@@ -37,4 +37,4 @@ addons:
     token:
       secure: si/AqZ8hUUzz2uLi/A4+pQSdQHRHEEWBpzPg+T0bU9xLZ44kDXeDfdpgFh2+690PFXFAa+3S7sQ+9JR8K9cwQqCUJg2FA9RGbw0NklubVh17f8RyDXTDnw4NX+wLpc6fKiJ7Rem8a+BOooKY/3kpBzwTXYr46W7LEZDHWNyWXbSE3AMmycTXLHPBl0MtZU/yCrSTFJCo3fqkzlq/ZiIBRLNsErtnuz6kKJiPwFfzZNWUWxdKixpdQjakEJZcWuxVNyg/nW7TPIGfrTOfVw4j0T/hR4HMUeEV2p+v5uhOLiEEaT9c6Ufe7jcn3v9Hcf2cluu4NUhQZobzCSJhGjPI88xTBrP7ptfXc3kuK8Nlk7d8vv+xjxwOu+dgoHz6j8c7U/btDHqB4llG2jCafXQSs2LgqUfMrG5y49HIrjd7F1bAf0X4pj/9GSoY8dDg+wZ0oAZmsgSl1RVvmgk0hFveFLp/sp9TjfQjKKRgk91lLVSXRQCWJ7/Xcb3kQGZKMq5YCvKomchbMMtHVUBU46V0Tod+TSgxUNHrqoHzTViJe4uZyUApve+lnjXdqvJo+8DDAYmCHCTFuDAS0p6NJxQMWFvW7lqHgqaZeKM16k2NGThD+KAx7btyx2bI95TS/vaaJ5GY+3jpFYr8/LIM+VGG/4ZRZYL/Jtq7evK+z9e32GE=
 script:
-- mvn clean verify sonar:sonar -Pcoverage -Dsonar.projectKey=imrafaelmerino_vertx-effect
+- mvn clean verify --settings .travis/settings.xml sonar:sonar -Pcoverage -Dsonar.projectKey=imrafaelmerino_vertx-effect
