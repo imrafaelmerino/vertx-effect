@@ -1,0 +1,6 @@
+target
+.idea
+*.iml
+out
+performance/dependency-reduced-pom.xml
+tests_with_secure_credentials.sh

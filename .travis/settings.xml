@@ -1,0 +1,24 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+            <id>ossrh</id>
+            <username>${env.NEXUS_USERNAME}</username>
+            <password>${env.NEXUS_PASSWORD}</password>
+        </server>
+    </servers>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+                <spotify.code>${env.SPOTIFY_REFRESH_TOKEN}</spotify.code>
+                <spotify.code>${env.SPOTIFY_CLIENT_ID}</spotify.code>
+                <spotify.code>${env.SPOTIFY_CLIENT_SECRET}</spotify.code>
+            </properties>
+        </profile>
+    </profiles>
+
+</settings>
