@@ -4,3 +4,4 @@ target
 out
 performance/dependency-reduced-pom.xml
 tests_with_secure_credentials.sh
+key.asc
