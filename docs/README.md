@@ -556,7 +556,7 @@ as extending the class HttpClientModule and defining a constructor to initialize
 address of the verticle that will perform the requests.
 
 ```java
-import vertxeffect.httpclient.HttpClientModule
+import vertx.effect.httpclient.HttpClientModule
 import io.vertx.core.http.HttpClientOptions;
 
 public class MyHttpModule extends HttpClientModule {
