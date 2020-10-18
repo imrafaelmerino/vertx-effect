@@ -11,7 +11,7 @@ cache:
   - "$HOME/.m2"
 deploy:
 - provider: script
-  script: mvn -X deploy --settings .travis/settings.xml -Dgpg.passphrase=${PGP_PASSPHRASE} -DskipTests=true -B -U
+  script: mvn -X deploy --settings .travis/settings.xml -DskipTests=true -B -U -Prelease
   skip_cleanup: true
   on:
     repo: imrafaelmerino/vertx-effect
