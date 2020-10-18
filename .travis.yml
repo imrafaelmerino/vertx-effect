@@ -1,5 +1,5 @@
 language: java
-install: mvn install
+install: mvn install --settings .travis/settings.xml
 before_install:
 - openssl aes-256-cbc -K $encrypted_b9997e150274_key -iv $encrypted_b9997e150274_iv -in key.asc.enc -out key.asc -d
 - echo $GPG_PASSPHRASE | gpg --passphrase-fd 0 --batch --yes --import key.asc
