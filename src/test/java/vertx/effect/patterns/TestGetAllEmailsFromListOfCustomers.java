@@ -17,7 +17,7 @@ import vertx.effect.exp.JsObjVal;
 import vertx.effect.patterns.oauth.GetTokenReqVerticle;
 import vertx.effect.patterns.oauth.GetTokenVerticle;
 import vertx.effect.Val;
-import vertxeffect.exp.*;
+import vertx.effect.exp.*;
 import vertx.effect.λ;
 
 

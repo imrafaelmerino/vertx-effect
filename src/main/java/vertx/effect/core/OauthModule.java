@@ -8,8 +8,8 @@ import vertx.effect.exp.And;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.IfElse;
 import vertx.effect.httpclient.*;
-import vertxeffect.exp.*;
-import vertxeffect.httpclient.*;
+import vertx.effect.exp.*;
+import vertx.effect.httpclient.*;
 import vertx.effect.λ;
 import vertx.effect.λc;
 

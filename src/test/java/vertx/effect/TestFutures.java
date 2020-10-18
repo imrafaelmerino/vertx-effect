@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.JsArrayVal;
 import vertx.effect.exp.JsObjVal;
-import vertxeffect.exp.*;
+import vertx.effect.exp.*;
 
 import java.util.function.Function;
 

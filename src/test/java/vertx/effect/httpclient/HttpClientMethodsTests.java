@@ -146,7 +146,8 @@ public class HttpClientMethodsTests {
         })
                 .accept(httpClient.delete.apply(new DeleteReq()
                                                         .port(PORT)
-                                                        .uri("example")),
+                                                        .uri("example")
+                                               ),
                         context
                        );
     }

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertxeffect.*;
+import vertx.effect.*;
 
 import java.util.Objects;
 import java.util.function.Supplier;
