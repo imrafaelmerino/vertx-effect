@@ -15,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 /**
  Default req to refresh the token in an Authorization code flow
  POST https://host:port/uri
- grant_type=refresh_token&refresh_token={{REFRESH_TOKEN}}
+ grant_type=refresh_token{@literal &}refresh_token={{REFRESH_TOKEN}}
  Accept: application/json
  Authorization: Base64(ClientId:ClientSecret)
  Content-Type: application/x-www-form-urlencoded
