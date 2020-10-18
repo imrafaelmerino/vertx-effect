@@ -14,9 +14,6 @@
             <id>release</id>
             <properties>
                 <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
-                <SPOTIFY_REFRESH_TOKEN>${env.SPOTIFY_REFRESH_TOKEN}</SPOTIFY_REFRESH_TOKEN>
-                <SPOTIFY_CLIENT_ID>${env.SPOTIFY_CLIENT_ID}</SPOTIFY_CLIENT_ID>
-                <SPOTIFY_CLIENT_SECRET>${env.SPOTIFY_CLIENT_SECRET}</SPOTIFY_CLIENT_SECRET>
             </properties>
         </profile>
     </profiles>

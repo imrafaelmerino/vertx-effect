@@ -1,5 +1,6 @@
 language: java
-install: mvn install --settings .travis/settings.xml
+install: mvn install -DSPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID} -DSPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET} -DSPOTIFY_REFRESH_TOKEN=${SPOTIFY_REFRESH_TOKEN}
+
 before_install:
 - openssl aes-256-cbc -K $encrypted_b9997e150274_key -iv $encrypted_b9997e150274_iv -in key.asc.enc -out key.asc -d
 - echo $GPG_PASSPHRASE | gpg --passphrase-fd 0 --batch --yes --import key.asc
