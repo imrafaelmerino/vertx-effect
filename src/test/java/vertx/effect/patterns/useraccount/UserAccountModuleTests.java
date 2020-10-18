@@ -82,12 +82,8 @@ public class UserAccountModuleTests {
                               "id",
                               JsStr.of("03786761>")
                              );
-        JsObj user2 = JsObj.of("email",JsStr.of("example@gmail.com"),"age",
-                               JsInt.of(10));
-        UserAccountModule.isValid.apply(MultiMap.caseInsensitiveMultiMap()
-                                                .add("email",
-                                                     user2.getStr("email")
-                                                    ),user2).get();
+
+
         UserAccountModule.isValid
                 .apply(MultiMap.caseInsensitiveMultiMap()
                                .add("email",
