@@ -6,7 +6,7 @@
     <groupId>com.github.imrafaelmerino</groupId>
     <artifactId>vertx-effect</artifactId>
     <packaging>jar</packaging>
-    <version>0.9.9</version>
+    <version>0.1</version>
     <name>vertx-effect</name>
     <description>It's a Java library to work with Vertx following a functional and reactive approach.</description>
     <url>https://github.com/imrafaelmerino/vertx-effect</url>
@@ -41,17 +41,20 @@
         <MAVEN-COMPILER-PLUGIN.TARGET>11</MAVEN-COMPILER-PLUGIN.TARGET>
         <VERTX-VERSION>4.0.0-milestone5</VERTX-VERSION>
         <JSON-VALUES.VERSION>8.4.0</JSON-VALUES.VERSION>
+        <MAVEN-JAR-PLUGIN.VERSION>3.2.0</MAVEN-JAR-PLUGIN.VERSION>
     </properties>
 
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>${MAVEN-JAR-PLUGIN.VERSION}</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Automatic-Module-Name>vertx.values</Automatic-Module-Name>
+                            <Automatic-Module-Name>vertx.effect</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>

@@ -14,9 +14,6 @@
             <id>release</id>
             <properties>
                 <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
-                <spotify.code>${env.SPOTIFY_REFRESH_TOKEN}</spotify.code>
-                <spotify.code>${env.SPOTIFY_CLIENT_ID}</spotify.code>
-                <spotify.code>${env.SPOTIFY_CLIENT_SECRET}</spotify.code>
             </properties>
         </profile>
     </profiles>

@@ -7,7 +7,7 @@
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.9.9)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.9.9/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.1)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.1/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 - [vertx-effect manifesto](#manifesto)
@@ -556,7 +556,7 @@ as extending the class HttpClientModule and defining a constructor to initialize
 address of the verticle that will perform the requests.
 
 ```java
-import vertxeffect.httpclient.HttpClientModule
+import vertx.effect.httpclient.HttpClientModule
 import io.vertx.core.http.HttpClientOptions;
 
 public class MyHttpModule extends HttpClientModule {
@@ -642,7 +642,7 @@ Add the following dependency to your building tool:
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>0.9.9</version>
+  <version>0.1</version>
 </dependency>
 ```
 

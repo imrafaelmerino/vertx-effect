@@ -1,0 +1,37 @@
+package vertx.effect;
+
+import jsonvalues.JsObj;
+import jsonvalues.JsStr;
+import vertx.effect.exp.Cons;
+
+public class MyModule  extends VertxModule {
+    private static final String REMOVE_NULL_ADDRESS = "removeNull";
+    private static final String TRIM_ADDRESS = "trim";
+
+    public static λ<JsObj, JsObj> removeNull;
+    public static λ<JsObj, JsObj> trim;
+
+    @Override
+    public void deploy() {
+        λ<JsObj, JsObj> removeNull = o ->
+                Cons.success(o.filterAllValues(pair -> pair.value.isNotNull()));
+        this.deploy(REMOVE_NULL_ADDRESS,
+                    removeNull
+                   );
+
+        λ<JsObj, JsObj> trim = o ->
+                Cons.success(o.mapAllValues(pair -> JsStr.prism.modify.apply(String::trim)
+                                                                      .apply(pair.value)
+                                           )
+                            );
+        this.deploy(TRIM_ADDRESS,
+                    trim
+                   );
+    }
+
+    @Override
+    protected void initialize() {
+        removeNull = this.ask(REMOVE_NULL_ADDRESS);
+        trim = this.ask(TRIM_ADDRESS);
+    }
+}
