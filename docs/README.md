@@ -1,5 +1,4 @@
-<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_linkedin_swe2n4mg/color1/full/coverphoto/white_logo_color1_background.png" align="left"></a>
-
+<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_linkedin_swe2n4mg/black/full/coverphoto/black_logo_white_background.png" align="left"></a>
 
 <br/>
 <br/>
