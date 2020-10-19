@@ -1,4 +1,4 @@
-![logo](docs/logo.png)
+![logo](https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/docs/logo.png)
 
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
