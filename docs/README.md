@@ -1,4 +1,10 @@
-![logo](https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/docs/logo.png)
+<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/docs/logo_transparent_background.png" align="left" height="100" width="200" ></a>
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
