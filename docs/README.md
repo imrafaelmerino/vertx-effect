@@ -1,4 +1,4 @@
-<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/docs/logo_transparent_background.png" align="left" height="100" width="200" ></a>
+<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/docs/black_logo_white_background.png" align="left" height="100" width="200" ></a>
 
 <br/>
 <br/>
