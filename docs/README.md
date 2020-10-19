@@ -1,11 +1,5 @@
 <a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_linkedin_swe2n4mg/black/full/coverphoto/black_logo_white_background.png" align="left"></a>
 
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
@@ -48,14 +42,14 @@
 ## <a name="introduction"><a/> Introduction
 
 **Functional Programming is all about working with pure functions and values**. That's all. 
-FP shines dealing with effects. That's all. FP shines dealing with effects. An effect is 
+One of the points where FP especially shines, is dealing with effects. An effect is 
 something you can't call twice unless you intended to: 
 
 ```java 
 
-Future<Customer> a = insertCustomerIntoDb(customer);
+Future<Customer> a = insertDb(customer);
 
-Future<Customer> b = insertCustomerIntoDb(customer);
+Future<Customer> b = insertDb(customer);
 
 ```
 
@@ -64,11 +58,11 @@ That code is not referentially transparent. For obvious reasons, you can't do th
 
 ```java
 
-Future<Customer> customer = insertCustomerDb(customer)
+Future<Customer> c = insertDb(customer)
 
-Future<Customer> a = customer;
+Future<Customer> a = c;
 
-Future<Customer> b = customer;
+Future<Customer> b = c;
 
 ```
 
@@ -90,6 +84,32 @@ public interface Val<O> extends Supplier<Future<O>> {}
 
 A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) na 
 effect that will compute a value of type O**.
+
+If we turn Future into Val in the previous example:
+
+```java 
+
+Val<Customer> a = insertDb(customer);
+
+Val<Customer> b = insertDb(customer);
+
+```
+
+The above example is completely equivalent to:
+
+```java
+
+Val<Customer> c = insertDb(customer)
+
+Val<Customer> a = c;
+
+Val<Customer> b = c;
+
+```
+This property is extremely important. Whenever you see _insertDb(customer)_ in your program you can think of as it was c.
+Pure FP programming help us to reason about the programs we write. On the other hand, do notice that a Val is lazy, it's 
+a description of an effect. In FP we describe programs, and it's at the very
+last moment when they're executed.
 
 What about functions? I always wanted to name **λ** to something, and I finally got the chance!
 
