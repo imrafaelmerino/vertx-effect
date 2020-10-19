@@ -36,13 +36,39 @@
     . Simplicity matters.
     . Avoid state when possible. 
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
-    . Avoid debug-driven development
     
 ## <a name="introduction"><a/> Introduction
 
 **Functional Programming is all about working with pure functions and values**. That's all. 
-Haskell has proven to us how **laziness is an essential property to stay pure**. Since Java 
-8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
+FP shines dealing with effects. An effect or an effectful computation is something you
+can't call twice, unless you intended to:
+
+```java 
+
+Future<Customer> a = insertCustomerIntoDb(customer);
+
+Future<Customer> b = insertCustomerIntoDb(customer);
+
+```
+
+Both calls can fail, or they can create two different customers or even only one of them can fail, 
+who knows. That's code is not referential transparent. For obvious reasons, you can't do the following refactor:
+
+```java
+
+Future<Customer> customer = insertCustomerDb(customer)
+
+Future<Customer> a = customer;
+
+Future<Customer> b = customer;
+
+```
+
+A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency 
+of a computation. Haskell has proven to us how **laziness is an essential property to stay pure**. We need to 
+define an immutable and lazy data structure that allows us to control latency.
+
+Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
 is in vertx-effect:
   
 ```java
@@ -54,7 +80,8 @@ public interface Val<O> extends Supplier<Future<O>> {}
 
 ```
 
-A **Val** of type **O** is a supplier that will return a Vertx future of type **O**.
+A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. It describes an effectful
+computation that will compute a value of type O.
 
 What about functions? I always wanted to name **λ** to something, and I finally got the chance!
 
@@ -385,7 +412,7 @@ using vertx-effect. That's why I decided to publish remarkable events in a speci
 If you want to use your favorite slf4j implementation, just implement it in a consumer.
 On the other hand, consuming all those events during testing will give you instant feedback on 
 your system and agility spotting bugs. You can disable this future with the Java system 
-property**-Dpublish.events=false**. 
+property **-Dpublish.events=false**. 
 
 ### <a name="events"><a/> Publishing events 
 **vertx-effect** publishes events to the address **vertx-effect-events**. Find below some of the most important predefined
