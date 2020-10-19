@@ -1,14 +1,19 @@
 package vertx.effect;
 
+import io.vertx.core.VertxException;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 import jsonvalues.JsObj;
 import jsonvalues.Prism;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+
 import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
+import static io.vertx.core.eventbus.ReplyFailure.TIMEOUT;
+import static io.vertx.core.net.impl.ConnectionBase.CLOSED_EXCEPTION;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -19,7 +24,8 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings({"serial", "squid:S110"})
 public final class Failures {
 
-    private Failures(){}
+    private Failures() {
+    }
 
     public static final int BAD_MESSAGE_CODE = 3000;
     public static final int INTERNAL_ERROR_CODE = 3001;
@@ -49,13 +55,81 @@ public final class Failures {
     public static final int DEFAULT_HTTP_EXCEPTION_CODE = 4999;
 
 
-    public static final Prism<Throwable, ReplyException> prism = new Prism<>(
-            t -> {
-                if (t instanceof ReplyException) return Optional.of(((ReplyException) t));
-                else return Optional.empty();
-            },
-            v -> v
-    );
+    public static final Prism<Throwable, ReplyException> UNKNOWN_HOST_PRISM =
+            new Prism<>(
+                    t -> {
+                        if (t instanceof ReplyException) {
+                            ReplyException replyException = (ReplyException) t;
+                            if (replyException.failureCode() == UNKNOWN_HOST_CODE)
+                                return Optional.of(replyException);
+                            return Optional.empty();
+                        }
+                        else return Optional.empty();
+                    },
+                    v -> v
+            );
+
+
+    public static final Prism<Throwable, ReplyException> HTTP_CONNECT_TIMEOUT_PRISM =
+            new Prism<>(
+                    t -> {
+                        if (t instanceof ReplyException) {
+                            ReplyException replyException = (ReplyException) t;
+                            if (replyException.failureCode() == CONNECT_TIMEOUT_CODE)
+                                return Optional.of(replyException);
+                            return Optional.empty();
+                        }
+                        else return Optional.empty();
+                    },
+                    v -> v
+            );
+
+
+    public static final Prism<Throwable, ReplyException> HTTP_TIMEOUTS_PRISM =
+            new Prism<>(
+                    t -> {
+                        if (t instanceof ReplyException) {
+                            ReplyException replyException = (ReplyException) t;
+                            if (replyException.failureCode() == CONNECT_TIMEOUT_CODE
+                                    || replyException.failureCode() == REQUEST_TIMEOUT_CODE)
+                                return Optional.of(replyException);
+                            return Optional.empty();
+                        }
+                        else return Optional.empty();
+                    },
+                    v -> v
+            );
+
+    public static final Prism<Throwable, VertxException> TCP_CONNECTION_CLOSED_PRISM =
+            new Prism<>(
+                    t -> {
+                        if (t.equals(CLOSED_EXCEPTION))
+                            return Optional.of(CLOSED_EXCEPTION);
+                        else return Optional.empty();
+                    },
+                    v -> v
+            );
+    public static final Prism<Throwable, ReplyException> REPLY_EXCEPTION_PRISM =
+            new Prism<>(
+                    t -> {
+                        if (t instanceof ReplyException) return Optional.of(((ReplyException) t));
+                        else return Optional.empty();
+                    },
+                    v -> v
+            );
+
+    public static final Prism<Throwable, ReplyException> VERTICLE_TIMEOUT_PRISM =
+            new Prism<>(
+                    t -> {
+                        if (t instanceof ReplyException) {
+                            ReplyException replyException = (ReplyException) t;
+                            if (replyException.failureType() == TIMEOUT)
+                                return Optional.of(replyException);
+                        }
+                        return Optional.empty();
+                    },
+                    v -> v
+            );
 
     public static final Function<String, ReplyException> GET_EMPTY_CONTEXT_EXCEPTION =
             address -> new ReplyException(RECIPIENT_FAILURE,
@@ -64,7 +138,6 @@ public final class Failures {
                                                         address
                                                        )
             );
-
 
     public static final Function<Throwable, ReplyException> GET_UNKNOWN_ERROR_EXCEPTION =
             exc -> new ReplyException(RECIPIENT_FAILURE,

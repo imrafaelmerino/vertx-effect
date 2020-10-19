@@ -54,7 +54,7 @@ public class ValidatorTests {
         vertxRef.deploy("validateInteger",
                         validate
                        )
-                .onSuccess(vr -> Verifiers.<Integer>verifyFailure(Failures.prism.exists.apply(it -> it.failureCode() == Failures.BAD_MESSAGE_CODE))
+                .onSuccess(vr -> Verifiers.<Integer>verifyFailure(Failures.REPLY_EXCEPTION_PRISM.exists.apply(it -> it.failureCode() == Failures.BAD_MESSAGE_CODE))
                                    .accept(vr.ask()
                                              .apply(-10),
                                            context
@@ -80,7 +80,7 @@ public class ValidatorTests {
                                                           )
                                            );
 
-        Verifiers.<JsArray>verifyFailure(Failures.prism
+        Verifiers.<JsArray>verifyFailure(Failures.REPLY_EXCEPTION_PRISM
                                            .exists
                                            .apply(it -> it.failureCode() == Failures.BAD_MESSAGE_CODE)
                                         )

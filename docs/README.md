@@ -1,3 +1,5 @@
+<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_linkedin_swe2n4mg/black/full/coverphoto/black_logo_white_background.png" align="left"></a>
+
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
@@ -36,13 +38,39 @@
     . Simplicity matters.
     . Avoid state when possible. 
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
-    . Avoid debug-driven development
     
 ## <a name="introduction"><a/> Introduction
 
 **Functional Programming is all about working with pure functions and values**. That's all. 
-Haskell has proven to us how **laziness is an essential property to stay pure**. Since Java 
-8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
+One of the points where FP especially shines, is dealing with effects. An effect is 
+something you can't call twice unless you intended to: 
+
+```java 
+
+Future<Customer> a = insertDb(customer);
+
+Future<Customer> b = insertDb(customer);
+
+```
+
+Both calls can fail, or they can create two different customers, or even only one of them can fail, who knows. 
+That code is not referentially transparent. For obvious reasons, you can't do the following refactoring:
+
+```java
+
+Future<Customer> c = insertDb(customer)
+
+Future<Customer> a = c;
+
+Future<Customer> b = c;
+
+```
+
+A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a 
+computation. Haskell has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
+and lazy data structure that allows us to control latency.
+
+Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
 is in vertx-effect:
   
 ```java
@@ -54,7 +82,34 @@ public interface Val<O> extends Supplier<Future<O>> {}
 
 ```
 
-A **Val** of type **O** is a supplier that will return a Vertx future of type **O**.
+A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) na 
+effect that will compute a value of type O**.
+
+If we turn Future into Val in the previous example:
+
+```java 
+
+Val<Customer> a = insertDb(customer);
+
+Val<Customer> b = insertDb(customer);
+
+```
+
+The above example is completely equivalent to:
+
+```java
+
+Val<Customer> c = insertDb(customer)
+
+Val<Customer> a = c;
+
+Val<Customer> b = c;
+
+```
+This property is extremely important. Whenever you see _insertDb(customer)_ in your program you can think of as it was c.
+Pure FP programming help us to reason about the programs we write. On the other hand, do notice that a Val is lazy, it's 
+a description of an effect. In FP we describe programs, and it's at the very
+last moment when they're executed.
 
 What about functions? I always wanted to name **λ** to something, and I finally got the chance!
 
@@ -385,7 +440,7 @@ using vertx-effect. That's why I decided to publish remarkable events in a speci
 If you want to use your favorite slf4j implementation, just implement it in a consumer.
 On the other hand, consuming all those events during testing will give you instant feedback on 
 your system and agility spotting bugs. You can disable this future with the Java system 
-property**-Dpublish.events=false**. 
+property **-Dpublish.events=false**. 
 
 ### <a name="events"><a/> Publishing events 
 **vertx-effect** publishes events to the address **vertx-effect-events**. Find below some of the most important predefined

@@ -109,7 +109,7 @@ public class TestPair {
         Pair.of(val.get(),
                 val.get()
                )
-            .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                      2
                     )
             .get()
@@ -137,7 +137,7 @@ public class TestPair {
         Pair.of(val.get(),
                 val.get()
                )
-            .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                      2
                     )
             .get()

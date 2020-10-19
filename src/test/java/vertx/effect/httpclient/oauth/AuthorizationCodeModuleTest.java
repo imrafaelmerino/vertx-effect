@@ -76,7 +76,7 @@ public class AuthorizationCodeModuleTest {
 
 
                 ).setReqAttempts(4)
-                 .setRetryReqPredicate(Failures.prism
+                 .setRetryReqPredicate(Failures.REPLY_EXCEPTION_PRISM
                                                .exists
                                                .apply(exc -> Objects.equals(Failures.UNKNOWN_HOST_CODE,
                                                                             exc.failureCode()
