@@ -103,7 +103,7 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     }
 
     private static final Predicate<Throwable> RETRY_ACCESS_TOKEN_REQ_PREDICATE =
-            Failures.prism
+            Failures.REPLY_EXCEPTION_PRISM
                     .exists
                     .apply(exc -> Objects.equals(UNKNOWN_HOST_CODE,
                                                  exc.failureCode()
@@ -117,7 +117,7 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
                           );
 
     private static final Predicate<Throwable> RETRY_REQ_PREDICATE =
-            Failures.prism
+            Failures.REPLY_EXCEPTION_PRISM
                     .exists
                     .apply(exc -> Objects.equals(UNKNOWN_HOST_CODE,
                                                  exc.failureCode()

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertx.effect.*;
 
 import java.util.function.Supplier;
 
@@ -89,7 +88,7 @@ public class TestQuadruple {
                      val.get(),
                      val.get()
                     )
-                 .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           2
                          )
                  .get()
@@ -121,7 +120,7 @@ public class TestQuadruple {
                      val.get(),
                      val.get()
                     )
-                 .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           2
                          )
                  .get()

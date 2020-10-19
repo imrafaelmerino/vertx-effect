@@ -555,7 +555,7 @@ public class VertxRef {
                   }
                   else {
 
-                      ReplyException error = Failures.prism
+                      ReplyException error = Failures.REPLY_EXCEPTION_PRISM
                               .getOptional.apply(event.cause())
                                           .orElse(Failures.GET_UNKNOWN_ERROR_EXCEPTION.apply(event.cause()));
                       message.reply(error,
@@ -623,7 +623,7 @@ public class VertxRef {
                       else {
 
                           ReplyException error = Failures
-                                  .prism
+                                  .REPLY_EXCEPTION_PRISM
                                   .getOptional.apply(event.cause())
                                               .orElse(Failures.GET_UNKNOWN_ERROR_EXCEPTION.apply(event.cause()));
                           message.reply(error,

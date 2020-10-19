@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertx.effect.*;
 
 import java.util.function.Supplier;
 
@@ -76,7 +75,7 @@ public class TestIfElse {
         IfElse.predicate(trueVal.get())
               .consequence(Cons.success("consequence"))
               .alternative(Cons.success("alternative"))
-              .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+              .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                        2
                       )
               .onComplete(r -> {
@@ -105,7 +104,7 @@ public class TestIfElse {
         IfElse.<String>predicate(Cons.TRUE)
                 .consequence(consequence.get())
                 .alternative(Cons.success("alternative"))
-                .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                          2
                         )
                 .onComplete(r -> {
@@ -135,7 +134,7 @@ public class TestIfElse {
         IfElse.<String>predicate(Cons.success(false))
                 .consequence(Cons.success("consequence"))
                 .alternative(alternative.get())
-                .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                          2
                         )
                 .onComplete(r -> {

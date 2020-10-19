@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 import static jsonvalues.JsNothing.NOTHING;
 import static vertx.effect.Event.*;
-import static vertx.effect.Failures.prism;
+import static vertx.effect.Failures.REPLY_EXCEPTION_PRISM;
 import static vertx.effect.core.Functions.headers2JsObj;
 
 public class EventPublisher {
@@ -38,7 +38,7 @@ public class EventPublisher {
                                          final MultiMap context) {
         return vertx -> {
             if (enabled) {
-                Optional<ReplyException> opt = prism
+                Optional<ReplyException> opt = REPLY_EXCEPTION_PRISM
                         .getOptional.apply(exc);
                 opt.ifPresentOrElse(error -> vertx
                                             .eventBus()
@@ -89,7 +89,7 @@ public class EventPublisher {
         return vertx -> {
             if (enabled) {
 
-                Optional<ReplyException> opt = prism.getOptional.apply(exc);
+                Optional<ReplyException> opt = REPLY_EXCEPTION_PRISM.getOptional.apply(exc);
                 opt.ifPresentOrElse(error -> vertx
                                             .eventBus()
                                             .publish(VertxRef.EVENTS_ADDRESS,

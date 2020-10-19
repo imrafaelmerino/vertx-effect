@@ -310,7 +310,7 @@ public class TestCond {
                 b.get()
                )
             .retryIf(
-                    Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                    Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                     ATTEMPTS
                     )
             .onComplete(

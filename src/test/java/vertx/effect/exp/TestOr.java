@@ -93,7 +93,7 @@ public class TestOr {
         Or.of(TRUE.get(),
               FALSE.get()
              )
-          .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+          .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                    2
                   )
           .get()
@@ -131,7 +131,7 @@ public class TestOr {
         Or.of(TRUE.get(),
               FALSE.get()
              )
-          .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.REQUEST_TIMEOUT_CODE),
+          .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.REQUEST_TIMEOUT_CODE),
                    2
                   )
           .get()

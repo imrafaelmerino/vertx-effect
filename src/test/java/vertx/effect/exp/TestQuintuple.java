@@ -95,7 +95,7 @@ public class TestQuintuple {
                      val.get(),
                      val.get()
                     )
-                 .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           2
                          )
                  .get()
@@ -129,7 +129,7 @@ public class TestQuintuple {
                      val.get(),
                      val.get()
                     )
-                 .retryIf(Failures.prism.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           2
                          )
                  .get()
