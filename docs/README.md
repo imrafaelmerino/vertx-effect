@@ -40,8 +40,8 @@
 ## <a name="introduction"><a/> Introduction
 
 **Functional Programming is all about working with pure functions and values**. That's all. 
-FP shines dealing with effects. An effect or an effectful computation is something you
-can't call twice, unless you intended to:
+FP shines dealing with effects. That's all. FP shines dealing with effects. An effect is 
+something you can't call twice unless you intended to: 
 
 ```java 
 
@@ -51,8 +51,8 @@ Future<Customer> b = insertCustomerIntoDb(customer);
 
 ```
 
-Both calls can fail, or they can create two different customers or even only one of them can fail, 
-who knows. That's code is not referential transparent. For obvious reasons, you can't do the following refactor:
+Both calls can fail, or they can create two different customers, or even only one of them can fail, who knows. 
+That code is not referentially transparent. For obvious reasons, you can't do the following refactoring:
 
 ```java
 
@@ -64,9 +64,9 @@ Future<Customer> b = customer;
 
 ```
 
-A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency 
-of a computation. Haskell has proven to us how **laziness is an essential property to stay pure**. We need to 
-define an immutable and lazy data structure that allows us to control latency.
+A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a 
+computation. Haskell has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
+and lazy data structure that allows us to control latency.
 
 Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
 is in vertx-effect:
@@ -80,8 +80,8 @@ public interface Val<O> extends Supplier<Future<O>> {}
 
 ```
 
-A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. It describes an effectful
-computation that will compute a value of type O.
+A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) na 
+effect that will compute a value of type O**.
 
 What about functions? I always wanted to name **λ** to something, and I finally got the chance!
 
