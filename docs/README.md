@@ -1,9 +1,6 @@
-<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_linkedin_swe2n4mg/black/full/coverphoto/black_logo_white_background.png" align="left"></a>
-
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
-
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=alert_status)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
@@ -12,6 +9,12 @@
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.1)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.1/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
+
+<br/> <br/> <br/> <br/> <br/> <br/> <br/> <br/> <br/> <br/> <br/> <br/>
+
+<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="150" height="150" align="center"/>
+
+<br/> 
 
 - [vertx-effect manifesto](#manifesto)
 - [Introduction](#introduction)
@@ -68,7 +71,7 @@ Future<Customer> b = c;
 
 A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a 
 computation. Haskell has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
-and lazy data structure that allows us to control latency.
+and lazy data structure that allows us to control the effect latency.
 
 Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
 is in vertx-effect:
@@ -82,8 +85,8 @@ public interface Val<O> extends Supplier<Future<O>> {}
 
 ```
 
-A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) na 
-effect that will compute a value of type O**.
+A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) an 
+asynchronous effect that will compute a value of type O**.
 
 If we turn Future into Val in the previous example:
 
@@ -107,7 +110,7 @@ Val<Customer> b = c;
 
 ```
 This property is extremely important. Whenever you see _insertDb(customer)_ in your program you can think of as it was c.
-Pure FP programming help us to reason about the programs we write. On the other hand, do notice that a Val is lazy, it's 
+Pure FP programming help us reason about the programs we write. On the other hand, do notice that a Val is lazy, it's 
 a description of an effect. In FP we describe programs, and it's at the very
 last moment when they're executed.
 
@@ -121,7 +124,7 @@ public interface λ<I,O> extends Function<I, Val<O>> { }
 
 ```
 A lambda is a function that returns a **Val** of type **O** given a type **I**. **It models the communication with a Verticle**:
-a message is sent, the Verticle receives and processes the message, and replies with a response. The response has to
+a message is sent, the Verticle receives and processes the message, and replies with a response. The message and the response has to
 be of a type that can be sent across the EvenBus; otherwise, you must implement a [MessageCodec](https://vertx.io/docs/apidocs/io/vertx/core/eventbus/MessageCodec.html).
 
 ## <a name="exp"><a/> Expressions 
