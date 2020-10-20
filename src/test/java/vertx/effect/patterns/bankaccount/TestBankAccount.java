@@ -8,12 +8,8 @@ import jsonvalues.JsObj;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VerticleRef;
-import vertx.effect.VertxRef;
-import vertx.effect.Verifiers;
+import vertx.effect.*;
 import vertx.effect.exp.Pair;
-import vertx.effect.Val;
 
 @ExtendWith(VertxExtension.class)
 public class TestBankAccount {
@@ -30,9 +26,9 @@ public class TestBankAccount {
         module = new BankAccountModule();
 
         Verifiers.<Tuple2<String, String>>verifySuccess()
-                .accept(Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                                vertxRef.deploy(module)
-                               ),
+                .accept(Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                                      vertxRef.deploy(module)
+                                     ),
                         context
                        );
     }
@@ -55,9 +51,9 @@ public class TestBankAccount {
                                             );
 
 
-        Pair.of(futRafaRef,
-                futPhilipRef
-               )
+        Pair.parallel(futRafaRef,
+                      futPhilipRef
+                     )
             .onComplete(pair -> {
                             VerticleRef<JsObj, Integer> rafaRef   = pair._1;
                             VerticleRef<JsObj, Integer> carmenRef = pair._2;
@@ -87,9 +83,9 @@ public class TestBankAccount {
                                                                  .apply(JsObj.empty())
                                             );
 
-        Val<Integer> val = Pair.of(futRafaRef,
-                                   futPhilipRef
-                                  )
+        Val<Integer> val = Pair.parallel(futRafaRef,
+                                         futPhilipRef
+                                        )
                                .flatMap(
                                        pair ->
                                                module.makeTx.apply(pair._1.ask(),

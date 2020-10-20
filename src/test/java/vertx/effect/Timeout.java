@@ -54,11 +54,12 @@ public class Timeout {
         VertxRef vertxRef = new VertxRef(vertx);
 
         vertxRef.registerConsumer(EVENTS_ADDRESS,
-                                  System.out::println);
+                                  System.out::println
+                                 );
 
-        Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                vertxRef.deploy(new MyModule())
-               )
+        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                      vertxRef.deploy(new MyModule())
+                     )
             .onComplete(it -> context.completeNow())
             .get();
     }

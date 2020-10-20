@@ -9,9 +9,7 @@
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.1)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.1/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
-
 <img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="250" height="150"/>
-
 
 - [vertx-effect manifesto](#manifesto)
 - [Introduction](#introduction)

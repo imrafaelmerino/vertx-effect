@@ -13,8 +13,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
 import vertx.effect.Verifiers;
+import vertx.effect.VertxRef;
 import vertx.effect.exp.Pair;
 
 @ExtendWith(VertxExtension.class)
@@ -31,9 +31,9 @@ public class UserAccountModuleTests {
                                   System.out::println
                                  );
         Verifiers.<Tuple2<String, String>>verifySuccess()
-                .accept(Pair.of(vertxRef.deploy(new UserAccountModule()),
-                                vertxRef.deploy(new RegisterJsValuesCodecs())
-                               ),
+                .accept(Pair.parallel(vertxRef.deploy(new UserAccountModule()),
+                                      vertxRef.deploy(new RegisterJsValuesCodecs())
+                                     ),
                         context
                        );
 

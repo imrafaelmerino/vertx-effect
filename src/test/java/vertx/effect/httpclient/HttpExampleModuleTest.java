@@ -10,12 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Verifiers;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.exp.Pair;
-import vertx.effect.Val;
-import vertx.effect.λ;
 
 
 @ExtendWith(VertxExtension.class)
@@ -45,9 +41,9 @@ public class HttpExampleModuleTest {
                                              );
 
         Verifiers.<Tuple2<String, String>>verifySuccess()
-                .accept(Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                                vertxRef.deploy(httpModule)
-                               ),
+                .accept(Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                                      vertxRef.deploy(httpModule)
+                                     ),
                         context
                        );
 
@@ -59,9 +55,9 @@ public class HttpExampleModuleTest {
     public void testTwoSearchesInGoogle(VertxTestContext context) {
         Val<JsObj> search1 = search.apply("vertx");
         Val<JsObj> search2 = search.apply("reactive");
-        Pair.of(search1,
-                search2
-               )
+        Pair.parallel(search1,
+                      search2
+                     )
             .onComplete(Verifiers.pipeTo(context))
             .get();
 

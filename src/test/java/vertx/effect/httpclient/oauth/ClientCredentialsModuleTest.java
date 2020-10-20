@@ -10,16 +10,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
-import vertx.effect.httpclient.GetReq;
-import vertx.effect.httpclient.HttpResp;
-import vertx.effect.Verifiers;
+import vertx.effect.*;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
 import vertx.effect.exp.Triple;
-import vertx.effect.Val;
+import vertx.effect.httpclient.GetReq;
+import vertx.effect.httpclient.HttpResp;
 import vertx.effect.httpclient.MyHttpServer;
 
 import java.util.Objects;
@@ -58,8 +54,6 @@ public class ClientCredentialsModuleTest {
                                                                  exc.failureCode()
                                                                 )
                                              ));
-        ;
-
 
         httpClient = builder.createModule();
 
@@ -191,9 +185,9 @@ public class ClientCredentialsModuleTest {
         ClientCredentialsModule module = builder.createModule();
 
 
-        Pair.of(vertxRef.deploy(module),
-                vertxRef.deploy(new RegisterJsValuesCodecs())
-               )
+        Pair.parallel(vertxRef.deploy(module),
+                      vertxRef.deploy(new RegisterJsValuesCodecs())
+                     )
             .onSuccess(ids -> {
                 Val<JsObj> customer = module.getOauth.apply(new GetReq().uri("/uniqueregistry/crud/customer/0024403438")
                                                                         .header("accept",

@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
 import vertx.effect.Val;
+import vertx.effect.VertxRef;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -58,8 +58,9 @@ public class TestPair {
                                                    i -> new IllegalArgumentException(),
                                                    1
         );
-        Pair.of(one.get(),
-                one.get())
+        Pair.parallel(one.get(),
+                      one.get()
+                     )
             .retryIf(it -> it instanceof IllegalArgumentException,
                      ATTEMPTS,
                      (e, i) -> vertxRef.timer(1,
@@ -69,7 +70,11 @@ public class TestPair {
                     )
             .onSuccess(it -> {
                 context.verify(() -> {
-                    Assertions.assertEquals(new Tuple2<>(1,1),it);
+                    Assertions.assertEquals(new Tuple2<>(1,
+                                                         1
+                                            ),
+                                            it
+                                           );
                     context.completeNow();
                 });
             })
@@ -79,20 +84,20 @@ public class TestPair {
     @Test
     public void test_retries(VertxTestContext context) {
 
-        Pair.of(a.get(),
-                a.get()
-               )
-            .retry(2)
-            .get()
-            .onComplete(it -> {
-                context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
-                                                                          "a"
-                                                             ),
-                                                             it.result()
-                                                            )
-                              );
-                context.completeNow();
-            });
+        ParallelPair.of(a.get(),
+                        a.get()
+                       )
+                    .retry(2)
+                    .get()
+                    .onComplete(it -> {
+                        context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
+                                                                                  "a"
+                                                                     ),
+                                                                     it.result()
+                                                                    )
+                                      );
+                        context.completeNow();
+                    });
 
 
     }
@@ -106,22 +111,22 @@ public class TestPair {
                                  "a"
                 );
 
-        Pair.of(val.get(),
-                val.get()
-               )
-            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                     2
-                    )
-            .get()
-            .onComplete(it -> {
-                context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
-                                                                          "a"
-                                                             ),
-                                                             it.result()
-                                                            )
-                              );
-                context.completeNow();
-            });
+        ParallelPair.of(val.get(),
+                        val.get()
+                       )
+                    .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             2
+                            )
+                    .get()
+                    .onComplete(it -> {
+                        context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
+                                                                                  "a"
+                                                                     ),
+                                                                     it.result()
+                                                                    )
+                                      );
+                        context.completeNow();
+                    });
 
     }
 
@@ -134,18 +139,18 @@ public class TestPair {
                                  "a"
                 );
 
-        Pair.of(val.get(),
-                val.get()
-               )
-            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                     2
-                    )
-            .get()
-            .onComplete(it -> {
-                context.verify(() -> Assertions.assertTrue(it.failed())
-                              );
-                context.completeNow();
-            });
+        ParallelPair.of(val.get(),
+                        val.get()
+                       )
+                    .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             2
+                            )
+                    .get()
+                    .onComplete(it -> {
+                        context.verify(() -> Assertions.assertTrue(it.failed())
+                                      );
+                        context.completeNow();
+                    });
 
     }
 
@@ -155,47 +160,47 @@ public class TestPair {
 
         long start = System.nanoTime();
 
-        Pair.of(a.get(),
-                a.get()
-               )
-            .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.timer(1,
-                                                SECONDS,
-                                                "next attempt"
-                                               )
-                  )
-            .get()
-            .onComplete(r -> context.verify(() -> {
-                Assertions.assertEquals(new Tuple2<>("a",
-                                                     "a"
-                                        ),
-                                        r.result()
-                                       );
-                Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
-                context.completeNow();
+        ParallelPair.of(a.get(),
+                        a.get()
+                       )
+                    .retry(ATTEMPTS,
+                           (error, n) -> vertxRef.timer(1,
+                                                        SECONDS,
+                                                        "next attempt"
+                                                       )
+                          )
+                    .get()
+                    .onComplete(r -> context.verify(() -> {
+                        Assertions.assertEquals(new Tuple2<>("a",
+                                                             "a"
+                                                ),
+                                                r.result()
+                                               );
+                        Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                        context.completeNow();
 
-            }));
+                    }));
 
     }
 
     @Test
     public void test_pair_exp_map(VertxTestContext context) {
 
-        Pair.of(Cons.success("a"),
-                Cons.success("ab")
-               )
-            .map(pair -> pair.map((a, b) -> new Tuple2<>(a.length(),
-                                                         b.length()
-            )))
-            .onSuccess(r -> context.verify(() -> {
-                Assertions.assertEquals(new Tuple2<>(1,
-                                                     2
-                                        ),
-                                        r
-                                       );
-                context.completeNow();
-            }))
-            .get();
+        ParallelPair.of(Cons.success("a"),
+                        Cons.success("ab")
+                       )
+                    .map(pair -> pair.map((a, b) -> new Tuple2<>(a.length(),
+                                                                 b.length()
+                    )))
+                    .onSuccess(r -> context.verify(() -> {
+                        Assertions.assertEquals(new Tuple2<>(1,
+                                                             2
+                                                ),
+                                                r
+                                               );
+                        context.completeNow();
+                    }))
+                    .get();
 
     }
 
@@ -203,9 +208,9 @@ public class TestPair {
     public void test_pair_exp_flatmap_success(VertxTestContext context) {
 
 
-        Pair.of(Cons.success("a"),
-                Cons.success("b")
-               )
+        Pair.parallel(Cons.success("a"),
+                      Cons.success("b")
+                     )
             .flatMap(pair -> Cons.success(pair.map((a, b) -> new Tuple2<>(a.toUpperCase(),
                                                                           b.toUpperCase()
                                                    )
@@ -225,9 +230,9 @@ public class TestPair {
     public void test_pair_exp_flatmap_failure(VertxTestContext context) {
 
 
-        Pair.of(Cons.success("a"),
-                Cons.success("ab")
-               )
+        Pair.parallel(Cons.success("a"),
+                      Cons.success("ab")
+                     )
             .flatMap(s -> Cons.failure(new RuntimeException()))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
@@ -240,9 +245,9 @@ public class TestPair {
     @Test
     public void test_pair_exp_fails_and_recover_with_success(VertxTestContext context) {
 
-        Pair.of(a.get(),
-                a.get()
-               )
+        Pair.parallel(a.get(),
+                      a.get()
+                     )
             .recoverWith(e -> Cons.success(new Tuple2<>("",
                                                         ""
             )))
@@ -260,9 +265,9 @@ public class TestPair {
     @Test
     public void test_pair_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
-        Pair.of(a.get(),
-                a.get()
-               )
+        Pair.parallel(a.get(),
+                      a.get()
+                     )
             .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
@@ -274,9 +279,9 @@ public class TestPair {
 
     @Test
     public void test_pair_exp_recover_with_success(VertxTestContext context) {
-        Pair.of(a.get(),
-                a.get()
-               )
+        Pair.parallel(a.get(),
+                      a.get()
+                     )
             .retry(2)
             .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
             .onSuccess(map -> context.verify(() -> {
