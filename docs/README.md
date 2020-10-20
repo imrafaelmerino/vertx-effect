@@ -53,7 +53,7 @@ Future<Customer> b = insertDb(customer);
 
 ```
 
-Both calls can fail, or they can create two different customers, or even only one of them can fail, who knows. 
+Both calls can fail, or they can create two different customers, or one of them can fail, who knows. 
 That code is not referentially transparent. For obvious reasons, you can't do the following refactoring:
 
 ```java
@@ -106,12 +106,12 @@ Val<Customer> a = c;
 Val<Customer> b = c;
 
 ```
-This property is extremely important. Whenever you see _insertDb(customer)_ in your program you can think of as it was c.
-Pure FP programming help us reason about the programs we write. On the other hand, do notice that a Val is lazy, it's 
-a description of an effect. In FP we describe programs, and it's at the very
-last moment when they're executed.
+This property is fundamental. Whenever you see insertDb(customer) in your program, 
+you can think of it as it was c. Pure FP programming helps us reason about the programs
+ we write. On the other hand, do notice that a Val is lazy. It's a description of an effect. 
+ In FP, we describe programs, and it's at the very last moment when they're executed.
 
-What about functions? I always wanted to name **λ** to something, and I finally got the chance!
+I always wanted to name **λ** to something, and I finally got the chance!
 
 ```java
 
@@ -147,7 +147,7 @@ Val<JsObj> profile = Cons.of( () -> getProfile(id)); // from a Future
 ``` 
 
 
-- **IfElse**. If the predicate is evaluated to **Cons.success(true)**, it executes and returns the consequence
+- **IfElse**. If the predicate returns **Cons.success(true)**, it executes and returns the consequence
 ;otherwise, the alternative.
 
 
@@ -163,9 +163,9 @@ IfElse.<O>predicate(Val<Bool>)
 ```
  
 
-- **Cond**. It's a set of branches and a default value. Each branch consists of a predicate and a value to be 
-executed and returned if evaluated as **Cons.success(true)**. Suppose no predicate is evaluated to be true. 
-In that case, the Cond expression returns the default value, which is the last value of the clause 
+- **Cond**. It's a set of branches and a default value. Each branch consists of a predicate and a value.
+It computes and returns the value of the first branch which predicate is true. 
+If no predicate is true, then it returns the default value, which is the last value of the clause.
 
 
 ```java
@@ -236,7 +236,7 @@ Or.of(Val<Boolean>,...)
  
 
 - **JsObjVal** and **JsArrayVal**. The current implementation computes all the values of the JsObj 
-and JsArray in parallel. The next example shows how JsObjVla and JsArrayVal are data structures that 
+and JsArray in parallel. The next example shows how JsObjVal and JsArrayVal are data structures that 
 look like raw Json. And of course, you can mix expressions and nest them, going as deeper as necessary.  
 
 
