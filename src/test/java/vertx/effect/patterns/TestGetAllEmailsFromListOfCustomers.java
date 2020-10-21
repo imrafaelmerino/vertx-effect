@@ -71,7 +71,7 @@ public class TestGetAllEmailsFromListOfCustomers {
                 String head = ids.head()
                                  .toJsStr().value;
 
-                return JsObjVal.of("ids",
+                return JsObjVal.sequential("ids",
                                    Cons.success(ids.tail()),
                                    "acc",
                                    getCustomerEmails.apply(head)

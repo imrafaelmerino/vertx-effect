@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
-import vertx.effect.httpclient.GetReq;
-import vertx.effect.httpclient.MyHttpServer;
 import vertx.effect.Verifiers;
+import vertx.effect.VertxRef;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Triple;
+import vertx.effect.httpclient.GetReq;
+import vertx.effect.httpclient.MyHttpServer;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -44,7 +44,8 @@ public class AuthorizationCodeModuleTest {
                                                                         );
                                       else if (counter == 4) return JsObj.empty()
                                                                          .set("access_token",
-                                                                              JsStr.of(UUID.randomUUID().toString())
+                                                                              JsStr.of(UUID.randomUUID()
+                                                                                           .toString())
                                                                              );
                                       else if (counter <= 7) {
                                           try {
@@ -90,10 +91,10 @@ public class AuthorizationCodeModuleTest {
                                                      ))
                  .createFromRefreshToken("refresh_token");
 
-        Triple.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                  Cons.of(() -> server.start()),
-                  vertxRef.deploy(httpClient)
-                 )
+        Triple.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                        Cons.of(() -> server.start()),
+                        vertxRef.deploy(httpClient)
+                       )
               .onComplete(Verifiers.pipeTo(context))
               .get();
 

@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.httpclient.GetReq;
-import vertx.effect.httpclient.PostReq;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Triple;
+import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.MyHttpServer;
+import vertx.effect.httpclient.PostReq;
 
 import java.util.Objects;
 
@@ -83,10 +83,10 @@ public class AuthorizationCodeFlowAuthenticateReq {
                                                                              .getBytes()).uri("/authenticate"))
                                    );
 
-        Triple.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                  Cons.of(() -> server.start()),
-                  vertxRef.deploy(httpClient)
-                 )
+        Triple.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                        Cons.of(() -> server.start()),
+                        vertxRef.deploy(httpClient)
+                       )
               .onComplete(Verifiers.pipeTo(context))
               .get();
 

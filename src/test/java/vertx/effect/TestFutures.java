@@ -48,7 +48,7 @@ public class TestFutures extends VertxModule {
     @Test
     public void testJsObjFuture(final VertxTestContext context) {
 
-        JsObjVal.of("a",
+        JsObjVal.parallel("a",
                     multiplyBy10.apply(10)
                                 .map(JsInt::of),
                     "b",

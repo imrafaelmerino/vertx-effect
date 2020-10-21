@@ -70,10 +70,10 @@ public class ClientCredentialsModuleTest {
                                   System.out::println
                                  );
 
-        Triple.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                  Cons.of(() -> server.start()),
-                  vertxRef.deploy(httpClient)
-                 )
+        Triple.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                        Cons.of(() -> server.start()),
+                        vertxRef.deploy(httpClient)
+                       )
               .onComplete(Verifiers.pipeTo(context))
               .get();
 

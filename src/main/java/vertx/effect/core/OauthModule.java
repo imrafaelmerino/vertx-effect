@@ -8,8 +8,6 @@ import vertx.effect.exp.And;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.IfElse;
 import vertx.effect.httpclient.*;
-import vertx.effect.exp.*;
-import vertx.effect.httpclient.*;
 import vertx.effect.λ;
 import vertx.effect.λc;
 
@@ -115,18 +113,19 @@ public abstract class OauthModule extends HttpClientModule {
                                                                final int reqAttempts
                                                               ) {
         return (context, reqParams) -> req.apply(context,
-                                                 reqParams)
+                                                 reqParams
+                                                )
                                           .recoverWith(e ->
                                                                IfElse.<JsObj>predicate(And.of(retryReqPredicate.test(e),
                                                                                               reqAttempts > 0
                                                                                              )
                                                                                       )
-                                                               .consequence(this.resilientReq(req,
-                                                                                              reqAttempts - 1
-                                                                                             )
-                                                                                .apply(reqParams)
-                                                                           )
-                                                               .alternative(Cons.failure(e))
+                                                                       .consequence(this.resilientReq(req,
+                                                                                                      reqAttempts - 1
+                                                                                                     )
+                                                                                        .apply(reqParams)
+                                                                                   )
+                                                                       .alternative(Cons.failure(e))
                                                       )
                                           .flatMap(resp ->
                                                            IfElse.<JsObj>predicate(Cons.success(refreshTokenPredicate.test(resp)))
@@ -152,7 +151,8 @@ public abstract class OauthModule extends HttpClientModule {
                 IfElse.<String>predicate(Cons.success(refreshToken || accessToken == null))
                         .consequence(
                                 accessTokenReq.apply(context,
-                                                     this)
+                                                     this
+                                                    )
                                               .flatMap(readNewAccessTokenAfterRefresh)
                                               .retryIf(retryAccessTokenReqPredicate,
                                                        accessTokenReqAttempts

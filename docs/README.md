@@ -1,3 +1,5 @@
+<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="250" height="150" align="right"/>
+
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
@@ -9,7 +11,6 @@
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.1)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.1/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
-<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="250" height="150"/>
 
 - [vertx-effect manifesto](#manifesto)
 - [Introduction](#introduction)

@@ -1,0 +1,143 @@
+package vertx.effect.exp;
+
+import io.vavr.collection.Map;
+import io.vavr.collection.Set;
+import io.vavr.collection.TreeMap;
+import io.vertx.core.Future;
+import jsonvalues.JsObj;
+import jsonvalues.JsValue;
+import vertx.effect.Val;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static java.util.Objects.requireNonNull;
+
+/**
+ Represents a supplier of a vertx future which result is a json object. It has the same
+ recursive structure as a json object. Each key has a future associated that it's
+ executed asynchronously. When all the futures are completed, all the results are combined into
+ a json object.
+ */
+final class SequentialJsObj extends JsObjVal {
+    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
+
+    Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
+
+    SequentialJsObj() {
+    }
+
+    SequentialJsObj(final Map<String, Val<? extends JsValue>> bindings) {
+        this.bindings = bindings;
+    }
+
+
+
+    /**
+     returns a new object future inserting the given future at the given key
+
+     @param key    the given key
+     @param future the given future
+     @return a new JsObjFuture
+     */
+    public SequentialJsObj set(final String key,
+                               final Val<? extends JsValue> future
+                              ) {
+        final Map<String, Val<? extends JsValue>> a = bindings.put(requireNonNull(key),
+                                                                   requireNonNull(future)
+                                                                  );
+        return new SequentialJsObj(a);
+    }
+
+
+    /**
+     it triggers the execution of all the completable futures, combining the results into a JsObj
+
+     @return a Future of a json object
+     */
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Future<JsObj> get() {
+
+        Set<String>   keySet = bindings.keySet();
+        Future<JsObj> result = Future.succeededFuture(JsObj.empty());
+        for (final String key : keySet) {
+            result = result.flatMap(acc -> bindings.get(key)
+                                                   .getOrElseThrow(IllegalStateException::new)
+                                                   .get()
+                                                   .flatMap(val -> Future.succeededFuture(acc.set(key,
+                                                                                                  val
+                                                                                                 ))
+                                                           )
+                                   );
+        }
+
+
+        return result;
+    }
+
+
+    @Override
+    public <P> Val<P> map(final Function<JsObj, P> fn) {
+        if (fn == null)
+            return Cons.failure(new NullPointerException("fn is null"));
+        return Cons.of(() -> get().map(fn));
+    }
+
+
+    @Override
+    public Val<JsObj> retry(final int attempts) {
+        if (attempts < 1)
+            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
+
+        return new SequentialJsObj(bindings.mapValues(it -> it.retry(attempts)));
+    }
+
+
+    @Override
+    public Val<JsObj> retry(final int attempts,
+                            final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+        if (attempts < 1)
+            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
+
+        if (actionBeforeRetry == null)
+            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+
+        return new SequentialJsObj(bindings.mapValues(it -> it.retry(attempts,
+                                                                     actionBeforeRetry
+                                                                    )));
+    }
+
+    @Override
+    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
+                              final int attempts) {
+        if (attempts < 1)
+            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
+        if (predicate == null)
+            return Cons.failure(new NullPointerException("predicate is null"));
+        return new SequentialJsObj(bindings.mapValues(it -> it.retryIf(predicate,
+                                                                       attempts
+                                                                      )));
+
+    }
+
+
+    @Override
+    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+        if (attempts < 1)
+            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
+        if (predicate == null)
+            return Cons.failure(new NullPointerException("predicate is null"));
+        if (actionBeforeRetry == null)
+            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+
+        return new SequentialJsObj(bindings.mapValues(it -> it.retryIf(predicate,
+                                                                       attempts,
+                                                                       actionBeforeRetry
+                                                                      )));
+    }
+
+}

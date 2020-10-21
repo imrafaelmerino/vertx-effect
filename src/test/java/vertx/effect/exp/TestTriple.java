@@ -55,10 +55,10 @@ public class TestTriple {
     public void test_retries(VertxTestContext context) {
 
 
-        Val<Tuple3<String, String, String>> val = Triple.of(a.get(),
-                                                            a.get(),
-                                                            a.get()
-                                                           )
+        Val<Tuple3<String, String, String>> val = Triple.parallel(a.get(),
+                                                                  a.get(),
+                                                                  a.get()
+                                                                 )
                                                         .retry(2);
 
 
@@ -85,10 +85,10 @@ public class TestTriple {
                                  "a"
                 );
 
-        Val<Tuple3<String, String, String>> val = Triple.of(a.get(),
-                                                            a.get(),
-                                                            a.get()
-                                                           )
+        Val<Tuple3<String, String, String>> val = Triple.parallel(a.get(),
+                                                                  a.get(),
+                                                                  a.get()
+                                                                 )
                                                         .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                                                  2
                                                                 );
@@ -108,10 +108,10 @@ public class TestTriple {
 
 
         Val<Tuple3<String, String, String>> val =
-                Triple.of(a.get(),
-                          a.get(),
-                          a.get()
-                         )
+                Triple.parallel(a.get(),
+                                a.get(),
+                                a.get()
+                               )
                       .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                2
                               );
@@ -128,10 +128,10 @@ public class TestTriple {
     public void test_triple_exp_map(VertxTestContext context) {
 
         Val<Tuple3<Integer, Integer, Integer>> val =
-                Triple.of(Cons.success("a"),
-                          Cons.success("ab"),
-                          Cons.success("abc")
-                         )
+                Triple.parallel(Cons.success("a"),
+                                Cons.success("ab"),
+                                Cons.success("abc")
+                               )
                       .map(pair -> pair.map((a, b, c) -> new Tuple3<>(a.length(),
                                                                       b.length(),
                                                                       c.length()
@@ -157,10 +157,10 @@ public class TestTriple {
 
 
         Val<Tuple3<String, String, String>> val =
-                Triple.of(Cons.success("a"),
-                          Cons.success("b"),
-                          Cons.success("c")
-                         )
+                Triple.parallel(Cons.success("a"),
+                                Cons.success("b"),
+                                Cons.success("c")
+                               )
                       .flatMap(pair -> Cons.success(pair.map((a, b, c) -> new Tuple3<>(a.toUpperCase(),
                                                                                        b.toUpperCase(),
                                                                                        c.toUpperCase()
@@ -184,10 +184,10 @@ public class TestTriple {
     public void test_triple_exp_flatmap_success_failure(VertxTestContext context) {
 
 
-        Val<String> val = Triple.of(Cons.success("a"),
-                                    Cons.success("ab"),
-                                    Cons.success("abc")
-                                   )
+        Val<String> val = Triple.parallel(Cons.success("a"),
+                                          Cons.success("ab"),
+                                          Cons.success("abc")
+                                         )
                                 .flatMap(s -> Cons.failure(new RuntimeException()));
 
 
@@ -202,10 +202,10 @@ public class TestTriple {
     public void test_triple_exp_fails_and_recover_with_success(VertxTestContext context) {
 
         Val<Tuple3<String, Boolean, String>> val =
-                Triple.of(a.get(),
-                          True.get(),
-                          b.get()
-                         )
+                Triple.parallel(a.get(),
+                                True.get(),
+                                b.get()
+                               )
                       .recoverWith(e -> Cons.success(new Tuple3<>("",
                                                                   false,
                                                                   ""
@@ -229,10 +229,10 @@ public class TestTriple {
     public void test_triple_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
         Val<Tuple3<String, Boolean, String>> val =
-                Triple.of(a.get(),
-                          True.get(),
-                          b.get()
-                         )
+                Triple.parallel(a.get(),
+                                True.get(),
+                                b.get()
+                               )
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifyFailure(e -> e instanceof IllegalArgumentException)
@@ -246,10 +246,10 @@ public class TestTriple {
     @Test
     public void test_triple_exp_recover_with_success(VertxTestContext context) {
         Val<Tuple3<String, Boolean, String>> val =
-                Triple.of(a.get(),
-                          True.get(),
-                          b.get()
-                         )
+                Triple.parallel(a.get(),
+                                True.get(),
+                                b.get()
+                               )
                       .retry(2)
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
@@ -274,10 +274,10 @@ public class TestTriple {
         long start = System.nanoTime();
 
         Val<Tuple3<String, String, String>> val =
-                Triple.of(a.get(),
-                          a.get(),
-                          a.get()
-                         )
+                Triple.parallel(a.get(),
+                                a.get(),
+                                a.get()
+                               )
                       .retry(ATTEMPTS,
                              (error, n) -> vertxRef.timer(1,
                                                           SECONDS,

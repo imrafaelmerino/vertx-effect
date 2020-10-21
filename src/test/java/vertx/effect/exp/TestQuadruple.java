@@ -39,7 +39,8 @@ public class TestQuadruple {
 
         vertxRef = new VertxRef(vertx);
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
-                                  System.out::println);
+                                  System.out::println
+                                 );
         vertxRef.deploy(new RegisterJsValuesCodecs())
                 .onComplete(event -> testContext.completeNow())
                 .get();
@@ -55,11 +56,11 @@ public class TestQuadruple {
                 );
 
         Val<Tuple4<String, String, String, String>> val =
-                Quadruple.of(a.get(),
-                             a.get(),
-                             a.get(),
-                             a.get()
-                            )
+                Quadruple.parallel(a.get(),
+                                   a.get(),
+                                   a.get(),
+                                   a.get()
+                                  )
                          .retry(2);
 
         Verifiers.<Tuple4<String, String, String, String>>verifySuccess(tuple -> tuple.equals(new Tuple4<>("a",
@@ -83,26 +84,26 @@ public class TestQuadruple {
                                  "a"
                 );
 
-        Quadruple.of(val.get(),
-                     val.get(),
-                     val.get(),
-                     val.get()
-                    )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
-                 .get()
-                 .onComplete(it -> {
-                     context.verify(() -> Assertions.assertEquals(new Tuple4<>("a",
-                                                                               "a",
-                                                                               "a",
-                                                                               "a"
-                                                                  ),
-                                                                  it.result()
-                                                                 )
-                                   );
-                     context.completeNow();
-                 });
+        Quadruple.parallel(val.get(),
+                             val.get(),
+                             val.get(),
+                             val.get()
+                            )
+                         .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                  2
+                                 )
+                         .get()
+                         .onComplete(it -> {
+                             context.verify(() -> Assertions.assertEquals(new Tuple4<>("a",
+                                                                                       "a",
+                                                                                       "a",
+                                                                                       "a"
+                                                                          ),
+                                                                          it.result()
+                                                                         )
+                                           );
+                             context.completeNow();
+                         });
 
     }
 
@@ -115,91 +116,91 @@ public class TestQuadruple {
                                  "a"
                 );
 
-        Quadruple.of(val.get(),
-                     val.get(),
-                     val.get(),
-                     val.get()
-                    )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
-                 .get()
-                 .onComplete(it -> {
-                     context.verify(() -> Assertions.assertTrue(it.failed())
-                                   );
-                     context.completeNow();
-                 });
+        Quadruple.parallel(val.get(),
+                             val.get(),
+                             val.get(),
+                             val.get()
+                            )
+                         .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                  2
+                                 )
+                         .get()
+                         .onComplete(it -> {
+                             context.verify(() -> Assertions.assertTrue(it.failed())
+                                           );
+                             context.completeNow();
+                         });
 
     }
 
     @Test
     public void test_quadruple_exp_map(VertxTestContext context) {
 
-        Quadruple.of(Cons.success("a"),
-                     Cons.success("ab"),
-                     Cons.success("abc"),
-                     Cons.success("abcd")
-                    )
-                 .map(pair -> pair.map((a, b, c, d) -> new Tuple4<>(a.length(),
-                                                                    b.length(),
-                                                                    c.length(),
-                                                                    d.length()
-                 )))
-                 .onSuccess(r -> context.verify(() -> {
-                     Assertions.assertEquals(new Tuple4<>(1,
-                                                          2,
-                                                          3,
-                                                          4
-                                             ),
-                                             r
-                                            );
-                     context.completeNow();
-                 }))
-                 .get();
+        Quadruple.parallel(Cons.success("a"),
+                             Cons.success("ab"),
+                             Cons.success("abc"),
+                             Cons.success("abcd")
+                            )
+                         .map(pair -> pair.map((a, b, c, d) -> new Tuple4<>(a.length(),
+                                                                            b.length(),
+                                                                            c.length(),
+                                                                            d.length()
+                         )))
+                         .onSuccess(r -> context.verify(() -> {
+                             Assertions.assertEquals(new Tuple4<>(1,
+                                                                  2,
+                                                                  3,
+                                                                  4
+                                                     ),
+                                                     r
+                                                    );
+                             context.completeNow();
+                         }))
+                         .get();
 
     }
 
     @Test
     public void test_quadruple_exp_flatmap_success(VertxTestContext context) {
 
-        Quadruple.of(Cons.success("a"),
-                     Cons.success("b"),
-                     Cons.success("c"),
-                     Cons.success("d")
-                    )
-                 .flatMap(pair -> Cons.success(pair.map((a, b, c, d) -> new Tuple4<>(a.toUpperCase(),
-                                                                                     b.toUpperCase(),
-                                                                                     c.toUpperCase(),
-                                                                                     d.toUpperCase()
-                                                        )
-                                                       )))
-                 .onSuccess(r -> context.verify(() -> {
-                     Assertions.assertEquals(new Tuple4<>("A",
-                                                          "B",
-                                                          "C",
-                                                          "D"
-                                             ),
-                                             r
-                                            );
-                     context.completeNow();
-                 }))
-                 .get();
+        Quadruple.parallel(Cons.success("a"),
+                             Cons.success("b"),
+                             Cons.success("c"),
+                             Cons.success("d")
+                            )
+                         .flatMap(pair -> Cons.success(pair.map((a, b, c, d) -> new Tuple4<>(a.toUpperCase(),
+                                                                                             b.toUpperCase(),
+                                                                                             c.toUpperCase(),
+                                                                                             d.toUpperCase()
+                                                                )
+                                                               )))
+                         .onSuccess(r -> context.verify(() -> {
+                             Assertions.assertEquals(new Tuple4<>("A",
+                                                                  "B",
+                                                                  "C",
+                                                                  "D"
+                                                     ),
+                                                     r
+                                                    );
+                             context.completeNow();
+                         }))
+                         .get();
     }
 
     @Test
     public void test_quadruple_exp_flatmap_failure(VertxTestContext context) {
 
-        Quadruple.of(Cons.success("a"),
-                     Cons.success("ab"),
-                     Cons.success("abc"),
-                     Cons.success("abcd")
-                    )
-                 .flatMap(s -> Cons.failure(new RuntimeException()))
-                 .onComplete(r -> context.verify(() -> {
-                     Assertions.assertTrue(r.failed());
-                     context.completeNow();
-                 }))
-                 .get();
+        Quadruple.parallel(Cons.success("a"),
+                             Cons.success("ab"),
+                             Cons.success("abc"),
+                             Cons.success("abcd")
+                            )
+                         .flatMap(s -> Cons.failure(new RuntimeException()))
+                         .onComplete(r -> context.verify(() -> {
+                             Assertions.assertTrue(r.failed());
+                             context.completeNow();
+                         }))
+                         .get();
 
     }
 
@@ -207,67 +208,67 @@ public class TestQuadruple {
     @Test
     public void test_quadruple_exp_fails_and_recover_with_success(VertxTestContext context) {
 
-        Quadruple.of(a.get(),
-                     b.get(),
-                     b.get(),
-                     a.get()
-                    )
-                 .recoverWith(e -> Cons.success(new Tuple4<>("",
-                                                             "",
-                                                             "",
-                                                             ""
-                              ))
-                             )
-                 .onSuccess(map -> context.verify(() -> {
-                     Assertions.assertEquals(new Tuple4<>("",
-                                                          "",
-                                                          "",
-                                                          ""
-                                             ),
-                                             map
-                                            );
-                     context.completeNow();
-                 }))
-                 .get();
+        Quadruple.parallel(a.get(),
+                             b.get(),
+                             b.get(),
+                             a.get()
+                            )
+                         .recoverWith(e -> Cons.success(new Tuple4<>("",
+                                                                     "",
+                                                                     "",
+                                                                     ""
+                                      ))
+                                     )
+                         .onSuccess(map -> context.verify(() -> {
+                             Assertions.assertEquals(new Tuple4<>("",
+                                                                  "",
+                                                                  "",
+                                                                  ""
+                                                     ),
+                                                     map
+                                                    );
+                             context.completeNow();
+                         }))
+                         .get();
     }
 
     @Test
     public void test_quadruple_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
-        Quadruple.of(a.get(),
-                     b.get(),
-                     b.get(),
-                     a.get()
-                    )
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
-                 .onComplete(r -> context.verify(() -> {
-                     Assertions.assertTrue(r.failed());
-                     Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
-                     context.completeNow();
-                 }))
-                 .get();
+        Quadruple.parallel(a.get(),
+                             b.get(),
+                             b.get(),
+                             a.get()
+                            )
+                         .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                         .onComplete(r -> context.verify(() -> {
+                             Assertions.assertTrue(r.failed());
+                             Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
+                             context.completeNow();
+                         }))
+                         .get();
     }
 
     @Test
     public void test_quadruple_exp_recover_with_success(VertxTestContext context) {
-        Quadruple.of(a.get(),
-                     b.get(),
-                     b.get(),
-                     a.get()
-                    )
-                 .retry(2)
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
-                 .onSuccess(map -> context.verify(() -> {
-                     Assertions.assertEquals(new Tuple4<>("a",
-                                                          "b",
-                                                          "b",
-                                                          "a"
-                                             ),
-                                             map
-                                            );
-                     context.completeNow();
-                 }))
-                 .get();
+        Quadruple.parallel(a.get(),
+                             b.get(),
+                             b.get(),
+                             a.get()
+                            )
+                         .retry(2)
+                         .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                         .onSuccess(map -> context.verify(() -> {
+                             Assertions.assertEquals(new Tuple4<>("a",
+                                                                  "b",
+                                                                  "b",
+                                                                  "a"
+                                                     ),
+                                                     map
+                                                    );
+                             context.completeNow();
+                         }))
+                         .get();
     }
 
     @Test
@@ -279,30 +280,30 @@ public class TestQuadruple {
                                                 counter -> new RuntimeException("counter: " + counter),
                                                 "a"
         );
-        Quadruple.of(a.get(),
-                     a.get(),
-                     a.get(),
-                     a.get()
-                    )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.timer(1,
-                                                     SECONDS,
-                                                     "one sec"
-                                                    )
-                       )
-                 .get()
-                 .onComplete(r -> context.verify(() -> {
-                     Assertions.assertEquals(new Tuple4<>("a",
-                                                          "a",
-                                                          "a",
-                                                          "a"
-                                             ),
-                                             r.result()
-                                            );
-                     Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
-                     context.completeNow();
+        Quadruple.parallel(a.get(),
+                             a.get(),
+                             a.get(),
+                             a.get()
+                            )
+                         .retry(ATTEMPTS,
+                                (error, n) -> vertxRef.timer(1,
+                                                             SECONDS,
+                                                             "one sec"
+                                                            )
+                               )
+                         .get()
+                         .onComplete(r -> context.verify(() -> {
+                             Assertions.assertEquals(new Tuple4<>("a",
+                                                                  "a",
+                                                                  "a",
+                                                                  "a"
+                                                     ),
+                                                     r.result()
+                                                    );
+                             Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                             context.completeNow();
 
-                 }));
+                         }));
 
     }
 }

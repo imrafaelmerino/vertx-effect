@@ -226,15 +226,15 @@ public class TestIfElse {
                                                         .alternative(c);
 
 
-        JsObjVal of = JsObjVal.of("a",
-                                  a.map(JsBool::of),
-                                  "b",
-                                  b.map(JsInt::of),
-                                  "c",
-                                  c.map(JsInt::of),
-                                  "d",
-                                  d.map(JsInt::of)
-                                 );
+        JsObjVal of = JsObjVal.sequential("a",
+                                          a.map(JsBool::of),
+                                          "b",
+                                          b.map(JsInt::of),
+                                          "c",
+                                          c.map(JsInt::of),
+                                          "d",
+                                          d.map(JsInt::of)
+                                         );
 
 
         jsonvalues.JsObj result = of
@@ -426,22 +426,23 @@ public class TestIfElse {
                                                   "hi"
         );
         IfElse.<String>predicate(TRUE)
-              .consequence(str.get())
-              .alternative(Cons.success("bye"))
-              .retryIf(it -> it instanceof IllegalArgumentException,
-                       3,
-                       (e, i) -> vertxRef.timer(1,
-                                                SECONDS,
-                                                "1 sec"
-                                               )
-                      )
-              .onSuccess(it -> {
-                  context.verify(() -> {
-                      Assertions.assertEquals("hi",it);
-                      context.completeNow();
-                  });
-              })
-              .get();
+                .consequence(str.get())
+                .alternative(Cons.success("bye"))
+                .retryIf(it -> it instanceof IllegalArgumentException,
+                         3,
+                         (e, i) -> vertxRef.timer(1,
+                                                  SECONDS,
+                                                  "1 sec"
+                                                 )
+                        )
+                .onSuccess(it -> {
+                    context.verify(() -> {
+                        Assertions.assertEquals("hi",
+                                                it);
+                        context.completeNow();
+                    });
+                })
+                .get();
     }
 
     @Test

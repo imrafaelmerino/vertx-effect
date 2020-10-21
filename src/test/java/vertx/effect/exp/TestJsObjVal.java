@@ -9,8 +9,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
 import vertx.effect.Val;
+import vertx.effect.VertxRef;
 
 import java.time.Instant;
 import java.util.function.Supplier;
@@ -30,7 +30,8 @@ public class TestJsObjVal {
 
         vertxRef = new VertxRef(vertx);
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
-                                  System.out::println);
+                                  System.out::println
+                                 );
         vertxRef.deploy(new RegisterJsValuesCodecs())
                 .onComplete(event -> testContext.completeNow())
                 .get();
@@ -39,11 +40,11 @@ public class TestJsObjVal {
 
     @Test
     public void test_jsobj_exp_two_elems(VertxTestContext context) {
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b"))
-                   )
+        JsObjVal.sequential("a",
+                            Cons.success(JsStr.of("a")),
+                            "b",
+                            Cons.success(JsStr.of("b"))
+                           )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -59,13 +60,13 @@ public class TestJsObjVal {
 
     @Test
     public void test_jsobj_exp_three_elems(VertxTestContext context) {
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE)
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b")),
+                          "c",
+                          Cons.success(JsBool.TRUE)
+                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -83,15 +84,15 @@ public class TestJsObjVal {
 
     @Test
     public void test_jsobj_exp_four_elems(VertxTestContext context) {
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL)
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b")),
+                          "c",
+                          Cons.success(JsBool.TRUE),
+                          "d",
+                          Cons.success(JsNull.NULL)
+                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -111,17 +112,17 @@ public class TestJsObjVal {
 
     @Test
     public void test_jsobj_exp_five_elems(VertxTestContext context) {
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1))
-                   )
+        JsObjVal.sequential("a",
+                            Cons.success(JsStr.of("a")),
+                            "b",
+                            Cons.success(JsStr.of("b")),
+                            "c",
+                            Cons.success(JsBool.TRUE),
+                            "d",
+                            Cons.success(JsNull.NULL),
+                            "e",
+                            Cons.success(JsInt.of(1))
+                           )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -143,19 +144,19 @@ public class TestJsObjVal {
 
     @Test
     public void test_jsobj_exp_six_elems(VertxTestContext context) {
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L))
-                   )
+        JsObjVal.sequential("a",
+                            Cons.success(JsStr.of("a")),
+                            "b",
+                            Cons.success(JsStr.of("b")),
+                            "c",
+                            Cons.success(JsBool.TRUE),
+                            "d",
+                            Cons.success(JsNull.NULL),
+                            "e",
+                            Cons.success(JsInt.of(1)),
+                            "f",
+                            Cons.success(JsLong.of(1L))
+                           )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -180,24 +181,24 @@ public class TestJsObjVal {
 
     @Test
     public void test_jsobj_exp_seven_elems(VertxTestContext context) {
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           ))
-                   )
+        JsObjVal.sequential("a",
+                            Cons.success(JsStr.of("a")),
+                            "b",
+                            Cons.success(JsStr.of("b")),
+                            "c",
+                            Cons.success(JsBool.TRUE),
+                            "d",
+                            Cons.success(JsNull.NULL),
+                            "e",
+                            Cons.success(JsInt.of(1)),
+                            "f",
+                            Cons.success(JsLong.of(1L)),
+                            "g",
+                            Cons.success(JsArray.of(1,
+                                                    2,
+                                                    3
+                                                   ))
+                           )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -226,26 +227,26 @@ public class TestJsObjVal {
 
     @Test
     public void test_jsobj_exp_eight_elems(VertxTestContext context) {
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty())
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b")),
+                          "c",
+                          Cons.success(JsBool.TRUE),
+                          "d",
+                          Cons.success(JsNull.NULL),
+                          "e",
+                          Cons.success(JsInt.of(1)),
+                          "f",
+                          Cons.success(JsLong.of(1L)),
+                          "g",
+                          Cons.success(JsArray.of(1,
+                                                  2,
+                                                  3
+                                                 )),
+                          "h",
+                          Cons.success(JsObj.empty())
+                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -277,28 +278,28 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_nine_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty()),
-                    "i",
-                    Cons.success(JsInstant.of(now))
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b")),
+                          "c",
+                          Cons.success(JsBool.TRUE),
+                          "d",
+                          Cons.success(JsNull.NULL),
+                          "e",
+                          Cons.success(JsInt.of(1)),
+                          "f",
+                          Cons.success(JsLong.of(1L)),
+                          "g",
+                          Cons.success(JsArray.of(1,
+                                                  2,
+                                                  3
+                                                 )),
+                          "h",
+                          Cons.success(JsObj.empty()),
+                          "i",
+                          Cons.success(JsInstant.of(now))
+                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -332,30 +333,30 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_ten_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty()),
-                    "i",
-                    Cons.success(JsInstant.of(now)),
-                    "j",
-                    Cons.success(JsBinary.of("hi"))
-                   )
+        JsObjVal.sequential("a",
+                            Cons.success(JsStr.of("a")),
+                            "b",
+                            Cons.success(JsStr.of("b")),
+                            "c",
+                            Cons.success(JsBool.TRUE),
+                            "d",
+                            Cons.success(JsNull.NULL),
+                            "e",
+                            Cons.success(JsInt.of(1)),
+                            "f",
+                            Cons.success(JsLong.of(1L)),
+                            "g",
+                            Cons.success(JsArray.of(1,
+                                                    2,
+                                                    3
+                                                   )),
+                            "h",
+                            Cons.success(JsObj.empty()),
+                            "i",
+                            Cons.success(JsInstant.of(now)),
+                            "j",
+                            Cons.success(JsBinary.of("hi"))
+                           )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -391,32 +392,32 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_eleven_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty()),
-                    "i",
-                    Cons.success(JsInstant.of(now)),
-                    "j",
-                    Cons.success(JsBinary.of("hi")),
-                    "k",
-                    Cons.success(JsDouble.of(2.5d))
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b")),
+                          "c",
+                          Cons.success(JsBool.TRUE),
+                          "d",
+                          Cons.success(JsNull.NULL),
+                          "e",
+                          Cons.success(JsInt.of(1)),
+                          "f",
+                          Cons.success(JsLong.of(1L)),
+                          "g",
+                          Cons.success(JsArray.of(1,
+                                                  2,
+                                                  3
+                                                 )),
+                          "h",
+                          Cons.success(JsObj.empty()),
+                          "i",
+                          Cons.success(JsInstant.of(now)),
+                          "j",
+                          Cons.success(JsBinary.of("hi")),
+                          "k",
+                          Cons.success(JsDouble.of(2.5d))
+                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -454,34 +455,34 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_twelve_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty()),
-                    "i",
-                    Cons.success(JsInstant.of(now)),
-                    "j",
-                    Cons.success(JsBinary.of("hi")),
-                    "k",
-                    Cons.success(JsDouble.of(2.5d)),
-                    "l",
-                    Cons.success(JsArray.of(JsObj.empty()))
-                   )
+        JsObjVal.sequential("a",
+                            Cons.success(JsStr.of("a")),
+                            "b",
+                            Cons.success(JsStr.of("b")),
+                            "c",
+                            Cons.success(JsBool.TRUE),
+                            "d",
+                            Cons.success(JsNull.NULL),
+                            "e",
+                            Cons.success(JsInt.of(1)),
+                            "f",
+                            Cons.success(JsLong.of(1L)),
+                            "g",
+                            Cons.success(JsArray.of(1,
+                                                    2,
+                                                    3
+                                                   )),
+                            "h",
+                            Cons.success(JsObj.empty()),
+                            "i",
+                            Cons.success(JsInstant.of(now)),
+                            "j",
+                            Cons.success(JsBinary.of("hi")),
+                            "k",
+                            Cons.success(JsDouble.of(2.5d)),
+                            "l",
+                            Cons.success(JsArray.of(JsObj.empty()))
+                           )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -521,38 +522,38 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_thirteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty()),
-                    "i",
-                    Cons.success(JsInstant.of(now)),
-                    "j",
-                    Cons.success(JsBinary.of("hi")),
-                    "k",
-                    Cons.success(JsDouble.of(2.5d)),
-                    "l",
-                    Cons.success(JsArray.of(JsObj.empty())),
-                    "m",
-                    Cons.success(JsObj.of("a",
-                                          JsBool.TRUE
-                                         ))
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b")),
+                          "c",
+                          Cons.success(JsBool.TRUE),
+                          "d",
+                          Cons.success(JsNull.NULL),
+                          "e",
+                          Cons.success(JsInt.of(1)),
+                          "f",
+                          Cons.success(JsLong.of(1L)),
+                          "g",
+                          Cons.success(JsArray.of(1,
+                                                  2,
+                                                  3
+                                                 )),
+                          "h",
+                          Cons.success(JsObj.empty()),
+                          "i",
+                          Cons.success(JsInstant.of(now)),
+                          "j",
+                          Cons.success(JsBinary.of("hi")),
+                          "k",
+                          Cons.success(JsDouble.of(2.5d)),
+                          "l",
+                          Cons.success(JsArray.of(JsObj.empty())),
+                          "m",
+                          Cons.success(JsObj.of("a",
+                                                JsBool.TRUE
+                                               ))
+                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -596,41 +597,41 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_fourteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty()),
-                    "i",
-                    Cons.success(JsInstant.of(now)),
-                    "j",
-                    Cons.success(JsBinary.of("hi")),
-                    "k",
-                    Cons.success(JsDouble.of(2.5d)),
-                    "l",
-                    Cons.success(JsArray.of(JsObj.empty())),
-                    "m",
-                    Cons.success(JsObj.of("a",
-                                          JsBool.TRUE
-                                         )),
-                    "m",
-                    Cons.success(JsStr.of("a"))
+        JsObjVal.sequential("a",
+                            Cons.success(JsStr.of("a")),
+                            "b",
+                            Cons.success(JsStr.of("b")),
+                            "c",
+                            Cons.success(JsBool.TRUE),
+                            "d",
+                            Cons.success(JsNull.NULL),
+                            "e",
+                            Cons.success(JsInt.of(1)),
+                            "f",
+                            Cons.success(JsLong.of(1L)),
+                            "g",
+                            Cons.success(JsArray.of(1,
+                                                    2,
+                                                    3
+                                                   )),
+                            "h",
+                            Cons.success(JsObj.empty()),
+                            "i",
+                            Cons.success(JsInstant.of(now)),
+                            "j",
+                            Cons.success(JsBinary.of("hi")),
+                            "k",
+                            Cons.success(JsDouble.of(2.5d)),
+                            "l",
+                            Cons.success(JsArray.of(JsObj.empty())),
+                            "m",
+                            Cons.success(JsObj.of("a",
+                                                  JsBool.TRUE
+                                                 )),
+                            "m",
+                            Cons.success(JsStr.of("a"))
 
-                   )
+                           )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -676,43 +677,43 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_fifteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b")),
-                    "c",
-                    Cons.success(JsBool.TRUE),
-                    "d",
-                    Cons.success(JsNull.NULL),
-                    "e",
-                    Cons.success(JsInt.of(1)),
-                    "f",
-                    Cons.success(JsLong.of(1L)),
-                    "g",
-                    Cons.success(JsArray.of(1,
-                                            2,
-                                            3
-                                           )),
-                    "h",
-                    Cons.success(JsObj.empty()),
-                    "i",
-                    Cons.success(JsInstant.of(now)),
-                    "j",
-                    Cons.success(JsBinary.of("hi")),
-                    "k",
-                    Cons.success(JsDouble.of(2.5d)),
-                    "l",
-                    Cons.success(JsArray.of(JsObj.empty())),
-                    "m",
-                    Cons.success(JsObj.of("a",
-                                          JsBool.TRUE
-                                         )),
-                    "m",
-                    Cons.success(JsStr.of("a")),
-                    "n",
-                    Cons.success(JsArray.empty())
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b")),
+                          "c",
+                          Cons.success(JsBool.TRUE),
+                          "d",
+                          Cons.success(JsNull.NULL),
+                          "e",
+                          Cons.success(JsInt.of(1)),
+                          "f",
+                          Cons.success(JsLong.of(1L)),
+                          "g",
+                          Cons.success(JsArray.of(1,
+                                                  2,
+                                                  3
+                                                 )),
+                          "h",
+                          Cons.success(JsObj.empty()),
+                          "i",
+                          Cons.success(JsInstant.of(now)),
+                          "j",
+                          Cons.success(JsBinary.of("hi")),
+                          "k",
+                          Cons.success(JsDouble.of(2.5d)),
+                          "l",
+                          Cons.success(JsArray.of(JsObj.empty())),
+                          "m",
+                          Cons.success(JsObj.of("a",
+                                                JsBool.TRUE
+                                               )),
+                          "m",
+                          Cons.success(JsStr.of("a")),
+                          "n",
+                          Cons.success(JsArray.empty())
 
-                   )
+                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
                                                      JsStr.of("a"),
@@ -769,20 +770,20 @@ public class TestJsObjVal {
                 );
 
 
-        JsObjVal.of("a",
-                    val.get(),
-                    "b",
-                    val.get(),
-                    "c",
-                    val.get(),
-                    "d",
-                    JsArrayVal.of(val.get(),
-                                  val.get(),
-                                  JsObjVal.of("a",
-                                              val.get()
-                                             )
-                                 )
-                   )
+        JsObjVal.parallel("a",
+                          val.get(),
+                          "b",
+                          val.get(),
+                          "c",
+                          val.get(),
+                          "d",
+                          JsArrayVal.of(val.get(),
+                                        val.get(),
+                                        JsObjVal.parallel("a",
+                                                          val.get()
+                                                         )
+                                       )
+                         )
                 .retry(2)
                 .onComplete(it -> {
                     context.verify(() -> {
@@ -815,11 +816,11 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_map(VertxTestContext context) {
 
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b"))
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b"))
+                         )
                 .map(obj -> obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
                                                                  .apply(p.value)
                                          )
@@ -841,11 +842,11 @@ public class TestJsObjVal {
     @Test
     public void test_jsobj_exp_flatmap_success(VertxTestContext context) {
 
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b"))
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b"))
+                         )
                 .flatMap(obj -> Cons.success(obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
                                                                                   .apply(p.value)
                                                           ))
@@ -869,11 +870,11 @@ public class TestJsObjVal {
     public void test_jsobj_exp_flatmap_failure(VertxTestContext context) {
 
 
-        JsObjVal.of("a",
-                    Cons.success(JsStr.of("a")),
-                    "b",
-                    Cons.success(JsStr.of("b"))
-                   )
+        JsObjVal.parallel("a",
+                          Cons.success(JsStr.of("a")),
+                          "b",
+                          Cons.success(JsStr.of("b"))
+                         )
                 .flatMap(s -> Cons.failure(new RuntimeException()))
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertTrue(r.failed());
@@ -889,7 +890,7 @@ public class TestJsObjVal {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<String> a = new ErrorWhile<>( ATTEMPTS,
+        ErrorWhile<String> a = new ErrorWhile<>(ATTEMPTS,
                                                 counter -> new RuntimeException("counter: " + counter),
                                                 "a"
         );
@@ -898,13 +899,13 @@ public class TestJsObjVal {
                                                 "b"
         );
 
-        JsObjVal.of("a",
-                    a.get()
-                     .map(JsStr::of),
-                    "b",
-                    b.get()
-                     .map(JsStr::of)
-                   )
+        JsObjVal.parallel("a",
+                          a.get()
+                           .map(JsStr::of),
+                          "b",
+                          b.get()
+                           .map(JsStr::of)
+                         )
                 .retry(ATTEMPTS,
                        (error, n) -> vertxRef.timer(1,
                                                     SECONDS,

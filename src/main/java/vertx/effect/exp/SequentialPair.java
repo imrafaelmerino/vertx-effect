@@ -3,7 +3,6 @@ package vertx.effect.exp;
 import io.vavr.Tuple2;
 import io.vertx.core.Future;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -11,23 +10,23 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-final class SeqPair<A, B> extends Pair<A, B> {
+final class SequentialPair<A, B> extends Pair<A, B> {
 
     private final Val<A> _1;
     private final Val<B> _2;
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
-    SeqPair(final Val<A> _1,
-            final Val<B> _2) {
+    SequentialPair(final Val<A> _1,
+                   final Val<B> _2) {
         this._1 = requireNonNull(_1);
         this._2 = requireNonNull(_2);
     }
 
 
-    public static <A, B> SeqPair<A, B> of(final Val<A> _1,
-                                          final Val<B> _2) {
-        return new SeqPair<>(_1,
-                             _2
+    public static <A, B> SequentialPair<A, B> of(final Val<A> _1,
+                                                 final Val<B> _2) {
+        return new SequentialPair<>(_1,
+                                    _2
         );
     }
 
@@ -42,8 +41,8 @@ final class SeqPair<A, B> extends Pair<A, B> {
     public Val<Tuple2<A, B>> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new SeqPair<>(_1.retry(attempts),
-                             _2.retry(attempts)
+        return new SequentialPair<>(_1.retry(attempts),
+                                    _2.retry(attempts)
         );
     }
 
@@ -54,10 +53,10 @@ final class SeqPair<A, B> extends Pair<A, B> {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new SeqPair<>(_1.retry(attempts,
-                                      actionBeforeRetry
-                                     ),
-                             _2.retry(attempts,
+        return new SequentialPair<>(_1.retry(attempts,
+                                             actionBeforeRetry
+                                            ),
+                                    _2.retry(attempts,
                                       actionBeforeRetry
                                      )
         );
@@ -71,10 +70,10 @@ final class SeqPair<A, B> extends Pair<A, B> {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new SeqPair<>(_1.retryIf(predicate,
-                                        attempts
-                                       ),
-                             _2.retryIf(predicate,
+        return new SequentialPair<>(_1.retryIf(predicate,
+                                               attempts
+                                              ),
+                                    _2.retryIf(predicate,
                                         attempts
                                        )
         );
@@ -92,10 +91,10 @@ final class SeqPair<A, B> extends Pair<A, B> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new SeqPair<>(_1.retryIf(predicate,
-                                        attempts
-                                       ),
-                             _2.retryIf(predicate,
+        return new SequentialPair<>(_1.retryIf(predicate,
+                                               attempts
+                                              ),
+                                    _2.retryIf(predicate,
                                         attempts
                                        )
         );
