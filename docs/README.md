@@ -151,7 +151,6 @@ Val<JsObj> profile = Cons.of( () -> getProfile(id)); // from a Future
 
 ```java
 
-
 public final class IfElse<O> extends Val<O> {}
 
 IfElse.<O>predicate(Val<Bool>)
@@ -160,7 +159,6 @@ IfElse.<O>predicate(Val<Bool>)
 
 ```
  
-
 - **Cond**. It's a set of branches and a default value. Each branch consists of a predicate and a value.
 It computes and returns the value of the first branch which predicate is true. 
 If no predicate is true, then it returns the default value, which is the last value of the clause.
@@ -183,7 +181,6 @@ However, it evaluates a value and allows multiple value clauses based on the eva
 
 
 ```java
-
 
 new Case<I,O>(Val<I>).of(cons of type I,Val<O>,
                          cons of type I,Val<O>,        
@@ -235,7 +232,7 @@ Or.sequential(Val<Boolean>,...)
  
 
 - **JsObjVal** and **JsArrayVal**. You can compute all the values either in parallel or sequentially.
-The next example shows how JsObjVal and JsArrayVal are data structures that 
+The next example shows how _JsObjVal_ and _JsArrayVal_ are data structures that 
 look like raw Json. And of course, you can mix expressions and nest them, going as deeper as necessary.  
 
 
@@ -244,24 +241,24 @@ look like raw Json. And of course, you can mix expressions and nest them, going 
 import jsonval.JsValue
 
 JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
-                               .consequence(Val<JsValue>)
-                               .alternative(Val<JsValue>),
-                   "b", JsArrayVal.sequential(new Case<Integer,String>(Integer).of(1, Val<JsValue>,
-                                                                                   2, Val<JsValue>,
-                                                                                   Val<JsValue> 
-                                                                                   ),
-                                              Cond.of(Val<Boolean>,Val<JsValue>,
-                                                      Val<Boolean>,Val<JsValue>,
-                                                      Val<JsValue>
-                                                      )
-                                              ),
-            "c", JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>),
-                                   "e", And.parallel(Val<Boolean>, Val<Boolean>),
-                                   "f", JsArrayVal.parallel(Val<JsValue>,
-                                                            Val<JsValue> 
-                                                            ) 
-                                  )
-           );
+                                     .consequence(Val<JsValue>)
+                                     .alternative(Val<JsValue>),
+                  "b", JsArrayVal.sequential(new Case<Integer,String>(Integer).of(1, Val<JsValue>,
+                                                                                  2, Val<JsValue>,
+                                                                                  Val<JsValue> 
+                                                                                 ),
+                                             Cond.of(Val<Boolean>, Val<JsValue>,
+                                                     Val<Boolean>, Val<JsValue>,
+                                                     Val<JsValue>
+                                                     )
+                                             ),
+                  "c", JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>),
+                                         "e", And.parallel(Val<Boolean>, Val<Boolean>),
+                                         "f", JsArrayVal.parallel(Val<JsValue>,
+                                                                  Val<JsValue> 
+                                                                 ) 
+                                        )
+                  );
 
 ``` 
  
@@ -271,21 +268,20 @@ JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
 
 ```java
 
-Val<Tuple2<A,B>  pair = Pair.parallel(Val<A>,Val<B>);
+Val<Tuple2<A,B>  pair = Pair.parallel(Val<A>, Val<B>);
 
-Val<Tuple2<A,B>  pair = Pair.sequential(Val<A>,Val<B>);
-    
+Val<Tuple2<A,B>  pair = Pair.sequential(Val<A>, Val<B>);
+
 ```
   
-
 - **Triple**. A triple is a tuple of three elements. 
 
 
 ```java
 
-Val<Tuple3<A,B,C> triple = Triple.parallel(Val<A>,Val<B>,Val<C>));
+Val<Tuple3<A,B,C> triple = Triple.parallel(Val<A>, Val<B>, Val<C>);
 
-Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>,Val<B>,Val<C>));
+Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>, Val<B>, Val<C>);
 
 ```
 
@@ -300,15 +296,15 @@ more resilient:
 ```java
 public interface Val<O> extends Supplier<Future<O>> {
 
-    <Q> Val<Q> flatMap(λ<O,Q> fn);
+  <Q> Val<Q> flatMap(λ<O,Q> fn);
 
-    Val<O> retry(int attempts);
+  Val<O> retry(int attempts);
 
-    Val<O> retryIf(Predicate<Throwable> predicate, int attempts);
+  Val<O> retryIf(Predicate<Throwable> predicate, int attempts);
 
-    Val<O> fallbackTo(λ<Throwable, O> fn);
+  Val<O> fallbackTo(λ<Throwable, O> fn);
 
-    Val<O> recoverWith(λ<Throwable, O> fn);
+  Val<O> recoverWith(λ<Throwable, O> fn);
 }
  ``` 
 
@@ -321,6 +317,7 @@ communicate with them**. Let's put an example:
 import jsonvalues.JsObj;
 
 public class MyModule extends VertxModule {
+
   private static final String REMOVE_NULL_ADDRESS = "removeNull";
   private static final String TRIM_ADDRESS = "trim";
  
@@ -329,6 +326,7 @@ public class MyModule extends VertxModule {
  
   @Override
   public void deploy() {
+ 
      λ<JsObj, JsObj> removeNull = o ->
                  Cons.success(o.filterAllValues(pair -> pair.value.isNotNull()));
      this.deploy(REMOVE_NULL_ADDRESS,
@@ -337,9 +335,9 @@ public class MyModule extends VertxModule {
  
      λ<JsObj, JsObj> trim = o ->
          Cons.success(o.mapAllValues(pair -> JsStr.prism.modify.apply(String::trim)
-                                                                       .apply(pair.value)
-                                            )
-                             );
+                                                               .apply(pair.value)
+                                    )
+                     );
      this.deploy(TRIM_ADDRESS,
                  trim
                 );
@@ -389,7 +387,11 @@ Let's deploy our module and do some testing.
                   vertxRef.deploy(new RegisterJsValuesCodecs())
                  )
         .onSuccess(pair -> {
-                            System.out.println(String.format("Ids deployed: %s and %s",pair._1,pair._2));
+                            System.out.println(String.format("Ids deployed: %s and %s",
+                                                             pair._1,
+                                                             pair._2
+                                                            )
+                                              );
                             context.completeNow();
                            }
                   )
@@ -401,18 +403,19 @@ Let's deploy our module and do some testing.
  {
     λ<JsObj, JsObj> removeAndNull = MyModule.removeNull.andThen(MyModule.trim);
 
-    JsObj obj = JsObj.parallel("a", JsStr.of("  hi  "),
-                               "b", JsNull.NULL,
-                               "c", JsObj.parallel("d", JsStr.of("  bye  "),
-                                                   "e", JsNull.NULL
-                                                  )
-                              );
+    JsObj input = JsObj.of("a", JsStr.of("  hi  "),
+                           "b", JsNull.NULL,
+                           "c", JsObj.of("d", JsStr.of("  bye  "),
+                                         "e", JsNull.NULL
+                                        )
+                          );
 
-    removeAndNull.apply(obj)
+    JsObj expected = JsObj.of("a", JsStr.of("hi"),
+                              "c", JsObj.of("d", JsStr.of("bye"))
+                             );
+
+    removeAndNull.apply(input)
                  .onSuccess(it -> {
-                     JsObj expected = JsObj.parallel("a", JsStr.of("hi"),
-                                                     "c", JsObj.parallel("d", JsStr.of("bye"))
-                                                    );
                      context.verify(()-> {
                                           Assertions.assertEquals(expected,it);
                                           context.completeNow();
@@ -420,7 +423,7 @@ Let's deploy our module and do some testing.
                                    );
                                   }
                            )
-                 .get();
+                .get();
  }
 
 ```
@@ -500,8 +503,6 @@ You can put the user's email into the context to filter all the events associate
 and a random value to distinguish between transactions from the same email. That's only an example.
 
 ```java
-
-
     public static λc<Integer, Boolean> isLegalAge;
     public static λc<String, Boolean> isValidId;
     public static λc<JsObj, Boolean> isValidAddress;
@@ -551,7 +552,6 @@ and a random value to distinguish between transactions from the same email. That
                                                 obj.getStr("email")
                                                )
                              );
-
         this.deploy(IS_VALID,
                     isValid
                    );
@@ -570,13 +570,14 @@ of the And expression.
  Function<JsObj,Multimap> context = user -> MultiMap.caseInsensitiveMultiMap()
                                                     .add("email", user.getStr("email")); 
  
- JsObj user = JsObj.parallel("email", JsStr.of("imrafaelmerino@gmail.com"),
-                             "age", JsInt.of(17), 
-                             "id", JsStr.of("03786761>")
+ JsObj user = JsObj.of("email", JsStr.of("imrafaelmerino@gmail.com"),
+                       "age", JsInt.of(17), 
+                       "id", JsStr.of("03786761")
                       );
- JsObj user1 = JsObj.parallel("email", JsStr.of("example@gmail.com"),
-                              "age", JsInt.of(10)
-                             );
+ JsObj user1 = JsObj.of("email", JsStr.of("example@gmail.com"),
+                        "age", JsInt.of(10),
+                        "id", JsStr.of("03486761")
+                       );
 
  UserAccountModule.isValid.apply(contex.apply(user), user).get();
  UserAccountModule.isValid.apply(contex.apply(user1), user1).get();
@@ -661,7 +662,7 @@ search.apply("vertx").apply()
 
 ```
 
-would produce the events:
+would produce the following events:
 
 ```json
 {"event":"DEPLOYED_VERTICLE","class":"vertxval.RegisterJsValuesCodecs","instant":"2020-10-12T17:29:01.633606Z","id":"15f47d0d-1646-47a8-a458-e2a37a578457","thread":"vert.x-eventloop-thread-3"}
@@ -675,8 +676,8 @@ would produce the events:
 
 ```
 
-As you can see two verticles are deployed: the module and an iternal verticle listening on myhttp-client-adress
-that performs the incoming requests. The cookies, headers and body received from Google are ommited for brevity reasons.
+As you can see two verticles were deployed: the module and an iternal verticle listening on myhttp-client-adress
+that performs the requests. The cookies, headers and body received from Google are ommited.
 Every request message has a type that is an integer for performance reasons. In the example the type 0 means that
 it's a GET.
 
