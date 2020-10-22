@@ -34,8 +34,6 @@ public class Operation {
 
     public static final Predicate<JsObj> IS_DEPOSIT = opLens.exists.apply(DEPOSIT_OP::equals);
 
-    public static final Predicate<JsObj> IS_WITHDRAW = opLens.exists.apply(WITHDRAW_OP::equals);
-
     public static final Function<Integer, JsObj> makeDeposit =
             amount -> opLens.set.apply(DEPOSIT_OP)
                                 .andThen(amountLens.set.apply(amount))

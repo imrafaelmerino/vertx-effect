@@ -1,5 +1,6 @@
 package vertx.effect.exp;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.Val;
 import vertx.effect.VertxRef;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -37,9 +39,9 @@ public class TestJsArrayVal {
     @Test
     public void test_array_exp_map(VertxTestContext context) {
 
-        JsArrayVal.of(Cons.success(JsStr.of("a")),
-                      Cons.success(JsStr.of("b"))
-                     )
+        JsArrayVal.parallel(Cons.success(JsStr.of("a")),
+                            Cons.success(JsStr.of("b"))
+                           )
                   .map(arr -> arr.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
                                                                    .apply(p.value))
                       )
@@ -59,9 +61,9 @@ public class TestJsArrayVal {
     @Test
     public void test_array_exp_flatmap_success(VertxTestContext context) {
 
-        JsArrayVal.of(Cons.success(JsStr.of("a")),
-                      Cons.success(JsStr.of("b"))
-                     )
+        JsArrayVal.sequential(Cons.success(JsStr.of("a")),
+                              Cons.success(JsStr.of("b"))
+                             )
                   .flatMap(obj -> Cons.success(obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
                                                                                     .apply(p.value)
                                                             ))
@@ -81,9 +83,9 @@ public class TestJsArrayVal {
 
     @Test
     public void test_array_exp_flatmap_failure(VertxTestContext context) {
-        JsArrayVal.of(Cons.success(JsStr.of("a")),
-                      Cons.success(JsStr.of("b"))
-                     )
+        JsArrayVal.parallel(Cons.success(JsStr.of("a")),
+                            Cons.success(JsStr.of("b"))
+                           )
                   .flatMap(s -> Cons.failure(new RuntimeException()))
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertTrue(r.failed());
@@ -107,9 +109,9 @@ public class TestJsArrayVal {
                                                JsStr.of("b")
         );
 
-        JsArrayVal.of(a.get(),
-                      b.get()
-                     )
+        JsArrayVal.parallel(a.get(),
+                            b.get()
+                           )
                   .retry(ATTEMPTS,
                          (error, n) -> vertxRef.timer(1,
                                                       SECONDS,
@@ -144,9 +146,9 @@ public class TestJsArrayVal {
                                                JsStr.of("b")
         );
 
-        JsArrayVal.of(a.get(),
-                      b.get()
-                     )
+        JsArrayVal.sequential(a.get(),
+                              b.get()
+                             )
                   .retryIf(e -> e instanceof RuntimeException,
                            ATTEMPTS,
                            (error, n) -> vertxRef.timer(1,
@@ -182,9 +184,9 @@ public class TestJsArrayVal {
                                                JsStr.of("b")
         );
 
-        JsArrayVal.of(a.get(),
-                      b.get()
-                     )
+        JsArrayVal.sequential(a.get(),
+                              b.get()
+                             )
                   .retry(ATTEMPTS,
                          (error, n) -> vertxRef.timer(1,
                                                       SECONDS,
@@ -218,9 +220,9 @@ public class TestJsArrayVal {
                                                JsStr.of("b")
         );
 
-        JsArrayVal.of(a.get(),
-                      b.get()
-                     )
+        JsArrayVal.sequential(a.get(),
+                              b.get()
+                             )
                   .retryIf(e -> e instanceof RuntimeException,
                            ATTEMPTS
                           )
@@ -251,9 +253,9 @@ public class TestJsArrayVal {
                                                JsStr.of("b")
         );
 
-        JsArrayVal.of(a.get(),
-                      b.get()
-                     )
+        JsArrayVal.parallel(a.get(),
+                            b.get()
+                           )
                   .retry(ATTEMPTS - 1,
                          (error, n) -> vertxRef.timer(1,
                                                       SECONDS,
@@ -283,9 +285,9 @@ public class TestJsArrayVal {
                                                JsStr.of("b")
         );
 
-        JsArrayVal.of(a.get(),
-                      b.get()
-                     )
+        JsArrayVal.parallel(a.get(),
+                            b.get()
+                           )
                   .retryIf(e -> e instanceof RuntimeException,
                            ATTEMPTS - 1,
                            (error, n) -> vertxRef.timer(1,
@@ -304,26 +306,21 @@ public class TestJsArrayVal {
     }
 
     @Test
-    public void test_append_all(VertxTestContext context) {
-
-        JsArrayVal.of(Cons.success(JsStr.of("a")),
-                      Cons.success(JsStr.of("b"))
-                     )
-                  .appendAll(JsArrayVal.of(Cons.success(JsStr.of("c")),
-                                           Cons.success(JsStr.of("d"))
-                                          )
-                            )
-                  .onSuccess(it -> {
-                      context.verify(() -> {
-                          Assertions.assertEquals(JsArray.of("a",
-                                                             "b",
-                                                             "c",
-                                                             "d"
-                                                            ),
-                                                  it);
-                          context.completeNow();
-                      });
-                  })
+    public void test_race(final Vertx vertx,
+                          final VertxTestContext context) {
+        Val<JsStr> a = Cons.of(() -> Future.succeededFuture(JsStr.of("a")));
+        Val<JsStr> b = Cons.of(() -> Future.succeededFuture(JsStr.of("b")));
+        JsArrayVal.parallel()
+                  .append(a)
+                  .append(b)
+                  .race()
+                  .onSuccess(it -> context.verify(() -> {
+                      Assertions.assertEquals(JsStr.of("a"),
+                                              it
+                                             );
+                      context.completeNow();
+                  }))
                   .get();
     }
+
 }

@@ -1,7 +1,6 @@
 package vertx.effect.patterns.bankaccount;
 
 import io.vertx.core.DeploymentOptions;
-
 import jsonvalues.JsObj;
 import vertx.effect.Validators;
 import vertx.effect.VerticleRef;
@@ -35,7 +34,8 @@ public class BankAccountModule extends VertxModule {
                 );
                 return vertxRef.deploy(Account.nameLens.get.apply(account),
                                        lambda,
-                                       new DeploymentOptions().setWorker(true).setInstances(1)
+                                       new DeploymentOptions().setWorker(true)
+                                                              .setInstances(1)
                                       );
             };
 
@@ -48,8 +48,8 @@ public class BankAccountModule extends VertxModule {
     public BiFunction<λ<JsObj, Integer>, λ<JsObj, Integer>, λ<Integer, Integer>> makeTx =
             (from, to) -> vertxRef.spawn("tx",
                                          new TxVerticle(from,
-                                                to
-                                 )
+                                                        to
+                                         )
                                         );
 
 

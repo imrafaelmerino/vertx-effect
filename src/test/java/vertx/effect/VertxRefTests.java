@@ -68,9 +68,9 @@ public class VertxRefTests {
                                                                        sum
                                                                       );
 
-        Pair.of(addOneExp,
-                tripleExp
-               )
+        Pair.parallel(addOneExp,
+                      tripleExp
+                     )
             .flatMap(pair -> {
                 λ<Integer, Integer> addOne = pair._1.ask();
                 λ<Integer, Integer> triple = pair._2.ask();
@@ -135,7 +135,6 @@ public class VertxRefTests {
     }
 
 
-
     @Test
     public void test_publish_messages(VertxTestContext context) throws InterruptedException {
 
@@ -164,7 +163,6 @@ public class VertxRefTests {
 
 
         context.completeNow();
-
 
 
     }

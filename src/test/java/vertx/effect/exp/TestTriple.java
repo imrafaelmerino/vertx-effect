@@ -52,13 +52,13 @@ public class TestTriple {
     }
 
     @Test
-    public void test_retries(VertxTestContext context) {
+    public void test_parallel_retries(VertxTestContext context) {
 
 
-        Val<Tuple3<String, String, String>> val = Triple.of(a.get(),
-                                                            a.get(),
-                                                            a.get()
-                                                           )
+        Val<Tuple3<String, String, String>> val = Triple.parallel(a.get(),
+                                                                  a.get(),
+                                                                  a.get()
+                                                                 )
                                                         .retry(2);
 
 
@@ -77,7 +77,32 @@ public class TestTriple {
     }
 
     @Test
-    public void test_retries_if_Success(VertxTestContext context) {
+    public void test_sequential_retries(VertxTestContext context) {
+
+
+        Val<Tuple3<String, String, String>> val = Triple.sequential(a.get(),
+                                                                    a.get(),
+                                                                    a.get()
+                                                                   )
+                                                        .retry(2);
+
+
+        Verifiers.<Tuple3<String, String, String>>verifySuccess(
+                tuple -> Objects.equals(tuple,
+                                        new Tuple3<>("a",
+                                                     "a",
+                                                     "a"
+                                        )
+                                       )
+                                                               )
+                .accept(val,
+                        context
+                       );
+
+    }
+
+    @Test
+    public void test_parallel_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> a =
                 new ErrorWhile<>(counter -> counter == 1 || counter == 2,
@@ -85,10 +110,10 @@ public class TestTriple {
                                  "a"
                 );
 
-        Val<Tuple3<String, String, String>> val = Triple.of(a.get(),
-                                                            a.get(),
-                                                            a.get()
-                                                           )
+        Val<Tuple3<String, String, String>> val = Triple.parallel(a.get(),
+                                                                  a.get(),
+                                                                  a.get()
+                                                                 )
                                                         .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                                                  2
                                                                 );
@@ -104,14 +129,41 @@ public class TestTriple {
     }
 
     @Test
-    public void test_retries_if_failure(VertxTestContext context) {
+    public void test_sequential_retries_if_Success(VertxTestContext context) {
+
+        final Supplier<Val<String>> a =
+                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                 "a"
+                );
+
+        Val<Tuple3<String, String, String>> val = Triple.sequential(a.get(),
+                                                                    a.get(),
+                                                                    a.get()
+                                                                   )
+                                                        .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                                 2
+                                                                );
+        Verifiers.<Tuple3<String, String, String>>verifySuccess(
+                tuple -> new Tuple3<>("a",
+                                      "a",
+                                      "a"
+                ).equals(tuple))
+                .accept(val,
+                        context
+                       );
+
+    }
+
+    @Test
+    public void test_parallel_retries_if_failure(VertxTestContext context) {
 
 
         Val<Tuple3<String, String, String>> val =
-                Triple.of(a.get(),
-                          a.get(),
-                          a.get()
-                         )
+                Triple.parallel(a.get(),
+                                a.get(),
+                                a.get()
+                               )
                       .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                2
                               );
@@ -125,13 +177,34 @@ public class TestTriple {
     }
 
     @Test
-    public void test_triple_exp_map(VertxTestContext context) {
+    public void test_sequential_retries_if_failure(VertxTestContext context) {
+
+
+        Val<Tuple3<String, String, String>> val =
+                Triple.sequential(a.get(),
+                                  a.get(),
+                                  a.get()
+                                 )
+                      .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                               2
+                              );
+
+
+        Verifiers.<Tuple3<String, String, String>>verifyFailure()
+                .accept(val,
+                        context
+                       );
+
+    }
+
+    @Test
+    public void test_parallel_triple_exp_map(VertxTestContext context) {
 
         Val<Tuple3<Integer, Integer, Integer>> val =
-                Triple.of(Cons.success("a"),
-                          Cons.success("ab"),
-                          Cons.success("abc")
-                         )
+                Triple.parallel(Cons.success("a"),
+                                Cons.success("ab"),
+                                Cons.success("abc")
+                               )
                       .map(pair -> pair.map((a, b, c) -> new Tuple3<>(a.length(),
                                                                       b.length(),
                                                                       c.length()
@@ -153,14 +226,69 @@ public class TestTriple {
     }
 
     @Test
-    public void test_triple_exp_flatmap_success(VertxTestContext context) {
+    public void test_sequential_triple_exp_map(VertxTestContext context) {
+
+        Val<Tuple3<Integer, Integer, Integer>> val =
+                Triple.sequential(Cons.success("a"),
+                                  Cons.success("ab"),
+                                  Cons.success("abc")
+                                 )
+                      .map(pair -> pair.map((a, b, c) -> new Tuple3<>(a.length(),
+                                                                      b.length(),
+                                                                      c.length()
+                                            )
+                                           )
+                          );
+
+        Verifiers.<Tuple3<Integer, Integer, Integer>>verifySuccess(tuple -> Objects.equals(tuple,
+                                                                                           new Tuple3<>(1,
+                                                                                                        2,
+                                                                                                        3
+                                                                                           )
+                                                                                          )
+                                                                  ).accept(val,
+                                                                           context
+                                                                          );
+
+
+    }
+
+    @Test
+    public void test_parallel_triple_exp_flatmap_success(VertxTestContext context) {
 
 
         Val<Tuple3<String, String, String>> val =
-                Triple.of(Cons.success("a"),
-                          Cons.success("b"),
-                          Cons.success("c")
-                         )
+                Triple.parallel(Cons.success("a"),
+                                Cons.success("b"),
+                                Cons.success("c")
+                               )
+                      .flatMap(pair -> Cons.success(pair.map((a, b, c) -> new Tuple3<>(a.toUpperCase(),
+                                                                                       b.toUpperCase(),
+                                                                                       c.toUpperCase()
+                                                             )
+                                                            )
+                                                   )
+                              );
+        Verifiers.<Tuple3<String, String, String>>verifySuccess(tuple -> Objects.equals(tuple,
+                                                                                        new Tuple3<>("A",
+                                                                                                     "B",
+                                                                                                     "C"
+                                                                                        )
+                                                                                       )
+                                                               ).accept(val,
+                                                                        context
+                                                                       );
+    }
+
+    @Test
+    public void test_sequential_triple_exp_flatmap_success(VertxTestContext context) {
+
+
+        Val<Tuple3<String, String, String>> val =
+                Triple.sequential(Cons.success("a"),
+                                  Cons.success("b"),
+                                  Cons.success("c")
+                                 )
                       .flatMap(pair -> Cons.success(pair.map((a, b, c) -> new Tuple3<>(a.toUpperCase(),
                                                                                        b.toUpperCase(),
                                                                                        c.toUpperCase()
@@ -181,13 +309,13 @@ public class TestTriple {
 
 
     @Test
-    public void test_triple_exp_flatmap_success_failure(VertxTestContext context) {
+    public void test_parallel_triple_exp_flatmap_success_failure(VertxTestContext context) {
 
 
-        Val<String> val = Triple.of(Cons.success("a"),
-                                    Cons.success("ab"),
-                                    Cons.success("abc")
-                                   )
+        Val<String> val = Triple.parallel(Cons.success("a"),
+                                          Cons.success("ab"),
+                                          Cons.success("abc")
+                                         )
                                 .flatMap(s -> Cons.failure(new RuntimeException()));
 
 
@@ -197,15 +325,31 @@ public class TestTriple {
                        );
     }
 
+    @Test
+    public void test_sequential_triple_exp_flatmap_success_failure(VertxTestContext context) {
+
+
+        Val<String> val = Triple.sequential(Cons.success("a"),
+                                            Cons.success("ab"),
+                                            Cons.success("abc")
+                                           )
+                                .flatMap(s -> Cons.failure(new RuntimeException()));
+
+
+        Verifiers.<String>verifyFailure()
+                .accept(val,
+                        context
+                       );
+    }
 
     @Test
-    public void test_triple_exp_fails_and_recover_with_success(VertxTestContext context) {
+    public void test_parallel_triple_exp_fails_and_recover_with_success(VertxTestContext context) {
 
         Val<Tuple3<String, Boolean, String>> val =
-                Triple.of(a.get(),
-                          True.get(),
-                          b.get()
-                         )
+                Triple.parallel(a.get(),
+                                True.get(),
+                                b.get()
+                               )
                       .recoverWith(e -> Cons.success(new Tuple3<>("",
                                                                   false,
                                                                   ""
@@ -226,13 +370,40 @@ public class TestTriple {
     }
 
     @Test
-    public void test_triple_exp_fails_and_recover_with_failure(VertxTestContext context) {
+    public void test_sequential_triple_exp_fails_and_recover_with_success(VertxTestContext context) {
 
         Val<Tuple3<String, Boolean, String>> val =
-                Triple.of(a.get(),
-                          True.get(),
-                          b.get()
-                         )
+                Triple.sequential(a.get(),
+                                  True.get(),
+                                  b.get()
+                                 )
+                      .recoverWith(e -> Cons.success(new Tuple3<>("",
+                                                                  false,
+                                                                  ""
+                                                     )
+                                                    )
+                                  );
+        Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
+                tuple -> Objects.equals(tuple,
+                                        new Tuple3<>("",
+                                                     false,
+                                                     ""
+                                        )
+                                       ))
+                .accept(val,
+                        context
+                       );
+
+    }
+
+    @Test
+    public void test_parallel_triple_exp_fails_and_recover_with_failure(VertxTestContext context) {
+
+        Val<Tuple3<String, Boolean, String>> val =
+                Triple.parallel(a.get(),
+                                True.get(),
+                                b.get()
+                               )
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifyFailure(e -> e instanceof IllegalArgumentException)
@@ -244,12 +415,30 @@ public class TestTriple {
     }
 
     @Test
-    public void test_triple_exp_recover_with_success(VertxTestContext context) {
+    public void test_sequential_triple_exp_fails_and_recover_with_failure(VertxTestContext context) {
+
         Val<Tuple3<String, Boolean, String>> val =
-                Triple.of(a.get(),
-                          True.get(),
-                          b.get()
-                         )
+                Triple.sequential(a.get(),
+                                  True.get(),
+                                  b.get()
+                                 )
+                      .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
+
+        Verifiers.<Tuple3<String, Boolean, String>>verifyFailure(e -> e instanceof IllegalArgumentException)
+                .accept(val,
+                        context
+                       );
+
+
+    }
+
+    @Test
+    public void test_parallel_triple_exp_recover_with_success(VertxTestContext context) {
+        Val<Tuple3<String, Boolean, String>> val =
+                Triple.parallel(a.get(),
+                                True.get(),
+                                b.get()
+                               )
                       .retry(2)
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
@@ -268,16 +457,40 @@ public class TestTriple {
     }
 
     @Test
-    public void test_retry_with_delay(VertxTestContext context) {
+    public void test_sequential_triple_exp_recover_with_success(VertxTestContext context) {
+        Val<Tuple3<String, Boolean, String>> val =
+                Triple.sequential(a.get(),
+                                  True.get(),
+                                  b.get()
+                                 )
+                      .retry(2)
+                      .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
+
+        Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
+                tuple -> Objects.equals(tuple,
+                                        new Tuple3<>("a",
+                                                     true,
+                                                     "b"
+                                        )
+                                       )
+                                                                )
+                .accept(val,
+                        context
+                       );
+
+    }
+
+    @Test
+    public void test_parallel_retry_with_delay(VertxTestContext context) {
         int ATTEMPTS = 2;
 
         long start = System.nanoTime();
 
         Val<Tuple3<String, String, String>> val =
-                Triple.of(a.get(),
-                          a.get(),
-                          a.get()
-                         )
+                Triple.parallel(a.get(),
+                                a.get(),
+                                a.get()
+                               )
                       .retry(ATTEMPTS,
                              (error, n) -> vertxRef.timer(1,
                                                           SECONDS,
@@ -299,5 +512,36 @@ public class TestTriple {
 
     }
 
+    @Test
+    public void test_sequential_retry_with_delay(VertxTestContext context) {
+        int ATTEMPTS = 2;
+
+        long start = System.nanoTime();
+
+        Val<Tuple3<String, String, String>> val =
+                Triple.sequential(a.get(),
+                                  a.get(),
+                                  a.get()
+                                 )
+                      .retry(ATTEMPTS,
+                             (error, n) -> vertxRef.timer(1,
+                                                          SECONDS,
+                                                          "next attempt"
+                                                         )
+                            );
+        Verifiers.<Tuple3<String, String, String>>verifySuccess(
+                tuple -> Objects.equals(tuple,
+                                        new Tuple3<>("a",
+                                                     "a",
+                                                     "a"
+                                        )
+                                       )
+                        && NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS)
+                .accept(val,
+                        context
+                       );
+
+
+    }
 
 }

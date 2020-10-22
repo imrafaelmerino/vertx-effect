@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static io.vertx.core.eventbus.ReplyFailure.TIMEOUT;
@@ -48,12 +49,29 @@ public final class Failures {
     public static final int CONNECT_TIMEOUT_CODE = 4001;
     public static final int REQUEST_TIMEOUT_CODE = 4002;
     public static final int EMPTY_AUTHORIZATION_CODE = 4003;
-    public static final int ACCESS_TOKEN_NOT_FOUND = 4004;
+    public static final int ACCESS_TOKEN_NOT_FOUND_CODE = 4004;
     public static final int EMPTY_REDIRECT_URL_CODE = 4005;
-    public static final int REFRESH_TOKEN_NOT_FOUND = 4006;
+    public static final int REFRESH_TOKEN_NOT_FOUND_CODE = 4006;
+    public static final int CONNECTION_WAS_CLOSED_CODE = 4007;
     public static final int HTTP_METHOD_NOT_IMPLEMENTED_CODE = 4098;
     public static final int DEFAULT_HTTP_EXCEPTION_CODE = 4999;
 
+
+    public static Predicate<Throwable> or(final Prism<Throwable, ? extends VertxException> first,
+                                          final Prism<Throwable, ? extends VertxException>... others) {
+
+        requireNonNull(first);
+        requireNonNull(others);
+        return t -> {
+            Optional<? extends VertxException> firstOpt = first.getOptional.apply(t);
+            if (firstOpt.isPresent()) return true;
+            return Arrays.stream(others)
+                         .map(p -> p.getOptional.apply(t))
+                         .anyMatch(Optional::isPresent);
+        };
+
+
+    }
 
     public static final Prism<Throwable, ReplyException> UNKNOWN_HOST_PRISM =
             new Prism<>(
@@ -85,13 +103,12 @@ public final class Failures {
             );
 
 
-    public static final Prism<Throwable, ReplyException> HTTP_TIMEOUTS_PRISM =
+    public static final Prism<Throwable, ReplyException> HTTP_REQUEST_TIMEOUT_PRISM =
             new Prism<>(
                     t -> {
                         if (t instanceof ReplyException) {
                             ReplyException replyException = (ReplyException) t;
-                            if (replyException.failureCode() == CONNECT_TIMEOUT_CODE
-                                    || replyException.failureCode() == REQUEST_TIMEOUT_CODE)
+                            if (replyException.failureCode() == REQUEST_TIMEOUT_CODE)
                                 return Optional.of(replyException);
                             return Optional.empty();
                         }
@@ -100,11 +117,15 @@ public final class Failures {
                     v -> v
             );
 
-    public static final Prism<Throwable, VertxException> TCP_CONNECTION_CLOSED_PRISM =
+    public static final Prism<Throwable, ReplyException> TCP_CONNECTION_CLOSED_PRISM =
             new Prism<>(
                     t -> {
-                        if (t.equals(CLOSED_EXCEPTION))
-                            return Optional.of(CLOSED_EXCEPTION);
+                        if (t instanceof ReplyException) {
+                            ReplyException replyException = (ReplyException) t;
+                            if (replyException.failureCode() == CONNECTION_WAS_CLOSED_CODE)
+                                return Optional.of(replyException);
+                            return Optional.empty();
+                        }
                         else return Optional.empty();
                     },
                     v -> v
@@ -148,13 +169,13 @@ public final class Failures {
 
     public static final Function<JsObj, ReplyException> GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION =
             resp -> new ReplyException(RECIPIENT_FAILURE,
-                                       ACCESS_TOKEN_NOT_FOUND,
+                                       ACCESS_TOKEN_NOT_FOUND_CODE,
                                        "Access token not found. Http response:" + resp.toString()
             );
 
     public static final Function<JsObj, ReplyException> GET_REFRESH_TOKEN_NOT_FOUND_EXCEPTION =
             resp -> new ReplyException(RECIPIENT_FAILURE,
-                                       REFRESH_TOKEN_NOT_FOUND,
+                                       REFRESH_TOKEN_NOT_FOUND_CODE,
                                        "Refresh token not found. Http response:" + resp.toString()
             );
 
@@ -218,6 +239,7 @@ public final class Failures {
             exc -> {
                 switch (exc.getClass()
                            .getSimpleName()) {
+
                     case "ConnectTimeoutException":
                         return new ReplyException(RECIPIENT_FAILURE,
                                                   CONNECT_TIMEOUT_CODE,
@@ -233,6 +255,20 @@ public final class Failures {
                                                   REQUEST_TIMEOUT_CODE,
                                                   getMessage(exc)
                         );
+                    case "VertxException": {
+                        VertxException vertxException = (VertxException) exc;
+                        if (vertxException == CLOSED_EXCEPTION) {
+                            return new ReplyException(RECIPIENT_FAILURE,
+                                                      CONNECTION_WAS_CLOSED_CODE,
+                                                      CLOSED_EXCEPTION.getMessage()
+                            );
+                        }
+                        else return new ReplyException(RECIPIENT_FAILURE,
+                                                       DEFAULT_HTTP_EXCEPTION_CODE,
+                                                       getMessage(exc)
+                        );
+
+                    }
 
                     default:
                         return new ReplyException(RECIPIENT_FAILURE,

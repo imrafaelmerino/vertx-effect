@@ -22,11 +22,13 @@ public class ReadmeCodeTest {
 
         VertxRef vertxRef = new VertxRef(vertx);
 
-        vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS, System.out::println);
+        vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
+                                  System.out::println
+                                 );
 
-        Pair.of(vertxRef.deploy(new MyModule()),
-                vertxRef.deploy(new RegisterJsValuesCodecs())
-               )
+        Pair.parallel(vertxRef.deploy(new MyModule()),
+                      vertxRef.deploy(new RegisterJsValuesCodecs())
+                     )
             .onSuccess(pair -> {
                 String id1 = pair._1;
                 String id2 = pair._2;
@@ -41,25 +43,37 @@ public class ReadmeCodeTest {
     }
 
     @Test
-    public void test_composition(VertxTestContext context){
+    public void test_composition(VertxTestContext context) {
 
         λ<JsObj, JsObj> removeAndNull = MyModule.removeNull.andThen(MyModule.trim);
 
-        JsObj obj = JsObj.of("a", JsStr.of("  hi  "),
-                             "b", JsNull.NULL,
-                             "c", JsObj.of("d", JsStr.of("  bye  "),
-                                           "e", JsNull.NULL
-                                          )
+        JsObj obj = JsObj.of("a",
+                             JsStr.of("  hi  "),
+                             "b",
+                             JsNull.NULL,
+                             "c",
+                             JsObj.of("d",
+                                      JsStr.of("  bye  "),
+                                      "e",
+                                      JsNull.NULL
+                                     )
                             );
 
-        removeAndNull.apply(obj).onSuccess(it -> {
-            JsObj expected = JsObj.of("a", JsStr.of("hi"),
-                                      "c", JsObj.of("d", JsStr.of("bye"))
-                                     );
-            context.verify(()-> {
-                Assertions.assertEquals(expected,it);
-                context.completeNow();
-            });
-        }).get();
+        removeAndNull.apply(obj)
+                     .onSuccess(it -> {
+                         JsObj expected = JsObj.of("a",
+                                                   JsStr.of("hi"),
+                                                   "c",
+                                                   JsObj.of("d",
+                                                            JsStr.of("bye")
+                                                           )
+                                                  );
+                         context.verify(() -> {
+                             Assertions.assertEquals(expected,
+                                                     it);
+                             context.completeNow();
+                         });
+                     })
+                     .get();
     }
 }

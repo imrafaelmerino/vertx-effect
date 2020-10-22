@@ -10,14 +10,13 @@ import jsonvalues.spec.JsSpecs;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import vertx.effect.Val;
 import vertx.effect.Validators;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.JsArrayVal;
 import vertx.effect.exp.JsObjVal;
 import vertx.effect.patterns.oauth.GetTokenReqVerticle;
 import vertx.effect.patterns.oauth.GetTokenVerticle;
-import vertx.effect.Val;
-import vertx.effect.exp.*;
 import vertx.effect.λ;
 
 
@@ -25,7 +24,7 @@ import vertx.effect.λ;
 public class TestGetAllEmailsFromListOfCustomers {
 
     public static λ<String, JsArray> getCustomerEmails =
-            id -> JsArrayVal.empty()
+            id -> JsArrayVal.sequential()
                             .append(Cons.success(JsStr.of(id + "_a")))
                             .append(Cons.success(JsStr.of(id + "_b")));
 
@@ -34,13 +33,13 @@ public class TestGetAllEmailsFromListOfCustomers {
             ids -> Validators.validateJsArray(JsSpecs.arrayOfStr)
                              .apply(ids)
                              .flatMap($ -> ids.stream()
-                                     .map(pair -> pair.value.toJsStr().value)
-                                     .reduce(Cons.success(JsArray.empty()),
-                                             (acc, id) -> acc.flatMap(emails -> getCustomerEmails.apply(id)
-                                                                                                 .map(emails::appendAll)
-                                                                     ),
-                                             (arr1, arr2) -> arr1.flatMap(a -> arr2.map(a::appendAll))
-                                            ));
+                                              .map(pair -> pair.value.toJsStr().value)
+                                              .reduce(Cons.success(JsArray.empty()),
+                                                      (acc, id) -> acc.flatMap(emails -> getCustomerEmails.apply(id)
+                                                                                                          .map(emails::appendAll)
+                                                                              ),
+                                                      (arr1, arr2) -> arr1.flatMap(a -> arr2.map(a::appendAll))
+                                                     ));
 
 
     public static final λ<JsObj, JsArray> getCustomerEmailsRec =
@@ -71,11 +70,11 @@ public class TestGetAllEmailsFromListOfCustomers {
                 String head = ids.head()
                                  .toJsStr().value;
 
-                return JsObjVal.of("ids",
-                                   Cons.success(ids.tail()),
-                                   "acc",
-                                   getCustomerEmails.apply(head)
-                                  )
+                return JsObjVal.sequential("ids",
+                                           Cons.success(ids.tail()),
+                                           "acc",
+                                           getCustomerEmails.apply(head)
+                                          )
                                .flatMap(obj ->
                                                 TestGetAllEmailsFromListOfCustomers.getCustomerEmailsRec.apply(obj.set("acc",
                                                                                                                        input.getArray("acc")
@@ -92,12 +91,12 @@ public class TestGetAllEmailsFromListOfCustomers {
             ids -> Validators.validateJsArray(JsSpecs.arrayOfStr)
                              .apply(ids)
                              .flatMap($ -> getCustomerEmailsRec.apply(JsObj.of("ids",
-                                                                      ids,
-                                                                      "acc",
-                                                                      JsArray.empty()
+                                                                               ids,
+                                                                               "acc",
+                                                                               JsArray.empty()
+                                                                              )
                                                                      )
-                                                            )
-                            );
+                                     );
 
     @Test
     public void test_Get_All_Emails_From_A_List_Of_Ids(VertxTestContext context) {

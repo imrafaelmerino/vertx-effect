@@ -5,16 +5,14 @@ import jsonvalues.JsObj;
 import jsonvalues.JsPath;
 import vertx.effect.Failures;
 import vertx.effect.exp.Cons;
-import vertx.effect.λ;
 import vertx.effect.httpclient.HttpResp;
+import vertx.effect.λ;
 
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
-import static vertx.effect.Failures.CONNECT_TIMEOUT_CODE;
-import static vertx.effect.Failures.UNKNOWN_HOST_CODE;
+import static vertx.effect.Failures.*;
 
 @SuppressWarnings("unchecked")
 public abstract class OauthBuilder<T extends OauthBuilder<T>> {
@@ -103,27 +101,18 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     }
 
     private static final Predicate<Throwable> RETRY_ACCESS_TOKEN_REQ_PREDICATE =
-            Failures.REPLY_EXCEPTION_PRISM
-                    .exists
-                    .apply(exc -> Objects.equals(UNKNOWN_HOST_CODE,
-                                                 exc.failureCode()
-                                                ) ||
-                            Objects.equals(CONNECT_TIMEOUT_CODE,
-                                           exc.failureCode()
-                                          ) ||
-                            Objects.equals(Failures.ACCESS_TOKEN_NOT_FOUND,
-                                           exc.failureCode()
-                                          )
-                          );
+            Failures.or(UNKNOWN_HOST_PRISM,
+                        HTTP_CONNECT_TIMEOUT_PRISM
+                       )
+                    .or(REPLY_EXCEPTION_PRISM
+                                .exists
+                                .apply(exc ->
+                                               Failures.ACCESS_TOKEN_NOT_FOUND_CODE == exc.failureCode()
+                                      ));
 
     private static final Predicate<Throwable> RETRY_REQ_PREDICATE =
-            Failures.REPLY_EXCEPTION_PRISM
-                    .exists
-                    .apply(exc -> Objects.equals(UNKNOWN_HOST_CODE,
-                                                 exc.failureCode()
-                                                ) ||
-                            Objects.equals(CONNECT_TIMEOUT_CODE,
-                                           exc.failureCode()
-                                          )
-                          );
+            Failures.or(UNKNOWN_HOST_PRISM,
+                        HTTP_CONNECT_TIMEOUT_PRISM
+                       );
+
 }

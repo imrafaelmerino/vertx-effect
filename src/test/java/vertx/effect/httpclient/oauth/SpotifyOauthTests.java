@@ -9,12 +9,12 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.httpclient.GetReq;
 import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Pair;
+import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.HttpResp;
 
 @ExtendWith(VertxExtension.class)
@@ -51,9 +51,9 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                vertxRef.deploy(module)
-               )
+        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                      vertxRef.deploy(module)
+                     )
             .onSuccess(pair -> module.authenticate(JsObj.of("code",
                                                             JsStr.of(CODE),
                                                             "redirect_uri",
@@ -70,7 +70,7 @@ public class SpotifyOauthTests {
                                          }
                                          else {
                                              context.verify(() -> {
-                                                 Assertions.assertTrue(Failures.REPLY_EXCEPTION_PRISM.exists.apply(it -> it.failureCode() == Failures.ACCESS_TOKEN_NOT_FOUND)
+                                                 Assertions.assertTrue(Failures.REPLY_EXCEPTION_PRISM.exists.apply(it -> it.failureCode() == Failures.ACCESS_TOKEN_NOT_FOUND_CODE)
                                                                                                             .test(event.cause()));
                                                  context.completeNow();
                                              });
@@ -107,9 +107,9 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                vertxRef.deploy(module)
-               )
+        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                      vertxRef.deploy(module)
+                     )
             .onSuccess(pair ->
                                Verifiers.<JsObj>verifySuccess(resp -> 200 == HttpResp.STATUS_CODE_LENS.get.apply(resp))
                                        .accept(module.getOauth.apply(new GetReq().uri("/v1/users/rmerinogarcia/playlists")),
@@ -144,9 +144,9 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                vertxRef.deploy(module)
-               )
+        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                      vertxRef.deploy(module)
+                     )
             .onSuccess(pair ->
                                Verifiers.<JsObj>verifySuccess(resp -> 200 == HttpResp.STATUS_CODE_LENS.get.apply(resp))
                                        .accept(module.getOauth.apply(new GetReq().uri("/v1/users/rmerinogarcia/playlists")),

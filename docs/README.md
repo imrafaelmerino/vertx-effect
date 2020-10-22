@@ -1,17 +1,16 @@
-<a href="url"><img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_linkedin_swe2n4mg/black/full/coverphoto/black_logo_white_background.png" align="left"></a>
+<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="250" height="150"/>
 
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
 
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=alert_status)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.1)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.1/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
+
 
 - [vertx-effect manifesto](#manifesto)
 - [Introduction](#introduction)
@@ -36,7 +35,6 @@
     . Use persistent data structures.
     . Systems will fail, be prepared.
     . Simplicity matters.
-    . Avoid state when possible. 
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
     
 ## <a name="introduction"><a/> Introduction
@@ -53,7 +51,7 @@ Future<Customer> b = insertDb(customer);
 
 ```
 
-Both calls can fail, or they can create two different customers, or even only one of them can fail, who knows. 
+Both calls can fail, or they can create two different customers, or one of them can fail, who knows. 
 That code is not referentially transparent. For obvious reasons, you can't do the following refactoring:
 
 ```java
@@ -68,7 +66,7 @@ Future<Customer> b = c;
 
 A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a 
 computation. Haskell has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
-and lazy data structure that allows us to control latency.
+and lazy data structure that allows us to control the effect of latency.
 
 Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
 is in vertx-effect:
@@ -82,8 +80,8 @@ public interface Val<O> extends Supplier<Future<O>> {}
 
 ```
 
-A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) na 
-effect that will compute a value of type O**.
+A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) an 
+asynchronous effect that will compute a value of type O**.
 
 If we turn Future into Val in the previous example:
 
@@ -106,12 +104,12 @@ Val<Customer> a = c;
 Val<Customer> b = c;
 
 ```
-This property is extremely important. Whenever you see _insertDb(customer)_ in your program you can think of as it was c.
-Pure FP programming help us to reason about the programs we write. On the other hand, do notice that a Val is lazy, it's 
-a description of an effect. In FP we describe programs, and it's at the very
-last moment when they're executed.
+This property is fundamental. Whenever you see _insertDb(customer)_ in your program, 
+you can think of it as it was _c_. Pure FP programming helps us reason about the programs
+we write. On the other hand, do notice that a Val is lazy. It's a description of an effect. 
+**In FP, we describe programs, and it's at the very last moment when they're executed.**
 
-What about functions? I always wanted to name **λ** to something, and I finally got the chance!
+I always wanted to name **λ** to something, and I finally got the chance!
 
 ```java
 
@@ -121,7 +119,7 @@ public interface λ<I,O> extends Function<I, Val<O>> { }
 
 ```
 A lambda is a function that returns a **Val** of type **O** given a type **I**. **It models the communication with a Verticle**:
-a message is sent, the Verticle receives and processes the message, and replies with a response. The response has to
+a message is sent, the Verticle receives and processes the message, and replies with a response. The message and the response has to
 be of a type that can be sent across the EvenBus; otherwise, you must implement a [MessageCodec](https://vertx.io/docs/apidocs/io/vertx/core/eventbus/MessageCodec.html).
 
 ## <a name="exp"><a/> Expressions 
@@ -147,7 +145,7 @@ Val<JsObj> profile = Cons.of( () -> getProfile(id)); // from a Future
 ``` 
 
 
-- **IfElse**. If the predicate is evaluated to **Cons.success(true)**, it executes and returns the consequence
+- **IfElse**. If the predicate returns **Cons.success(true)**, it executes and returns the consequence
 ;otherwise, the alternative.
 
 
@@ -163,9 +161,9 @@ IfElse.<O>predicate(Val<Bool>)
 ```
  
 
-- **Cond**. It's a set of branches and a default value. Each branch consists of a predicate and a value to be 
-executed and returned if evaluated as **Cons.success(true)**. Suppose no predicate is evaluated to be true. 
-In that case, the Cond expression returns the default value, which is the last value of the clause 
+- **Cond**. It's a set of branches and a default value. Each branch consists of a predicate and a value.
+It computes and returns the value of the first branch which predicate is true. 
+If no predicate is true, then it returns the default value, which is the last value of the clause.
 
 
 ```java
@@ -236,7 +234,7 @@ Or.of(Val<Boolean>,...)
  
 
 - **JsObjVal** and **JsArrayVal**. The current implementation computes all the values of the JsObj 
-and JsArray in parallel. The next example shows how JsObjVla and JsArrayVal are data structures that 
+and JsArray in parallel. The next example shows how JsObjVal and JsArrayVal are data structures that 
 look like raw Json. And of course, you can mix expressions and nest them, going as deeper as necessary.  
 
 

@@ -44,16 +44,16 @@ public class UserAccountModule extends VertxModule {
                    );
 
         λc<JsObj, Boolean> isValid = (context, obj) ->
-                And.of(isLegalAge.apply(context,
-                                        obj.getInt("age")
-                                       ),
-                       isValidId.apply(context,
-                                       obj.getStr("id")
-                                      ),
-                       isValidEmail.apply(context,
-                                          obj.getStr("email")
-                                         )
-                      );
+                And.parallel(isLegalAge.apply(context,
+                                              obj.getInt("age")
+                                             ),
+                             isValidId.apply(context,
+                                             obj.getStr("id")
+                                            ),
+                             isValidEmail.apply(context,
+                                                obj.getStr("email")
+                                               )
+                            );
 
         this.deploy(IS_VALID,
                     isValid

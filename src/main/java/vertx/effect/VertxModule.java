@@ -97,9 +97,9 @@ public abstract class VertxModule extends AbstractVerticle {
                                     deploymentOptions
             );
             deploy();
-            Pair.of(idValSeq,
-                    refValMap
-                   )
+            Pair.parallel(idValSeq,
+                          refValMap
+                         )
                 .onComplete(event -> {
                     if (event.failed()) {
                         start.fail(event.cause());
