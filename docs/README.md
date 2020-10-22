@@ -220,21 +220,22 @@ new Case<Integer,String>(Cons.success(20))
 ```
     
 
-- **And** and **Or**. The current implementation executes all the values of the expression in parallel.
+- **And** and **Or**. You can compute all the values either in parallel or sequentially.
 
 
 ```java
 
-
-And.of(Val<Boolean>,....)
+And.parallel(Val<Boolean>,....)
+And.sequential(Val<Boolean>,....)
                          
-Or.of(Val<Boolean>,...)
+Or.parallel(Val<Boolean>,...)
+Or.sequential(Val<Boolean>,...)
 
 ```  
  
 
-- **JsObjVal** and **JsArrayVal**. The current implementation computes all the values of the JsObj 
-and JsArray in parallel. The next example shows how JsObjVal and JsArrayVal are data structures that 
+- **JsObjVal** and **JsArrayVal**. You can compute all the values either in parallel or sequentially.
+The next example shows how JsObjVal and JsArrayVal are data structures that 
 look like raw Json. And of course, you can mix expressions and nest them, going as deeper as necessary.  
 
 
@@ -242,51 +243,53 @@ look like raw Json. And of course, you can mix expressions and nest them, going 
 
 import jsonval.JsValue
 
-JsObjVal.of("a", IfElse.<String>predicate(Val<Boolean>)
+JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
                                .consequence(Val<JsValue>)
                                .alternative(Val<JsValue>),
-            "b", JsArrayVal.of(new Case<Integer,String>(Integer).of(1, Val<JsValue>,
-                                                                    2, Val<JsValue>,
-                                                                    Val<JsValue> 
-                                                                   ),
-                               Cond.of(Val<Boolean>,Val<JsValue>,
-                                       Val<Boolean>,Val<JsValue>,
-                                       Val<JsValue>
-                                      )
-                              ),
-            "c", JsObjVal.of("d", Or.of(Val<Boolean>, Val<Boolean>),
-                             "e", And.of(Val<Boolean>, Val<Boolean>),
-                             "f", JsArrayVal.of(Val<JsValue>,
-                                                Val<JsValue> 
-                                               ) 
-                            )
+                   "b", JsArrayVal.sequential(new Case<Integer,String>(Integer).of(1, Val<JsValue>,
+                                                                                   2, Val<JsValue>,
+                                                                                   Val<JsValue> 
+                                                                                   ),
+                                              Cond.of(Val<Boolean>,Val<JsValue>,
+                                                      Val<Boolean>,Val<JsValue>,
+                                                      Val<JsValue>
+                                                      )
+                                              ),
+            "c", JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>),
+                                   "e", And.parallel(Val<Boolean>, Val<Boolean>),
+                                   "f", JsArrayVal.parallel(Val<JsValue>,
+                                                            Val<JsValue> 
+                                                            ) 
+                                  )
            );
 
 ``` 
  
 
-- **Pair**. A pair is a tuple of two elements. Both elements are computed in parallel.
+- **Pair**. A pair is a tuple of two elements. 
 
 
 ```java
 
+Val<Tuple2<A,B>  pair = Pair.parallel(Val<A>,Val<B>);
 
-Val<Tuple2<A,B> = Pair.of(Val<A>,Val<B>);
+Val<Tuple2<A,B>  pair = Pair.sequential(Val<A>,Val<B>);
     
 ```
   
 
-- **Triple**. A triple is a tuple of three elements. All elements are computed in parallel.
+- **Triple**. A triple is a tuple of three elements. 
 
 
 ```java
 
+Val<Tuple3<A,B,C> triple = Triple.parallel(Val<A>,Val<B>,Val<C>));
 
-Val<Tuple3<A,B,C> = Triple.of(Val<A>,Val<B>,Val<C>);
+Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>,Val<B>,Val<C>));
 
 ```
 
-It's important to notice **that any value of the above expressions can be computed by a Verticle of
+It's important to notice **that any value of the above expressions can be computed by a different Verticle of
 any machine of a cluster**. Imagine ten machines collaborating to compute a JsObj, is not this amazing?
  
 
@@ -382,9 +385,9 @@ Let's deploy our module and do some testing.
     // prints out events published by vertx-effect
     vertxRef.registerConsumer(EVENTS_ADDRESS, System.out::println); 
 
-    Pair.of(vertxRef.deploy(new MyModule()),
-            vertxRef.deploy(new RegisterJsValuesCodecs())
-           )
+    Pair.parallel(vertxRef.deploy(new MyModule()),
+                  vertxRef.deploy(new RegisterJsValuesCodecs())
+                 )
         .onSuccess(pair -> {
                             System.out.println(String.format("Ids deployed: %s and %s",pair._1,pair._2));
                             context.completeNow();
@@ -398,18 +401,18 @@ Let's deploy our module and do some testing.
  {
     λ<JsObj, JsObj> removeAndNull = MyModule.removeNull.andThen(MyModule.trim);
 
-    JsObj obj = JsObj.of("a", JsStr.of("  hi  "),
-                         "b", JsNull.NULL,
-                         "c", JsObj.of("d", JsStr.of("  bye  "),
-                                       "e", JsNull.NULL
-                                      )
-                        );
+    JsObj obj = JsObj.parallel("a", JsStr.of("  hi  "),
+                               "b", JsNull.NULL,
+                               "c", JsObj.parallel("d", JsStr.of("  bye  "),
+                                                   "e", JsNull.NULL
+                                                  )
+                              );
 
     removeAndNull.apply(obj)
                  .onSuccess(it -> {
-                     JsObj expected = JsObj.of("a", JsStr.of("hi"),
-                                               "c", JsObj.of("d", JsStr.of("bye"))
-                                              );
+                     JsObj expected = JsObj.parallel("a", JsStr.of("hi"),
+                                                     "c", JsObj.parallel("d", JsStr.of("bye"))
+                                                    );
                      context.verify(()-> {
                                           Assertions.assertEquals(expected,it);
                                           context.completeNow();
@@ -521,6 +524,7 @@ and a random value to distinguish between transactions from the same email. That
 
     @Override
     protected void deploy() {
+
         λ<Integer, Boolean> isLegalAge = age -> Cons.success(age > 16)
         this.deploy(IS_LEGAL_AGE,
                     UserAccountFunctions.isLegalAge
@@ -535,17 +539,18 @@ and a random value to distinguish between transactions from the same email. That
         this.deploy(IS_VALID_EMAIL,
                     UserAccountFunctions.isValidEmail
                    );
+        
         λc<JsObj, Boolean> isValid = (context, obj) ->
-                And.of(isLegalAge.apply(context,
-                                        obj.getInt("age")
-                                       ),
-                       isValidId.apply(context,
-                                       obj.getStr("id")
-                                      ),
-                       isValidEmail.apply(context,
-                                          obj.getStr("email")
-                                         )
-                      );
+                And.parallel(isLegalAge.apply(context,
+                                              obj.getInt("age")
+                                             ),
+                             isValidId.apply(context,
+                                             obj.getStr("id")
+                                            ),
+                             isValidEmail.apply(context,
+                                                obj.getStr("email")
+                                               )
+                             );
 
         this.deploy(IS_VALID,
                     isValid
@@ -565,13 +570,13 @@ of the And expression.
  Function<JsObj,Multimap> context = user -> MultiMap.caseInsensitiveMultiMap()
                                                     .add("email", user.getStr("email")); 
  
- JsObj user = JsObj.of("email", JsStr.of("imrafaelmerino@gmail.com"),
-                       "age", JsInt.of(17), 
-                       "id", JsStr.of("03786761>")
+ JsObj user = JsObj.parallel("email", JsStr.of("imrafaelmerino@gmail.com"),
+                             "age", JsInt.of(17), 
+                             "id", JsStr.of("03786761>")
                       );
- JsObj user1 = JsObj.of("email", JsStr.of("example@gmail.com"),
-                        "age", JsInt.of(10)
-                       );
+ JsObj user1 = JsObj.parallel("email", JsStr.of("example@gmail.com"),
+                              "age", JsInt.of(10)
+                             );
 
  UserAccountModule.isValid.apply(contex.apply(user), user).get();
  UserAccountModule.isValid.apply(contex.apply(user1), user1).get();
