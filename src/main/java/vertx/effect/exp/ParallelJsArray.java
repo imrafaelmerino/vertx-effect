@@ -53,7 +53,7 @@ final class ParallelJsArray extends JsArrayVal {
      @return a CompletableFuture of a json array
      */
     @Override
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Future<JsArray> get() {
         java.util.List futures = seq.map(Supplier::get)
                                     .toJavaList();
@@ -79,6 +79,7 @@ final class ParallelJsArray extends JsArrayVal {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Val<JsValue> race() {
         return Cons.of(() -> {
             java.util.List futures = seq.map(Supplier::get)

@@ -57,6 +57,8 @@ public final class Failures {
     public static final int DEFAULT_HTTP_EXCEPTION_CODE = 4999;
 
 
+
+    @SafeVarargs
     public static Predicate<Throwable> or(final Prism<Throwable, ? extends VertxException> first,
                                           final Prism<Throwable, ? extends VertxException>... others) {
 
