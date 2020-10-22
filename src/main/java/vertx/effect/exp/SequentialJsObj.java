@@ -25,13 +25,11 @@ final class SequentialJsObj extends JsObjVal {
 
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
 
-    SequentialJsObj() {
-    }
+    SequentialJsObj(){}
 
     SequentialJsObj(final Map<String, Val<? extends JsValue>> bindings) {
         this.bindings = bindings;
     }
-
 
 
     /**
@@ -41,6 +39,7 @@ final class SequentialJsObj extends JsObjVal {
      @param future the given future
      @return a new JsObjFuture
      */
+    @Override
     public SequentialJsObj set(final String key,
                                final Val<? extends JsValue> future
                               ) {
@@ -59,7 +58,6 @@ final class SequentialJsObj extends JsObjVal {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Future<JsObj> get() {
-
         Set<String>   keySet = bindings.keySet();
         Future<JsObj> result = Future.succeededFuture(JsObj.empty());
         for (final String key : keySet) {
@@ -68,12 +66,11 @@ final class SequentialJsObj extends JsObjVal {
                                                    .get()
                                                    .flatMap(val -> Future.succeededFuture(acc.set(key,
                                                                                                   val
-                                                                                                 ))
+                                                                                                 )
+                                                                                         )
                                                            )
                                    );
         }
-
-
         return result;
     }
 
@@ -90,7 +87,6 @@ final class SequentialJsObj extends JsObjVal {
     public Val<JsObj> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
         return new SequentialJsObj(bindings.mapValues(it -> it.retry(attempts)));
     }
 
@@ -100,13 +96,12 @@ final class SequentialJsObj extends JsObjVal {
                             final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-
         return new SequentialJsObj(bindings.mapValues(it -> it.retry(attempts,
                                                                      actionBeforeRetry
-                                                                    )));
+                                                                    )
+                                                     ));
     }
 
     @Override
@@ -118,7 +113,8 @@ final class SequentialJsObj extends JsObjVal {
             return Cons.failure(new NullPointerException("predicate is null"));
         return new SequentialJsObj(bindings.mapValues(it -> it.retryIf(predicate,
                                                                        attempts
-                                                                      )));
+                                                                      )
+                                                     ));
 
     }
 
@@ -133,11 +129,11 @@ final class SequentialJsObj extends JsObjVal {
             return Cons.failure(new NullPointerException("predicate is null"));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-
         return new SequentialJsObj(bindings.mapValues(it -> it.retryIf(predicate,
                                                                        attempts,
                                                                        actionBeforeRetry
-                                                                      )));
+                                                                      )
+                                                     ));
     }
 
 }

@@ -4,6 +4,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
@@ -13,6 +14,7 @@ import jsonvalues.JsObj;
 import jsonvalues.JsStr;
 import vertx.effect.VertxModule;
 import vertx.effect.λc;
+
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -20,9 +22,8 @@ import java.util.stream.Collectors;
 
 import static io.vertx.core.http.HttpMethod.*;
 import static java.util.Objects.requireNonNull;
-import static vertx.effect.Event.INTERNAL_ERROR_PROCESSING_HTTP_RESP;
-import static vertx.effect.Event.INTERNAL_ERROR_READING_HTTP_RESP_BODY;
-import static vertx.effect.Failures.*;
+import static vertx.effect.Failures.GET_HTTP_METHOD_NOT_IMPLEMENTED_EXCEPTION;
+import static vertx.effect.Failures.GET_HTTP_REPLY_EXCEPTION;
 import static vertx.effect.httpclient.HttpResp.*;
 
 public abstract class AbstractHttpClientModule extends VertxModule {
@@ -49,7 +50,8 @@ public abstract class AbstractHttpClientModule extends VertxModule {
             JsObj req = message.body();
             EventPublisher.PUBLISHER.receivedMessage(httpClientAddress,
                                                      message.headers()
-                                                    ).accept(vertx);
+                                                    )
+                                    .accept(vertx);
 
             Integer        type    = HttpReq.TYPE_LENS.get.apply(req);
             RequestOptions options = HttpReq.toReqOptions.apply(req);
@@ -124,15 +126,17 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                                         EventPublisher.PUBLISHER.repliedResp(httpClientAddress,
                                                                              output,
                                                                              message.headers()
-                                                                            ).accept(vertx);
+                                                                            )
+                                                                .accept(vertx);
                                     }
                                     else {
-                                        message.reply(GET_HTTP_REPLY_EXCEPTION.apply(it.cause()));
-                                        EventPublisher.PUBLISHER.internalError(INTERNAL_ERROR_READING_HTTP_RESP_BODY,
-                                                                               httpClientAddress,
-                                                                               r.cause(),
-                                                                               message.headers()
-                                                                              ).accept(vertx);
+                                        ReplyException replyException = GET_HTTP_REPLY_EXCEPTION.apply(it.cause());
+                                        message.reply(replyException);
+                                        EventPublisher.PUBLISHER.repliedError(httpClientAddress,
+                                                                              replyException,
+                                                                              message.headers()
+                                                                             )
+                                                                .accept(vertx);
                                     }
                                 }
 
@@ -140,12 +144,14 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
             }
             else {
-                message.reply(GET_HTTP_REPLY_EXCEPTION.apply(r.cause()));
-                EventPublisher.PUBLISHER.internalError(INTERNAL_ERROR_PROCESSING_HTTP_RESP,
-                                                       httpClientAddress,
-                                                       r.cause(),
-                                                       message.headers()
-                                                      ).accept(vertx);
+                ReplyException replyException = GET_HTTP_REPLY_EXCEPTION.apply(r.cause());
+                message.reply(replyException);
+
+                EventPublisher.PUBLISHER.repliedError(httpClientAddress,
+                                                      replyException,
+                                                      message.headers()
+                                                     )
+                                        .accept(vertx);
 
             }
 
@@ -156,8 +162,6 @@ public abstract class AbstractHttpClientModule extends VertxModule {
     protected void initialize() {
         this.httpClient = trace(httpClientAddress);
     }
-
-
 
 
     @Override

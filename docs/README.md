@@ -1,4 +1,4 @@
-<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="250" height="150" align="right"/>
+<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="250" height="150"/>
 
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
@@ -35,7 +35,6 @@
     . Use persistent data structures.
     . Systems will fail, be prepared.
     . Simplicity matters.
-    . Avoid state when possible. 
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
     
 ## <a name="introduction"><a/> Introduction
@@ -67,7 +66,7 @@ Future<Customer> b = c;
 
 A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a 
 computation. Haskell has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
-and lazy data structure that allows us to control the effect latency.
+and lazy data structure that allows us to control the effect of latency.
 
 Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
 is in vertx-effect:
@@ -105,10 +104,10 @@ Val<Customer> a = c;
 Val<Customer> b = c;
 
 ```
-This property is fundamental. Whenever you see insertDb(customer) in your program, 
-you can think of it as it was c. Pure FP programming helps us reason about the programs
- we write. On the other hand, do notice that a Val is lazy. It's a description of an effect. 
- In FP, we describe programs, and it's at the very last moment when they're executed.
+This property is fundamental. Whenever you see _insertDb(customer)_ in your program, 
+you can think of it as it was _c_. Pure FP programming helps us reason about the programs
+we write. On the other hand, do notice that a Val is lazy. It's a description of an effect. 
+**In FP, we describe programs, and it's at the very last moment when they're executed.**
 
 I always wanted to name **λ** to something, and I finally got the chance!
 

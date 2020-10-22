@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static io.vertx.core.eventbus.ReplyFailure.TIMEOUT;
@@ -55,6 +56,22 @@ public final class Failures {
     public static final int DEFAULT_HTTP_EXCEPTION_CODE = 4999;
 
 
+    public static Predicate<Throwable> or(final Prism<Throwable, ReplyException> first,
+                                          final Prism<Throwable, ReplyException>... others) {
+
+        requireNonNull(first);
+        requireNonNull(others);
+        return t -> {
+            Optional<ReplyException> firstOpt = first.getOptional.apply(t);
+            if (firstOpt.isPresent()) return true;
+            return Arrays.stream(others)
+                         .map(p -> p.getOptional.apply(t))
+                         .anyMatch(Optional::isPresent);
+        };
+
+
+    }
+
     public static final Prism<Throwable, ReplyException> UNKNOWN_HOST_PRISM =
             new Prism<>(
                     t -> {
@@ -85,13 +102,12 @@ public final class Failures {
             );
 
 
-    public static final Prism<Throwable, ReplyException> HTTP_TIMEOUTS_PRISM =
+    public static final Prism<Throwable, ReplyException> HTTP_REQUEST_TIMEOUT_PRISM =
             new Prism<>(
                     t -> {
                         if (t instanceof ReplyException) {
                             ReplyException replyException = (ReplyException) t;
-                            if (replyException.failureCode() == CONNECT_TIMEOUT_CODE
-                                    || replyException.failureCode() == REQUEST_TIMEOUT_CODE)
+                            if (replyException.failureCode() == REQUEST_TIMEOUT_CODE)
                                 return Optional.of(replyException);
                             return Optional.empty();
                         }

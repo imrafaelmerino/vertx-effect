@@ -1,8 +1,8 @@
 package vertx.effect.patterns.bankaccount;
 
 import jsonvalues.JsObj;
-import vertx.effect.exp.Cons;
 import vertx.effect.Val;
+import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 import static vertx.effect.patterns.bankaccount.Operation.IS_DEPOSIT;

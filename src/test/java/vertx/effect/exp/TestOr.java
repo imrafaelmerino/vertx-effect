@@ -19,11 +19,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @ExtendWith(VertxExtension.class)
 public class TestOr {
-
-
     static VertxRef vertxRef;
     static final int ATTEMPTS = 2;
-    Supplier<Val<Boolean>> TRUE =
+    static final Supplier<Val<Boolean>> TRUE =
             new ErrorWhile<>(ATTEMPTS,
                              counter ->
                                      Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
@@ -31,7 +29,7 @@ public class TestOr {
             );
 
 
-    Supplier<Val<Boolean>> FALSE =
+    static final Supplier<Val<Boolean>> FALSE =
             new ErrorWhile<>(ATTEMPTS,
                              counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                              false
@@ -53,7 +51,7 @@ public class TestOr {
 
 
     @Test
-    public void test_retries_two_times_returns_true(VertxTestContext context) {
+    public void test_parallel_retries_two_times_returns_true(VertxTestContext context) {
 
         Or.parallel(TRUE.get(),
                     TRUE.get()
@@ -69,7 +67,23 @@ public class TestOr {
     }
 
     @Test
-    public void test_retries_two_times_returns_false(VertxTestContext context) {
+    public void test_sequential_retries_two_times_returns_true(VertxTestContext context) {
+
+        Or.sequential(TRUE.get(),
+                      TRUE.get()
+                     )
+          .retry(2)
+          .get()
+          .onComplete(it -> {
+              context.verify(() -> Assertions.assertEquals(true,
+                                                           it.result()
+                                                          ));
+              context.completeNow();
+          });
+    }
+
+    @Test
+    public void test_parallel_retries_two_times_returns_false(VertxTestContext context) {
 
 
         Or.parallel(FALSE.get(),
@@ -86,7 +100,24 @@ public class TestOr {
     }
 
     @Test
-    public void test_retries_if_success(VertxTestContext context) {
+    public void test_sequential_retries_two_times_returns_false(VertxTestContext context) {
+
+
+        Or.sequential(FALSE.get(),
+                      FALSE.get()
+                     )
+          .retry(2)
+          .get()
+          .onComplete(it -> {
+              context.verify(() -> Assertions.assertEquals(false,
+                                                           it.result()
+                                                          ));
+              context.completeNow();
+          });
+    }
+
+    @Test
+    public void test_parallel_retries_if_success(VertxTestContext context) {
 
 
         Or.parallel(TRUE.get(),
@@ -107,8 +138,29 @@ public class TestOr {
     }
 
     @Test
-    public void test_map(final VertxTestContext context,
-                         final Vertx vertx) {
+    public void test_sequential_retries_if_success(VertxTestContext context) {
+
+
+        Or.sequential(TRUE.get(),
+                      FALSE.get()
+                     )
+          .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   2
+                  )
+          .get()
+          .onComplete(it -> {
+              context.verify(() -> Assertions.assertEquals(true,
+                                                           it.result()
+                                                          )
+                            );
+              context.completeNow();
+          });
+
+    }
+
+    @Test
+    public void test_parallel_map(final VertxTestContext context,
+                                  final Vertx vertx) {
 
         Or.parallel(Cons.success(true),
                     Cons.success(true)
@@ -124,7 +176,24 @@ public class TestOr {
     }
 
     @Test
-    public void test_retries_if_failure(VertxTestContext context) {
+    public void test_sequential_map(final VertxTestContext context,
+                                    final Vertx vertx) {
+
+        Or.sequential(Cons.success(true),
+                      Cons.success(true)
+                     )
+          .map(it -> !it)
+          .onSuccess(result -> {
+              context.verify(() -> {
+                  Assertions.assertFalse(result);
+                  context.completeNow();
+              });
+          })
+          .get();
+    }
+
+    @Test
+    public void test_parallel_retries_if_failure(VertxTestContext context) {
 
 
         Or.parallel(TRUE.get(),
@@ -142,9 +211,27 @@ public class TestOr {
 
     }
 
+    @Test
+    public void test_sequential_retries_if_failure(VertxTestContext context) {
+
+
+        Or.sequential(TRUE.get(),
+                      FALSE.get()
+                     )
+          .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.REQUEST_TIMEOUT_CODE),
+                   2
+                  )
+          .get()
+          .onComplete(it -> {
+              context.verify(() -> Assertions.assertTrue(it.failed())
+                            );
+              context.completeNow();
+          });
+
+    }
 
     @Test
-    public void test_retry_if_success_with_delay(final VertxTestContext context) {
+    public void test_parallel_retry_if_success_with_delay(final VertxTestContext context) {
 
 
         ErrorWhile<Boolean> True = new ErrorWhile<>(3,
@@ -171,26 +258,91 @@ public class TestOr {
     }
 
     @Test
-    public void test_retry_with_delay(VertxTestContext context) {
+    public void test_sequential_retry_if_success_with_delay(final VertxTestContext context) {
+
+
+        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+                                                    i -> new IllegalArgumentException(),
+                                                    true
+        );
+        Or.sequential(True.get(),
+                      True.get()
+                     )
+          .retryIf(it -> it instanceof IllegalArgumentException,
+                   3,
+                   (e, i) -> vertxRef.timer(1,
+                                            SECONDS,
+                                            "1 sec"
+                                           )
+                  )
+          .onSuccess(it -> {
+              context.verify(() -> {
+                  Assertions.assertTrue(it);
+                  context.completeNow();
+              });
+          })
+          .get();
+    }
+
+    @Test
+    public void test_parallel_retry_with_delay(VertxTestContext context) {
         long start = System.nanoTime();
         Or.parallel(TRUE.get(),
-                      FALSE.get()
-                     )
-                  .retry(ATTEMPTS,
-                         (error, n) -> vertxRef.timer(1,
-                                                      SECONDS,
-                                                      "next attempt"
-                                                     )
-                        )
-                  .get()
-                  .onComplete(r -> context.verify(() -> {
-                      Assertions.assertTrue(r.result());
-                      long seconds = NANOSECONDS.toSeconds(System.nanoTime() - start);
-                      Assertions.assertTrue(seconds >= ATTEMPTS);
-                      context.completeNow();
+                    FALSE.get()
+                   )
+          .retry(ATTEMPTS,
+                 (error, n) -> vertxRef.timer(1,
+                                              SECONDS,
+                                              "next attempt"
+                                             )
+                )
+          .get()
+          .onComplete(r -> context.verify(() -> {
+              Assertions.assertTrue(r.result());
+              long seconds = NANOSECONDS.toSeconds(System.nanoTime() - start);
+              Assertions.assertTrue(seconds >= ATTEMPTS);
+              context.completeNow();
 
-                  }));
+          }));
 
     }
 
+    @Test
+    public void test_sequential_retry_with_delay(VertxTestContext context) {
+        long start = System.nanoTime();
+        Or.sequential(TRUE.get(),
+                      FALSE.get()
+                     )
+          .retry(ATTEMPTS,
+                 (error, n) -> vertxRef.timer(1,
+                                              SECONDS,
+                                              "next attempt"
+                                             )
+                )
+          .get()
+          .onComplete(r -> context.verify(() -> {
+                          Assertions.assertTrue(r.result());
+                          long seconds = NANOSECONDS.toSeconds(System.nanoTime() - start);
+                          Assertions.assertTrue(seconds >= ATTEMPTS);
+                          context.completeNow();
+                      })
+                     );
+
+    }
+
+    @Test
+    public void test_or_booleans(Vertx vertx,
+                                 VertxTestContext context) {
+
+        Or.of(true,
+              true
+             )
+          .onSuccess(it -> {
+              context.verify(() -> {
+                  Assertions.assertTrue(it);
+                  context.completeNow();
+              });
+          })
+          .get();
+    }
 }

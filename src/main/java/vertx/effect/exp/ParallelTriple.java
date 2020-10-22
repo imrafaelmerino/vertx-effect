@@ -27,8 +27,6 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
         this._3 = _3;
     }
 
-
-
     @Override
     public <P> Val<P> map(final Function<Tuple3<A, B, C>, P> fn) {
         if (fn == null)

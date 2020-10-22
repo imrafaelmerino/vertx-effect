@@ -5,13 +5,11 @@ import io.vertx.core.Future;
 import jsonvalues.JsArray;
 import jsonvalues.JsValue;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
+import javax.naming.OperationNotSupportedException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -21,50 +19,28 @@ import static java.util.Objects.requireNonNull;
  a json array.
  */
 
-public final class SequentialJsArray extends AbstractVal<JsArray> {
+final class SequentialJsArray extends JsArrayVal {
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     private List<Val<? extends JsValue>> seq = List.empty();
 
-    private static final SequentialJsArray EMPTY = new SequentialJsArray();
+    static final SequentialJsArray EMPTY = new SequentialJsArray();
 
-    private SequentialJsArray(List<Val<? extends JsValue>> seq) {
+    SequentialJsArray(List<Val<? extends JsValue>> seq) {
         this.seq = seq;
     }
 
-    private SequentialJsArray() {
-    }
-
-
-    public static SequentialJsArray empty() {
-        return EMPTY;
+    SequentialJsArray() {
     }
 
     @SafeVarargs
-    private SequentialJsArray(final Val<? extends JsValue> fut,
-                              final Val<? extends JsValue>... others
-                             ) {
-        seq = seq.append(fut);
+    SequentialJsArray(final Val<? extends JsValue> val,
+                      final Val<? extends JsValue>... others
+                     ) {
+        seq = seq.append(val);
         for (Val<? extends JsValue> other : others) {
             seq = seq.append(other);
         }
-    }
-
-
-    /**
-     returns a JsArrayFuture from the given head and the tail
-
-     @param head the head
-     @param tail the tail
-     @return a new JsArrayFuture
-     */
-    @SafeVarargs
-    public static SequentialJsArray of(final Val<? extends JsValue> head,
-                                       final Val<? extends JsValue>... tail
-                                      ) {
-        return new SequentialJsArray(requireNonNull(head),
-                                     requireNonNull(tail)
-        );
     }
 
 
@@ -84,12 +60,6 @@ public final class SequentialJsArray extends AbstractVal<JsArray> {
         return result;
     }
 
-    public SequentialJsArray append(final Val<? extends JsValue> future) {
-
-        final SequentialJsArray arrayFuture = new SequentialJsArray();
-        arrayFuture.seq = this.seq.append(future);
-        return arrayFuture;
-    }
 
     @Override
     public <P> Val<P> map(final Function<JsArray, P> fn) {
@@ -152,8 +122,16 @@ public final class SequentialJsArray extends AbstractVal<JsArray> {
         );
     }
 
-    public SequentialJsArray appendAll(final SequentialJsArray others) {
-        return new SequentialJsArray(seq.appendAll(others.seq));
+    public JsArrayVal append(final Val<? extends JsValue> future) {
+
+        final SequentialJsArray arrayFuture = new SequentialJsArray();
+        arrayFuture.seq = this.seq.append(future);
+        return arrayFuture;
+    }
+
+    @Override
+    public Val<JsValue> race() {
+        return Cons.failure(new OperationNotSupportedException("race doesn't make any sense in a sequential execution"));
     }
 
 }

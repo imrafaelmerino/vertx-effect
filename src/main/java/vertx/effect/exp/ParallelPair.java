@@ -25,13 +25,6 @@ final class ParallelPair<A, B> extends Pair<A, B> {
     }
 
 
-    public static <A, B> ParallelPair<A, B> of(final Val<A> _1,
-                                               final Val<B> _2) {
-        return new ParallelPair<>(_1,
-                                  _2
-        );
-    }
-
     @Override
     public <P> Val<P> map(final Function<Tuple2<A, B>, P> fn) {
         if (fn == null)

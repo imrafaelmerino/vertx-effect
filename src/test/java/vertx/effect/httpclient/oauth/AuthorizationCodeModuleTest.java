@@ -74,8 +74,6 @@ public class AuthorizationCodeModuleTest {
                                                  new RefreshAccessTokenReq("client_id",
                                                                            "client_secret"
                                                  )
-
-
                 ).setReqAttempts(4)
                  .setRetryReqPredicate(Failures.REPLY_EXCEPTION_PRISM
                                                .exists
@@ -110,11 +108,9 @@ public class AuthorizationCodeModuleTest {
                                        );
         httpClient.getOauth.apply(t)
                            .onComplete(it -> {
-                               if (it.succeeded()) {
+                               if (it.succeeded())
                                    context.completeNow();
-                               }
-                               else
-                                   context.failNow(it.cause());
+                               else context.failNow(it.cause());
                            })
                            .get();
 

@@ -25,26 +25,6 @@ final class ParallelOr extends Or {
 
     final List<Val<Boolean>> exps;
 
-    public static Val<Boolean> of(final boolean a,
-                                  final boolean... others) {
-        List<Val<Boolean>> exps = new ArrayList<>();
-        exps.add(Cons.success(a));
-        for (final boolean other : others) {
-            exps.add(Cons.success(other));
-        }
-        return new ParallelOr(exps);
-    }
-    @SafeVarargs
-    public static Val<Boolean> of(final Val<Boolean> a,
-                                  final Val<Boolean>... others) {
-        List<Val<Boolean>> exps = new ArrayList<>();
-        exps.add(requireNonNull(a));
-        for (final Val<Boolean> other : others) {
-            exps.add(requireNonNull(other));
-        }
-        return new ParallelOr(exps);
-    }
-
     @Override
     public <P> Val<P> map(final Function<Boolean, P> fn) {
         if(fn==null)

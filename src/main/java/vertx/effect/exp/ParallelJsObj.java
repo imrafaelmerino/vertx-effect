@@ -22,15 +22,15 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-public final class ParallelJsObj extends JsObjVal {
+final class ParallelJsObj extends JsObjVal {
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
 
-     ParallelJsObj() {
+    ParallelJsObj() {
     }
 
-     ParallelJsObj(final Map<String, Val<? extends JsValue>> bindings) {
+    ParallelJsObj(final Map<String, Val<? extends JsValue>> bindings) {
         this.bindings = bindings;
     }
 
@@ -41,6 +41,7 @@ public final class ParallelJsObj extends JsObjVal {
      @param future the given future
      @return a new JsObjFuture
      */
+    @Override
     public ParallelJsObj set(final String key,
                              final Val<? extends JsValue> future
                             ) {

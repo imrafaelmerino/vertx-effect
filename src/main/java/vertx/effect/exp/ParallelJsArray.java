@@ -1,15 +1,17 @@
 package vertx.effect.exp;
 
 import io.vavr.collection.List;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import jsonvalues.JsArray;
 import jsonvalues.JsValue;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 
 /**
@@ -19,29 +21,25 @@ import java.util.function.Predicate;
  a json array.
  */
 
-public final class SequentialJsArray extends AbstractVal<JsArray> {
+final class ParallelJsArray extends JsArrayVal {
+
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     private List<Val<? extends JsValue>> seq = List.empty();
 
-    private static final SequentialJsArray EMPTY = new SequentialJsArray();
+    static final ParallelJsArray EMPTY = new ParallelJsArray();
 
-    private SequentialJsArray(List<Val<? extends JsValue>> seq) {
+    ParallelJsArray(List<Val<? extends JsValue>> seq) {
         this.seq = seq;
     }
 
-    private SequentialJsArray() {
-    }
-
-
-    public static SequentialJsArray empty() {
-        return EMPTY;
+    ParallelJsArray() {
     }
 
     @SafeVarargs
-    SequentialJsArray(final Val<? extends JsValue> val,
-                      final Val<? extends JsValue>... others
-                     ) {
+    ParallelJsArray(final Val<? extends JsValue> val,
+                    final Val<? extends JsValue>... others
+                   ) {
         seq = seq.append(val);
         for (Val<? extends JsValue> other : others) {
             seq = seq.append(other);
@@ -55,21 +53,48 @@ public final class SequentialJsArray extends AbstractVal<JsArray> {
      @return a CompletableFuture of a json array
      */
     @Override
+    @SuppressWarnings({"rawtypes"})
     public Future<JsArray> get() {
-        Future<JsArray> result = Future.succeededFuture(JsArray.empty());
+        java.util.List futures = seq.map(Supplier::get)
+                                    .toJavaList();
+        return CompositeFuture.all(futures)
+                              .map(result -> {
+                                       java.util.List<Object> list = result.list();
+                                       JsArray                acc  = JsArray.empty();
+                                       for (final Object o : list) {
+                                           acc = acc.append(((JsValue) o));
+                                       }
+                                       return acc;
+                                   }
+                                  );
 
-        for (final Val<? extends JsValue> future : seq) {
-            result = result.flatMap(arr -> future.get()
-                                                 .map(arr::append));
-        }
-        return result;
+
     }
 
-    public SequentialJsArray append(final Val<? extends JsValue> future) {
+    public ParallelJsArray append(final Val<? extends JsValue> future) {
 
-        final SequentialJsArray arrayFuture = new SequentialJsArray();
+        final ParallelJsArray arrayFuture = new ParallelJsArray();
         arrayFuture.seq = this.seq.append(future);
         return arrayFuture;
+    }
+
+    @Override
+    public Val<JsValue> race() {
+        return Cons.of(() -> {
+            java.util.List futures = seq.map(Supplier::get)
+                                        .toJavaList();
+            return CompositeFuture.any(futures)
+                                  .map(cf -> {
+                                           int index = IntStream.range(0,
+                                                                       futures.size()
+                                                                      )
+                                                                .filter(cf::succeeded)
+                                                                .findFirst()
+                                                                .getAsInt();//TODO
+                                           return cf.resultAt(index);
+                                       }
+                                      );
+        });
     }
 
     @Override
@@ -86,7 +111,7 @@ public final class SequentialJsArray extends AbstractVal<JsArray> {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new SequentialJsArray(seq.map(it -> it.retry(attempts)));
+        return new ParallelJsArray(seq.map(it -> it.retry(attempts)));
     }
 
 
@@ -97,9 +122,9 @@ public final class SequentialJsArray extends AbstractVal<JsArray> {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new SequentialJsArray(seq.map(it -> it.retry(attempts,
-                                                            actionBeforeRetry
-                                                           )));
+        return new ParallelJsArray(seq.map(it -> it.retry(attempts,
+                                                          actionBeforeRetry
+                                                         )));
     }
 
     @Override
@@ -110,9 +135,9 @@ public final class SequentialJsArray extends AbstractVal<JsArray> {
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
-        return new SequentialJsArray(seq.map(it -> it.retryIf(predicate,
-                                                              attempts
-                                                             )));
+        return new ParallelJsArray(seq.map(it -> it.retryIf(predicate,
+                                                            attempts
+                                                           )));
 
     }
 
@@ -126,15 +151,12 @@ public final class SequentialJsArray extends AbstractVal<JsArray> {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new SequentialJsArray(seq.map(it -> it.retryIf(predicate,
-                                                              attempts,
-                                                              actionBeforeRetry
-                                                             ))
+        return new ParallelJsArray(seq.map(it -> it.retryIf(predicate,
+                                                            attempts,
+                                                            actionBeforeRetry
+                                                           ))
         );
     }
 
-    public SequentialJsArray appendAll(final SequentialJsArray others) {
-        return new SequentialJsArray(seq.appendAll(others.seq));
-    }
 
 }

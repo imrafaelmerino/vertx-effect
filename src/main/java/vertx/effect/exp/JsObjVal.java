@@ -2168,4 +2168,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
         return obj;
     }
 
+    public abstract JsObjVal set(final String key,
+                                 final Val<? extends JsValue> val);
+
 }
