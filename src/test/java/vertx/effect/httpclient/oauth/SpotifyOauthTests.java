@@ -70,7 +70,7 @@ public class SpotifyOauthTests {
                                          }
                                          else {
                                              context.verify(() -> {
-                                                 Assertions.assertTrue(Failures.REPLY_EXCEPTION_PRISM.exists.apply(it -> it.failureCode() == Failures.ACCESS_TOKEN_NOT_FOUND)
+                                                 Assertions.assertTrue(Failures.REPLY_EXCEPTION_PRISM.exists.apply(it -> it.failureCode() == Failures.ACCESS_TOKEN_NOT_FOUND_CODE)
                                                                                                             .test(event.cause()));
                                                  context.completeNow();
                                              });

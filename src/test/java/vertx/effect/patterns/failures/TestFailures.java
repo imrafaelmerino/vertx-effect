@@ -14,8 +14,9 @@ import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Cons;
-import vertx.effect.exp.Quadruple;
+import vertx.effect.exp.Quintuple;
 import vertx.effect.httpclient.GetReq;
+import vertx.effect.httpclient.HttpResp;
 import vertx.effect.httpclient.MyHttpServer;
 
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,8 @@ public class TestFailures {
 
     final static MyHttpClient client = new MyHttpClient();
     final static int port = 9765;
+    final static int portServerClosesConnection = 9766;
+    static MyHttpServer serverCloseConnection;
 
     @BeforeAll
     public static void prepare(VertxTestContext context,
@@ -38,6 +41,17 @@ public class TestFailures {
         ref.registerConsumer(VertxRef.EVENTS_ADDRESS,
                              System.out::println
                             );
+
+
+        serverCloseConnection = new MyHttpServer(vertx,
+                                                 portServerClosesConnection,
+                                                 counter -> req -> body -> {
+                                                     if (counter == 1) req.response()
+                                                                          .close();
+                                                     return JsObj.empty();
+                                                 },
+                                                 counter -> req -> body -> 200
+        );
 
         MyHttpServer server = new MyHttpServer(vertx,
                                                port,
@@ -57,16 +71,65 @@ public class TestFailures {
                                                counter -> req -> body -> 200
         );
 
-        Quadruple.sequential(ref.deploy(new RegisterJsValuesCodecs()),
+        Quintuple.sequential(ref.deploy(new RegisterJsValuesCodecs()),
                              ref.deploy(new Module()),
                              ref.deploy(client),
-                             Cons.of(server::start)
+                             Cons.of(server::start),
+                             Cons.of(serverCloseConnection::start)
                             )
                  .onComplete(result -> context.completeNow())
                  .get();
 
     }
 
+    @Test
+    public void test_close_connection_fails(VertxTestContext context) {
+        serverCloseConnection.resetCounter();
+
+        client.get.apply(new GetReq().host("localhost")
+                                     .port(portServerClosesConnection)
+                                     .uri("/hi")
+                        )
+                  .onComplete(it -> {
+                      if (it.succeeded())
+                          context.failNow(new RuntimeException("the server was supposed to close the connection"));
+                      else {
+                          context.verify(() -> {
+                              Assertions.assertTrue(TCP_CONNECTION_CLOSED_PRISM.getOptional.apply(it.cause())
+                                                                                           .isPresent());
+                              context.completeNow();
+                          });
+                      }
+                  })
+                  .get();
+    }
+
+
+    @Test
+    public void test_close_connection_success(VertxTestContext context) {
+        serverCloseConnection.resetCounter();
+
+        client.get.apply(new GetReq().host("localhost")
+                                     .port(portServerClosesConnection)
+                                     .uri("/hi")
+                        )
+                  .retryIf(or(TCP_CONNECTION_CLOSED_PRISM),
+                           1
+                          )
+                  .onComplete(it -> {
+                      if (it.succeeded())
+                          context.verify(() -> {
+                              Assertions.assertEquals(200,
+                                                      HttpResp.STATUS_CODE_LENS.get.apply(it.result())
+                                                     );
+                              context.completeNow();
+                          });
+                      else {
+                          context.failNow(it.cause());
+                      }
+                  })
+                  .get();
+    }
 
     @Test
     public void test_http_unkown_host(VertxTestContext context) {
@@ -78,12 +141,15 @@ public class TestFailures {
                                              )
                                      .uri("/hi")
                         )
-                  .retryIf(or(UNKNOWN_HOST_PRISM), 1)
+                  .retryIf(or(UNKNOWN_HOST_PRISM),
+                           1
+                          )
                   .onComplete(it -> {
                       if (it.succeeded()) context.failNow(new RuntimeException("abcd is really a host!"));
-                      else{
-                          context.verify(()-> {
-                              Assertions.assertTrue(UNKNOWN_HOST_PRISM.getOptional.apply(it.cause()).isPresent());
+                      else {
+                          context.verify(() -> {
+                              Assertions.assertTrue(UNKNOWN_HOST_PRISM.getOptional.apply(it.cause())
+                                                                                  .isPresent());
                               context.completeNow();
                           });
                       }
@@ -103,7 +169,11 @@ public class TestFailures {
                                              )
                                      .uri("/hi")
                         )
-                  .retryIf(Failures.or(HTTP_REQUEST_TIMEOUT_PRISM,HTTP_CONNECT_TIMEOUT_PRISM),1)
+                  .retryIf(Failures.or(HTTP_REQUEST_TIMEOUT_PRISM,
+                                       HTTP_CONNECT_TIMEOUT_PRISM
+                                      ),
+                           1
+                          )
                   .onComplete(it -> {
                       if (it.succeeded()) context.completeNow();
                       else context.failNow(it.cause());

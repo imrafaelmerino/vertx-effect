@@ -107,7 +107,7 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
                     .or(REPLY_EXCEPTION_PRISM
                                 .exists
                                 .apply(exc ->
-                                               Failures.ACCESS_TOKEN_NOT_FOUND == exc.failureCode()
+                                               Failures.ACCESS_TOKEN_NOT_FOUND_CODE == exc.failureCode()
                                       ));
 
     private static final Predicate<Throwable> RETRY_REQ_PREDICATE =
