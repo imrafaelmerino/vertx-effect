@@ -35,7 +35,7 @@ public class ClientCredentialsModuleTest {
     public static void prepare(final Vertx vertx,
                                final VertxTestContext context
                               ) {
-        int port = 1223;
+        int port = Port.number.incrementAndGet();
         builder = new ClientCredentialsFlowBuilder(new HttpClientOptions().setDefaultPort(port)
                                                                           .setDefaultHost("localhost"),
                                                    "my-httpclient",
@@ -160,46 +160,4 @@ public class ClientCredentialsModuleTest {
 
     }
 
-    @Test
-    @Disabled
-    public void test(Vertx vertx,
-                     VertxTestContext context) {
-        String clientId     = "";
-        String clientSecret = "";
-
-        String host = "";
-        int    port = 8243;
-        HttpClientOptions options = new HttpClientOptions().setDefaultHost(host)
-                                                           .setDefaultPort(port)
-                                                           .setSsl(true)
-                                                           .setTrustAll(true);
-        VertxRef vertxRef = new VertxRef(vertx);
-
-        ClientCredentialsFlowBuilder builder =
-                new ClientCredentialsFlowBuilder(options,
-                                                 "http-client",
-                                                 new GetAccessTokenRequest(clientId,
-                                                                           clientSecret
-                                                 )
-                );
-        ClientCredentialsModule module = builder.createModule();
-
-
-        Pair.parallel(vertxRef.deploy(module),
-                      vertxRef.deploy(new RegisterJsValuesCodecs())
-                     )
-            .onSuccess(ids -> {
-                Val<JsObj> customer = module.getOauth.apply(new GetReq().uri("/uniqueregistry/crud/customer/0024403438")
-                                                                        .header("accept",
-                                                                                "application/json"
-                                                                               )
-                                                           );
-
-                Verifiers.<JsObj>verifySuccess().accept(customer,
-                                                        context
-                                                       );
-            })
-            .get();
-
-    }
 }

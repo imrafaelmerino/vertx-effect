@@ -11,6 +11,7 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import vertx.effect.Port;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.Verifiers;
@@ -19,7 +20,7 @@ import vertx.effect.Verifiers;
 @ExtendWith(VertxExtension.class)
 public class HttpClientMethodsTests {
 
-    private static final int PORT = 1234;
+    private static final int PORT = Port.number.incrementAndGet();
     static HttpClientModule httpClient;
 
     @BeforeAll

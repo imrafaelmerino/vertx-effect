@@ -23,7 +23,6 @@
 - [Reactive http client](#httpclient)
 - [Reactive OAuth http client](#oauth-httpclient)
 - [What to use _vertx-effect_ for and when to use it](#whatfor)
-- [When not to use it](#notwhatfor)
 - [Performance](#perf)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -260,8 +259,8 @@ JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
                                         )
                   );
 
-``` 
- 
+```
+
 
 - **Pair**. A pair is a tuple of two elements. 
 
@@ -295,6 +294,7 @@ more resilient:
 
 ```java
 public interface Val<O> extends Supplier<Future<O>> {
+  <P> Val<P> map(final Function<O, P> fn);
 
   <Q> Val<Q> flatMap(λ<O,Q> fn);
 
@@ -685,9 +685,6 @@ it's a GET.
 in progress
  
 ## <a name="whatfor"><a/> What to use json-values for and when to use it
-in progress
-
-## <a name="notwhatfor"><a/> When not to use it
 in progress
 
 ## <a name="perf"><a/> Performance 

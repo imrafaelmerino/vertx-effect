@@ -9,10 +9,7 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Verifiers;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
@@ -32,7 +29,7 @@ public class AuthorizationCodeModuleTest {
     public static void prepare(final Vertx vertx,
                                final VertxTestContext context
                               ) {
-        int port = 3333;
+        int port = Port.number.incrementAndGet();
 
 
         server = new MyHttpServer(vertx,
@@ -67,7 +64,7 @@ public class AuthorizationCodeModuleTest {
                                  );
         HttpClientOptions options =
                 new HttpClientOptions().setDefaultHost("localhost")
-                                       .setDefaultPort(3333);
+                                       .setDefaultPort(port);
         httpClient =
                 new AuthorizationCodeFlowBuilder(options,
                                                  "oauth-http-client",

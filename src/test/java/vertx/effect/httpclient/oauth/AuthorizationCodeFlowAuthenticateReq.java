@@ -9,10 +9,7 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Verifiers;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
@@ -26,7 +23,7 @@ public class AuthorizationCodeFlowAuthenticateReq {
 
     static AuthorizationCodeModule httpClient;
     static MyHttpServer server;
-    static final int PORT = 1111;
+    static final int PORT = Port.number.incrementAndGet();
 
 
     @BeforeAll

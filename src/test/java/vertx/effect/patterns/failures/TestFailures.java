@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.Failures;
+import vertx.effect.Port;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Cons;
@@ -28,8 +29,8 @@ public class TestFailures {
 
 
     final static MyHttpClient client = new MyHttpClient();
-    final static int port = 9765;
-    final static int portServerClosesConnection = 9766;
+    final static int port = Port.number.incrementAndGet();
+    final static int portServerClosesConnection = Port.number.incrementAndGet();
     static MyHttpServer serverCloseConnection;
 
     @BeforeAll
@@ -159,8 +160,7 @@ public class TestFailures {
     }
 
     @Test
-    public void test_http_req_timeout(VertxTestContext context,
-                                      Vertx vertx) {
+    public void test_http_req_timeout(VertxTestContext context) {
 
         client.get.apply(new GetReq().host("localhost")
                                      .port(port)
@@ -183,8 +183,7 @@ public class TestFailures {
     }
 
     @Test
-    public void test_verticle_timeout(VertxTestContext context,
-                                      Vertx vertx) {
+    public void test_verticle_timeout(VertxTestContext context) {
 
         Module.sum100.apply(100)
                      .apply(10)

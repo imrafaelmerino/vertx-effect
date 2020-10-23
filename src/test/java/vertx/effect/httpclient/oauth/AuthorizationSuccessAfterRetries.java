@@ -9,6 +9,7 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import vertx.effect.Port;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
@@ -32,7 +33,7 @@ public class AuthorizationSuccessAfterRetries {
     public static void prepare(final Vertx vertx,
                                final VertxTestContext context
                               ) {
-        int port = 5555;
+        int port = Port.number.incrementAndGet();
         builder = new AuthorizationCodeFlowBuilder(new HttpClientOptions().setDefaultPort(port)
                                                                           .setDefaultHost("localhost"),
                                                    "testing",
