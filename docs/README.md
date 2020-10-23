@@ -608,13 +608,12 @@ Let's take a look at the events that are published during the execution of the p
 ## <a name="spawning-verticles"><a/> Spawning verticles 
 With vertx-effect, you can spawn verticles, which means that verticles are deployed and undeployed on the fly. 
 Every time something needs to be computed, a new Verticle is deployed. When the computation is done, and the 
-verticle replies, it is right away undeployed. 
+verticle replies, it is undeployed right away. 
 
-The point is to heat up the cores! **Erlang taught us how to develop concurrent software that doubles 
+The goal is to get the most out of the cores! **Erlang taught us how to develop concurrent software that doubles 
 in speed if you double the number of cores without changing a code line:  spawning as many verticles as possible**. 
 In Erlang jargon, a Verticle is kind of a process. On the 
 other hand, if you have a cluster, every computation could be done on different machines.
-
 
 ## <a name="httpclient"><a/> Reactive http client 
 vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple
