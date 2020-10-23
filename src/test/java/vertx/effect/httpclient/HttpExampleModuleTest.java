@@ -21,7 +21,6 @@ public class HttpExampleModuleTest {
     static HttpExampleModule httpModule;
     static λ<String, JsObj> search;
 
-
     @BeforeAll
     public static void prepare(Vertx vertx,
                                VertxTestContext context
@@ -32,13 +31,15 @@ public class HttpExampleModuleTest {
                                   System.out::println
                                  );
 
-        httpModule = new HttpExampleModule(new HttpClientOptions().setSsl(true)
-                                                                  .setDefaultPort(443)
-                                                                  .setTrustAll(true));
+        httpModule =
+                new HttpExampleModule(new HttpClientOptions().setSsl(true)
+                                                             .setDefaultPort(443)
+                                                             .setTrustAll(true));
 
-        search = term -> httpModule.get.apply(new GetReq().host("www.google.com")
-                                                          .uri("/search?q=" + term)
-                                             );
+        search =
+                term -> httpModule.get.apply(new GetReq().host("www.google.com")
+                                                         .uri("/search?q=" + term)
+                                            );
 
         Verifiers.<Tuple2<String, String>>verifySuccess()
                 .accept(Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
@@ -60,7 +61,6 @@ public class HttpExampleModuleTest {
                      )
             .onComplete(Verifiers.pipeTo(context))
             .get();
-
     }
 
 

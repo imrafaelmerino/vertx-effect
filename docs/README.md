@@ -144,8 +144,7 @@ Val<JsObj> profile = Cons.of( () -> getProfile(id)); // from a Future
 ``` 
 
 
-- **IfElse**. If the predicate returns **Cons.success(true)**, it executes and returns the consequence
-;otherwise, the alternative.
+- **IfElse**. If the predicate returns true, it executes and returns the consequence; otherwise, the alternative.
 
 
 ```java
@@ -176,16 +175,17 @@ Cond.<O>of(Val<Boolean>, Val<O>,
  
 
 - **Case**. The case construct implements multiple predicate-value branches like the Cond construct. 
-However, it evaluates a value and allows multiple value clauses based on the evaluation of that value.
+However, it evaluates a value of type **I** and allows multiple value clauses based on the evaluation of 
+that value.
 
 
 ```java
 
-new Case<I,O>(Val<I>).of(cons of type I,Val<O>,
-                         cons of type I,Val<O>,        
-                         cons of type I,Val<O>,
+new Case<I,O>(Val<I>).of(cons of type I, Val<O>,
+                         cons of type I, Val<O>,        
+                         cons of type I, Val<O>,
                          Val<O>
-                        );       
+                        );      
 
 // reduces to Wednesday
 new Case<Integer,String>(Cons.success(3)).of(1, Cons.success("Monday"),
@@ -197,11 +197,13 @@ new Case<Integer,String>(Cons.success(3)).of(1, Cons.success("Monday"),
                                             );
 ```
 
+The same as before but using lists instead of constants.
+
 ```java
 
-new Case<I,O>(Val<I>).of(List<I>,Val<O>,
-                         List<I>,Val<O>,        
-                         List<I>,Val<O>,
+new Case<I,O>(Val<I>).of(List<I>, Val<O>,
+                         List<I>, Val<O>,        
+                         List<I>, Val<O>,
                          Val<O>
                         );      
         
@@ -228,11 +230,33 @@ Or.parallel(Val<Boolean>,...)
 Or.sequential(Val<Boolean>,...)
 
 ```  
- 
 
-- **JsObjVal** and **JsArrayVal**. You can compute all the values either in parallel or sequentially.
-The next example shows how _JsObjVal_ and _JsArrayVal_ are data structures that 
-look like raw Json. And of course, you can mix expressions and nest them, going as deeper as necessary.  
+- **Pair**. A pair is a tuple of two elements. Each element can be computed either in parallel or sequentially.
+
+
+```java
+
+Val<Tuple2<A,B>  pair = Pair.parallel(Val<A>, Val<B>);
+
+Val<Tuple2<A,B>  pair = Pair.sequential(Val<A>, Val<B>);
+
+```
+  
+- **Triple**. A triple is a tuple of three elements. Each element can be computed either in parallel or sequentially. 
+
+
+```java
+
+Val<Tuple3<A,B,C> triple = Triple.parallel(Val<A>, Val<B>, Val<C>);
+
+Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>, Val<B>, Val<C>);
+
+```
+ 
+- **JsObjVal** and **JsArrayVal**. 
+_JsObjVal_ and _JsArrayVal_ are data structures that look like raw Json. You can compute all the values either in parallel or sequentially.
+You can mix all the expressions we've seen so far and nest them, going as deeper as necessary, like in the
+following example:  
 
 
 ```java
@@ -262,27 +286,7 @@ JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
 ```
 
 
-- **Pair**. A pair is a tuple of two elements. 
 
-
-```java
-
-Val<Tuple2<A,B>  pair = Pair.parallel(Val<A>, Val<B>);
-
-Val<Tuple2<A,B>  pair = Pair.sequential(Val<A>, Val<B>);
-
-```
-  
-- **Triple**. A triple is a tuple of three elements. 
-
-
-```java
-
-Val<Tuple3<A,B,C> triple = Triple.parallel(Val<A>, Val<B>, Val<C>);
-
-Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>, Val<B>, Val<C>);
-
-```
 
 It's important to notice **that any value of the above expressions can be computed by a different Verticle of
 any machine of a cluster**. Imagine ten machines collaborating to compute a JsObj, is not this amazing?
@@ -301,6 +305,8 @@ public interface Val<O> extends Supplier<Future<O>> {
   Val<O> retry(int attempts);
 
   Val<O> retryIf(Predicate<Throwable> predicate, int attempts);
+  
+  Val<O> recoverWith(final λ<Throwable, O> fn);
 
   Val<O> fallbackTo(λ<Throwable, O> fn);
 
@@ -586,12 +592,12 @@ of the And expression.
 Let's take a look at the events that are published during the execution of the previous code:
 
 ```json
-{"event":"SENT_MESSAGE","to":"isValid","context":{"email":["example@gmail.com"]},"message":{"email":"example@gmail.com","age":10},"instant":"2020-10-11T15:09:26.704145Z","thread":"main"}
+{"event":"SENT_MESSAGE","to":"isValid","context":{"email":["example@gmail.com"]},"message":{"email":"example@gmail.com","age":10, "id": "03486761"},"instant":"2020-10-11T15:09:26.704145Z","thread":"main"}
 {"event":"RECEIVED_MESSAGE","address":"isValid","context":{"email":["example@gmail.com"]},"instant":"2020-10-11T15:09:26.708157Z","thread":"vert.x-eventloop-thread-8"}
 {"event":"SENT_MESSAGE","to":"isValid","context":{"email":["imrafaelmerino@gmail.com"]},"message":{"email":"imrafaelmerino@gmail.com","age":17,"id":"03786761>"},"instant":"2020-10-11T15:09:26.708597Z","thread":"main"}
 {"event":"SENT_MESSAGE","to":"isLegalAge","context":{"email":["example@gmail.com"]},"message":10,"instant":"2020-10-11T15:09:26.709568Z","thread":"vert.x-eventloop-thread-8"}
 {"event":"RECEIVED_MESSAGE","address":"isLegalAge","context":{"email":["example@gmail.com"]},"instant":"2020-10-11T15:09:26.710185Z","thread":"vert.x-eventloop-thread-4"}
-{"event":"SENT_MESSAGE","to":"isValidId","context":{"email":["example@gmail.com"]},"message":null,"instant":"2020-10-11T15:09:26.710136Z","thread":"vert.x-eventloop-thread-8"}
+{"event":"SENT_MESSAGE","to":"isValidId","context":{"email":["example@gmail.com"]},"message": "03486761","instant":"2020-10-11T15:09:26.710136Z","thread":"vert.x-eventloop-thread-8"}
 {"event":"SENT_MESSAGE","to":"isValidEmail","context":{"email":["example@gmail.com"]},"message":"example@gmail.com","instant":"2020-10-11T15:09:26.710672Z","thread":"vert.x-eventloop-thread-8"}
 {"event":"RECEIVED_MESSAGE","address":"isValidId","context":{"email":["example@gmail.com"]},"instant":"2020-10-11T15:09:26.710713Z","thread":"vert.x-eventloop-thread-5"}
 {"event":"RECEIVED_MESSAGE","address":"isValidEmail","context":{"email":["example@gmail.com"]},"instant":"2020-10-11T15:09:26.711165Z","thread":"vert.x-eventloop-thread-6"}
@@ -628,13 +634,16 @@ public class MyHttpModule extends HttpClientModule {
     }
 
 }
+
 HttpClientOptions options = new HttpClientOptions().setDefaultHost("www.google.com")
                                                    .setDefaultPort(80);
-MyHttpModule httpModule = new MyHttpModule();
+MyHttpModule httpModule = new MyHttpModule(options);
 
-vertxRef.deploy(httpModule);
+Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
+        vertxRef.deploy(httpModule)
+       ).get()
 
-``` 
+```
 
 Find below the types of some of the most relevant lambdas that you can use to make HTTP requests
 after deploying the module:
@@ -653,16 +662,33 @@ The response is a Json with the following fields and types:
 
 **body**:String, **status_code**:int, **status_message**:int, **cookies**:JsArray, **headers**:JsObj
 
-All the request events are published into the address "vertx-effect-events. Making the request:
+Let's create a function that takes two arguments; the number of retries in case of a timeout 
+takes place, and a search term. We wait one second before making the first attempt, two seconds before
+making the second one and so forth. If other error happens, or the function uses up the number of attempts,
+the function returns an empty json. 
 
-```java
+```java 
+import static vertx.effect.Failures.HTTP_CONNECT_TIMEOUT_PRISM;
+import static vertx.effect.Failures.HTTP_REQUEST_TIMEOUT_PRISM; 
 
-Function<String,JsObj> search =  term -> httpModule.get.apply(new GetReq().uri("/search?q=" + term));
-search.apply("vertx").apply()
+BiFunction<Integer,String,JsObj> search =  
+       (attempts,term) -> httpModule.get.apply(new GetReq().uri("/search?q=" + term))
+                                    .retryIf(Failures.or(HTTP_CONNECT_TIMEOUT_PRISM,
+                                                         HTTP_REQUEST_TIMEOUT_PRISM
+                                                        ),
+                                             attempts,
+                                             (error,nattempt) -> vertxRef.timer(nattempt,
+                                                                                SECONDS,
+                                                                                "waiting til next attemp"
+                                                                               )
+                                            )
+                                    .recoverWith(e -> Cons.success(JsObj.EMPTY));
 
-```
+search.apply(3, "vertx").get();
 
-would produce the following events:
+``` 
+
+All the request events are also published into the address "vertx-effect-events.
 
 ```json
 {"event":"DEPLOYED_VERTICLE","class":"vertxval.RegisterJsValuesCodecs","instant":"2020-10-12T17:29:01.633606Z","id":"15f47d0d-1646-47a8-a458-e2a37a578457","thread":"vert.x-eventloop-thread-3"}
@@ -676,7 +702,7 @@ would produce the following events:
 
 ```
 
-As you can see two verticles were deployed: the module and an iternal verticle listening on myhttp-client-adress
+As you can see two verticles were deployed: the module and an iternal verticle listening on the specified address _myhttp-client-adress_,
 that performs the requests. The cookies, headers and body received from Google are ommited.
 Every request message has a type that is an integer for performance reasons. In the example the type 0 means that
 it's a GET.
