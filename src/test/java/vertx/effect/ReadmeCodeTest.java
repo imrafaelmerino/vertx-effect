@@ -26,9 +26,9 @@ public class ReadmeCodeTest {
                                   System.out::println
                                  );
 
-        Pair.parallel(vertxRef.deploy(new MyModule()),
-                      vertxRef.deploy(new RegisterJsValuesCodecs())
-                     )
+        Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                        vertxRef.deploy(new MyModule())
+                       )
             .onSuccess(pair -> {
                 String id1 = pair._1;
                 String id2 = pair._2;

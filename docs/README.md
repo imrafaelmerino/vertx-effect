@@ -1,4 +1,4 @@
-<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/black/full/black_logo_white_background.png" width="250" height="150"/>
+<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/color1/full/white_logo_color1_background.png" width="250" height="150"/>
 
 [![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
@@ -389,9 +389,9 @@ Let's deploy our module and do some testing.
     // prints out events published by vertx-effect
     vertxRef.registerConsumer(EVENTS_ADDRESS, System.out::println); 
 
-    Pair.parallel(vertxRef.deploy(new MyModule()),
-                  vertxRef.deploy(new RegisterJsValuesCodecs())
-                 )
+    Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                    vertxRef.deploy(new MyModule()) 
+                   )
         .onSuccess(pair -> {
                             System.out.println(String.format("Ids deployed: %s and %s",
                                                              pair._1,
