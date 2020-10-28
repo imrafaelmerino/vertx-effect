@@ -1,17 +1,17 @@
-package vertxval.performance.benchmarks;
+package vertx.effect.performance.benchmarks;
 
 import io.vertx.core.Vertx;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
-import vertxval.RegisterJsValuesCodecs;
-import vertxval.VertxRef;
-import vertxval.exp.Pair;
-import vertxval.performance.Module;
+import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.VertxRef;
+import vertx.effect.exp.Pair;
+import vertx.effect.Module;
 
-import static vertxval.performance.Functions.await5segForEnding;
-import static vertxval.performance.Module.*;
+import static vertx.effect.Functions.await5segForEnding;
+import static vertx.effect.Module.*;
 
 public class MyBenchmark {
 
@@ -26,12 +26,6 @@ public class MyBenchmark {
 
     private static final int TIMES = 100;
 
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void testCountStringOneVerticle()  {
-        await5segForEnding(countStringsOneVerticle.apply(TIMES));
-    }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)

@@ -1,7 +1,7 @@
-package vertxval.performance;
+package vertx.effect;
 
 import jsonvalues.*;
-import vertxval.exp.Val;
+import vertx.effect.Val;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;

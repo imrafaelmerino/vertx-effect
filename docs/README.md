@@ -1,6 +1,6 @@
 <img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/color1/full/white_logo_color1_background.png" width="250" height="150"/>
 
-[![Build Status](https://travis-ci.org/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.org/imrafaelmerino/vertx-effect)
+[![Build Status](https://travis-ci.com/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.com/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
 
@@ -472,9 +472,9 @@ a Json would be:
 ```json
 
 {"event":"DEPLOYED_VERTICLE","address":"removeNull","instant":"2020-10-10T22:44:42.687633Z","id":"3de92ef8-777f-4110-aa45-442fc41900c6","thread":"vert.x-eventloop-thread-1"}
-{"event":"DEPLOYED_VERTICLE","class":"vertxval.RegisterJsValuesCodecs","instant":"2020-10-10T22:44:42.682624Z","id":"73181043-ae38-4819-b7de-02f303fcc155","thread":"vert.x-eventloop-thread-3"}
+{"event":"DEPLOYED_VERTICLE","class":"vertx.effect.RegisterJsValuesCodecs","instant":"2020-10-10T22:44:42.682624Z","id":"73181043-ae38-4819-b7de-02f303fcc155","thread":"vert.x-eventloop-thread-3"}
 {"event":"DEPLOYED_VERTICLE","address":"trim","instant":"2020-10-10T22:44:42.701293Z","id":"a866ffdc-38c8-4da2-bcc0-c9f4881f5139","thread":"vert.x-eventloop-thread-1"}
-{"event":"DEPLOYED_VERTICLE","class":"vertxval.MyModule","instant":"2020-10-10T22:44:42.703410Z","id":"1473dff2-075c-4fd8-be42-cebcf0a890a0","thread":"vert.x-eventloop-thread-6"}
+{"event":"DEPLOYED_VERTICLE","class":"vertx.effect.MyModule","instant":"2020-10-10T22:44:42.703410Z","id":"1473dff2-075c-4fd8-be42-cebcf0a890a0","thread":"vert.x-eventloop-thread-6"}
 
 {"event":"SENT_MESSAGE","to":"removeNull","message":{"a":"  hi  ","b":null,"c":{"d":"  bye  ","e":null}},"instant":"2020-10-10T22:44:42.710447Z","thread":"main"}
 {"event":"RECEIVED_MESSAGE","address":"removeNull","instant":"2020-10-10T22:44:42.713981Z","thread":"vert.x-eventloop-thread-4"}
@@ -690,7 +690,7 @@ search.apply(3, "vertx").get();
 All the request events are also published into the address "vertx-effect-events.
 
 ```json
-{"event":"DEPLOYED_VERTICLE","class":"vertxval.RegisterJsValuesCodecs","instant":"2020-10-12T17:29:01.633606Z","id":"15f47d0d-1646-47a8-a458-e2a37a578457","thread":"vert.x-eventloop-thread-3"}
+{"event":"DEPLOYED_VERTICLE","class":"vertx.effect.RegisterJsValuesCodecs","instant":"2020-10-12T17:29:01.633606Z","id":"15f47d0d-1646-47a8-a458-e2a37a578457","thread":"vert.x-eventloop-thread-3"}
 {"event":"DEPLOYED_VERTICLE","address":"myhttp-client-address","instant":"2020-10-12T17:29:01.801718Z","id":"4e0928a8-633b-4a3d-88ae-ef32d4dae06f","thread":"vert.x-eventloop-thread-2"}
 {"event":"DEPLOYED_VERTICLE","class":"MyHttpModule","instant":"2020-10-12T17:29:01.803823Z","id":"0395c2ec-9959-4aa5-bd71-84c894c35f0f","thread":"vert.x-eventloop-thread-5"}
 

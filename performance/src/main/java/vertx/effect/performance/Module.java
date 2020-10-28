@@ -1,4 +1,4 @@
-package vertxval.performance;
+package vertx.effect;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -7,14 +7,13 @@ import jsonvalues.JsInt;
 import jsonvalues.JsObj;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vertxval.VertxModule;
-import vertxval.exp.Cons;
-import vertxval.exp.λ;
+import vertx.effect.exp.Cons;
+import vertx.effect.exp.Pair;
+
 
 
 public class Module extends VertxModule {
 
-    public static λ<Integer, Integer> countStringsOneVerticle;
     public static λ<Integer, Integer> countStringsMultiProcesses;
     public static λ<Integer, Integer> countStringsMultiVerticles;
     public static λ<JsObj, JsObj> filter;
@@ -29,7 +28,7 @@ public class Module extends VertxModule {
     public static λ<String, JsObj> parser;
     public static λ<JsonObject, JsonObject> jacksonId;
     public static λ<String, JsonObject> jacksonParser;
-    final static DeploymentOptions WORKER = new DeploymentOptions().setWorker(true);
+    static final DeploymentOptions WORKER = new DeploymentOptions().setWorker(true);
 
     private static final String FILTER_ADDRESS = "filter";
     private static final String MAP_ADDRESS = "map";
@@ -37,7 +36,6 @@ public class Module extends VertxModule {
     private static final String GENERATOR_ADDRESS = "generator";
     private static final String PARSER_ADDRESS = "parser";
     private static final String JACKSON_PARSER_ADDRESS = "jacksonParser";
-    private static final String GET_LENGTH_ADDRESS = "getLengthString";
     private static final String GET_LENGTH_MULTIVERTICLE_ADDRESS = "getLengthStringMultiVerticle";
     private static final String ID_ADDRESS = "id";
     private static final String JACKSONID_ADDRESS = "jacksonId";
@@ -53,7 +51,6 @@ public class Module extends VertxModule {
 
         generator = this.ask(GENERATOR_ADDRESS);
 
-        countStringsOneVerticle = this.ask(GET_LENGTH_ADDRESS);
 
         countStringsMultiVerticles = this.ask(GET_LENGTH_MULTIVERTICLE_ADDRESS);
 
@@ -83,9 +80,9 @@ public class Module extends VertxModule {
                                           new JsGenVerticle(),
                                           WORKER
                                          );
-
-
     }
+
+
 
 
     @Override
@@ -117,10 +114,6 @@ public class Module extends VertxModule {
                     WORKER.setInstances(8)
                    );
 
-        this.deploy(GET_LENGTH_ADDRESS,
-                    new CountStringOneVerticle(),
-                    WORKER
-                   );
 
         this.deploy(GET_LENGTH_MULTIVERTICLE_ADDRESS,
                     new CountStringMultiVerticle(),
@@ -158,10 +151,13 @@ public class Module extends VertxModule {
 
         final Vertx vertx = Vertx.vertx();
 
+        final VertxRef vertxRef = new VertxRef(vertx);
 
-        vertx.deployVerticle(new Module(),
-                             h -> Module.countStringsMultiVerticles.apply(10)
-                            );
+        Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                        vertxRef.deploy(new Module()))
+            .onSuccess(it ->  Module.countStringsMultiVerticles.apply(10).onSuccess(System.out::println))
+            .get();
+
 
         Thread.sleep(10000);
 

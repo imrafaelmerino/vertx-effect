@@ -1,4 +1,4 @@
-package vertxval.performance.benchmarks;
+package vertx.effect.performance.benchmarks;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -8,17 +8,17 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
-import vertxval.RegisterJsValuesCodecs;
-import vertxval.VertxRef;
-import vertxval.exp.Pair;
-import vertxval.performance.Functions;
-import vertxval.performance.Module;
+import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.VertxRef;
+import vertx.effect.exp.Pair;
+import vertx.effect.Functions;
+import vertx.effect.Module;
 
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static vertxval.performance.Functions.await5segForEnding;
-import static vertxval.performance.Module.*;
+import static vertx.effect.Functions.await5segForEnding;
+import static vertx.effect.Module.*;
 
 public class JacksonVsJsValuesBenchmark {
     private static final Supplier<JsObj> objGen = Functions.generator.apply(new Random());

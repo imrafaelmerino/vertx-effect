@@ -1,9 +1,10 @@
-package vertxval.performance;
+package vertx.effect;
 
 import jsonvalues.JsObj;
-import vertxval.exp.Cons;
-import vertxval.exp.Val;
-import vertxval.exp.λ;
+import vertx.effect.Val;
+import vertx.effect.exp.Cons;
+import vertx.effect.λ;
+
 import java.util.Random;
 import java.util.function.Supplier;
 

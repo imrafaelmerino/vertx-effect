@@ -1,13 +1,11 @@
-package vertxval.performance;
+package vertx.effect;
 
-import vertxval.exp.Cons;
-import vertxval.exp.Val;
-import vertxval.exp.λ;
+import vertx.effect.exp.Cons;
 
 import java.util.stream.IntStream;
 
-import static vertxval.performance.Functions.TIME_WAITING_MS;
-import static vertxval.performance.Module.*;
+import static vertx.effect.Functions.TIME_WAITING_MS;
+import static vertx.effect.Module.*;
 
 public class CountStringProcesses implements λ<Integer, Integer> {
     private int total = 0;
