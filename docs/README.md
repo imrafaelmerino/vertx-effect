@@ -1,4 +1,6 @@
-<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/color1/full/white_logo_color1_background.png" width="250" height="150"/>
+<a href="https://github.com/imrafaelmerino/vertx-effect">
+<img src="https://github.com/imrafaelmerino/vertx-effect/blob/master/logo/package_highres_swe2n4mg/color1/full/white_logo_color1_background.png" width="250" height="150" alt="logo"/>
+</a>
 
 [![Build Status](https://travis-ci.com/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.com/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
