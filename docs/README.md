@@ -1,5 +1,3 @@
-<img src="https://github.com/imrafaelmerino/vertx-effect/blob/release-0.2/logo/package_highres_swe2n4mg/color1/full/white_logo_color1_background.png" width="250" height="150"/>
-
 [![Build Status](https://travis-ci.com/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.com/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
@@ -687,7 +685,7 @@ search.apply(3, "vertx").get();
 
 ``` 
 
-All the request events are also published into the address "vertx-effect-events.
+All the request events are also published into the address **vertx-effect-events**.
 
 ```json
 {"event":"DEPLOYED_VERTICLE","class":"vertx.effect.RegisterJsValuesCodecs","instant":"2020-10-12T17:29:01.633606Z","id":"15f47d0d-1646-47a8-a458-e2a37a578457","thread":"vert.x-eventloop-thread-3"}
