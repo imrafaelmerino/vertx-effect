@@ -8,17 +8,20 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
+
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Pair;
-import vertx.effect.Functions;
-import vertx.effect.Module;
+import vertx.effect.performance.Functions;
+import vertx.effect.performance.MyModule;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static vertx.effect.Functions.await5segForEnding;
-import static vertx.effect.Module.*;
+
+import static vertx.effect.performance.Functions.awaitForEnding;
+import static vertx.effect.performance.MyModule.*;
 
 public class JacksonVsJsValuesBenchmark {
     private static final Supplier<JsObj> objGen = Functions.generator.apply(new Random());
@@ -28,9 +31,11 @@ public class JacksonVsJsValuesBenchmark {
 
     static {
         VertxRef vertxRef = new VertxRef(Vertx.vertx());
-        await5segForEnding(Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                                   vertxRef.deploy(new Module())
-                                  )
+        awaitForEnding(Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                                   vertxRef.deploy(new MyModule())
+                                      ),
+                       2,
+                       TimeUnit.SECONDS
                           );
     }
 
@@ -52,16 +57,21 @@ public class JacksonVsJsValuesBenchmark {
     @BenchmarkMode(Mode.Throughput)
     @Fork(1)
     public void parsing_with_JsValues_and_sending_to_event_bus() {
-        await5segForEnding(parser.apply(strGen.get())
-                                 .flatMap(id));
+        awaitForEnding(parser.apply(strGen.get())
+                                 .flatMap(id),
+                       10,
+                       TimeUnit.SECONDS
+                      );
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @Fork(1)
     public void parsing_with_Jackson_and_sending_to_event_bus() {
-        await5segForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId)
+        awaitForEnding(jacksonParser.apply(strGen.get())
+                                        .flatMap(jacksonId),
+                       10,
+                       TimeUnit.SECONDS
                           );
     }
 

@@ -5,15 +5,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import jsonvalues.JsInt;
 import jsonvalues.JsObj;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxModule;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
-import vertx.effect.λ;
 
 
-public class Module extends VertxModule {
+public class MyModule extends VertxModule {
 
     public static λ<Integer, Integer> countStringsLengthMultiProcesses;
     public static λ<Integer, Integer> countStringsLengthMultiVerticles;
@@ -164,8 +161,8 @@ public class Module extends VertxModule {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,System.out::println);
 
         Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                        vertxRef.deploy(new Module()))
-            .onSuccess(it ->  Module.countStringsLengthMultiVerticles.apply(10).onSuccess(System.out::println))
+                        vertxRef.deploy(new MyModule()))
+            .onSuccess(it ->  MyModule.countStringsLengthMultiVerticles.apply(10).onSuccess(System.out::println))
             .get();
 
 
