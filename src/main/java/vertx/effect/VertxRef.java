@@ -276,7 +276,7 @@ public class VertxRef {
      */
     public <I, O> λ<I, O> spawn(final String address,
                                 final λ<I, O> lambda) {
-        return spawn(generateProcessAddress(address),
+        return spawn(address,
                      lambda,
                      deploymentOptions
                     );
@@ -291,7 +291,7 @@ public class VertxRef {
      */
     public <I, O> λc<I, O> spawn(final String address,
                                  final λc<I, O> lambda) {
-        return spawn(generateProcessAddress(address),
+        return spawn(address,
                      lambda,
                      DEFAULT_OPTIONS
                     );
@@ -365,11 +365,12 @@ public class VertxRef {
 
         return input ->
         {
-            Consumer<Message<I>> consumer = message -> wrapLambda(address,
+            String generatedAddress = generateProcessAddress(address);
+            Consumer<Message<I>> consumer = message -> wrapLambda(generatedAddress,
                                                                   message,
                                                                   lambda
                                                                  );
-            Val<VerticleRef<I, O>> future = deploy(address,
+            Val<VerticleRef<I, O>> future = deploy(generatedAddress,
                                                    consumer,
                                                    options
                                                   );
@@ -379,11 +380,11 @@ public class VertxRef {
                                         .onComplete(__ -> r.undeploy()
                                                            .onComplete(event -> {
                                                                if (event.succeeded())
-                                                                   EventPublisher.PUBLISHER.undeployedVerticle(address)
+                                                                   EventPublisher.PUBLISHER.undeployedVerticle(generatedAddress)
                                                                                            .accept(vertx);
                                                                else
                                                                    EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_UNDEPLOYING_VERTICLE,
-                                                                                                          address,
+                                                                                                          generatedAddress,
                                                                                                           event.cause()
                                                                                                          )
                                                                                            .accept(vertx);

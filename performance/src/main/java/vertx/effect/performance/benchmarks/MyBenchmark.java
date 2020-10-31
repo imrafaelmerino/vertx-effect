@@ -1,6 +1,7 @@
 package vertx.effect.performance.benchmarks;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -8,40 +9,53 @@ import org.openjdk.jmh.annotations.Mode;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Pair;
-import vertx.effect.Module;
+import vertx.effect.performance.MyModule;
 
-import static vertx.effect.Functions.await5segForEnding;
-import static vertx.effect.Module.*;
+import java.util.concurrent.TimeUnit;
+
+import static vertx.effect.performance.Functions.awaitForEnding;
+import static vertx.effect.performance.MyModule.countStringsLengthMultiProcesses;
+import static vertx.effect.performance.MyModule.countStringsLengthMultiVerticles;
 
 public class MyBenchmark {
 
     static {
-        VertxRef deployer = new VertxRef(Vertx.vertx());
+        VertxRef vertxRef = new VertxRef(Vertx.vertx(new VertxOptions().setWorkerPoolSize(100)));
 
 
-        await5segForEnding(Pair.of(deployer.deploy(new RegisterJsValuesCodecs()),
-                                   deployer.deploy(new Module())
-                                  ));
+        awaitForEnding(Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
+                                       vertxRef.deploy(new MyModule())
+                                      ),
+                       2,
+                       TimeUnit.SECONDS
+                      );
     }
 
     private static final int TIMES = 100;
+    private  static final int TIME_WAITING = 200;
 
 
     @Benchmark
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.All)
     @Fork(1)
     public void testCountStringMultiVerticle()  {
 
-        await5segForEnding(countStringsMultiVerticles.apply(TIMES));
+        awaitForEnding(countStringsLengthMultiVerticles.apply(TIMES),
+                       TIME_WAITING,
+                       TimeUnit.SECONDS
+                      );
 
     }
 
     @Benchmark
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.All)
     @Fork(1)
     public void testCountStringProcesses()  {
 
-        await5segForEnding(countStringsMultiProcesses.apply(TIMES));
+        awaitForEnding(countStringsLengthMultiProcesses.apply(TIMES),
+                       TIME_WAITING,
+                       TimeUnit.SECONDS
+                      );
 
 
     }

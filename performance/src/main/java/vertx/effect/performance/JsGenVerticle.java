@@ -1,4 +1,4 @@
-package vertx.effect;
+package vertx.effect.performance;
 
 import jsonvalues.JsObj;
 import vertx.effect.Val;

@@ -1,35 +1,46 @@
-package vertx.effect;
+package vertx.effect.performance;
 
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import vertx.effect.Val;
 import vertx.effect.exp.Cons;
+import vertx.effect.λ;
 
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import static vertx.effect.Functions.TIME_WAITING_MS;
-import static vertx.effect.Module.*;
+import static vertx.effect.performance.Functions.TIME_WAITING_MS;
+import static vertx.effect.performance.MyModule.*;
 
 public class CountStringProcesses implements λ<Integer, Integer> {
-    private int total = 0;
-
 
     @Override
     public Val<Integer> apply(final Integer times) {
-        return IntStream.range(0,
-                               times
-                              )
-                        .mapToObj(it -> generatorProcess.apply(TIME_WAITING_MS)
-                                                        .flatMap(obj -> filterProcess.andThen(mapProcess)
-                                                                                     .andThen(reduceProcess)
-                                                                                     .apply(obj))
+        return Cons.of(() -> {
+            List<Future> futures = new ArrayList<>();
+            for (int i = 0; i < times; i++) {
+                futures.add(
+                        generatorProcess.apply(TIME_WAITING_MS)
+                                        .flatMap(filterProcess.andThen(mapProcess)
+                                                              .andThen(reduceProcess)
+                                                )
+                                        .get()
+                           );
 
-
-                                 )
-                        .reduce(Cons.success(0),
-                                (a, b) -> a.flatMap(n -> b.flatMap(m -> Cons.success(m + n)))
-                               )
-                        .onSuccess(it -> total += it);
-
+            }
+            return CompositeFuture.all(futures)
+                                  .map(val -> val.list()
+                                                 .stream()
+                                                 .map(it -> ((Integer) it))
+                                                 .reduce((r, r2) -> r + r2)
+                                                 .orElse(0)
+                                      );
+        });
 
     }
 
 
 }
+
+
+

@@ -1,21 +1,19 @@
-package vertx.effect;
+package vertx.effect.performance;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import jsonvalues.JsInt;
 import jsonvalues.JsObj;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import vertx.effect.*;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
 
 
+public class MyModule extends VertxModule {
 
-public class Module extends VertxModule {
-
-    public static λ<Integer, Integer> countStringsMultiProcesses;
-    public static λ<Integer, Integer> countStringsMultiVerticles;
+    public static λ<Integer, Integer> countStringsLengthMultiProcesses;
+    public static λ<Integer, Integer> countStringsLengthMultiVerticles;
     public static λ<JsObj, JsObj> filter;
     public static λ<JsObj, JsObj> filterProcess;
     public static λ<Integer, JsObj> generator;
@@ -36,11 +34,23 @@ public class Module extends VertxModule {
     private static final String GENERATOR_ADDRESS = "generator";
     private static final String PARSER_ADDRESS = "parser";
     private static final String JACKSON_PARSER_ADDRESS = "jacksonParser";
-    private static final String GET_LENGTH_MULTIVERTICLE_ADDRESS = "getLengthStringMultiVerticle";
+    private static final String COUNT_STRING_LENGTH_MULTIVERTICLE_ADDRESS = "countStringsLengthMultiVerticle";
     private static final String ID_ADDRESS = "id";
     private static final String JACKSONID_ADDRESS = "jacksonId";
-    private static final String GET_LENGTH_MULTIPROCESSES_ADDRESS = "getLengthStringMultiProcesses";
+    private static final String COUNT_STRING_LENGTH_MULTIPROCESSES_ADDRESS = "countStringsLengthMultiProcesses";
 
+    final λ<JsObj, JsObj> mapFn = obj ->
+            Cons.success(obj.mapAllValues(pair -> JsInt.of(pair.value.toJsStr().value.length())));
+
+    final λ<JsObj, JsObj> filterFn = obj ->
+            Cons.success(obj.filterAllValues(pair -> pair.value.isStr()));
+
+    final λ<JsObj, Integer> reduceFn = json ->
+            Cons.success(json.reduceAll(Integer::sum,
+                                        pair -> pair.value.toJsInt().value,
+                                        pair -> true
+                                       )
+                             .orElse(0));
     @Override
     protected void initialize() {
         filter = this.ask(FILTER_ADDRESS);
@@ -52,9 +62,9 @@ public class Module extends VertxModule {
         generator = this.ask(GENERATOR_ADDRESS);
 
 
-        countStringsMultiVerticles = this.ask(GET_LENGTH_MULTIVERTICLE_ADDRESS);
+        countStringsLengthMultiVerticles = this.ask(COUNT_STRING_LENGTH_MULTIVERTICLE_ADDRESS);
 
-        countStringsMultiProcesses = this.ask(GET_LENGTH_MULTIPROCESSES_ADDRESS);
+        countStringsLengthMultiProcesses = this.ask(COUNT_STRING_LENGTH_MULTIPROCESSES_ADDRESS);
 
         id = this.ask(ID_ADDRESS);
 
@@ -65,15 +75,15 @@ public class Module extends VertxModule {
         jacksonParser = this.ask(JACKSON_PARSER_ADDRESS);
 
         filterProcess = vertxRef.spawn(FILTER_ADDRESS,
-                                       filter
+                                       filterFn
                                       );
 
         mapProcess = vertxRef.spawn(MAP_ADDRESS,
-                                    map
+                                    mapFn
                                    );
 
         reduceProcess = vertxRef.spawn(REDUCE_ADDRESS,
-                                       reduce
+                                       reduceFn
                                       );
 
         generatorProcess = vertxRef.spawn(GENERATOR_ADDRESS,
@@ -87,40 +97,37 @@ public class Module extends VertxModule {
 
     @Override
     protected void deploy() {
-        final λ<JsObj, JsObj> filter = obj ->
-                Cons.success(obj.filterAllValues(pair -> pair.value.isStr()));
+
         this.deploy(FILTER_ADDRESS,
-                    filter
+                    filterFn,
+                    new DeploymentOptions().setInstances(4)
                    );
 
-        final λ<JsObj, JsObj> map = obj ->
-                Cons.success(obj.mapAllValues(pair -> JsInt.of(pair.value.toJsStr().value.length())));
+
         this.deploy(MAP_ADDRESS,
-                    map
+                    mapFn,
+                    new DeploymentOptions().setInstances(4)
+
                    );
 
-        final λ<JsObj, Integer> reduce = json ->
-                Cons.success(json.reduceAll(Integer::sum,
-                                            pair -> pair.value.toJsInt().value,
-                                            pair -> true
-                                           )
-                                 .orElse(0));
+
         this.deploy(REDUCE_ADDRESS,
-                    reduce
+                    reduceFn,
+                    new DeploymentOptions().setInstances(4)
                    );
 
         this.deploy(GENERATOR_ADDRESS,
                     new JsGenVerticle(),
-                    WORKER.setInstances(8)
+                    WORKER.setInstances(4)
                    );
 
 
-        this.deploy(GET_LENGTH_MULTIVERTICLE_ADDRESS,
+        this.deploy(COUNT_STRING_LENGTH_MULTIVERTICLE_ADDRESS,
                     new CountStringMultiVerticle(),
                     WORKER
                    );
 
-        this.deploy(GET_LENGTH_MULTIPROCESSES_ADDRESS,
+        this.deploy(COUNT_STRING_LENGTH_MULTIPROCESSES_ADDRESS,
                     new CountStringProcesses(),
                     WORKER
                    );
@@ -147,21 +154,19 @@ public class Module extends VertxModule {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        Logger LOGGER = LoggerFactory.getLogger(Module.class);
-
         final Vertx vertx = Vertx.vertx();
 
         final VertxRef vertxRef = new VertxRef(vertx);
 
+        vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,System.out::println);
+
         Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                        vertxRef.deploy(new Module()))
-            .onSuccess(it ->  Module.countStringsMultiVerticles.apply(10).onSuccess(System.out::println))
+                        vertxRef.deploy(new MyModule()))
+            .onSuccess(it ->  MyModule.countStringsLengthMultiVerticles.apply(10).onSuccess(System.out::println))
             .get();
 
 
         Thread.sleep(10000);
-
-        LOGGER.info("The end.");
 
 
     }
