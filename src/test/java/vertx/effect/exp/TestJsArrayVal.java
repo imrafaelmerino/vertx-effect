@@ -14,8 +14,7 @@ import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestJsArrayVal {
@@ -113,9 +112,8 @@ public class TestJsArrayVal {
                             b.get()
                            )
                   .retry(ATTEMPTS,
-                         (error, n) -> vertxRef.timer(1,
-                                                      SECONDS,
-                                                      "next attempt"
+                         (error, n) -> vertxRef.timer(100,
+                                                      MILLISECONDS
                                                      )
                         )
                   .get()
@@ -125,7 +123,7 @@ public class TestJsArrayVal {
                                                         ),
                                               r.result()
                                              );
-                      Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                       context.completeNow();
 
                   }));
@@ -151,9 +149,8 @@ public class TestJsArrayVal {
                              )
                   .retryIf(e -> e instanceof RuntimeException,
                            ATTEMPTS,
-                           (error, n) -> vertxRef.timer(1,
-                                                        SECONDS,
-                                                        "next attempt"
+                           (error, n) -> vertxRef.timer(100,
+                                                       MILLISECONDS
                                                        )
                           )
                   .get()
@@ -163,7 +160,7 @@ public class TestJsArrayVal {
                                                         ),
                                               r.result()
                                              );
-                      Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                       context.completeNow();
 
                   }));
@@ -188,9 +185,8 @@ public class TestJsArrayVal {
                               b.get()
                              )
                   .retry(ATTEMPTS,
-                         (error, n) -> vertxRef.timer(1,
-                                                      SECONDS,
-                                                      "next attempt"
+                         (error, n) -> vertxRef.timer(100,
+                                                      MILLISECONDS
                                                      )
                         )
                   .get()
@@ -200,7 +196,7 @@ public class TestJsArrayVal {
                                                         ),
                                               r.result()
                                              );
-                      Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                       context.completeNow();
 
                   }));
@@ -257,14 +253,13 @@ public class TestJsArrayVal {
                             b.get()
                            )
                   .retry(ATTEMPTS - 1,
-                         (error, n) -> vertxRef.timer(1,
-                                                      SECONDS,
-                                                      "next attempt"
+                         (error, n) -> vertxRef.timer(100,
+                                                      MILLISECONDS
                                                      )
                         )
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertTrue(r.cause() instanceof RuntimeException);
-                      Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS - 1);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS - 1);
                       context.completeNow();
                   }))
                   .get();
@@ -290,15 +285,14 @@ public class TestJsArrayVal {
                            )
                   .retryIf(e -> e instanceof RuntimeException,
                            ATTEMPTS - 1,
-                           (error, n) -> vertxRef.timer(1,
-                                                        SECONDS,
-                                                        "next attempt"
+                           (error, n) -> vertxRef.timer(100,
+                                                       MILLISECONDS
                                                        )
                           )
                   .get()
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertTrue(r.cause() instanceof RuntimeException);
-                      Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS - 1);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS - 1);
                       context.completeNow();
 
                   }));

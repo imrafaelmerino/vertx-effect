@@ -13,8 +13,7 @@ import vertx.effect.VertxRef;
 
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestAnd {
@@ -147,15 +146,14 @@ public class TestAnd {
                      falseVal.get()
                     )
            .retry(attempts,
-                  (error, n) -> vertxRef.timer(1,
-                                               SECONDS,
-                                               "next attempt"
+                  (error, n) -> vertxRef.timer(100,
+                                               MILLISECONDS
                                               )
                  )
            .get()
            .onComplete(r -> context.verify(() -> {
                Assertions.assertFalse(r.result());
-               Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= attempts);
+               Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= attempts);
                context.completeNow();
            }));
 
@@ -180,15 +178,14 @@ public class TestAnd {
                        falseVal.get()
                       )
            .retry(attempts,
-                  (error, n) -> vertxRef.timer(1,
-                                               SECONDS,
-                                               "next attempt"
+                  (error, n) -> vertxRef.timer(100,
+                                              MILLISECONDS
                                               )
                  )
            .get()
            .onComplete(r -> context.verify(() -> {
                Assertions.assertFalse(r.result());
-               Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= attempts);
+               Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= attempts);
                context.completeNow();
            }));
 
@@ -287,9 +284,8 @@ public class TestAnd {
                     )
            .retryIf(it -> it instanceof IllegalArgumentException,
                     3,
-                    (e, i) -> vertxRef.timer(1,
-                                             SECONDS,
-                                             "1 sec"
+                    (e, i) -> vertxRef.timer(100,
+                                             MILLISECONDS
                                             )
                    )
            .onSuccess(it -> {
@@ -314,9 +310,8 @@ public class TestAnd {
                       )
            .retryIf(it -> it instanceof IllegalArgumentException,
                     3,
-                    (e, i) -> vertxRef.timer(1,
-                                             SECONDS,
-                                             "1 sec"
+                    (e, i) -> vertxRef.timer(100,
+                                             MILLISECONDS
                                             )
                    )
            .onSuccess(it -> {

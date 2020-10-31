@@ -22,7 +22,7 @@ import static java.util.concurrent.TimeUnit.*;
 public class TestCase {
     private static VertxRef vertxRef;
 
-    private static BiFunction<Throwable, Integer, Val<Void>> oneSec;
+    private static BiFunction<Throwable, Integer, Val<Void>> action;
 
     private static int ATTEMPTS = 2;
 
@@ -44,9 +44,8 @@ public class TestCase {
                               ) {
         vertxRef = new VertxRef(vertx);
 
-        oneSec = (error, n) -> vertxRef.timer(1,
-                                              SECONDS,
-                                              "one sec"
+        action = (error, n) -> vertxRef.timer(100,
+                                              MILLISECONDS
                                              );
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
@@ -691,9 +690,8 @@ public class TestCase {
                    )
                 .retryIf(e -> e instanceof RuntimeException,
                          3,
-                         (e, n) -> vertxRef.timer(1,
-                                                  SECONDS,
-                                                  "1 sec"
+                         (e, n) -> vertxRef.timer(100,
+                                                 MILLISECONDS
                                                  )
                         )
                 .onComplete(
@@ -733,7 +731,7 @@ public class TestCase {
     public void test_case_exp_succeeds_after_two_retries_waiting_1sec_before_retries(VertxTestContext context) {
 
         int  attempts = 2;
-        long start    = System.currentTimeMillis();
+        long start    = System.nanoTime();
         new Case<String, String>(Cons.success("a"))
                 .of("a",
                     a.get(),
@@ -741,13 +739,13 @@ public class TestCase {
                     b.get()
                    )
                 .retry(attempts,
-                       oneSec
+                       action
                       )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             r
                                            );
-                    Assertions.assertTrue(MILLISECONDS.toSeconds(System.currentTimeMillis() - start) >= attempts);
+                    Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= attempts);
                     context.completeNow();
                 }))
                 .get();
@@ -906,9 +904,8 @@ public class TestCase {
                     b.get()
                    )
                 .retry(ATTEMPTS,
-                       (error, n) -> vertxRef.timer(1,
-                                                    SECONDS,
-                                                    "one sec"
+                       (error, n) -> vertxRef.timer(100,
+                                                    MILLISECONDS
                                                    )
                       )
                 .get()
@@ -916,7 +913,7 @@ public class TestCase {
                     Assertions.assertEquals("a",
                                             r.result()
                                            );
-                    Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                    Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                     context.completeNow();
 
                 }));

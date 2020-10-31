@@ -13,8 +13,7 @@ import vertx.effect.*;
 
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 import static vertx.effect.exp.Cons.FALSE;
 import static vertx.effect.exp.Cons.TRUE;
 
@@ -399,9 +398,8 @@ public class TestIfElse {
               .consequence(Cons.success("b"))
               .alternative(Cons.success("a"))
               .retry(ATTEMPTS,
-                     (error, n) -> vertxRef.timer(1,
-                                                  SECONDS,
-                                                  "next attempt"
+                     (error, n) -> vertxRef.timer(100,
+                                                 MILLISECONDS
                                                  )
                     )
               .get()
@@ -409,7 +407,7 @@ public class TestIfElse {
                   Assertions.assertEquals("b",
                                           r.result()
                                          );
-                  Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                  Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                   context.completeNow();
 
               }));
@@ -430,9 +428,8 @@ public class TestIfElse {
                 .alternative(Cons.success("bye"))
                 .retryIf(it -> it instanceof IllegalArgumentException,
                          3,
-                         (e, i) -> vertxRef.timer(1,
-                                                  SECONDS,
-                                                  "1 sec"
+                         (e, i) -> vertxRef.timer(100,
+                                                  MILLISECONDS
                                                  )
                         )
                 .onSuccess(it -> {
@@ -458,9 +455,8 @@ public class TestIfElse {
                 .alternative(Cons.success("bye"))
                 .retryIf(it -> it instanceof IllegalArgumentException,
                          2,
-                         (e, i) -> vertxRef.timer(1,
-                                                  SECONDS,
-                                                  "1 sec"
+                         (e, i) -> vertxRef.timer(100,
+                                                 MILLISECONDS
                                                  )
                         )
                 .onComplete(it -> {

@@ -501,23 +501,17 @@ public class VertxRef {
 
 
     public Val<Void> timer(final int time,
-                           final TimeUnit unit,
-                           final String description) {
+                           final TimeUnit unit) {
         if (time < 0) return Cons.failure(new IllegalArgumentException("time < 0"));
         if (unit == null) return Cons.failure(new NullPointerException("unit is null"));
-        if (description == null) return Cons.failure(new NullPointerException("description is null"));
         return Cons.of(() -> {
-            EventPublisher.PUBLISHER.timer(Event.TIMER_STARTS_EVENT,
-                                           description
-                                          )
+            EventPublisher.PUBLISHER.timer(Event.TIMER_STARTS_EVENT)
                                     .accept(vertx);
             Promise<Void> promise = Promise.promise();
             vertx.setTimer(requireNonNull(unit).toMillis(time),
                            result -> {
                                promise.complete(null);
-                               EventPublisher.PUBLISHER.timer(Event.TIMER_ENDS_EVENT,
-                                                              description
-                                                             )
+                               EventPublisher.PUBLISHER.timer(Event.TIMER_ENDS_EVENT)
                                                        .accept(vertx);
                            }
                           );

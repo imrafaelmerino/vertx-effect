@@ -16,8 +16,7 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestSeqVal {
@@ -129,9 +128,8 @@ public class TestSeqVal {
 
         long start = System.nanoTime();
         BiFunction<Throwable, Integer, Val<Void>> oneSecDelay =
-                (error, n) -> vertxRef.timer(1,
-                                             SECONDS,
-                                             "one sec"
+                (error, n) -> vertxRef.timer(100,
+                                             MILLISECONDS
                                             );
         Val<List<String>> val = SeqVal.<String>empty()
                 .append(b.get())
@@ -146,7 +144,7 @@ public class TestSeqVal {
                                                                    .append("a")
                                                                    .append("b")
                                                                     )
-                && NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS)
+                && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
                 .accept(val,
                         context
                        );

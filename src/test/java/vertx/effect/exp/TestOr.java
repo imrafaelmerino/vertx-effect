@@ -14,8 +14,8 @@ import vertx.effect.VertxRef;
 
 import java.util.function.Supplier;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 @ExtendWith(VertxExtension.class)
 public class TestOr {
@@ -243,9 +243,8 @@ public class TestOr {
                    )
           .retryIf(it -> it instanceof IllegalArgumentException,
                    3,
-                   (e, i) -> vertxRef.timer(1,
-                                            SECONDS,
-                                            "1 sec"
+                   (e, i) -> vertxRef.timer(100,
+                                            MILLISECONDS
                                            )
                   )
           .onSuccess(it -> {
@@ -270,9 +269,8 @@ public class TestOr {
                      )
           .retryIf(it -> it instanceof IllegalArgumentException,
                    3,
-                   (e, i) -> vertxRef.timer(1,
-                                            SECONDS,
-                                            "1 sec"
+                   (e, i) -> vertxRef.timer(100,
+                                            MILLISECONDS
                                            )
                   )
           .onSuccess(it -> {
@@ -291,15 +289,14 @@ public class TestOr {
                     FALSE.get()
                    )
           .retry(ATTEMPTS,
-                 (error, n) -> vertxRef.timer(1,
-                                              SECONDS,
-                                              "next attempt"
+                 (error, n) -> vertxRef.timer(100,
+                                              MILLISECONDS
                                              )
                 )
           .get()
           .onComplete(r -> context.verify(() -> {
               Assertions.assertTrue(r.result());
-              long seconds = NANOSECONDS.toSeconds(System.nanoTime() - start);
+              long seconds = NANOSECONDS.toMillis(System.nanoTime() - start);
               Assertions.assertTrue(seconds >= ATTEMPTS);
               context.completeNow();
 
@@ -314,15 +311,14 @@ public class TestOr {
                       FALSE.get()
                      )
           .retry(ATTEMPTS,
-                 (error, n) -> vertxRef.timer(1,
-                                              SECONDS,
-                                              "next attempt"
+                 (error, n) -> vertxRef.timer(100,
+                                              MILLISECONDS
                                              )
                 )
           .get()
           .onComplete(r -> context.verify(() -> {
                           Assertions.assertTrue(r.result());
-                          long seconds = NANOSECONDS.toSeconds(System.nanoTime() - start);
+                          long seconds = NANOSECONDS.toMillis(System.nanoTime() - start);
                           Assertions.assertTrue(seconds >= ATTEMPTS);
                           context.completeNow();
                       })
@@ -331,8 +327,7 @@ public class TestOr {
     }
 
     @Test
-    public void test_or_booleans(Vertx vertx,
-                                 VertxTestContext context) {
+    public void test_or_booleans(VertxTestContext context) {
 
         Or.of(true,
               true

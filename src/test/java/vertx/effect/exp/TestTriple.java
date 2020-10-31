@@ -12,8 +12,7 @@ import vertx.effect.*;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestTriple {
@@ -492,9 +491,8 @@ public class TestTriple {
                                 a.get()
                                )
                       .retry(ATTEMPTS,
-                             (error, n) -> vertxRef.timer(1,
-                                                          SECONDS,
-                                                          "next attempt"
+                             (error, n) -> vertxRef.timer(100,
+                                                          MILLISECONDS
                                                          )
                             );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
@@ -504,7 +502,7 @@ public class TestTriple {
                                                      "a"
                                         )
                                        )
-                        && NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS)
+                        && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
                 .accept(val,
                         context
                        );
@@ -524,9 +522,8 @@ public class TestTriple {
                                   a.get()
                                  )
                       .retry(ATTEMPTS,
-                             (error, n) -> vertxRef.timer(1,
-                                                          SECONDS,
-                                                          "next attempt"
+                             (error, n) -> vertxRef.timer(100,
+                                                          MILLISECONDS
                                                          )
                             );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
@@ -536,7 +533,7 @@ public class TestTriple {
                                                      "a"
                                         )
                                        )
-                        && NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS)
+                        && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
                 .accept(val,
                         context
                        );

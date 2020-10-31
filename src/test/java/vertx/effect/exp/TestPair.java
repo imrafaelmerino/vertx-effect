@@ -16,8 +16,7 @@ import vertx.effect.VertxRef;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestPair {
@@ -37,9 +36,8 @@ public class TestPair {
                               ) {
 
         vertxRef = new VertxRef(vertx);
-        oneSec = vertxRef.timer(1,
-                                TimeUnit.SECONDS,
-                                "one sec"
+        oneSec = vertxRef.timer(100,
+                                MILLISECONDS
                                );
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
@@ -63,9 +61,8 @@ public class TestPair {
                      )
             .retryIf(it -> it instanceof IllegalArgumentException,
                      ATTEMPTS,
-                     (e, i) -> vertxRef.timer(1,
-                                              SECONDS,
-                                              "1 sec"
+                     (e, i) -> vertxRef.timer(100,
+                                             MILLISECONDS
                                              )
                     )
             .onSuccess(it -> {
@@ -95,9 +92,8 @@ public class TestPair {
                        )
             .retryIf(it -> it instanceof IllegalArgumentException,
                      ATTEMPTS,
-                     (e, i) -> vertxRef.timer(1,
-                                              SECONDS,
-                                              "1 sec"
+                     (e, i) -> vertxRef.timer(100,
+                                             MILLISECONDS
                                              )
                     )
             .onSuccess(it -> {
@@ -269,9 +265,8 @@ public class TestPair {
                       a.get()
                      )
             .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.timer(1,
-                                                SECONDS,
-                                                "next attempt"
+                   (error, n) -> vertxRef.timer(100,
+                                               MILLISECONDS
                                                )
                   )
             .get()
@@ -281,7 +276,7 @@ public class TestPair {
                                         ),
                                         r.result()
                                        );
-                Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                 context.completeNow();
 
             }));
@@ -298,9 +293,8 @@ public class TestPair {
                         a.get()
                        )
             .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.timer(1,
-                                                SECONDS,
-                                                "next attempt"
+                   (error, n) -> vertxRef.timer(100,
+                                                MILLISECONDS
                                                )
                   )
             .get()
@@ -310,7 +304,7 @@ public class TestPair {
                                         ),
                                         r.result()
                                        );
-                Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                 context.completeNow();
 
             }));

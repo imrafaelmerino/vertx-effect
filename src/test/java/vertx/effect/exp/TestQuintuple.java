@@ -15,8 +15,7 @@ import vertx.effect.VertxRef;
 
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestQuintuple {
@@ -542,9 +541,8 @@ public class TestQuintuple {
                            a.get()
                           )
                  .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.timer(1,
-                                                     SECONDS,
-                                                     "one sec"
+                        (error, n) -> vertxRef.timer(100,
+                                                     MILLISECONDS
                                                     )
                        )
                  .get()
@@ -557,7 +555,7 @@ public class TestQuintuple {
                                              ),
                                              r.result()
                                             );
-                     Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                     Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                      context.completeNow();
 
                  }));
@@ -577,9 +575,8 @@ public class TestQuintuple {
                              a.get()
                             )
                  .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.timer(1,
-                                                     SECONDS,
-                                                     "one sec"
+                        (error, n) -> vertxRef.timer(100,
+                                                     MILLISECONDS
                                                     )
                        )
                  .get()
@@ -592,7 +589,7 @@ public class TestQuintuple {
                                              ),
                                              r.result()
                                             );
-                     Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                     Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                      context.completeNow();
 
                  }));

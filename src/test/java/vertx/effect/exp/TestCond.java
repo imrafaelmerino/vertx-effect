@@ -23,7 +23,7 @@ import static vertx.effect.exp.Cons.TRUE;
 public class TestCond {
 
     private static VertxRef vertxRef;
-    private static BiFunction<Throwable, Integer, Val<Void>> oneSec;
+    private static BiFunction<Throwable, Integer, Val<Void>> delay;
     private static final int ATTEMPTS = 2;
     private static Supplier<Val<String>> a =
             new ErrorWhile<>(ATTEMPTS,
@@ -43,10 +43,9 @@ public class TestCond {
                               ) {
         vertxRef = new VertxRef(vertx);
 
-        oneSec = (error, n) -> vertxRef.timer(1,
-                                              SECONDS,
-                                              "one sec"
-                                             );
+        delay = (error, n) -> vertxRef.timer(100,
+                                             MILLISECONDS
+                                            );
 
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println);
@@ -347,20 +346,20 @@ public class TestCond {
     @Test
     public void test_cond_exp_succeeds_after_two_retries_waiting_1sec_before_retries(VertxTestContext context) {
 
-        long start    = System.currentTimeMillis();
+        long start    = System.nanoTime();
         Cond.of(TRUE,
                 a.get(),
                 FALSE,
                 b.get()
                )
             .retry(ATTEMPTS,
-                   oneSec
+                   delay
                   )
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals("a",
                                         r
                                        );
-                Assertions.assertTrue(MILLISECONDS.toSeconds(System.currentTimeMillis() - start) >= ATTEMPTS);
+                Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                 context.completeNow();
             }))
             .get();
@@ -474,9 +473,8 @@ public class TestCond {
                 b.get()
                )
             .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.timer(1,
-                                                SECONDS,
-                                                "one sec"
+                   (error, n) -> vertxRef.timer(100,
+                                                MILLISECONDS
                                                )
                   )
             .get()
@@ -484,7 +482,7 @@ public class TestCond {
                 Assertions.assertEquals("a",
                                         r.result()
                                        );
-                Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                 context.completeNow();
 
             }));

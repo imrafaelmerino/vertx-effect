@@ -16,8 +16,7 @@ import vertx.effect.Val;
 
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestMapVal {
@@ -1024,9 +1023,8 @@ public class TestMapVal {
                   b.get()
                  )
               .retry(ATTEMPTS,
-                     (error, n) -> vertxRef.timer(1,
-                                                  SECONDS,
-                                                  "next attempt"
+                     (error, n) -> vertxRef.timer(100,
+                                                 MILLISECONDS
                                                  )
                     )
               .get()
@@ -1040,7 +1038,7 @@ public class TestMapVal {
                                                       ),
                                           r.result()
                                          );
-                  Assertions.assertTrue(NANOSECONDS.toSeconds(System.nanoTime() - start) >= ATTEMPTS);
+                  Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
                   context.completeNow();
 
               }));

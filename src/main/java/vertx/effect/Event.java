@@ -12,7 +12,6 @@ public final class Event {
     public static final Option<JsObj, String> addressOpt = JsObj.optional.str(path("/address"));
     public static final Option<JsObj, String> toOpt = JsObj.optional.str(path("/to"));
     public static final Option<JsObj, String> fromOpt = JsObj.optional.str(path("/from"));
-    public static final Option<JsObj, String> descriptionOpt = JsObj.optional.str(path("/desc"));
     public static final Option<JsObj, String> classOpt = JsObj.optional.str(path("/class"));
     public static final Option<JsObj, String> exceptionOpt = JsObj.optional.str(path("/exception/class"));
     public static final Option<JsObj, String> exceptionMessageOpt = JsObj.optional.str(path("/exception/message"));

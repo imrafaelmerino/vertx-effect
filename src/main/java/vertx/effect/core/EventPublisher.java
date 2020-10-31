@@ -339,14 +339,12 @@ public class EventPublisher {
     }
 
 
-    public Consumer<Vertx> timer(final String event,
-                                 final String description) {
+    public Consumer<Vertx> timer(final String event) {
         return vertx -> {
             if (enabled) vertx
                     .eventBus()
                     .publish(VertxRef.EVENTS_ADDRESS,
                              Event.eventLens.set.apply(event)
-                                                .andThen(Event.descriptionOpt.set.apply(description))
                                                 .andThen(Event.instantLens.set.apply(Instant.now()))
                                                 .andThen(Event.threadLens.set.apply(Thread.currentThread()
                                                                                           .getName())
