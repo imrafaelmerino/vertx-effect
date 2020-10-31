@@ -722,7 +722,7 @@ Add the following dependency to your building tool:
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
 </dependency>
 ```
 
