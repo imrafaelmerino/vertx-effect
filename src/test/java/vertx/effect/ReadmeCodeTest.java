@@ -1,5 +1,6 @@
 package vertx.effect;
 
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -43,6 +44,22 @@ public class ReadmeCodeTest {
     }
 
     @Test
+    public void test_to_lowercase(VertxTestContext context) {
+
+        MyModule.toLowerCase.apply(MultiMap.caseInsensitiveMultiMap()
+                                           .add("name",
+                                                "rafa"
+                                               ),
+                                   "ABCDS"
+                                  )
+                            .get()
+                            .onSuccess(it -> context.verify(() -> {
+                                    Assertions.assertEquals("abcds", it);
+                                    context.completeNow();
+                            }));
+    }
+
+    @Test
     public void test_composition(VertxTestContext context) {
 
         λ<JsObj, JsObj> removeAndNull = MyModule.removeNull.andThen(MyModule.trim);
@@ -70,7 +87,8 @@ public class ReadmeCodeTest {
                                                   );
                          context.verify(() -> {
                              Assertions.assertEquals(expected,
-                                                     it);
+                                                     it
+                                                    );
                              context.completeNow();
                          });
                      })
