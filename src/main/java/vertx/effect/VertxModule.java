@@ -34,7 +34,7 @@ public abstract class VertxModule extends AbstractVerticle {
                         final DeploymentOptions deploymentOptions) {
         this.refValMap = requireNonNull(refExp);
         this.deploymentOptions = requireNonNull(deploymentOptions);
-        idValSeq = SeqVal.empty();
+        idValSeq = SeqVal.sequential();
     }
 
 
@@ -47,7 +47,7 @@ public abstract class VertxModule extends AbstractVerticle {
         this(MapVal.EMPTY,
              requireNonNull(options)
             );
-        idValSeq = SeqVal.empty();
+        idValSeq = SeqVal.sequential();
     }
 
     /**
@@ -63,7 +63,7 @@ public abstract class VertxModule extends AbstractVerticle {
         this(MapVal.EMPTY,
              DEFAULT_DEPLOYMENT_OPTIONS
             );
-        idValSeq = SeqVal.empty();
+        idValSeq = SeqVal.sequential();
 
     }
 
