@@ -79,23 +79,8 @@ final class ParallelJsArray extends JsArrayVal {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public Val<JsValue> race() {
-        return Cons.of(() -> {
-            java.util.List futures = seq.map(Supplier::get)
-                                        .toJavaList();
-            return CompositeFuture.any(futures)
-                                  .map(cf -> {
-                                           int index = IntStream.range(0,
-                                                                       futures.size()
-                                                                      )
-                                                                .filter(cf::succeeded)
-                                                                .findFirst()
-                                                                .getAsInt();//TODO
-                                           return cf.resultAt(index);
-                                       }
-                                      );
-        });
+      return Functions.race(seq);
     }
 
     @Override

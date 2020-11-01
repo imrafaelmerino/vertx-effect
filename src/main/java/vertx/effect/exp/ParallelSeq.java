@@ -96,8 +96,10 @@ class ParallelSeq<O> extends SeqVal<O> {
         return new ParallelSeq<>(seq.prepend(requireNonNull(exp)));
     }
 
-    @SuppressWarnings("unchecked")
-
+    @Override
+    public Val<O> race() {
+        return Functions.race(seq);
+    }
 
     public SeqVal<O> tail() {
         return new ParallelSeq<>(seq.tail());

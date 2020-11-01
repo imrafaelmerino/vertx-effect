@@ -77,6 +77,6 @@ public abstract class SeqVal<O> extends AbstractVal<List<O>> {
 
     public abstract SeqVal<O> prepend(final Val<? extends O> val);
 
-
+    public abstract Val<O> race();
 
 }

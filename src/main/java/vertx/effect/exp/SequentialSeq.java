@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
 
+import javax.naming.OperationNotSupportedException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -90,6 +91,12 @@ class SequentialSeq<O> extends SeqVal<O> {
 
     public SeqVal<O> prepend(final Val<? extends O> exp) {
         return new SequentialSeq<>(seq.prepend(requireNonNull(exp)));
+    }
+
+    @Override
+    public Val<O> race() {
+        return Cons.failure(new OperationNotSupportedException("race doesn't make any sense in a sequential execution"));
+
     }
 
     public SeqVal<O> tail() {
