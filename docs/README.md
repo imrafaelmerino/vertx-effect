@@ -674,10 +674,10 @@ BiFunction<Integer,String,JsObj> search =
                                                          HTTP_REQUEST_TIMEOUT_PRISM
                                                         ),
                                              attempts,
-                                             (error,nattempt) -> vertxRef.timer(nattempt,
-                                                                                SECONDS,
-                                                                                "waiting til next attemp"
-                                                                               )
+                                             (error,remainingAttempt) -> 
+                                                              vertxRef.timer(attempts-remainingAttempt+1,
+                                                                             SECONDS
+                                                                             )
                                             )
                                     .recoverWith(e -> Cons.success(JsObj.EMPTY));
 
