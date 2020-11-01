@@ -1,13 +1,11 @@
 package vertx.effect.performance;
 
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
 import vertx.effect.Val;
 import vertx.effect.exp.Cons;
+import vertx.effect.exp.SeqVal;
 import vertx.effect.λ;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.IntStream;
 
 import static vertx.effect.performance.Functions.TIME_WAITING_MS;
 import static vertx.effect.performance.MyModule.*;
@@ -18,27 +16,24 @@ public class CountStringMultiVerticle implements λ<Integer, Integer> {
     @Override
     public Val<Integer> apply(final Integer times) {
 
-        return Cons.of(() -> {
-            List<Future> futures = new ArrayList<>();
-            for (int i = 0; i < times; i++) {
-                futures.add(
-                        generator.apply(TIME_WAITING_MS)
-                                 .flatMap(filter.andThen(map)
-                                                .andThen(reduce)
-                                         )
-                                 .get()
-                           );
-
-            }
-            return CompositeFuture.all(futures)
-                                  .map(val -> val.list()
-                                                 .stream()
-                                                 .map(it -> ((Integer) it))
-                                                 .reduce((r, r2) -> r + r2)
-                                                 .orElse(0)
-                                      );
-        });
-
+        return IntStream.range(0,
+                               times
+                              )
+                        .mapToObj(n -> Cons.of(() -> generator.apply(TIME_WAITING_MS)
+                                                              .flatMap(filter.andThen(map)
+                                                                             .andThen(reduce)
+                                                                      )
+                                                              .get()
+                                              )
+                                 )
+                        .reduce(SeqVal.parallel(),
+                                SeqVal::append,
+                                (a, b) -> a.appendAll(b)
+                               )
+                        .map(list -> list
+                                .map(it -> ((Integer) it))
+                                .reduce(Integer::sum)
+                            );
 
     }
 

@@ -6,7 +6,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.3)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.3/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.4)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.4/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 
@@ -674,10 +674,10 @@ BiFunction<Integer,String,JsObj> search =
                                                          HTTP_REQUEST_TIMEOUT_PRISM
                                                         ),
                                              attempts,
-                                             (error,nattempt) -> vertxRef.timer(nattempt,
-                                                                                SECONDS,
-                                                                                "waiting til next attemp"
-                                                                               )
+                                             (error,remainingAttempt) -> 
+                                                              vertxRef.timer(attempts-remainingAttempt+1,
+                                                                             SECONDS
+                                                                             )
                                             )
                                     .recoverWith(e -> Cons.success(JsObj.EMPTY));
 
@@ -722,7 +722,7 @@ Add the following dependency to your building tool:
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>0.3</version>
+  <version>0.4</version>
 </dependency>
 ```
 

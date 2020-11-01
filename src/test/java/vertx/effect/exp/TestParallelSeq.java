@@ -1,25 +1,28 @@
 package vertx.effect.exp;
 
 import io.vavr.collection.List;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
 import vertx.effect.Val;
 import vertx.effect.Verifiers;
+import vertx.effect.VertxRef;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 @ExtendWith(VertxExtension.class)
-public class TestSeqVal {
+public class TestParallelSeq {
 
     private static VertxRef vertxRef;
 
@@ -30,7 +33,8 @@ public class TestSeqVal {
 
         vertxRef = new VertxRef(vertx);
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
-                                  System.out::println);
+                                  System.out::println
+                                 );
         vertxRef.deploy(new RegisterJsValuesCodecs())
                 .onComplete(event -> testContext.completeNow())
                 .get();
@@ -40,7 +44,7 @@ public class TestSeqVal {
     public void test_head_returns_the_first_element(VertxTestContext context) {
 
 
-        Val<String> val = SeqVal.<String>empty()
+        Val<String> val = SeqVal.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .head();
@@ -58,7 +62,7 @@ public class TestSeqVal {
     public void test_head_returns_the_tail(VertxTestContext context) {
 
 
-        SeqVal<String> val = SeqVal.<String>empty()
+        SeqVal<String> val = SeqVal.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .append(Cons.success("c"))
@@ -67,12 +71,12 @@ public class TestSeqVal {
 
         Verifiers.<List<String>>verifySuccess(tail -> Objects.equals(tail,
                                                                      List.empty()
-                                                                   .append("b")
-                                                                   .append("c")
+                                                                         .append("b")
+                                                                         .append("c")
                                                                     )
                                              ).accept(val,
-                                                context
-                                               );
+                                                      context
+                                                     );
 
 
     }
@@ -93,7 +97,7 @@ public class TestSeqVal {
                                  "b"
                 );
 
-        Val<List<String>> val = SeqVal.<String>empty()
+        Val<List<String>> val = SeqVal.<String>parallel()
                 .append(b.get())
                 .prepend(a.get())
                 .retry(ATTEMPTS);
@@ -101,8 +105,8 @@ public class TestSeqVal {
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
                                                                      List.empty()
-                                                                   .append("a")
-                                                                   .append("b")
+                                                                         .append("a")
+                                                                         .append("b")
                                                                     ))
                 .accept(val,
                         context
@@ -125,13 +129,12 @@ public class TestSeqVal {
                                  "b"
                 );
 
-
         long start = System.nanoTime();
         BiFunction<Throwable, Integer, Val<Void>> oneSecDelay =
                 (error, n) -> vertxRef.timer(100,
                                              MILLISECONDS
                                             );
-        Val<List<String>> val = SeqVal.<String>empty()
+        Val<List<String>> val = SeqVal.<String>parallel()
                 .append(b.get())
                 .prepend(a.get())
                 .retry(ATTEMPTS,
@@ -141,8 +144,8 @@ public class TestSeqVal {
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
                                                                      List.empty()
-                                                                   .append("a")
-                                                                   .append("b")
+                                                                         .append("a")
+                                                                         .append("b")
                                                                     )
                 && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
                 .accept(val,
@@ -154,7 +157,7 @@ public class TestSeqVal {
     @Test
     public void test_map(VertxTestContext context) {
 
-        Val<List<String>> val = SeqVal.<String>empty()
+        Val<List<String>> val = SeqVal.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .map(it -> it.map(String::toUpperCase));
@@ -162,8 +165,8 @@ public class TestSeqVal {
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
                                                                      List.empty()
-                                                                   .append("A")
-                                                                   .append("B")
+                                                                         .append("A")
+                                                                         .append("B")
                                                                     )
                                              )
                 .accept(val,
@@ -175,7 +178,7 @@ public class TestSeqVal {
     @Test
     public void test_seqval_exp_flatmap_failure(VertxTestContext context) {
 
-        Val<List<String>> val = SeqVal.<String>empty()
+        Val<List<String>> val = SeqVal.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .flatMap(s -> Cons.failure(new RuntimeException()));
@@ -190,16 +193,69 @@ public class TestSeqVal {
     }
 
     @Test
+    public void test_retry_if(VertxTestContext context) {
+        ErrorWhile<String> hi = new ErrorWhile<>(3,
+                                                 i -> new IllegalArgumentException(),
+                                                 "hi"
+        );
+        SeqVal.parallel(hi.get(),
+                        hi.get()
+                       )
+              .retryIf(it -> it instanceof IllegalArgumentException,
+                       3
+                      )
+              .onSuccess(it -> {
+                  context.verify(() -> {
+                      Assertions.assertEquals(List.empty()
+                                                  .append("hi")
+                                                  .append("hi"),
+                                              it
+                                             );
+                      context.completeNow();
+                  });
+              })
+              .get();
+    }
+
+    @Test
+    public void test_retry_if_with_action(VertxTestContext context) {
+        ErrorWhile<String> hi = new ErrorWhile<>(3,
+                                                 i -> new IllegalArgumentException(),
+                                                 "hi"
+        );
+        SeqVal.parallel(hi.get(),
+                        hi.get()
+                       )
+              .retryIf(it -> it instanceof IllegalArgumentException,
+                       3,
+                       (e, i) -> vertxRef.timer(100,
+                                                MILLISECONDS
+                                               )
+                      )
+              .onSuccess(it -> {
+                  context.verify(() -> {
+                      Assertions.assertEquals(List.empty()
+                                                  .append("hi")
+                                                  .append("hi"),
+                                              it
+                                             );
+                      context.completeNow();
+                  });
+              })
+              .get();
+    }
+
+    @Test
     public void test_quintuple_exp_flatmap_success(VertxTestContext context) {
-        Val<List<String>> val = SeqVal.<String>empty()
+        Val<List<String>> val = SeqVal.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .flatMap(list -> Cons.success(list.map(String::toUpperCase)));
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
                                                                      List.empty()
-                                                                   .append("A")
-                                                                   .append("B")
+                                                                         .append("A")
+                                                                         .append("B")
                                                                     ))
                 .accept(val,
                         context
@@ -207,4 +263,66 @@ public class TestSeqVal {
 
 
     }
+
+    @Test
+    public void test_append_all(VertxTestContext context) {
+        SeqVal<String> a = SeqVal.parallel(Cons.success("a"),
+                                           Cons.success("b")
+                                          );
+
+        SeqVal<String> b = SeqVal.parallel(Cons.success("c"),
+                                           Cons.success("d")
+                                          );
+
+        a.appendAll(b)
+         .onSuccess(list -> context.verify(() -> {
+             Assertions.assertEquals(List.empty()
+                                         .append("a")
+                                         .append("b")
+                                         .append("c")
+                                         .append("d"),
+                                     list
+                                    );
+             context.completeNow();
+         }))
+         .get();
+
+    }
+
+    @Test
+    public void test_size(VertxTestContext context) {
+        Assertions.assertEquals(3,
+                                SeqVal.parallel(Cons.success(1),
+                                                Cons.success(2),
+                                                Cons.success(3)
+                                               )
+                                      .size()
+                               );
+        context.completeNow();
+    }
+
+    @Test
+    public void test_is_empty(VertxTestContext context) {
+
+        Assertions.assertTrue(SeqVal.parallel()
+                                    .isEmpty());
+        context.completeNow();
+    }
+
+    @Test
+    public void test_race(final VertxTestContext context) {
+        Val<String> a = Cons.of(() -> Future.succeededFuture("a"));
+        Val<String> b = Cons.of(() -> Future.succeededFuture("b"));
+        SeqVal.parallel(a,
+                        b)
+              .race()
+              .onSuccess(it -> context.verify(() -> {
+                  Assertions.assertEquals("a",
+                                          it
+                                         );
+                  context.completeNow();
+              }))
+              .get();
+    }
+
 }

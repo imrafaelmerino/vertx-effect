@@ -315,11 +315,13 @@ public class VertxRef {
 
         return (context, input) ->
         {
-            Consumer<Message<I>> consumer = message -> wrapLambda(address,
+            String generatedAddress = generateProcessAddress(address);
+
+            Consumer<Message<I>> consumer = message -> wrapLambda(generatedAddress,
                                                                   message,
                                                                   lambda
                                                                  );
-            Val<VerticleRef<I, O>> future = deploy(address,
+            Val<VerticleRef<I, O>> future = deploy(generatedAddress,
                                                    consumer,
                                                    options
                                                   );
@@ -331,11 +333,11 @@ public class VertxRef {
                                         .onComplete(__ -> r.undeploy()
                                                            .onComplete(event -> {
                                                                if (event.succeeded())
-                                                                   EventPublisher.PUBLISHER.undeployedVerticle(address)
+                                                                   EventPublisher.PUBLISHER.undeployedVerticle(generatedAddress)
                                                                                            .accept(vertx);
                                                                else
                                                                    EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_UNDEPLOYING_VERTICLE,
-                                                                                                          address,
+                                                                                                          generatedAddress,
                                                                                                           event.cause()
                                                                                                          )
                                                                                            .accept(vertx);

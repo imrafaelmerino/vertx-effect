@@ -11,8 +11,7 @@ import vertx.effect.VertxRef;
 import vertx.effect.exp.Pair;
 import vertx.effect.performance.MyModule;
 
-import java.util.concurrent.TimeUnit;
-
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static vertx.effect.performance.Functions.awaitForEnding;
 import static vertx.effect.performance.MyModule.countStringsLengthMultiProcesses;
 import static vertx.effect.performance.MyModule.countStringsLengthMultiVerticles;
@@ -27,7 +26,7 @@ public class MyBenchmark {
                                        vertxRef.deploy(new MyModule())
                                       ),
                        2,
-                       TimeUnit.SECONDS
+                       SECONDS
                       );
     }
 
@@ -42,7 +41,7 @@ public class MyBenchmark {
 
         awaitForEnding(countStringsLengthMultiVerticles.apply(TIMES),
                        TIME_WAITING,
-                       TimeUnit.SECONDS
+                       SECONDS
                       );
 
     }
@@ -54,7 +53,7 @@ public class MyBenchmark {
 
         awaitForEnding(countStringsLengthMultiProcesses.apply(TIMES),
                        TIME_WAITING,
-                       TimeUnit.SECONDS
+                       SECONDS
                       );
 
 
