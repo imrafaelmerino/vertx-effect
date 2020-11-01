@@ -1,6 +1,7 @@
 package vertx.effect.exp;
 
 import io.vavr.collection.List;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -280,7 +281,8 @@ public class TestParallelSeq {
                                          .append("b")
                                          .append("c")
                                          .append("d"),
-                                     list);
+                                     list
+                                    );
              context.completeNow();
          }))
          .get();
@@ -291,17 +293,36 @@ public class TestParallelSeq {
     public void test_size(VertxTestContext context) {
         Assertions.assertEquals(3,
                                 SeqVal.parallel(Cons.success(1),
-                                                  Cons.success(2),
-                                                  Cons.success(3))
-                                      .size());
+                                                Cons.success(2),
+                                                Cons.success(3)
+                                               )
+                                      .size()
+                               );
         context.completeNow();
     }
 
     @Test
     public void test_is_empty(VertxTestContext context) {
 
-        Assertions.assertTrue(SeqVal.parallel().isEmpty());
+        Assertions.assertTrue(SeqVal.parallel()
+                                    .isEmpty());
         context.completeNow();
+    }
+
+    @Test
+    public void test_race(final VertxTestContext context) {
+        Val<String> a = Cons.of(() -> Future.succeededFuture("a"));
+        Val<String> b = Cons.of(() -> Future.succeededFuture("b"));
+        SeqVal.parallel(a,
+                        b)
+              .race()
+              .onSuccess(it -> context.verify(() -> {
+                  Assertions.assertEquals("a",
+                                          it
+                                         );
+                  context.completeNow();
+              }))
+              .get();
     }
 
 }
