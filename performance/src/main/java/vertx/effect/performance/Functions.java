@@ -16,7 +16,7 @@ public class Functions {
 
     private static final int A = 97;
     private static final int Z = 122;
-    public static final int TIME_WAITING_MS = 1000;
+    public static final int TIME_WAITING_MS = 100;
 
 
     public static Function<Random, Supplier<JsObj>> generator = random -> () ->
