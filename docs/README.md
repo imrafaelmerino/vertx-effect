@@ -13,7 +13,7 @@
 - [vertx-effect manifesto](#manifesto)
 - [vertx-effect in a few lines of code](#fewlinesofcode)
 - [How persistent data structures makes a different working with actors](#persistendata)
-- [Introduction](#introduction)
+- [Effects](#effects)
 - [Expressions](#exp)
 - [Modules](#modules)
 - [Logging](#logging)
@@ -39,15 +39,159 @@
 ## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
 
 ```java
+import jsonvalues.*;
+import jsonvalues.spec.JsObjSpec;
+import vertx.effect.*;
+import vertx.effect.exp.*;
+public class MyModule extends VertxModule {
 
+  public static λ<String, String> toLowerCase, toUpperCase;
+  public static λ<Integer, Integer> inc;
+  public static λ<JsObj, JsObj> validate, validateAndMap;
+
+  @Override
+  protected void initialize() {
+    toUpperCase = this.ask("toUpperCase");
+    toLowerCase = this.ask("toLowerCase");
+    inc = this.ask("inc");
+    validate = this.ask("validate");
+    validateAndMap = this.ask("validateAnMap");
+  }
+
+  @Override
+  protected void deploy() {
+    this.deploy("toLowerCase", (String str) -> Cons.success(str.toLowerCase()));
+    this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
+    this.deploy("inc", (Integer n) -> Cons.success(n+1));
+    this.deploy("validate", Validators.validateJsObj(JsObjSpec.strict("a", integer, "b", tuple(str, str))));
+    
+    λ<JsObj, JsObj> validateAndMap = obj ->
+         validate.apply(obj)
+                 .flatMap(it -> JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
+                                                  "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+                                                                                      .map(JsStr::of),
+                                                                           toUpperCase.apply(obj.getStr(path("/b/1")))
+                                                                                      .map(JsStr::of)
+                                                                           )));
+    this.deploy("validateAnMap",validateAndMap);
+
+  }
+}
+```
+
+A module is a regular Verticle that deploys others Verticles and exposes functions to communicate with them.
+In our above example it deploys five Verticles. It's worth mentioning the validateAndMap verticle. It has
+been defined using composition and the JsObjVal expresion. It shows the essence of vertx-effect. ValidateAndMap 
+sends the input Json to the validate Verticle and, if it conforms to the given spec,
+it builds the output sending messages in parallel to the verticles inc, toLowerCase and toUpperCase and
+composing a Json from their response. vertx-effect uses the persistent Json from json-values. Well talk how 
+important persistent data structures are in the next section.  
+
+Let's write some tests. json-values is not supported by Vertx and we need to register a MessageCodec to be 
+able to send our persistent Json across the even bus: 
+
+```java
+import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.VertxRef;
+import vertx.effect.exp.Pair;
+import jsonvalues.JsArray;
+import jsonvalues.JsInt;
+import jsonvalues.JsObj;
+
+@ExtendWith(VertxExtension.class)
+public class TestMyModule {
+
+  @BeforeAll
+  // register MessageCode for json-values and deploy MyModule
+  public static void prepare(final Vertx vertx,
+                             final VertxTestContext context) {
+    VertxRef ref = new VertxRef(vertx);
+    Pair.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()), 
+                    ref.deployVerticle(new MyModule())
+                   )
+        .onSuccess(ids -> context.completeNow())
+        .get();
+    }
+
+    @Test
+    public void badMessageFailure(VertxTestContext context)  {
+        MyModule.validateAndMap.apply(JsObj.EMPTY)
+                               .onComplete(result -> {
+                                   context.verify(() -> {
+                                       Assertions.assertTrue(result.failed());
+                                       System.out.println(result.cause());
+                                       context.completeNow();
+                                   });
+                               })
+                               .get();
+    }
+
+    @Test
+    public void jsonMappedSuccess(VertxTestContext context) {
+
+        JsObj input = JsObj.of("a",JsInt.of(1),"b",JsArray.of("FOO","foo"));
+        
+        JsObj expected = JsObj.of("a",JsInt.of(2),"b",JsArray.of("foo","FOO"));
+
+        MyModule.validateAndMap.apply(input)
+                               .onSuccess(output -> {
+                                   context.verify(() -> {
+                                       Assertions.assertEquals(expected,output);
+                                       context.completeNow();
+                                   });
+                               })
+                               .get();
+    }
 
 ```
 
+The test badMessageReceived prints out the failure received: 
+
+(RECIPIENT_FAILURE,3000) [(path=/a, error=(code=REQUIRED, value=NOTHING)), (path=/b, error=(code=REQUIRED, value=NOTHING))]
+
+where 3000 is the bad message error code (in vertx-effect the more significant errors has a code) 
+
 ## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
 
+Every type that can be sent across the even bus, has an associated MessageCodec. Go to package
+io.vertx.core.eventbus.impl.codecs to check out what types are supported. The Vertx Json implemented with 
+Jackson has the codec JsonObjectMessageCodec.
+ 
+When a Verticle sends a message to the event bus, Vertx intercepts that message and calls the transform 
+method of its message codec. Since the Json from Jackson is not immutable at all, the transform method
+has to make a copy of the message before sending it to the event bus: 
+
+``` java
+// Vertx impl 
+public JsonObject transform(JsonObject message) {
+    return message.copy();
+}
+```
+
+Since vertx-effect uses json-values, which is a truly immutable Json implemented with persistent data structures,
+the transform method of its codec returns the same message sent by the Verticle without making any copy.
 
 
-## <a name="introduction"><a/> Introduction
+```
+// vertx-effect impl
+@Override
+public JsObj transform(final JsObj message) {
+   return message;
+}`
+```
+
+As you can imagine, the more verticles you have, the more messages have to be copied, putting a lot pressure in 
+the garbage collector and decreasing performance. Furthermore, the bigger the Jsons are, the longer it takes to 
+copy them. This is a problem since, to get the most out of the actor model, you need to create the more actors the
+better.
+
+Find below a benchmark comparing the Jsons from Jackson and json-values. The benchmark consists of
+sending a message to a Verticle that just returns it back.
+
+to be done
+
+
+## <a name="effects"><a/> Effects 
 
 **Functional Programming is all about working with pure functions and values**. That's all. 
 One of the points where FP especially shines, is dealing with effects. An effect is 
@@ -344,19 +488,15 @@ public class MyModule extends VertxModule {
   @Override
   public void deploy() {
  
-     λ<JsObj, JsObj> removeNull = o ->
-                 Cons.success(o.filterAllValues(pair -> pair.value.isNotNull()));
      this.deploy(REMOVE_NULL_ADDRESS,
-                 removeNull
+                (JsObj o) -> Cons.success(o.filterAllValues(pair -> pair.value.isNotNull())) 
                 );
  
-     λ<JsObj, JsObj> trim = o ->
-         Cons.success(o.mapAllValues(pair -> JsStr.prism.modify.apply(String::trim)
-                                                               .apply(pair.value)
-                                    )
-                     );
      this.deploy(TRIM_ADDRESS,
-                 trim
+                (JsObj o)->  Cons.success(o.mapAllValues(pair -> JsStr.prism.modify.apply(String::trim)
+                                                                                   .apply(pair.value)
+                                                        )
+                                         ) 
                 );
   }
  

@@ -141,10 +141,10 @@ public class VertxModuleTest extends VertxModule {
                                            }
                                           );
         Consumer<Message<Void>> consumer = message -> message.reply(counter);
-        this.<Void, Integer>deploy("getCounter",
-                                   consumer,
-                                   new DeploymentOptions().setInstances(3)
-                                  );
+        this.<Void, Integer>deployConsumer("getCounter",
+                                           consumer,
+                                           new DeploymentOptions().setInstances(3)
+                                          );
 
 
     }
