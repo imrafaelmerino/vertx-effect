@@ -81,16 +81,15 @@ public class MyModule extends VertxModule {
 }
 ```
 
-A module is a regular Verticle that deploys others Verticles and exposes functions to communicate with them.
-In our above example it deploys five Verticles. It's worth mentioning the validateAndMap verticle. It has
-been defined using composition and the JsObjVal expresion. It shows the essence of vertx-effect. ValidateAndMap 
-sends the input Json to the validate Verticle and, if it conforms to the given spec,
-it builds the output sending messages in parallel to the verticles inc, toLowerCase and toUpperCase and
-composing a Json from their response. vertx-effect uses the persistent Json from json-values. Well talk how 
-important persistent data structures are in the next section.  
+**A module is a regular Verticle that deploys other Verticles and exposes functions to communicate with them.** 
+In our above example, it deploys five Verticles. It's worth mentioning the _validateAndMap_ Verticle. It has 
+been defined using composition and the _JsObjVal_ expression. It shows the essence of vertx-effect. 
+_ValidateAndMap_ sends the input Json to the _validate_ Verticle. If it conforms to the given spec, 
+it builds the output in parallel, sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
+composing a Json from their responses. vertx-effect uses a persistent Json from [json-values](https://github.com/imrafaelmerino/json-values).
 
 Let's write some tests. json-values is not supported by Vertx and we need to register a MessageCodec to be 
-able to send our persistent Json across the even bus: 
+able to send its persistent Json across the even bus: 
 
 ```java
 import vertx.effect.RegisterJsValuesCodecs;
@@ -147,20 +146,19 @@ public class TestMyModule {
 
 ```
 
-The test badMessageReceived prints out the failure received: 
-
+The test badMessageReceived prints out the failure: 
+```text
 (RECIPIENT_FAILURE,3000) [(path=/a, error=(code=REQUIRED, value=NOTHING)), (path=/b, error=(code=REQUIRED, value=NOTHING))]
-
-where 3000 is the bad message error code (in vertx-effect the more significant errors has a code) 
+```
 
 ## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
 
-Every type that can be sent across the even bus, has an associated MessageCodec. Go to package
-io.vertx.core.eventbus.impl.codecs to check out what types are supported. The Vertx Json implemented with 
+**Every type that can be sent across the event bus has an associated MessageCodec**. Go to package
+_io.vertx.core.eventbus.impl.codecs_ to check out what types are supported. The Vertx Json implemented with 
 Jackson has the codec JsonObjectMessageCodec.
  
-When a Verticle sends a message to the event bus, Vertx intercepts that message and calls the transform 
-method of its message codec. Since the Json from Jackson is not immutable at all, the transform method
+When a Verticle sends a message to the event bus, Vertx intercepts that message and calls the transform method 
+of its message codec. Since the Json from _Jackson_ is not immutable at all, the transform method
 has to make a copy of the message before sending it to the event bus: 
 
 ```java
@@ -170,9 +168,9 @@ public JsonObject transform(JsonObject message) {
 }
 ```
 
-Since vertx-effect uses json-values, which is a truly immutable Json implemented with persistent data structures,
-the transform method of its codec returns the same message sent by the Verticle without making any copy.
-
+Since vertx-effect uses [json-values](https://github.com/imrafaelmerino/json-values), which is a truly immutable
+Json implemented with persistent data structures, the transform method of its codec returns the same message sent
+by the Verticle without making any copy.
 
 ```java
 // vertx-effect impl
@@ -181,13 +179,13 @@ public JsObj transform(final JsObj message) {
 }
 ```
 
-As you can imagine, the more verticles you have, the more messages have to be copied, putting a lot pressure in 
-the garbage collector and decreasing performance. Furthermore, the bigger the Jsons are, the longer it takes to 
-copy them. This is a problem since, to get the most out of the actor model, you need to create the more actors the
-better.
+As you can imagine, the more verticles you have, the more messages have to be copied, putting 
+a lot of pressure on the garbage collector and decreasing performance. Furthermore, the bigger 
+the Jsons are, the longer it takes to copy them. This is a problem since, to get the most out
+of the actor model, you need to create the more actors the better.
 
-Find below a benchmark comparing the Jsons from Jackson and json-values. The benchmark consists of
-sending a message to a Verticle that just returns it back.
+Find below a benchmark comparing the Jsons from _Jackson_ and _json-values_. The benchmark consists of
+sending messages to a Verticle that just returns them back.
 
 to be done
 
@@ -195,7 +193,7 @@ to be done
 ## <a name="effects"><a/> Effects 
 
 **Functional Programming is all about working with pure functions and values**. That's all. 
-One of the points where FP especially shines, is dealing with effects. An effect is 
+One of the points where FP especially shines is dealing with effects. An effect is 
 something you can't call twice unless you intended to: 
 
 ```java 
