@@ -34,8 +34,8 @@ public class TestPerformance {
                                   System.out::println
                                  );
 
-        Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                        vertxRef.deploy(new MyModule())
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(new MyModule())
                )
             .onSuccess(pair -> testContext.completeNow())
             .get();

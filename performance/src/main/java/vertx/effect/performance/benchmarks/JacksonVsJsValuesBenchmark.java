@@ -8,7 +8,6 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
-
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Pair;
@@ -16,223 +15,41 @@ import vertx.effect.performance.Functions;
 import vertx.effect.performance.MyModule;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static vertx.effect.performance.Functions.awaitForEnding;
-import static vertx.effect.performance.MyModule.*;
 
 public class JacksonVsJsValuesBenchmark {
-    private static final Supplier<JsObj> objGen = Functions.generator.apply(new Random());
-
-    private static final Supplier<String> strGen = () -> objGen.get()
-                                                               .toString();
-
+    static JsonObject jacksonObj;
+    static JsObj      jsonValuesObj;
     static {
-        VertxRef vertxRef = new VertxRef(Vertx.vertx());
-        awaitForEnding(Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                                   vertxRef.deploy(new MyModule())
+        String     json          = "{\"firstName\": \"John\",  \"lastName\": \"Smith\",  \"isAlive\": true,  \"age\": 27,  \"address\": {    \"streetAddress\": \"21 2nd Street\",    \"city\": \"New York\",    \"state\": \"NY\",    \"postalCode\": \"10021-3100\"  },  \"phoneNumbers\": [    {      \"type\": \"home\",      \"number\": \"212 555-1234\"    },    {      \"type\": \"office\",      \"number\": \"646 555-4567\"    }  ],  \"children\": [],  \"spouse\": null}";
+         jacksonObj    = new JsonObject(json);
+              jsonValuesObj = JsObj.parse(json);
+        VertxRef   vertxRef      = new VertxRef(Vertx.vertx());
+        awaitForEnding(Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                                       vertxRef.deployVerticle(new MyModule())
                                       ),
                        2,
-                       TimeUnit.SECONDS
-                          );
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void parsing_with_JsValues(Blackhole blackhole)  {
-        blackhole.consume(JsObj.parse(strGen.get()));
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void parsing_with_Jackson(Blackhole blackhole)  {
-        blackhole.consume(new JsonObject(strGen.get()));
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void parsing_with_JsValues_and_sending_to_event_bus() {
-        awaitForEnding(parser.apply(strGen.get())
-                                 .flatMap(id),
-                       10,
-                       TimeUnit.SECONDS
+                       SECONDS
                       );
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @Fork(1)
-    public void parsing_with_Jackson_and_sending_to_event_bus() {
-        awaitForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId),
-                       10,
-                       TimeUnit.SECONDS
-                          );
-    }
-
-
-   /* @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_2_steps_JsValues() {
-        await5segForEnding(parser.apply(strGen.get())
-                                 .flatMap(id)
-                                 .flatMap(id));
+    public void jsonValues(Blackhole blackhole) {
+        awaitForEnding(MyModule.id.apply(jsonValuesObj),3,SECONDS,blackhole);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @Fork(1)
-    public void test_3_steps_JsValues() {
-
-        await5segForEnding(parser.apply(strGen.get())
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                          );
+    public void jackson(Blackhole blackhole) {
+        awaitForEnding(MyModule.jacksonId.apply(jacksonObj),3,SECONDS,blackhole);
 
     }
 
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_4_steps_JsValues() {
-        await5segForEnding(parser.apply(strGen.get())
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                          );
-    }
 
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_5_steps_JsValues() {
-        await5segForEnding(parser.apply(strGen.get())
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                          );
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_6_steps_JsValues() {
-        await5segForEnding(parser.apply(strGen.get())
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                          );
-    }
-
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_10_steps_JsValues() {
-        await5segForEnding(parser.apply(strGen.get())
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                                 .flatMap(id)
-                          );
-    }
-
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_2_steps_Jackson() {
-        await5segForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId));
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_3_steps_Jackson() {
-
-        await5segForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                          );
-
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_4_steps_Jackson() {
-        await5segForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                          );
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_5_steps_Jackson() {
-        await5segForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                          );
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_6_steps_Jackson() {
-        await5segForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                          );
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void test_10_steps_Jackson() {
-        await5segForEnding(jacksonParser.apply(strGen.get())
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                                        .flatMap(jacksonId)
-                          );
-    }*/
 }

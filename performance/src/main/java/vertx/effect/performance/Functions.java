@@ -1,6 +1,7 @@
 package vertx.effect.performance;
 
 import jsonvalues.*;
+import org.openjdk.jmh.infra.Blackhole;
 import vertx.effect.Val;
 
 import java.util.Random;
@@ -54,20 +55,15 @@ public class Functions {
                        );
     };
 
-    public static <O> void await5segForEnding(Val<O> fn) {
-        awaitForEnding(fn,
-                       5,
-                       TimeUnit.SECONDS
-                      );
-    }
-
     public static <O> void awaitForEnding(Val<O> fn,
                                           int time,
                                           TimeUnit unit) {
         CountDownLatch latch = new CountDownLatch(1);
 
         try {
-            fn.onComplete(it -> latch.countDown())
+            fn.onSuccess(it -> {
+                latch.countDown();
+            })
               .get();
             latch.await(time,
                         unit
@@ -77,6 +73,25 @@ public class Functions {
         }
     }
 
+    public static <O> void awaitForEnding(Val<O> fn,
+                                          int time,
+                                          TimeUnit unit,
+                                          Blackhole blackhole) {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        try {
+            fn.onSuccess(it -> {
+                latch.countDown();
+                blackhole.consume(it);
+            })
+              .get();
+            latch.await(time,
+                        unit
+                       );
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static Function<Random, Function<Integer, Supplier<String>>> randomStr() {
         return random -> length -> () -> random.ints(A,
