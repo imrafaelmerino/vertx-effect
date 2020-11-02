@@ -43,6 +43,7 @@ import jsonvalues.*;
 import jsonvalues.spec.JsObjSpec;
 import vertx.effect.*;
 import vertx.effect.exp.*;
+
 public class MyModule extends VertxModule {
 
   public static λ<String, String> toLowerCase, toUpperCase;
@@ -148,7 +149,8 @@ public class TestMyModule {
 
 The test badMessageReceived prints out the failure: 
 ```text
-(RECIPIENT_FAILURE,3000) [(path=/a, error=(code=REQUIRED, value=NOTHING)), (path=/b, error=(code=REQUIRED, value=NOTHING))]
+(RECIPIENT_FAILURE,3000) 
+[(path=/a, error=(code=REQUIRED, value=NOTHING)), (path=/b, error=(code=REQUIRED, value=NOTHING))]
 ```
 
 ## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
