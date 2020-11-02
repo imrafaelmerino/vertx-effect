@@ -26,7 +26,7 @@ public class VerticleRefTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        vertxRef.deploy(new RegisterJsValuesCodecs())
+        vertxRef.deployVerticle(new RegisterJsValuesCodecs())
                 .onComplete(it -> testContext.completeNow())
                 .get();
 

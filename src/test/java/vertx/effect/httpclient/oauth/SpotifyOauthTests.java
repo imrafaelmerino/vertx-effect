@@ -51,8 +51,8 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                      vertxRef.deploy(module)
+        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                      vertxRef.deployVerticle(module)
                      )
             .onSuccess(pair -> module.authenticate(JsObj.of("code",
                                                             JsStr.of(CODE),
@@ -107,8 +107,8 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                      vertxRef.deploy(module)
+        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                      vertxRef.deployVerticle(module)
                      )
             .onSuccess(pair ->
                                Verifiers.<JsObj>verifySuccess(resp -> 200 == HttpResp.STATUS_CODE_LENS.get.apply(resp))
@@ -144,8 +144,8 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                      vertxRef.deploy(module)
+        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                      vertxRef.deployVerticle(module)
                      )
             .onSuccess(pair ->
                                Verifiers.<JsObj>verifySuccess(resp -> 200 == HttpResp.STATUS_CODE_LENS.get.apply(resp))

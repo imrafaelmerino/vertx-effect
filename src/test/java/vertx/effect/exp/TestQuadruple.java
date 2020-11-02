@@ -40,7 +40,7 @@ public class TestQuadruple {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        vertxRef.deploy(new RegisterJsValuesCodecs())
+        vertxRef.deployVerticle(new RegisterJsValuesCodecs())
                 .onComplete(event -> testContext.completeNow())
                 .get();
     }

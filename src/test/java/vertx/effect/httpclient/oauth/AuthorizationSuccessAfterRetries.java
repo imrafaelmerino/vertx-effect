@@ -58,9 +58,9 @@ public class AuthorizationSuccessAfterRetries {
                                  );
 
 
-        Triple.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+        Triple.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
                         Cons.of(() -> server.start()),
-                        vertxRef.deploy(httpClient)
+                        vertxRef.deployVerticle(httpClient)
                        )
               .onComplete(Verifiers.pipeTo(context))
               .get();

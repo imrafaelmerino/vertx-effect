@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
  */
 final class ParallelMap<O> extends vertx.effect.exp.Map<O> {
 
+    @SuppressWarnings({"rawtypes"})
     public static final ParallelMap EMPTY = new ParallelMap<>();
 
 

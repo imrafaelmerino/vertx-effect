@@ -13,7 +13,6 @@ import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
 
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.*;
@@ -42,7 +41,7 @@ public class TestPair {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        vertxRef.deploy(new RegisterJsValuesCodecs())
+        vertxRef.deployVerticle(new RegisterJsValuesCodecs())
                 .onComplete(event -> testContext.completeNow())
                 .get();
     }

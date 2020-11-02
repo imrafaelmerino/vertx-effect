@@ -27,6 +27,7 @@ public abstract class Map<O> extends AbstractVal<io.vavr.collection.Map<String, 
         return bindings.isEmpty();
     }
 
+    @SuppressWarnings({"unchecked"})
     public static <O> Map<O> parallel(){
         return ParallelMap.EMPTY;
     }
@@ -1087,6 +1088,7 @@ public abstract class Map<O> extends AbstractVal<io.vavr.collection.Map<String, 
                                                 final Val<? extends O> exp
                                       );
 
+    @SuppressWarnings({"unchecked"})
     public static <O> Map<O> sequential(){
         return SequentialMap.EMPTY;
     }

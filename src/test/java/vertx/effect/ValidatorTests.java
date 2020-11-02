@@ -68,7 +68,7 @@ public class ValidatorTests {
         λ<JsArray, JsArray> fn = Validators.validateJsArray(JsSpecs.arrayOfStr);
 
 
-        Val<JsArray> val = vertxRef.deploy(new RegisterJsValuesCodecs())
+        Val<JsArray> val = vertxRef.deployVerticle(new RegisterJsValuesCodecs())
                                    .flatMap($ -> vertxRef.deploy("validateJsArr",
                                                                  fn
                                                                 )
