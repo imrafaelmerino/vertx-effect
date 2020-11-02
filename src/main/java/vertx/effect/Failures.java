@@ -59,6 +59,7 @@ public final class Failures {
 
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static Predicate<Throwable> or(final Prism<Throwable, ? extends VertxException> first,
                                           final Prism<Throwable, ? extends VertxException>... others) {
 
@@ -67,6 +68,7 @@ public final class Failures {
         return t -> {
             Optional<? extends VertxException> firstOpt = first.getOptional.apply(t);
             if (firstOpt.isPresent()) return true;
+
             return Arrays.stream(others)
                          .map(p -> p.getOptional.apply(t))
                          .anyMatch(Optional::isPresent);

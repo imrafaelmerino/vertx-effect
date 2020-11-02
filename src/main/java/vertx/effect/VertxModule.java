@@ -42,6 +42,7 @@ public abstract class VertxModule extends AbstractVerticle {
 
      @param options deployments options
      */
+    @SuppressWarnings("unchecked")
     public VertxModule(final DeploymentOptions options) {
         this(Map.sequential(),
              requireNonNull(options)
@@ -58,6 +59,7 @@ public abstract class VertxModule extends AbstractVerticle {
     }
      </pre>
      */
+    @SuppressWarnings("unchecked")
     public VertxModule() {
         this(Map.sequential(),
              DEFAULT_DEPLOYMENT_OPTIONS
@@ -164,7 +166,7 @@ public abstract class VertxModule extends AbstractVerticle {
         idValSeq = idValSeq.append(vertxRef.deployVerticle(requireNonNull(verticle)));
     }
 
-    protected void deployConsumer(final AbstractVerticle verticle,
+    protected void deployVerticle(final AbstractVerticle verticle,
                                   final DeploymentOptions options) {
         idValSeq = idValSeq.append(vertxRef.deployVerticle(requireNonNull(verticle),
                                                            requireNonNull(options)
@@ -183,9 +185,9 @@ public abstract class VertxModule extends AbstractVerticle {
                                  );
     }
 
-    protected <I, O> void deploy(final String address,
-                                 final Consumer<Message<I>> consumer,
-                                 final DeploymentOptions options) {
+    protected <I, O> void deployConsumer(final String address,
+                                         final Consumer<Message<I>> consumer,
+                                         final DeploymentOptions options) {
 
         Val<VerticleRef<I, O>> exp = vertxRef.deployConsumer(requireNonNull(address),
                                                              requireNonNull(consumer),

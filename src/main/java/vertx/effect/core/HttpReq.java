@@ -75,6 +75,7 @@ public abstract class HttpReq<T extends HttpReq<T>> {
      @param value the new header value
      @return this http req with a new value in the specified header
      */
+    @SuppressWarnings("unchecked")
     public T setHeader(String key,
                        String value) {
         headers = headers.set(key,
