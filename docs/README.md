@@ -155,11 +155,11 @@ The test badMessageReceived prints out the failure:
 
 **Every type that can be sent across the event bus has an associated MessageCodec**. Go to package
 _io.vertx.core.eventbus.impl.codecs_ to check out what types are supported. The Vertx Json implemented with 
-Jackson has the codec JsonObjectMessageCodec.
+**Jackson** has the codec _JsonObjectMessageCodec_.
  
 When a Verticle sends a message to the event bus, Vertx intercepts that message and calls the transform method 
-of its message codec. Since the Json from _Jackson_ is not immutable at all, the transform method
-has to make a copy of the message before sending it to the event bus: 
+of its codec. Since the Json from **Jackson** is not immutable at all, the _transform_ method has to make a copy 
+of the message before sending it to the event bus: 
 
 ```java
 // Vertx impl 
@@ -169,8 +169,8 @@ public JsonObject transform(JsonObject message) {
 ```
 
 Since vertx-effect uses [json-values](https://github.com/imrafaelmerino/json-values), which is a truly immutable
-Json implemented with persistent data structures, the transform method of its codec returns the same message sent
-by the Verticle without making any copy.
+Json implemented with persistent data structures, the _transform_ method of its codec **returns the same message sent
+by the Verticle without making any copy**.
 
 ```java
 // vertx-effect impl
@@ -184,7 +184,7 @@ a lot of pressure on the garbage collector and decreasing performance. Furthermo
 the Jsons are, the longer it takes to copy them. This is a problem since, to get the most out
 of the actor model, you need to create the more actors the better.
 
-Find below a benchmark comparing the Jsons from _Jackson_ and _json-values_. The benchmark consists of
+Find below a benchmark comparing the Jsons from **Jackson** and **json-values**. The benchmark consists of
 sending messages to a Verticle that just returns them back.
 
 to be done
@@ -218,7 +218,7 @@ Future<Customer> b = c;
 ```
 
 A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a 
-computation. Haskell has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
+computation. **Haskell** has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
 and lazy data structure that allows us to control the effect of latency.
 
 Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
