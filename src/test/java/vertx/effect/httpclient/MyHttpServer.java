@@ -2,6 +2,7 @@ package vertx.effect.httpclient;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import jsonvalues.JsObj;
@@ -43,23 +44,31 @@ public class MyHttpServer {
     public Future<io.vertx.core.http.HttpServer> start() {
         return vertx.createHttpServer(new HttpServerOptions())
                     .requestHandler(req -> {
-                                        int n = counter.incrementAndGet();
-                                        req.bodyHandler(body -> {
-                                                            req.response()
-                                                               .putHeader("Content-Type",
-                                                                          "application/json");
-                                                            Integer statusCode = statusCodeRes.apply(n)
-                                                                                              .apply(req)
-                                                                                              .apply(body.toString());
-                                                            String response = bodyRes.apply(n)
-                                                                                     .apply(req)
-                                                                                     .apply(body.toString())
-                                                                                     .toPrettyString();
-                                                            req.response()
-                                                               .setStatusCode(statusCode)
-                                                               .end(response);
-                                                        }
-                                                       );
+                                        int            n       = counter.incrementAndGet();
+                                        Future<Buffer> bodyFut = req.body();
+                                        bodyFut.onSuccess(buffer -> {
+                                                              System.out.println("server req #"+n);
+                                                              req.response()
+                                                                 .putHeader("Content-Type",
+                                                                            "application/json"
+                                                                           );
+                                                              String bodyStr = buffer.toString();
+
+                                                              Integer statusCode = statusCodeRes.apply(n)
+                                                                                                .apply(null)
+                                                                                                .apply("");
+
+                                                              String response = bodyRes.apply(n)
+                                                                                       .apply(req)
+                                                                                       .apply(bodyStr)
+                                                                                       .toPrettyString();
+                                                              req.response()
+                                                                 .setStatusCode(statusCode)
+                                                                 .end(response);
+
+                                                          }
+                                                         );
+
                                     }
                                    )
                     .listen(port);
