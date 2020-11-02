@@ -63,17 +63,19 @@ public class MyModule extends VertxModule {
     this.deploy("toLowerCase", (String str) -> Cons.success(str.toLowerCase()));
     this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
     this.deploy("inc", (Integer n) -> Cons.success(n+1));
-    this.deploy("validate", Validators.validateJsObj(JsObjSpec.strict("a", integer, "b", tuple(str, str))));
     
-    λ<JsObj, JsObj> validateAndMap = obj ->
-         validate.apply(obj)
-                 .flatMap(it -> JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
-                                                  "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
-                                                                                      .map(JsStr::of),
-                                                                           toUpperCase.apply(obj.getStr(path("/b/1")))
-                                                                                      .map(JsStr::of)
-                                                                           )));
-    this.deploy("validateAnMap",validateAndMap);
+    JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
+    this.deploy("validate", Validators.validateJsObj(spec));
+
+    λ<JsObj, JsObj> map = obj-> 
+          JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
+                            "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+                                                                .map(JsStr::of),
+                                                     toUpperCase.apply(obj.getStr(path("/b/1")))
+                                                                .map(JsStr::of)
+                                                     )
+                            );   
+    this.deploy("validateAnMap",validate.apply(obj).flatMap(map));
 
   }
 }
@@ -161,7 +163,7 @@ When a Verticle sends a message to the event bus, Vertx intercepts that message 
 method of its message codec. Since the Json from Jackson is not immutable at all, the transform method
 has to make a copy of the message before sending it to the event bus: 
 
-``` java
+```java
 // Vertx impl 
 public JsonObject transform(JsonObject message) {
     return message.copy();
@@ -172,12 +174,11 @@ Since vertx-effect uses json-values, which is a truly immutable Json implemented
 the transform method of its codec returns the same message sent by the Verticle without making any copy.
 
 
-```
+```java
 // vertx-effect impl
-@Override
 public JsObj transform(final JsObj message) {
    return message;
-}`
+}
 ```
 
 As you can imagine, the more verticles you have, the more messages have to be copied, putting a lot pressure in 
