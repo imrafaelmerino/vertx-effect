@@ -79,17 +79,17 @@ public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientMod
 
         return module.post.apply(context,
                                  message.uri(uri)
-                                        .header("Accept",
-                                                "application/json"
-                                               )
-                                        .header("Authorization",
-                                                String.format("Basic %s",
+                                        .setHeader("Accept",
+                                                   "application/json"
+                                                  )
+                                        .setHeader("Authorization",
+                                                   String.format("Basic %s",
                                                               clientIdSecretBase64
                                                              )
-                                               )
-                                        .header("Content-Type",
-                                                "application/x-www-form-urlencoded"
-                                               )
+                                                  )
+                                        .setHeader("Content-Type",
+                                                   "application/x-www-form-urlencoded"
+                                                  )
                                 );
     }
 

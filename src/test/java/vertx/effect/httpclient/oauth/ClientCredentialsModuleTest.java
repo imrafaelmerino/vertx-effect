@@ -151,10 +151,7 @@ public class ClientCredentialsModuleTest {
 
 
         Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                .accept(httpClient.getOauth.apply(new GetReq().uri("/name")
-                                                              .timeout(1,
-                                                                       TimeUnit.SECONDS
-                                                                      )),
+                .accept(httpClient.getOauth.apply(new GetReq().uri("/name")).retry(3),
                         context
                        );
 

@@ -62,18 +62,18 @@ public class Spotify {
                                             .host(HOST)
                                             .port(PORT)
                                             .ssl(true)
-                                            .header("accept",
-                                                    "application/json"
-                                                   )
-                                            .header("Authorization",
-                                                    String.format("Basic %s",
+                                            .setHeader("accept",
+                                                       "application/json"
+                                                      )
+                                            .setHeader("Authorization",
+                                                       String.format("Basic %s",
                                                                   Base64.getEncoder()
                                                                         .encodeToString(credentials.getBytes())
                                                                  )
-                                                   )
-                                            .header("Content-Type",
-                                                    "application/x-www-form-urlencoded"
-                                                   )
+                                                      )
+                                            .setHeader("Content-Type",
+                                                       "application/x-www-form-urlencoded"
+                                                      )
                                     );
 
         };

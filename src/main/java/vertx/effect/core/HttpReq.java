@@ -49,9 +49,15 @@ public abstract class HttpReq<T extends HttpReq<T>> {
     private String uri;
     private Boolean ssl;
 
+    /**
+     add a value into the given header. It's appended to the end of the header values.
+     @param key the header name
+     @param value the new header value
+     @return this http req with a new value appended to the end of the specified header
+     */
     @SuppressWarnings("unchecked")
-    public T header(String key,
-                    String value) {
+    public T addHeader(String key,
+                       String value) {
         JsValue values = headers.get(key);
         if (values.isNothing()) headers = headers.set(key,
                                                       JsArray.of(value)
@@ -60,6 +66,20 @@ public abstract class HttpReq<T extends HttpReq<T>> {
                                    values.toJsArray()
                                          .append(JsStr.of(value))
                                   );
+        return (T) this;
+    }
+
+    /**
+     set a new value into the given header, replacing the existing one if it exists.
+     @param key the header name
+     @param value the new header value
+     @return this http req with a new value in the specified header
+     */
+    public T setHeader(String key,
+                       String value) {
+        headers = headers.set(key,
+                              JsArray.of(value)
+                             );
         return (T) this;
     }
 

@@ -11,6 +11,8 @@
 
 
 - [vertx-effect manifesto](#manifesto)
+- [vertx-effect in a few lines of code](#fewlinesofcode)
+- [How persistent data structures makes a different working with actors](#persistendata)
 - [Introduction](#introduction)
 - [Expressions](#exp)
 - [Modules](#modules)
@@ -33,7 +35,18 @@
     . Systems will fail, be prepared.
     . Simplicity matters.
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
-    
+
+## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
+
+```java
+
+
+```
+
+## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
+
+
+
 ## <a name="introduction"><a/> Introduction
 
 **Functional Programming is all about working with pure functions and values**. That's all. 
