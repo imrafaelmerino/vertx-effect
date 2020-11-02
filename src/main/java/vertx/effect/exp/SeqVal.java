@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 public abstract class SeqVal<O> extends AbstractVal<List<O>> {
 
     @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <O> SeqVal<O> sequential(Val<O>... others) {
         if (requireNonNull(others).length == 0) return SequentialSeq.EMPTY;
         SeqVal<O> seq = SequentialSeq.EMPTY;
@@ -21,6 +22,7 @@ public abstract class SeqVal<O> extends AbstractVal<List<O>> {
     }
 
     @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <O> SeqVal<O> parallel(Val<O>... others) {
         if (requireNonNull(others).length == 0) return ParallelSeq.EMPTY;
         SeqVal<O> seq = ParallelSeq.EMPTY;

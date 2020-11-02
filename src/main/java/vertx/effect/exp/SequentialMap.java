@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
  */
 final class SequentialMap<O> extends vertx.effect.exp.Map<O> {
 
+    @SuppressWarnings({"rawtypes"})
     public static final SequentialMap EMPTY = new SequentialMap<>();
 
 

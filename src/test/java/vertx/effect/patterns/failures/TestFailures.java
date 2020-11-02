@@ -72,9 +72,9 @@ public class TestFailures {
                                                counter -> req -> body -> 200
         );
 
-        Quintuple.sequential(ref.deploy(new RegisterJsValuesCodecs()),
-                             ref.deploy(new Module()),
-                             ref.deploy(client),
+        Quintuple.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()),
+                             ref.deployVerticle(new Module()),
+                             ref.deployVerticle(client),
                              Cons.of(server::start),
                              Cons.of(serverCloseConnection::start)
                             )

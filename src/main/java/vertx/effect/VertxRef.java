@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -66,16 +67,16 @@ public class VertxRef {
      @param <O>      the type of the reply
      @return an VerticleRel wrapped in a future
      */
-    public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
-                                                final Consumer<Message<I>> consumer
-                                               ) {
+    public <I, O> Val<VerticleRef<I, O>> deployConsumer(final String address,
+                                                        final Consumer<Message<I>> consumer
+                                                       ) {
         if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
         if (consumer == null) return Cons.failure(new NullPointerException(CONSUMER_IS_NULL));
 
-        return deploy(address,
-                      consumer,
-                      deploymentOptions
-                     );
+        return deployConsumer(address,
+                              consumer,
+                              deploymentOptions
+                             );
     }
 
     /**
@@ -86,10 +87,10 @@ public class VertxRef {
      @param <O>      the type of the reply
      @return an VerticleRel wrapped in a future
      */
-    public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
-                                                final Consumer<Message<I>> consumer,
-                                                final DeploymentOptions options
-                                               ) {
+    public <I, O> Val<VerticleRef<I, O>> deployConsumer(final String address,
+                                                        final Consumer<Message<I>> consumer,
+                                                        final DeploymentOptions options
+                                                       ) {
         if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
         if (consumer == null) return Cons.failure(new NullPointerException(CONSUMER_IS_NULL));
         if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
@@ -130,7 +131,7 @@ public class VertxRef {
 
     /**
      @param address the address of the verticle
-     @param lambda       the function that takes a message of type I and produces an output of type O
+     @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
      @return an VerticleRel wrapped in a future
@@ -149,7 +150,7 @@ public class VertxRef {
 
     /**
      @param address the address of the verticle
-     @param lambda       the function that takes a message of type I and produces an output of type O
+     @param lambda  the function that takes a message of type I and produces an output of type O
      @param options options for configuring the verticle deployment
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
@@ -163,7 +164,7 @@ public class VertxRef {
         if (lambda == null) return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
         if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
         return Cons.of(() -> {
-                           final int instances = options.getInstances();
+                           final int                                                         instances = options.getInstances();
                            final Set<String>                                                 ids       = new HashSet<>();
                            @SuppressWarnings({"rawtypes", "squid:S3740"}) final List<Future> futures   = new ArrayList<>();
                            final MyVerticle<I> verticle = new MyVerticle<>(message -> wrapLambda(address,
@@ -199,7 +200,7 @@ public class VertxRef {
 
     /**
      @param address the address of the verticle
-     @param lambda       the function that takes a message of type I and produces an output of type O
+     @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
      @return an VerticleRel wrapped in a Val
@@ -217,7 +218,7 @@ public class VertxRef {
 
     /**
      @param address the address of the verticle
-     @param lambda      the function that takes a message of type I and produces an output of type O
+     @param lambda  the function that takes a message of type I and produces an output of type O
      @param options options for configuring the verticle deployment
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
@@ -233,8 +234,8 @@ public class VertxRef {
         if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
 
         return Cons.of(() -> {
-                           final int instances = options.getInstances();
-                           final Set<String> ids = new HashSet<>();
+                           final int                                                         instances = options.getInstances();
+                           final Set<String>                                                 ids       = new HashSet<>();
                            @SuppressWarnings({"rawtypes", "squid:S3740"}) final List<Future> futures   = new ArrayList<>();
                            final MyVerticle<I> verticle = new MyVerticle<>(message -> wrapLambda(address,
                                                                                                  message,
@@ -298,7 +299,7 @@ public class VertxRef {
     }
 
     /**
-     @param lambda      the function that takes a message of type I and produces an output of type O
+     @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
      @param address the prefix of the auto generated address
@@ -321,10 +322,10 @@ public class VertxRef {
                                                                   message,
                                                                   lambda
                                                                  );
-            Val<VerticleRef<I, O>> future = deploy(generatedAddress,
-                                                   consumer,
-                                                   options
-                                                  );
+            Val<VerticleRef<I, O>> future = deployConsumer(generatedAddress,
+                                                           consumer,
+                                                           options
+                                                          );
 
             return future.flatMap(r -> r.trace()
                                         .apply(context,
@@ -350,7 +351,7 @@ public class VertxRef {
     }
 
     /**
-     @param lambda       the function that takes a message of type I and produces an output of type O
+     @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
      @param address the prefix of the auto generated address
@@ -372,10 +373,10 @@ public class VertxRef {
                                                                   message,
                                                                   lambda
                                                                  );
-            Val<VerticleRef<I, O>> future = deploy(generatedAddress,
-                                                   consumer,
-                                                   options
-                                                  );
+            Val<VerticleRef<I, O>> future = deployConsumer(generatedAddress,
+                                                           consumer,
+                                                           options
+                                                          );
 
             return future.flatMap(r -> r.ask()
                                         .apply(input)
@@ -399,8 +400,8 @@ public class VertxRef {
     }
 
 
-    public Val<String> deploy(final AbstractVerticle verticle,
-                              final DeploymentOptions options) {
+    public Val<String> deployVerticle(final AbstractVerticle verticle,
+                                      final DeploymentOptions options) {
         if (verticle == null) return Cons.failure(new NullPointerException(VERTICLE_IS_NULL));
         if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
 
@@ -413,20 +414,21 @@ public class VertxRef {
                                                                                                 event.result()
                                                                                                )
                                                                               .accept(vertx);
-                                                  else EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_DEPLOYING_VERTICLE,
-                                                                                              verticle.getClass(),
-                                                                                              event.cause()
-                                                                                             )
-                                                                               .accept(vertx);
+                                                  else
+                                                      EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_DEPLOYING_VERTICLE,
+                                                                                             verticle.getClass(),
+                                                                                             event.cause()
+                                                                                            )
+                                                                              .accept(vertx);
                                               }
                                              )
                       );
     }
 
-    public Val<String> deploy(final AbstractVerticle verticle) {
-        return deploy(verticle,
-                      deploymentOptions
-                     );
+    public Val<String> deployVerticle(final AbstractVerticle verticle) {
+        return deployVerticle(verticle,
+                              deploymentOptions
+                             );
     }
 
 

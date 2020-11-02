@@ -20,8 +20,8 @@ public class TestJsArrayVal {
                           final Vertx vertx) {
 
         VertxRef ref = new VertxRef(vertx);
-        Pair.sequential(ref.deploy(new RegisterJsValuesCodecs()),
-                        ref.deploy(new Module())
+        Pair.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()),
+                        ref.deployVerticle(new Module())
                        )
             .onSuccess(pair ->
                                JsArrayVal.parallel()

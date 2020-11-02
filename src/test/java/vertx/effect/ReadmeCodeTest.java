@@ -27,8 +27,8 @@ public class ReadmeCodeTest {
                                   System.out::println
                                  );
 
-        Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                        vertxRef.deploy(new MyModule())
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(new MyModule())
                        )
             .onSuccess(pair -> {
                 String id1 = pair._1;

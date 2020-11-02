@@ -160,8 +160,8 @@ public class MyModule extends VertxModule {
 
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,System.out::println);
 
-        Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                        vertxRef.deploy(new MyModule()))
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(new MyModule()))
             .onSuccess(it ->  MyModule.countStringsLengthMultiVerticles.apply(10).onSuccess(System.out::println))
             .get();
 

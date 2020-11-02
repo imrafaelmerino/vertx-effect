@@ -166,9 +166,9 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
     @Override
     protected void deploy() {
-        this.deploy(httpClientAddress,
-                    consumer(vertx.createHttpClient(httpOptions))
-                   );
+        this.deployConsumer(httpClientAddress,
+                            consumer(vertx.createHttpClient(httpOptions))
+                           );
     }
 
     private static JsArray cookies2JsArray(final List<String> cookies) {

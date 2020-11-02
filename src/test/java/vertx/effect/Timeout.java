@@ -57,8 +57,8 @@ public class Timeout {
                                   System.out::println
                                  );
 
-        Pair.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                      vertxRef.deploy(new MyModule())
+        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                      vertxRef.deployVerticle(new MyModule())
                      )
             .onComplete(it -> context.completeNow())
             .get();

@@ -7,19 +7,16 @@ import io.vertx.junit5.VertxTestContext;
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.exp.Cons;
-import vertx.effect.exp.Pair;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.HttpResp;
 import vertx.effect.httpclient.MyHttpServer;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import static jsonvalues.JsBool.FALSE;
 import static jsonvalues.JsBool.TRUE;
@@ -70,9 +67,9 @@ public class ClientCredentialsModuleTest {
                                   System.out::println
                                  );
 
-        Triple.parallel(vertxRef.deploy(new RegisterJsValuesCodecs()),
+        Triple.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
                         Cons.of(() -> server.start()),
-                        vertxRef.deploy(httpClient)
+                        vertxRef.deployVerticle(httpClient)
                        )
               .onComplete(Verifiers.pipeTo(context))
               .get();

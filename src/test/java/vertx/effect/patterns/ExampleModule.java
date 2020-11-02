@@ -47,9 +47,9 @@ public class ExampleModule extends VertxModule {
                     addOne
                    );
 
-        this.deploy(PRINT_ADDRESS,
-                    printNumber
-                   );
+        this.deployConsumer(PRINT_ADDRESS,
+                            printNumber
+                           );
 
 
     }

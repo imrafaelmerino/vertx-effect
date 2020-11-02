@@ -22,8 +22,8 @@ public class MyBenchmark {
         VertxRef vertxRef = new VertxRef(Vertx.vertx(new VertxOptions().setWorkerPoolSize(100)));
 
 
-        awaitForEnding(Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                                       vertxRef.deploy(new MyModule())
+        awaitForEnding(Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                                       vertxRef.deployVerticle(new MyModule())
                                       ),
                        2,
                        SECONDS

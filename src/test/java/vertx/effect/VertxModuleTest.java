@@ -134,17 +134,17 @@ public class VertxModuleTest extends VertxModule {
                new DeploymentOptions().setInstances(3)
               );
 
-        this.<Integer, Void>deploy("incCounter",
+        this.<Integer, Void>deployConsumer("incCounter",
                                            message -> {
                                                counter = counter + message.body();
                                                message.reply(null);
                                            }
-                                  );
+                                          );
         Consumer<Message<Void>> consumer = message -> message.reply(counter);
-        this.<Void, Integer>deploy("getCounter",
-                                   consumer,
-                                   new DeploymentOptions().setInstances(3)
-                                  );
+        this.<Void, Integer>deployConsumer("getCounter",
+                                           consumer,
+                                           new DeploymentOptions().setInstances(3)
+                                          );
 
 
     }

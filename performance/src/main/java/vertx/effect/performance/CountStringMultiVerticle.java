@@ -28,7 +28,7 @@ public class CountStringMultiVerticle implements λ<Integer, Integer> {
                                  )
                         .reduce(SeqVal.parallel(),
                                 SeqVal::append,
-                                (a, b) -> a.appendAll(b)
+                                SeqVal::appendAll
                                )
                         .map(list -> list
                                 .map(it -> ((Integer) it))
