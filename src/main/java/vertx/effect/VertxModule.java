@@ -78,8 +78,8 @@ public abstract class VertxModule extends AbstractVerticle {
     /**
      override this method and deploy the Verticles you want to be exposed by your module.
      using the functions {@link VertxModule#deploy(String, λ)} (String, Function)} or
-     {@link VertxModule#deploy(String, Consumer)}.
-     You can also deployed regular Verticles with the method {@link VertxModule#deploy(AbstractVerticle)}
+     {@link VertxModule#deployConsumer(String, Consumer)}.
+     You can also deployed regular Verticles with the method {@link VertxModule#deployVerticle(AbstractVerticle)}
      */
     protected abstract void deploy();
 
@@ -160,24 +160,24 @@ public abstract class VertxModule extends AbstractVerticle {
                                           .get()).tell(options);
     }
 
-    protected void deploy(final AbstractVerticle verticle) {
-        idValSeq = idValSeq.append(vertxRef.deploy(requireNonNull(verticle)));
+    protected void deployVerticle(final AbstractVerticle verticle) {
+        idValSeq = idValSeq.append(vertxRef.deployVerticle(requireNonNull(verticle)));
     }
 
-    protected void deploy(final AbstractVerticle verticle,
-                          final DeploymentOptions options) {
-        idValSeq = idValSeq.append(vertxRef.deploy(requireNonNull(verticle),
-                                                   requireNonNull(options)
-                                                  ));
+    protected void deployConsumer(final AbstractVerticle verticle,
+                                  final DeploymentOptions options) {
+        idValSeq = idValSeq.append(vertxRef.deployVerticle(requireNonNull(verticle),
+                                                           requireNonNull(options)
+                                                          ));
     }
 
-    protected <I, O> void deploy(final String address,
-                                 final Consumer<Message<I>> consumer) {
+    protected <I, O> void deployConsumer(final String address,
+                                         final Consumer<Message<I>> consumer) {
 
-        Val<VerticleRef<I, O>> exp = vertxRef.deploy(requireNonNull(address),
-                                                     requireNonNull(consumer),
-                                                     deploymentOptions
-                                                    );
+        Val<VerticleRef<I, O>> exp = vertxRef.deployConsumer(requireNonNull(address),
+                                                             requireNonNull(consumer),
+                                                             deploymentOptions
+                                                            );
         refValMap = refValMap.set(address,
                                   requireNonNull(exp)
                                  );
@@ -187,10 +187,10 @@ public abstract class VertxModule extends AbstractVerticle {
                                  final Consumer<Message<I>> consumer,
                                  final DeploymentOptions options) {
 
-        Val<VerticleRef<I, O>> exp = vertxRef.deploy(requireNonNull(address),
-                                                     requireNonNull(consumer),
-                                                     requireNonNull(options)
-                                                    );
+        Val<VerticleRef<I, O>> exp = vertxRef.deployConsumer(requireNonNull(address),
+                                                             requireNonNull(consumer),
+                                                             requireNonNull(options)
+                                                            );
         refValMap = refValMap.set(address,
                                   exp
                                  );
