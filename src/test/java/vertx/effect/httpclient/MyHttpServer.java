@@ -47,7 +47,7 @@ public class MyHttpServer {
                                         int            n       = counter.incrementAndGet();
                                         Future<Buffer> bodyFut = req.body();
                                         bodyFut.onSuccess(buffer -> {
-                                                              System.out.println("server req #"+n);
+                                                              System.out.println("server req #" + n);
                                                               req.response()
                                                                  .putHeader("Content-Type",
                                                                             "application/json"
@@ -55,8 +55,8 @@ public class MyHttpServer {
                                                               String bodyStr = buffer.toString();
 
                                                               Integer statusCode = statusCodeRes.apply(n)
-                                                                                                .apply(null)
-                                                                                                .apply("");
+                                                                                                .apply(req)
+                                                                                                .apply(bodyStr);
 
                                                               String response = bodyRes.apply(n)
                                                                                        .apply(req)
