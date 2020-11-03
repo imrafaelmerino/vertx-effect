@@ -11,8 +11,8 @@
 
 
 - [vertx-effect manifesto](#manifesto)
+- [How persistent data structures makes a difference working with actors](#persistendata)
 - [vertx-effect in a few lines of code](#fewlinesofcode)
-- [How persistent data structures makes a different working with actors](#persistendata)
 - [Effects](#effects)
 - [Expressions](#exp)
 - [Modules](#modules)
@@ -31,135 +31,19 @@
 
 ## <a name="manifesto"><a/> vertx-effect manifesto
     . The more verticles, the better.
+    . A Verticle must do only one thing.
     . Use persistent data structures.
     . Systems will fail, be prepared.
     . Simplicity matters.
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
 
-## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
-
-```java
-import jsonvalues.*;
-import jsonvalues.spec.JsObjSpec;
-import vertx.effect.*;
-import vertx.effect.exp.*;
-
-public class MyModule extends VertxModule {
-
-  public static λ<String, String> toLowerCase, toUpperCase;
-  public static λ<Integer, Integer> inc;
-  public static λ<JsObj, JsObj> validate, validateAndMap;
-
-  @Override
-  protected void initialize() {
-    toUpperCase = this.ask("toUpperCase");
-    toLowerCase = this.ask("toLowerCase");
-    inc = this.ask("inc");
-    validate = this.ask("validate");
-    validateAndMap = this.ask("validateAnMap");
-  }
-
-  @Override
-  protected void deploy() {
-    this.deploy("toLowerCase", (String str) -> Cons.success(str.toLowerCase()));
-    this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
-    this.deploy("inc", (Integer n) -> Cons.success(n+1));
-    
-    JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
-    this.deploy("validate", Validators.validateJsObj(spec));
-
-    λ<JsObj, JsObj> map = obj-> 
-          JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
-                            "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
-                                                                .map(JsStr::of),
-                                                     toUpperCase.apply(obj.getStr(path("/b/1")))
-                                                                .map(JsStr::of)
-                                                     )
-                            );   
-    this.deploy("validateAnMap",validate.apply(obj).flatMap(map));
-
-  }
-}
-```
-
-**A module is a regular Verticle that deploys other Verticles and exposes functions to communicate with them.** 
-In our above example, it deploys five Verticles. It's worth mentioning the _validateAndMap_ Verticle. It has 
-been defined using composition and the _JsObjVal_ expression. It shows the essence of vertx-effect. 
-_ValidateAndMap_ sends the input Json to the _validate_ Verticle. If it conforms to the given spec, 
-it builds the output in parallel, sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
-composing a Json from their responses. vertx-effect uses a persistent Json from [json-values](https://github.com/imrafaelmerino/json-values).
-
-Let's write some tests. json-values is not supported by Vertx and we need to register a MessageCodec to be 
-able to send its persistent Json across the even bus: 
-
-```java
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
-import vertx.effect.exp.Pair;
-import jsonvalues.JsArray;
-import jsonvalues.JsInt;
-import jsonvalues.JsObj;
-
-@ExtendWith(VertxExtension.class)
-public class TestMyModule {
-
-  @BeforeAll
-  // register MessageCode for json-values and deploy MyModule
-  public static void prepare(final Vertx vertx,
-                             final VertxTestContext context) {
-    VertxRef ref = new VertxRef(vertx);
-    Pair.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()), 
-                    ref.deployVerticle(new MyModule())
-                   )
-        .onSuccess(ids -> context.completeNow())
-        .get();
-    }
-
-    @Test
-    public void badMessageFailure(VertxTestContext context)  {
-        MyModule.validateAndMap.apply(JsObj.EMPTY)
-                               .onComplete(result -> {
-                                   context.verify(() -> {
-                                       Assertions.assertTrue(result.failed());
-                                       System.out.println(result.cause());
-                                       context.completeNow();
-                                   });
-                               })
-                               .get();
-    }
-
-    @Test
-    public void jsonMappedSuccess(VertxTestContext context) {
-
-        JsObj input = JsObj.of("a",JsInt.of(1),"b",JsArray.of("FOO","foo"));
-        
-        JsObj expected = JsObj.of("a",JsInt.of(2),"b",JsArray.of("foo","FOO"));
-
-        MyModule.validateAndMap.apply(input)
-                               .onSuccess(output -> {
-                                   context.verify(() -> {
-                                       Assertions.assertEquals(expected,output);
-                                       context.completeNow();
-                                   });
-                               })
-                               .get();
-    }
-
-```
-
-The test badMessageReceived prints out the failure: 
-```text
-(RECIPIENT_FAILURE,3000) 
-[(path=/a, error=(code=REQUIRED, value=NOTHING)), (path=/b, error=(code=REQUIRED, value=NOTHING))]
-```
-
 ## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
 
 **Every type that can be sent across the event bus has an associated MessageCodec**. Go to package
-_io.vertx.core.eventbus.impl.codecs_ to check out what types are supported. The Vertx Json implemented with 
+_io.vertx.core.eventbus.impl.codecs_ to check out what types Vertx supports. The Json implemented in Vertx with 
 **Jackson** has the codec _JsonObjectMessageCodec_.
  
-When a Verticle sends a message to the event bus, Vertx intercepts that message and calls the transform method 
+When a Verticle sends a message to the event bus, Vertx intercepts that message and calls the _transform_ method 
 of its codec. Since the Json from **Jackson** is not immutable at all, the _transform_ method has to make a copy 
 of the message before sending it to the event bus: 
 
@@ -181,15 +65,180 @@ public JsObj transform(final JsObj message) {
 }
 ```
 
-As you can imagine, the more verticles you have, the more messages have to be copied, putting 
+As you can imagine, using Jackson, the more verticles you have, the more messages have to be copied, putting 
 a lot of pressure on the garbage collector and decreasing performance. Furthermore, the bigger 
 the Jsons are, the longer it takes to copy them. This is a problem since, to get the most out
-of the actor model, you need to create the more actors the better.
+of the actor model, you need to create as many Verticles as possible.
 
-Find below a benchmark comparing the Jsons from **Jackson** and **json-values**. The benchmark consists of
-sending messages to a Verticle that just returns them back.
+Find below the result of a benchmark carried out with [jmh](https://openjdk.java.net/projects/code-tools/jmh/), comparing 
+the Jsons from **Jackson** and **json-values**. The benchmark consists of sending messages to a Verticle that just returns 
+them back without doing any computation nor modification (go to [github](https://github.com/imrafaelmerino/vertx-effect/blob/master/performance/src/main/java/vertx/effect/performance/benchmarks/JacksonVsJsValues.java) 
+for further details).`
 
-to be done
+```text
+Benchmark                     Mode    Cnt      Score     Error      Units
+JacksonVsJsValues.jackson     thrpt    5    38816.552 ± 8916.894    ops/s
+JacksonVsJsValues.jsonValues  thrpt    5    51183.223 ± 10154.660   ops/s
+```
+
+## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
+
+```java
+import jsonvalues.*;
+import jsonvalues.spec.JsObjSpec;
+import vertx.effect.*;
+import vertx.effect.exp.*;
+
+public class MyModule extends VertxModule {
+
+  public static λ<String, String> toLowerCase, toUpperCase;
+  public static λ<Integer, Integer> inc;
+  public static λ<JsObj, JsObj> validate, validateAndMap;
+
+  @Override
+  protected void deploy() {
+
+    this.deploy("toLowerCase", (String str) -> Cons.success(str.toLowerCase()));
+    this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
+    this.deploy("inc", (Integer n) -> Cons.success(n+1));
+     
+    // json-values uses specs to define the structure of a Json 
+    JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
+    this.deploy("validate", Validators.validateJsObj(spec));
+
+    λ<JsObj, JsObj> map = obj-> 
+          JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
+                            "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+                                                                .map(JsStr::of),
+                                                     toUpperCase.apply(obj.getStr(path("/b/1")))
+                                                                .map(JsStr::of)
+                                                     )
+                            );   
+    this.deploy("validateAnMap",validate.apply(obj).flatMap(map));
+
+  }
+
+  @Override
+  protected void initialize() {
+
+    toUpperCase = this.ask("toUpperCase");
+    toLowerCase = this.ask("toLowerCase");
+    inc = this.ask("inc");
+    validate = this.ask("validate");
+    validateAndMap = this.ask("validateAnMap");
+
+  }
+}
+```
+
+**A module is a regular Verticle that deploys other Verticles and exposes functions to communicate with them.** 
+In our above example, it deploys five Verticles. It's worth mentioning the _validateAndMap_ Verticle. It has 
+been defined using composition and the _JsObjVal_ expression. It shows the essence of vertx-effect. 
+_ValidateAndMap_ sends the input Json to the _validate_ Verticle. If it conforms to the given spec, 
+it builds the output in parallel, sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
+composing a Json from their responses. vertx-effect uses a persistent Json from [json-values](https://github.com/imrafaelmerino/json-values).
+
+Let's write some tests. json-values is not supported by Vertx and we need to register a MessageCodec to be 
+able to send its persistent Json across the event bus: 
+
+```java
+import vertx.effect.*;
+import vertx.effect.exp.Pair;
+import jsonvalues.*;
+
+@ExtendWith(VertxExtension.class)
+public class TestMyModule {
+
+  @BeforeAll
+  // register MessageCodec for json-values and deploy MyModule
+  public static void prepare(final Vertx vertx,
+                             final VertxTestContext context) {
+    VertxRef ref = new VertxRef(vertx);
+    Pair.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()), 
+                    ref.deployVerticle(new MyModule())
+                   )
+        .onSuccess(ids -> context.completeNow())
+        .get();
+    }
+ 
+    /**
+     the following failure is printed out:
+     (RECIPIENT_FAILURE,3000) 
+     [(path=/a, error=(code=REQUIRED, value=NOTHING)), (path=/b, error=(code=REQUIRED, value=NOTHING))]
+    **/
+    @Test
+    public void empty_json_is_sent_and_failure_is_received(VertxTestContext context)  {
+
+        MyModule.validateAndMap.apply(JsObj.EMPTY)
+                               .onComplete(result -> {
+                                   context.verify(() -> {
+                                       Assertions.assertTrue(result.failed());
+                                       System.out.println(result.cause());
+                                       context.completeNow();
+                                   });
+                               })
+                               .get();
+    }
+
+    @Test
+    public void valid_json_is_sent_and_mapped_successfully(VertxTestContext context) {
+
+        JsObj input = JsObj.of("a", JsInt.of(1), "b", JsArray.of("FOO","foo"));
+        
+        JsObj expected = JsObj.of("a", JsInt.of(2), "b", JsArray.of("foo","FOO"));
+
+        MyModule.validateAndMap.apply(input)
+                               .onSuccess(output -> {
+                                   context.verify(() -> {
+                                       Assertions.assertEquals(expected,output);
+                                       context.completeNow();
+                                   });
+                               })
+                               .get();
+    }
+```
+
+**Lambdas are just functions, so you can test them without deploying any verticle!**
+
+```java
+
+ λ<String, String> toLowerCase = str -> Cons.success(str.toLowerCase());
+ λ<String, String> toUpperCase = str -> Cons.success(str.toUpperCase()); 
+ λ<Integer, Integer> inc = n -> Cons.success(n+1);
+ JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
+ λ<JsObj, JsObj> validate = Validators.validateJsObj(spec);
+ λ<JsObj, JsObj> map = obj-> 
+          JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
+                            "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+                                                                .map(JsStr::of),
+                                                     toUpperCase.apply(obj.getStr(path("/b/1")))
+                                                                .map(JsStr::of)
+                                                     )
+                            );   
+ 
+ @Test
+ public void valid_json_is_validated_and_mapped(VertxTestContext context) {
+
+    JsObj input = JsObj.of("a", JsInt.of(1), "b", JsArray.of("FOO","foo"));
+        
+    JsObj expected = JsObj.of("a", JsInt.of(2), "b", JsArray.of("foo","FOO"));
+
+    MyModule.validateAndMap.apply(input)
+                           .onSuccess(output -> {
+                                   context.verify(() -> {
+                                       Assertions.assertEquals(expected,output);
+                                       context.completeNow();
+                                   });
+                               })
+                           .get();
+    }
+
+```
+
+**This is extremely convenient and productive in order to do your testing. You don't need to mock anything. 
+Passing around functions that produce outputs given some inputs is enough to check that your verticles 
+will do their job.** 
+
 
 
 ## <a name="effects"><a/> Effects 
