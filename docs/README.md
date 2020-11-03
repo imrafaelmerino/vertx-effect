@@ -33,7 +33,7 @@
 
 ## <a name="manifesto"><a/> vertx-effect manifesto
     . The more verticles, the better.
-    . A Verticle must do only one thing.
+    . A verticle must do only one thing.
     . Use persistent data structures.
     . Systems will fail, be prepared.
     . Simplicity matters.
@@ -41,13 +41,12 @@
 
 ## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
 
-**Every type that can be sent across the event bus has an associated MessageCodec**. Go to the package
+**Every message that can be sent across the event bus has an associated MessageCodec**. Go to the package
 _io.vertx.core.eventbus.impl.codecs_ to check out what types Vertx supports. The Json implemented in Vertx with 
 **Jackson** has the codec _JsonObjectMessageCodec_.
  
-When a Verticle sends a message to the event bus, **Vertx intercepts that message and calls the _transform_ method 
-of its codec**. Since **Jackson** is not immutable at all, the _transform_ method of _JsonObjectMessageCodec_  
-has to make a copy of the message before sending it to the event bus: 
+When a verticle sends a message to the event bus, **Vertx intercepts that message and calls the _transform_ method 
+of its codec**. Since **Jackson** is not immutable at all, the _transform_ method of _JsonObjectMessageCodec_ has to make a copy of the message before sending it to the event bus: 
 
 ```java
 // Vertx impl 
@@ -58,7 +57,7 @@ public JsonObject transform(JsonObject message) {
 
 Since vertx-effect uses [json-values](https://github.com/imrafaelmerino/json-values), which is a truly immutable
 Json implemented with persistent data structures, the _transform_ method of its codec **returns the same message sent
-by the Verticle without making any copy**:
+by the verticle without making any copy**:
 
 ```java
 // vertx-effect impl
@@ -70,12 +69,12 @@ public JsObj transform(final JsObj message) {
 As you can imagine, using Jackson, the more verticles you have, the more messages have to be copied, putting 
 a lot of pressure on the garbage collector and decreasing performance. Furthermore, the bigger 
 the Jsons are, the longer it takes to copy them. **This is a problem since, to get the most out
-of the actor model, you need to create as many Verticles as possible**.
+of the actor model, you need to create as many verticles as possible**.
 
 Find below the result of a benchmark carried out with [jmh](https://openjdk.java.net/projects/code-tools/jmh/), comparing 
-the Jsons from **Jackson** and **json-values**. The benchmark consists of sending messages to a Verticle that just returns 
+the Jsons from **Jackson** and **json-values**. The benchmark consists of sending messages to a verticle that just returns 
 them back without doing any computation nor modification (go to [JacksonVsJsValues](https://github.com/imrafaelmerino/vertx-effect/blob/master/performance/src/main/java/vertx/effect/performance/benchmarks/JacksonVsJsValues.java) 
-for further details on the benchmark).`
+for further details on the benchmark).
 
 ```text
 Benchmark                     Mode    Cnt      Score     Error      Units
@@ -133,13 +132,24 @@ public class MyModule extends VertxModule {
 }
 ```
 
-**A module is a regular Verticle that deploys other Verticles and exposes functions to communicate with them.** 
-In the above example, it deploys five Verticles. It's worth mentioning how the _validateAndMap_ Verticle is 
+**A module is a regular verticle that deploys other verticles and exposes functions to communicate with them.** 
+In the above example, it deploys five verticles. It's worth mentioning how the _validateAndMap_ verticle is 
 defined using composition and the _JsObjVal_ expression. **It shows the essence of vertx-effect and functional programming**. 
 
-_ValidateAndMap_ sends a message to _validate_. If it matches the given spec, 
-it builds the output sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
+_ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, 
+_ValidateAndMap_  computes the output sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
 composing a Json from their responses **in parallel**. 
+
+It's important to notice that you can still send messages to the module verticles using the Vertx API:
+
+```java
+eventBus.send("toLowerCase", "AAA");
+
+eventBus.send("toUperCase", "aaa");
+
+eventBus.send("inc", 1);
+
+```
 
 Let's write some tests. Vertx doesn't support json-values, so we need to register a _MessageCodec_ to be 
 able to send its persistent Json across the event bus: 
@@ -325,8 +335,8 @@ import java.util.function.Function
 public interface λ<I,O> extends Function<I, Val<O>> { }
 
 ```
-A lambda is a function that returns a **Val** of type **O** given a type **I**. **It models the communication with a Verticle**:
-a message is sent, the Verticle receives and processes the message, and replies with a response. The message and the response has to
+A lambda is a function that returns a **Val** of type **O** given a type **I**. **It models the communication with a verticle**:
+a message is sent, the verticle receives and processes the message, and replies with a response. The message and the response has to
 be of a type that can be sent across the EvenBus; otherwise, you must implement a [MessageCodec](https://vertx.io/docs/apidocs/io/vertx/core/eventbus/MessageCodec.html).
 
 ## <a name="exp"><a/> Expressions 
@@ -496,7 +506,7 @@ JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
 
 
 
-It's important to notice **that any value of the above expressions can be computed by a different Verticle of
+It's important to notice **that any value of the above expressions can be computed by a different verticle of
 any machine of a cluster**. Imagine ten machines collaborating to compute a JsObj, is not this amazing?
  
 
@@ -524,7 +534,7 @@ public interface Val<O> extends Supplier<Future<O>> {
 
 ## <a name="modules"><a/> Modules 
  
-In **vertx-effect**, **a module is a special Verticle whose purpose is to deploy other Verticles and expose lambdas to 
+In **vertx-effect**, **a module is a special verticle whose purpose is to deploy other verticles and expose lambdas to 
 communicate with them**. Let's put an example:
 
 ```java
@@ -662,12 +672,12 @@ events:
 
     - DEPLOYED_VERTICLE 
     - UNDEPLOYED_VERTICLE
-    - SENT_MESSAGE: a message is sent to a Verticle
-    - RECEIVED_MESSAGE: a Verticle received a message
-    - REPLIED_RESP : a Verticle replied with a message
-    - REPLIED_FAILURE: a Verticle replied with an error
-    - RECEIVED_RESP: a response is received from a Verticle
-    - RECEIVED_FAILURE: an error is received from a Verticle
+    - SENT_MESSAGE: a message is sent to a verticle
+    - RECEIVED_MESSAGE: a verticle received a message
+    - REPLIED_RESP : a verticle replied with a message
+    - REPLIED_FAILURE: a verticle replied with an error
+    - RECEIVED_RESP: a response is received from a verticle
+    - RECEIVED_FAILURE: an error is received from a verticle
     - INTERNAL_ERROR_XXX: go to github and open and issue. 
 
 A real example from the previous example where we filter and trim the strings of 
@@ -708,7 +718,7 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {}
 ```
 
 A λc is a function that takes two arguments, a map representing the context in which an operation will be executed, 
-and the message of type I sent to the Verticle across the event bus.
+and the message of type I sent to the verticle across the event bus.
 You can put the user's email into the context to filter all the events associated with that email
 and a random value to distinguish between transactions from the same email. That's only an example.
 
@@ -811,12 +821,12 @@ Let's take a look at the events that are published during the execution of the p
  
 ## <a name="spawning-verticles"><a/> Spawning verticles 
 With vertx-effect, you can spawn verticles, which means that verticles are deployed and undeployed on the fly. 
-Every time something needs to be computed, a new Verticle is deployed. When the computation is done, and the 
+Every time something needs to be computed, a new verticle is deployed. When the computation is done, and the 
 verticle replies, it is undeployed right away. 
 
 The goal is to get the most out of the cores! **Erlang taught us how to develop concurrent software that doubles 
 in speed if you double the number of cores without changing a code line:  spawning as many verticles as possible**. 
-In Erlang jargon, a Verticle is kind of a process. On the 
+In Erlang jargon, a verticle is kind of a process. On the 
 other hand, if you have a cluster, every computation could be done on different machines.
 
 ## <a name="httpclient"><a/> Reactive http client 
