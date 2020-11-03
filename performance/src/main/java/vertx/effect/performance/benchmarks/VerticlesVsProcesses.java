@@ -16,7 +16,7 @@ import static vertx.effect.performance.Functions.awaitForEnding;
 import static vertx.effect.performance.MyModule.countStringsLengthMultiProcesses;
 import static vertx.effect.performance.MyModule.countStringsLengthMultiVerticles;
 
-public class MyBenchmark {
+public class VerticlesVsProcesses {
 
     static {
         VertxRef vertxRef = new VertxRef(Vertx.vertx(new VertxOptions().setWorkerPoolSize(100)));
