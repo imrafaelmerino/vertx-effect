@@ -1,4 +1,4 @@
-<img src="./logo/package_twitter_swe2n4mg/color1/full/coverphoto/white_logo_color1_background.png" alt="logo"/>
+<img src="./logo/package_twitter_swe2n4mg/base/full/coverphoto/base_logo_white_background.png" alt="logo"/>
 
 [![Build Status](https://travis-ci.com/imrafaelmerino/vertx-effect.svg?branch=master)](https://travis-ci.com/imrafaelmerino/vertx-effect)
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
