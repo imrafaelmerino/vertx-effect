@@ -85,10 +85,8 @@ JacksonVsJsValues.jsonValues  thrpt    5    51183.223 ± 10154.660   ops/s
 ## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
 
 ```java
-import jsonvalues.*;
-import jsonvalues.spec.JsObjSpec;
-import vertx.effect.*;
-import vertx.effect.exp.*;
+import jsonvalues.*;   import jsonvalues.spec.JsObjSpec;
+import vertx.effect.*; import vertx.effect.exp.*;
 
 public class MyModule extends VertxModule {
 
@@ -114,7 +112,8 @@ public class MyModule extends VertxModule {
                                                      toUpperCase.apply(obj.getStr(path("/b/1")))
                                                                 .map(JsStr::of)
                                                      )
-                            );   
+                            )
+                  .retry(2);   
     this.deploy("validateAnMap",validate.apply(obj).flatMap(map));
 
   }
@@ -134,11 +133,14 @@ public class MyModule extends VertxModule {
 
 **A module is a regular verticle that deploys other verticles and exposes functions to communicate with them.** 
 In the above example, it deploys five verticles. It's worth mentioning how the _validateAndMap_ verticle is 
-defined using composition and the _JsObjVal_ expression. **It shows the essence of vertx-effect and functional programming**. 
+defined using composition and the _JsObjVal_ and _JsArrayVal_ expressions. **It shows the essence of vertx-effect**. 
+Later on we'll see more expressions like **Cond**, **Case**, **IfElse**, **Pair**, **Triple**  etc.
 
 _ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, 
 _ValidateAndMap_  computes the output sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
-composing a Json from their responses **in parallel**. 
+composing a Json from their responses **in parallel**. If for some reason you prefer to operate sequentially instead
+of in parallel, you can use the sequential constructors _JsObjVal.sequential_ and _JsArrayVal.sequential_. Thanks to
+the _retry_ function, if **any** verticle failed computing their value, it would retry the computation up to two times.
 
 It's important to notice that you can still send messages to the module verticles using the Vertx API:
 
@@ -479,28 +481,31 @@ following example:
 
 ```java
 
-import jsonval.JsValue
+IfElse<JsStr> a = IfElse.<JsStr>predicate(Val<Boolean>)
+                        .consequence(Val<JsStr>)
+                        .alternative(Val<JsStr>); 
 
-JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
-                                     .consequence(Val<JsValue>)
-                                     .alternative(Val<JsValue>),
-                  "b", JsArrayVal.sequential(new Case<Integer,String>(Integer).of(1, Val<JsValue>,
-                                                                                  2, Val<JsValue>,
-                                                                                  Val<JsValue> 
-                                                                                 ),
-                                             Cond.of(Val<Boolean>, Val<JsValue>,
-                                                     Val<Boolean>, Val<JsValue>,
-                                                     Val<JsValue>
-                                                     )
-                                             ),
-                  "c", JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>),
-                                         "e", And.parallel(Val<Boolean>, Val<Boolean>),
-                                         "f", JsArrayVal.parallel(Val<JsValue>,
-                                                                  Val<JsValue> 
-                                                                 ) 
-                                        )
-                  );
+JsArrayVal b = JsArrayVal.sequential(new Case<Integer,JsValue>(n).of(1, Val<JsValue>,
+                                                                     2, Val<JsValue>,
+                                                                     Val<JsValue> 
+                                                                    ),
+                                     Cond.of(Val<Boolean>, Val<JsValue>,
+                                             Val<Boolean>, Val<JsValue>,
+                                             Val<JsValue>
+                                            )
+                                     );
 
+JsObjVal c = JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>).map(JsBool::of),
+                               "e", And.parallel(Val<Boolean>, Val<Boolean>).map(JsBool::of),
+                               "f", JsArrayVal.parallel(Val<JsValue>,
+                                                        Val<JsValue> 
+                                                       ) 
+                              )
+
+JsObjVal obj = JsObjVal.parallel("a",a,
+                                 "b",b,
+                                 "c",c 
+                                );
 ```
 
 
@@ -621,7 +626,7 @@ Let's deploy our module and do some testing.
  @Test
  public void test_composition(final VertxTestContext context)
  {
-    λ<JsObj, JsObj> removeAndNull = MyModule.removeNull.andThen(MyModule.trim);
+    λ<JsObj, JsObj> removeAndTim = MyModule.removeNull.andThen(MyModule.trim);
 
     JsObj input = JsObj.of("a", JsStr.of("  hi  "),
                            "b", JsNull.NULL,
@@ -634,7 +639,7 @@ Let's deploy our module and do some testing.
                               "c", JsObj.of("d", JsStr.of("bye"))
                              );
 
-    removeAndNull.apply(input)
+    removeAndTrim.apply(input)
                  .onSuccess(it -> {
                      context.verify(()-> {
                                           Assertions.assertEquals(expected,it);
