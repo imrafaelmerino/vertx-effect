@@ -44,7 +44,7 @@ public class TestCase {
                               ) {
         vertxRef = new VertxRef(vertx);
 
-        action = (error, n) -> vertxRef.timer(100,
+        action = (error, n) -> vertxRef.delay(100,
                                               MILLISECONDS
                                              );
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
@@ -690,8 +690,8 @@ public class TestCase {
                    )
                 .retryIf(e -> e instanceof RuntimeException,
                          3,
-                         (e, n) -> vertxRef.timer(100,
-                                                 MILLISECONDS
+                         (e, n) -> vertxRef.delay(100,
+                                                  MILLISECONDS
                                                  )
                         )
                 .onComplete(
@@ -904,7 +904,7 @@ public class TestCase {
                     b.get()
                    )
                 .retry(ATTEMPTS,
-                       (error, n) -> vertxRef.timer(100,
+                       (error, n) -> vertxRef.delay(100,
                                                     MILLISECONDS
                                                    )
                       )

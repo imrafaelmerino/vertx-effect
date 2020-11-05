@@ -588,13 +588,13 @@ any attempt. The type of action is Val<Void>. You can create any imaginable retr
 
 ```java
 // for ever
-retry(Integer.MAX)
+retry(Integer.MAX_VALUE)
 
 // constant delay n seconds
-retry(attemps, e -> remaining -> vertxRef.timer(n,SECONDS))
+retry(attemps, e -> remaining -> vertxRef.delay(n,SECONDS))
 
 // incremental delay: waiting one sec before first attempt, two secs before second attempt and so on
-retry(attemps, e -> remaining -> vertxRef.timer(attemps - remaining + 1,SECONDS))
+retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS))
 
 ```
 
@@ -1015,7 +1015,7 @@ BiFunction<Integer, String, Val<JsObj>> search =
                                               ),
                                    attempts,
                                    (error, remainingAttempts) ->
-                                             vertxRef.timer(attempts - remainingAttempts + 1,
+                                             vertxRef.delay(attempts - remainingAttempts + 1,
                                                             SECONDS
                                                            )
                                    )

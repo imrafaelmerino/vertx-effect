@@ -35,9 +35,8 @@ public class VerticlesVsProcesses {
 
 
     @Benchmark
-    @BenchmarkMode(Mode.All)
-    @Fork(1)
-    public void testCountStringMultiVerticle()  {
+    @BenchmarkMode(Mode.Throughput)
+    public void test_count_string_multi_verticles()  {
 
         awaitForEnding(countStringsLengthMultiVerticles.apply(TIMES),
                        TIME_WAITING,
@@ -47,9 +46,8 @@ public class VerticlesVsProcesses {
     }
 
     @Benchmark
-    @BenchmarkMode(Mode.All)
-    @Fork(1)
-    public void testCountStringProcesses()  {
+    @BenchmarkMode(Mode.Throughput)
+    public void test_count_string_processes()  {
 
         awaitForEnding(countStringsLengthMultiProcesses.apply(TIMES),
                        TIME_WAITING,

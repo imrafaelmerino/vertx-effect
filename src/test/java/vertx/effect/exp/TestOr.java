@@ -243,7 +243,7 @@ public class TestOr {
                    )
           .retryIf(it -> it instanceof IllegalArgumentException,
                    3,
-                   (e, i) -> vertxRef.timer(100,
+                   (e, i) -> vertxRef.delay(100,
                                             MILLISECONDS
                                            )
                   )
@@ -269,7 +269,7 @@ public class TestOr {
                      )
           .retryIf(it -> it instanceof IllegalArgumentException,
                    3,
-                   (e, i) -> vertxRef.timer(100,
+                   (e, i) -> vertxRef.delay(100,
                                             MILLISECONDS
                                            )
                   )
@@ -289,7 +289,7 @@ public class TestOr {
                     FALSE.get()
                    )
           .retry(ATTEMPTS,
-                 (error, n) -> vertxRef.timer(100,
+                 (error, n) -> vertxRef.delay(100,
                                               MILLISECONDS
                                              )
                 )
@@ -311,7 +311,7 @@ public class TestOr {
                       FALSE.get()
                      )
           .retry(ATTEMPTS,
-                 (error, n) -> vertxRef.timer(100,
+                 (error, n) -> vertxRef.delay(100,
                                               MILLISECONDS
                                              )
                 )

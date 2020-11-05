@@ -504,7 +504,7 @@ public class TestQuadruple {
                            a.get()
                           )
                  .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.timer(100,
+                        (error, n) -> vertxRef.delay(100,
                                                      MILLISECONDS
                                                     )
                        )
@@ -539,7 +539,7 @@ public class TestQuadruple {
                              a.get()
                             )
                  .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.timer(100,
+                        (error, n) -> vertxRef.delay(100,
                                                      MILLISECONDS
                                                     )
                        )

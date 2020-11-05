@@ -175,7 +175,7 @@ public class TestSequentialSeq {
                          )
               .retryIf(it -> it instanceof IllegalArgumentException,
                        3,
-                       (e, i) -> vertxRef.timer(100,
+                       (e, i) -> vertxRef.delay(100,
                                                 MILLISECONDS
                                                )
                       )
@@ -210,7 +210,7 @@ public class TestSequentialSeq {
 
         long start = System.nanoTime();
         BiFunction<Throwable, Integer, Val<Void>> oneSecDelay =
-                (error, n) -> vertxRef.timer(100,
+                (error, n) -> vertxRef.delay(100,
                                              MILLISECONDS
                                             );
         Val<List<String>> val = SeqVal.<String>sequential()

@@ -504,7 +504,7 @@ public class VertxRef {
     }
 
 
-    public Val<Void> timer(final int time,
+    public Val<Void> delay(final int time,
                            final TimeUnit unit) {
         if (time < 0) return Cons.failure(new IllegalArgumentException("time < 0"));
         if (unit == null) return Cons.failure(new NullPointerException("unit is null"));

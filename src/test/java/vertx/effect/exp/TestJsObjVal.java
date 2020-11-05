@@ -1781,8 +1781,8 @@ public class TestJsObjVal {
                            .map(JsStr::of)
                          )
                 .retry(ATTEMPTS,
-                       (error, n) -> vertxRef.timer(100,
-                                                   MILLISECONDS
+                       (error, n) -> vertxRef.delay(100,
+                                                    MILLISECONDS
                                                    )
                       )
                 .get()
@@ -1823,7 +1823,7 @@ public class TestJsObjVal {
                              .map(JsStr::of)
                            )
                 .retry(ATTEMPTS,
-                       (error, n) -> vertxRef.timer(100,
+                       (error, n) -> vertxRef.delay(100,
                                                     MILLISECONDS
                                                    )
                       )

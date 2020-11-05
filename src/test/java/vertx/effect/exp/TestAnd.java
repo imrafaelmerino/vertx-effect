@@ -146,7 +146,7 @@ public class TestAnd {
                      falseVal.get()
                     )
            .retry(attempts,
-                  (error, n) -> vertxRef.timer(100,
+                  (error, n) -> vertxRef.delay(100,
                                                MILLISECONDS
                                               )
                  )
@@ -178,8 +178,8 @@ public class TestAnd {
                        falseVal.get()
                       )
            .retry(attempts,
-                  (error, n) -> vertxRef.timer(100,
-                                              MILLISECONDS
+                  (error, n) -> vertxRef.delay(100,
+                                               MILLISECONDS
                                               )
                  )
            .get()
@@ -284,7 +284,7 @@ public class TestAnd {
                     )
            .retryIf(it -> it instanceof IllegalArgumentException,
                     3,
-                    (e, i) -> vertxRef.timer(100,
+                    (e, i) -> vertxRef.delay(100,
                                              MILLISECONDS
                                             )
                    )
@@ -310,7 +310,7 @@ public class TestAnd {
                       )
            .retryIf(it -> it instanceof IllegalArgumentException,
                     3,
-                    (e, i) -> vertxRef.timer(100,
+                    (e, i) -> vertxRef.delay(100,
                                              MILLISECONDS
                                             )
                    )

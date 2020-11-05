@@ -398,8 +398,8 @@ public class TestIfElse {
               .consequence(Cons.success("b"))
               .alternative(Cons.success("a"))
               .retry(ATTEMPTS,
-                     (error, n) -> vertxRef.timer(100,
-                                                 MILLISECONDS
+                     (error, n) -> vertxRef.delay(100,
+                                                  MILLISECONDS
                                                  )
                     )
               .get()
@@ -428,7 +428,7 @@ public class TestIfElse {
                 .alternative(Cons.success("bye"))
                 .retryIf(it -> it instanceof IllegalArgumentException,
                          3,
-                         (e, i) -> vertxRef.timer(100,
+                         (e, i) -> vertxRef.delay(100,
                                                   MILLISECONDS
                                                  )
                         )
@@ -455,8 +455,8 @@ public class TestIfElse {
                 .alternative(Cons.success("bye"))
                 .retryIf(it -> it instanceof IllegalArgumentException,
                          2,
-                         (e, i) -> vertxRef.timer(100,
-                                                 MILLISECONDS
+                         (e, i) -> vertxRef.delay(100,
+                                                  MILLISECONDS
                                                  )
                         )
                 .onComplete(it -> {

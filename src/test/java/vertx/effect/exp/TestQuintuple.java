@@ -541,7 +541,7 @@ public class TestQuintuple {
                            a.get()
                           )
                  .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.timer(100,
+                        (error, n) -> vertxRef.delay(100,
                                                      MILLISECONDS
                                                     )
                        )
@@ -575,7 +575,7 @@ public class TestQuintuple {
                              a.get()
                             )
                  .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.timer(100,
+                        (error, n) -> vertxRef.delay(100,
                                                      MILLISECONDS
                                                     )
                        )
