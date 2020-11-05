@@ -893,8 +893,8 @@ filter, map and reduce functions to count the length all the Json values that ar
 all the results adding them up.
 We're going to compare two different approaches:
 
-    - Filter, map and reduce are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle 
-    - Using the spawn function, so filter, map and reduce are verticles that are deployed on the fly, and undeployed
+    - The Json generator, and the functions filter, map and reduce are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle 
+    - Using the spawn function, so the json generator, filter, map and reduce are verticles that are deployed on the fly, and undeployed
     when their computation is done. 
 
 In both approaches, the generator is a worker that produces a Json with a specified delay. We'll vary this delay
@@ -910,8 +910,8 @@ public class SumJsonStringLength implements λ<Integer, Integer> {
         return IntStream.range(0,
                                n 
                               )
-                        //generate -> filter -> map -> reduce
-                        .mapToObj(n -> Cons.of(() -> generator.apply(delay)
+                        //generate json with delay -> filter -> map -> reduce
+                        .mapToObj(n -> Cons.of(() -> generator.apply(DELAY)
                                                               .flatMap(filter.andThen(map)
                                                                              .andThen(reduce)
                                                                       )
@@ -928,25 +928,13 @@ public class SumJsonStringLength implements λ<Integer, Integer> {
                                 .map(it -> ((Integer) it))
                                 .reduce(Integer::sum)
                             );
-
     }
-
 }
 
 ```    
 
-    n      |  delay (ms)   |  instances  |  deploy   |   spawn 	
------------|---------------|-------------|-----------|-----------
-           |   	       	   |   	         |   	     |
------------|---------------|-------------|-----------|-----------   	
-           |   	       	   |   	         |   	     |
------------|---------------|-------------|-----------|-----------
-           |   	       	   |   	         |   	     | 
------------|---------------|-------------|-----------|-----------
-           |   	       	   |   	         |   	     | 
------------|---------------|-------------|-----------|-----------
-           |   	       	   |   	         |   	     |  
------------|---------------|-------------|-----------|-----------
+
+
 ## <a name="httpclient"><a/> Reactive http client 
 vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple
 as extending the class _HttpClientModule_ and defining a constructor to initialize the HTTP options and the internal
@@ -1043,10 +1031,96 @@ As you can see two verticles were deployed: the module and an internal verticle 
 This verticle performs the requests. The cookies, headers and body received from Google are omitted.
 
 ## <a name="oauth-httpclient"><a/> Reactive OAuth http client
-in progress
+
 
 ### <a name="clientcredentials"><a/> Client credentials flow 
-in progress
+
+```java
+ClientCredentialsFlowBuilder builder  = 
+            new ClientCredentialsFlowBuilder(new HttpClientOptions().setDefaultPort(port)
+                                                                    .setDefaultHost("localhost"),
+                                             "my-httpclient-address",
+                                             new GetAccessTokenRequest(clientId,clientSecret)
+                                            );
+
+ClientCredentialsModule httpClient = builder.createModule();
+
+vertxRef.deployVerticle(httpClient);
+
+```
+
+After deploying the http client module, you can use the lambdas it exposes to make any requests:
+
+```java
+
+public final λc<GetReq, JsObj> getOauth;
+public final λc<PostReq, JsObj> postOauth;
+public final λc<PutReq, JsObj> putOauth;
+public final λc<DeleteReq, JsObj> deleteOauth;
+public final λc<PatchReq, JsObj> patchOauth;
+public final λc<HeadReq, JsObj> headOauth;
+public final λc<ConnectReq, JsObj> connectOauth;
+public final λc<OptionsReq, JsObj> optionsOauth;
+public final λc<TraceReq, JsObj> traceOauth;
+
+```
+
+You can customize anything using the builder:
+
+```java
+
+// by default Authorization
+builder.setAuthorizationHeaderName(final String authorizationHeaderName) 
+
+// by default token -> "Bearer "+token
+builder.setAuthorizationHeaderValue(final Function<String, String> authorizationHeaderValue) 
+
+// predicate to check if we need to refresh the token
+// by default resp -> resp.getInt("status_code") == 401
+builder.setRefreshTokenPredicate(final Predicate<JsObj> refreshTokenPredicate) 
+
+// lambda to get the access token from the resp
+// by default parse the body into a Json a get the access_token field 
+builder.setReadNewAccessTokenAfterRefresh(final λ<JsObj, String> readNewAccessTokenAfterRefresh) 
+
+// predicate to check if retrying in case of an error making the request to get the token
+// by default connection timeout, unknown host or access_token is not found in the response
+builder.setRetryAccessTokenReqPredicate(final Predicate<Throwable> retryGetTokenPredicate)
+
+// default number of attempts in case of retryGetTokenPredicate is tested true 
+builder.setAccessTokenReqAttempts(final int accessTokenReqAttempts) 
+
+// predicate to check if retrying in case of an error making the request
+// by default connection timeout or unknown host 
+builder.setRetryReqPredicate(final Predicate<Throwable> retryReqPredicate) 
+
+// default number of attempts in case of setRetryReqPredicate is tested true 
+builder.setReqAttempts(final int reqAttempts) 
+
+```
+
+The default request to get the token is
+
+```text
+POST https://{{host}}:{{port}}/token
+Authorization: Basic Base64(clientId:clientSecret) 
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+```
+
+Since _GetAccessTokenRequest_ is just a function, it can be also customized:
+
+```java
+new ClientCredentialsFlowBuilder(httpOptions,   
+                                 "address",
+                                 context -> httpclient -> { 
+                                                             PostReq postReq = ???;
+                                                             return httpclient.post.apply(context,postReq);
+                                                           }
+                                )           
+```
+
 
 ### <a name="authorizationflow"><a/> Authorization flow
 in progress

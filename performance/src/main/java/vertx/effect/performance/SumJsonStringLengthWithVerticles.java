@@ -11,7 +11,7 @@ import static vertx.effect.performance.Functions.TIME_WAITING_MS;
 import static vertx.effect.performance.MyModule.*;
 
 
-public class CountStringMultiVerticle implements λ<Integer, Integer> {
+public class SumJsonStringLengthWithVerticles implements λ<Integer, Integer> {
 
     @Override
     public Val<Integer> apply(final Integer times) {
