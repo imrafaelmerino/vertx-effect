@@ -1032,6 +1032,9 @@ This verticle performs the requests. The cookies, headers and body received from
 
 ## <a name="oauth-httpclient"><a/> Reactive OAuth http client
 
+Following the philosophy we've seen so far, the oauth http clients implemented in vertx-effect are
+verticles that exposes lambdas to make http request. Getting and refreshing the access token is something
+you don't have to worry about. It's all handled for you. The good thing is that you can customize everything.
 
 ### <a name="clientcredentials"><a/> Client credentials flow 
 
