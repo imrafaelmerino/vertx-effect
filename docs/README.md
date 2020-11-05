@@ -1112,6 +1112,7 @@ grant_type=client_credentials
 Since _GetAccessTokenRequest_ is just a function, it can be also customized:
 
 ```java
+
 new ClientCredentialsFlowBuilder(httpOptions,   
                                  "address",
                                  (context,httpclient) -> { 
@@ -1120,12 +1121,66 @@ new ClientCredentialsFlowBuilder(httpOptions,
                                                                           .apply(context,
                                                                                  postReq);
                                                        }
-                                )           
+                                )
+
+         
 ```
 
 
 ### <a name="authorizationflow"><a/> Authorization flow
-in progress
+
+
+You need to get the access and refresh token making an authentication request. You will need
+tipically a code, a redirect_uri etc
+
+```java
+JsObj inputs = JsObj.of("code",???,"redirect_uri",???);
+
+// (module,inputs) -> http response
+BiFunction<HttpClientModule, JsObj, Val<JsObj>> authenticateReq = ???;
+
+AuthorizationCodeModule httpClient = 
+                new AuthorizationCodeFlowBuilder(options,
+                                                 "oauth-http-client",
+                                                 new RefreshAccessTokenReq("client_id",
+                                                                           "client_secret"
+                                                ).createFromAuthReq(authenticateReq);
+
+vertxRef.deployVerticle(httpClient);
+
+//(access_token, refresh_token)  
+Val<Tuple2<String, String>> tokens = httpClient.authenticate(inputs);
+
+tokens.get().onSucess(tuple -> { //at
+                                // store refresh token if applied
+                                // use lambdas to make requests
+                                GetReq req = ???;
+                                httpClient.getOauth(req)
+                               }
+                     );
+ 
+```
+
+You already have the refresh token. You don't need to make any authorization requests.
+
+```java
+String refreshToken = ???;
+
+AuthorizationCodeModule httpClient = 
+                new AuthorizationCodeFlowBuilder(options,
+                                                 "oauth-http-client",
+                                                 new RefreshAccessTokenReq("client_id",
+                                                                           "client_secret"
+                                                ).createFromRefreshToken(refreshToken);
+               
+vertxRef.deployVerticle(httpClient);
+
+```
+
+There are implementations of the requests to get the tokens and authenticate your app for Spotify.
+Go to _vertx.effect.httpclient.oauth.Spotify_ for further details. In case you can implement any just
+defining a couple of functions. Like it was shown in the previous section, you can customize everything:
+retries under certain errors, number of attempts etc 
  
 ## <a name="perf"><a/> Performance 
 in progress

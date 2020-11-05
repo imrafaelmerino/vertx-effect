@@ -24,11 +24,11 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
 
     public AuthorizationCodeFlowBuilder(final HttpClientOptions options,
                                         final String address,
-                                        final Function<String, BiFunction<MultiMap, HttpClientModule, Val<JsObj>>> accessTokenReq) {
+                                        final Function<String, BiFunction<MultiMap, HttpClientModule, Val<JsObj>>> refreshAccessTokenReq) {
         super(options,
               address
              );
-        this.accessTokenReq = requireNonNull(accessTokenReq);
+        this.accessTokenReq = requireNonNull(refreshAccessTokenReq);
     }
 
     public AuthorizationCodeFlowBuilder setReadTokensAfterAuthentication(final λ<JsObj, Tuple2<String, String>> readTokensAfterAuthentication) {
