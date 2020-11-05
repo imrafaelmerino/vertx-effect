@@ -11,12 +11,12 @@
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.5)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.5/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
-
 - [vertx-effect manifesto](#manifesto)
 - [How persistent data structures makes a difference working with actors](#persistendata)
 - [vertx-effect in a few lines of code](#fewlinesofcode)
 - [Effects](#effects)
 - [Expressions](#exp)
+- [Being reactive](#reactive)
 - [Modules](#modules)
 - [Logging](#logging)
     - [Publishing events](#events)
@@ -41,7 +41,7 @@
     . Simplicity matters.
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
 
-## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
+## <a name="persistendata"><a/>How persistent data structures makes a difference working with actors 
 
 **Every message that can be sent across the event bus has an associated MessageCodec**. Go to the package
 _io.vertx.core.eventbus.impl.codecs_ to check out what types Vertx supports. The Json implemented in Vertx with 
@@ -113,7 +113,7 @@ public class MyModule extends VertxModule {
     this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
     this.deploy("inc", (Integer n) -> Cons.success(n+1));
      
-    // json-values uses specs to define the structure of a Json 
+    // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]} 
     JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
     this.deploy("validate", Validators.validateJsObj(spec));
 
@@ -146,7 +146,7 @@ public class MyModule extends VertxModule {
 **A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them.** 
 A lamda is just a function that takes an input and produces an output. In the above example, _MyModule_ deploys five verticles. 
 It's worth mentioning how the _validateAndMap_ verticle is defined using composition and the _JsObjVal_ and _JsArrayVal_ expressions. **It shows the essence of vertx-effect**. 
-Later on, we'll see more expressions like **Cond**, **Case**, **IfElse**, **Pair**, **Triple**  etc.
+Later on, we'll see more expressions like **Cons**, **Cond**, **Case**, **IfElse**, **Pair**, **Triple**  etc.
 
 _ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, 
 _ValidateAndMap_  computes the output sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
@@ -532,22 +532,43 @@ JsObjVal obj = JsObjVal.parallel("a",a,
 
 It's important to notice **that any value of the above expressions can be computed by a different verticle of
 any machine of a cluster**. Imagine ten machines collaborating to compute a JsObj, is not this amazing?
- 
+
+- **SeqVal and MapVal**
+
+They represent sequences and maps. **Modules use them internally**. For example the _deploy_ method uses a MapVal
+to put the deployed verticles using their addresses as keys. They also use a SeqVal when more than a verticle instance
+is deployed. As with the other expressions, you can compute their values either in parallel or sequentially.
+
+```
+
+MapVal<String> map = MapVal.parallel("a",Val<String>,
+                                     "b",Val<String>,
+                                     "c",Val<String>
+                                     );
+
+SeqVal<Integer> seq = SeqVal.parallel(Val<Integer>,Val<Integer>);
+
+Val<Integer> firstFinishing = seq.race();
+
+```
+
+The race function returns the value that finishes first. You can race a _JsArrayVal_ as well.
+
+## <a name="reactive"><a/> Being reactive 
 
 Find below some of the most critical operations defined in the **Val** interface that will help us make our code
 more resilient:
 
-
 ```java
 public interface Val<O> extends Supplier<Future<O>> {
-  <P> Val<P> map(final Function<O, P> fn);
-
-  <Q> Val<Q> flatMap(λ<O,Q> fn);
 
   Val<O> retry(int attempts);
 
   Val<O> retryIf(Predicate<Throwable> predicate, int attempts);
-  
+
+  Val<O> retry(int attempts,
+               BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);  
+
   Val<O> recoverWith(final λ<Throwable, O> fn);
 
   Val<O> fallbackTo(λ<Throwable, O> fn);
@@ -555,6 +576,30 @@ public interface Val<O> extends Supplier<Future<O>> {
   Val<O> recoverWith(λ<Throwable, O> fn);
 }
  ``` 
+
+**recoverWith**: it switches to an alternative lambda when a failure happens.
+
+**fallbackTo**: It's like recoverWith, but if the second lambda fails too, it returns the error of the first one. 
+
+**recover**: returns a constant if the computation fails
+
+**retry**: retries the computation the specified number of attempts. An action can be specified to be executed before
+any attempt. The type of action is Val<Void>. You can create any imaginable retry policy, for example:
+
+```java
+// for ever
+retry(Integer.MAX)
+
+// constant delay n seconds
+retry(attemps, e -> remaining -> vertxRef.timer(n,SECONDS))
+
+// incremental delay: waiting one sec before first attempt, two secs before second attempt and so on
+retry(attemps, e -> remaining -> vertxRef.timer(attemps - remaining + 1,SECONDS))
+
+```
+
+**retryIf**: retries the computation the specified number of attempts if the error matches the predicate
+
 
 ## <a name="modules"><a/> Modules 
  
@@ -841,9 +886,67 @@ verticle replies, it is undeployed right away.
 
 The goal is to get the most out of the cores! **Erlang taught us how to develop concurrent software that doubles 
 in speed if you double the number of cores without changing a code line:  spawning as many verticles as possible**. 
-In Erlang jargon, a verticle is kind of a process. On the 
-other hand, if you have a cluster, every computation could be done on different machines.
+In Erlang jargon, a verticle is kind of a process.
 
+Let's generate a fixed number of Jsons n, and for every Json we'll apply a
+filter, map and reduce functions to count the length all the Json values that are strings. We'll aggregate
+all the results adding them up.
+We're going to compare two different approaches:
+
+    - Filter, map and reduce are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle 
+    - Using the spawn function, so filter, map and reduce are verticles that are deployed on the fly, and undeployed
+    when their computation is done. 
+
+In both approaches, the generator is a worker that produces a Json with a specified delay. We'll vary this delay
+to see how it affects the results.
+
+    
+```java
+public class SumJsonStringLength implements λ<Integer, Integer> {
+
+    @Override
+    public Val<Integer> apply(final Integer n) {
+        
+        return IntStream.range(0,
+                               n 
+                              )
+                        //generate -> filter -> map -> reduce
+                        .mapToObj(n -> Cons.of(() -> generator.apply(delay)
+                                                              .flatMap(filter.andThen(map)
+                                                                             .andThen(reduce)
+                                                                      )
+                                                              .get()
+                                              )
+                                 )
+                        //add partial results into a seq
+                        .reduce(SeqVal.parallel(),
+                                SeqVal::append,
+                                SeqVal::appendAll
+                               )
+                        //reduce the seq summing all the partial results
+                        .map(list -> list
+                                .map(it -> ((Integer) it))
+                                .reduce(Integer::sum)
+                            );
+
+    }
+
+}
+
+```    
+
+    n      |  delay (ms)   |  instances  |  deploy   |   spawn 	
+-----------|---------------|-------------|-----------|-----------
+           |   	       	   |   	         |   	     |
+-----------|---------------|-------------|-----------|-----------   	
+           |   	       	   |   	         |   	     |
+-----------|---------------|-------------|-----------|-----------
+           |   	       	   |   	         |   	     | 
+-----------|---------------|-------------|-----------|-----------
+           |   	       	   |   	         |   	     | 
+-----------|---------------|-------------|-----------|-----------
+           |   	       	   |   	         |   	     |  
+-----------|---------------|-------------|-----------|-----------
 ## <a name="httpclient"><a/> Reactive http client 
 vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple
 as extending the class _HttpClientModule_ and defining a constructor to initialize the HTTP options and the internal
@@ -894,7 +997,7 @@ The response is a Json with the following fields and types:
    - **headers** :: JsObj 
 
 Let's create a function that takes two arguments; the number of retries in case of a timeout 
-takes place, and a search term. We wait one second before making the first attempt, two seconds before
+takes place or the tcp connection is closed, and a search term. We wait one second before making the first attempt, two seconds before
 making the second one and so forth. If other error happens, or the function uses up the number of attempts,
 the function returns an empty json. 
 
@@ -930,9 +1033,9 @@ All the request events are also published into the address **vertx-effect-events
 {"event":"DEPLOYED_VERTICLE","class":"MyHttpModule","instant":"2020-10-12T17:29:01.803823Z","id":"0395c2ec-9959-4aa5-bd71-84c894c35f0f","thread":"vert.x-eventloop-thread-5"}
 
 {"event":"SENT_MESSAGE","to":"myhttp-client","message":{"type":0,"host":"www.google.com","uri":"/search?q=vertx"},"instant":"2020-10-12T17:29:01.817395Z","thread":"main"}
-{"event":"RECEIVED_MESSAGE","address":"myhttp-client","instant":"2020-10-12T17:29:01.819720Z","thread":"vert.x-eventloop-thread-4"}
-{"event":"REPLIED_RESP","address":"myhttp-client","message":{"status_code":200,"status_message":"OK","cookies":[], "headers": {},"body":""}
-{"event":"RECEIVED_RESP","from":"myhttp-client","instant":"2020-10-12T17:29:03.189085Z","thread":"vert.x-eventloop-thread-7"}
+{"event":"RECEIVED_MESSAGE","address":"myhttp-client-address","instant":"2020-10-12T17:29:01.819720Z","thread":"vert.x-eventloop-thread-4"}
+{"event":"REPLIED_RESP","address":"myhttp-client-address","message":{"status_code":200,"status_message":"OK","cookies":[], "headers": {},"body":""}
+{"event":"RECEIVED_RESP","from":"myhttp-client-address","instant":"2020-10-12T17:29:03.189085Z","thread":"vert.x-eventloop-thread-7"}
 
 ```
 
