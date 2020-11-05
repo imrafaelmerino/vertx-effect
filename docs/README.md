@@ -1117,10 +1117,12 @@ Since _GetAccessTokenRequest_ is just a function, it can be also customized:
 ```java
 new ClientCredentialsFlowBuilder(httpOptions,   
                                  "address",
-                                 context -> httpclient -> { 
-                                                             PostReq postReq = ???;
-                                                             return httpclient.post.apply(context,postReq);
-                                                           }
+                                 (context,httpclient) -> { 
+                                                         PostReq postReq = ???;
+                                                         return httpclient.post
+                                                                          .apply(context,
+                                                                                 postReq);
+                                                       }
                                 )           
 ```
 
