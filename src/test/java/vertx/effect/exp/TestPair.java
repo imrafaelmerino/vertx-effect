@@ -35,7 +35,7 @@ public class TestPair {
                               ) {
 
         vertxRef = new VertxRef(vertx);
-        oneSec = vertxRef.timer(100,
+        oneSec = vertxRef.delay(100,
                                 MILLISECONDS
                                );
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
@@ -60,8 +60,8 @@ public class TestPair {
                      )
             .retryIf(it -> it instanceof IllegalArgumentException,
                      ATTEMPTS,
-                     (e, i) -> vertxRef.timer(100,
-                                             MILLISECONDS
+                     (e, i) -> vertxRef.delay(100,
+                                              MILLISECONDS
                                              )
                     )
             .onSuccess(it -> {
@@ -91,8 +91,8 @@ public class TestPair {
                        )
             .retryIf(it -> it instanceof IllegalArgumentException,
                      ATTEMPTS,
-                     (e, i) -> vertxRef.timer(100,
-                                             MILLISECONDS
+                     (e, i) -> vertxRef.delay(100,
+                                              MILLISECONDS
                                              )
                     )
             .onSuccess(it -> {
@@ -264,8 +264,8 @@ public class TestPair {
                       a.get()
                      )
             .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.timer(100,
-                                               MILLISECONDS
+                   (error, n) -> vertxRef.delay(100,
+                                                MILLISECONDS
                                                )
                   )
             .get()
@@ -292,7 +292,7 @@ public class TestPair {
                         a.get()
                        )
             .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.timer(100,
+                   (error, n) -> vertxRef.delay(100,
                                                 MILLISECONDS
                                                )
                   )

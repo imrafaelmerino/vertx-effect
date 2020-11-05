@@ -1025,7 +1025,7 @@ public class TestSequentialMap {
                                         b.get()
                                        )
                             .retry(ATTEMPTS,
-                                   (error, n) -> vertxRef.timer(100,
+                                   (error, n) -> vertxRef.delay(100,
                                                                 MILLISECONDS
                                                                )
                                   )

@@ -55,24 +55,4 @@ public class JacksonVsJsValues {
 
     }
 
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void jsonValues_two_steps(Blackhole blackhole) {
-        awaitForEnding(MyModule.id.andThen(MyModule.id).apply(jsonValuesObj),
-                       3,
-                       SECONDS,
-                       blackhole);
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
-    public void jackson_two_steps(Blackhole blackhole) {
-        awaitForEnding(MyModule.jacksonId.andThen(MyModule.jacksonId).apply(jacksonObj),
-                       3,
-                       SECONDS,
-                       blackhole);
-
-    }
 }

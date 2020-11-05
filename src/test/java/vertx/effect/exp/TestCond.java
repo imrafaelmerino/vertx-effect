@@ -43,7 +43,7 @@ public class TestCond {
                               ) {
         vertxRef = new VertxRef(vertx);
 
-        delay = (error, n) -> vertxRef.timer(100,
+        delay = (error, n) -> vertxRef.delay(100,
                                              MILLISECONDS
                                             );
 
@@ -473,7 +473,7 @@ public class TestCond {
                 b.get()
                )
             .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.timer(100,
+                   (error, n) -> vertxRef.delay(100,
                                                 MILLISECONDS
                                                )
                   )

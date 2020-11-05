@@ -9,21 +9,23 @@ import java.util.stream.IntStream;
 
 import static vertx.effect.performance.Functions.TIME_WAITING_MS;
 import static vertx.effect.performance.MyModule.*;
+import static vertx.effect.performance.benchmarks.VerticlesVsProcesses.DELAY;
 
-public class CountStringProcesses implements λ<Integer, Integer> {
+
+public class SumJsonStringLengthWithVerticles implements λ<Integer, Integer> {
 
     @Override
     public Val<Integer> apply(final Integer times) {
+
         return IntStream.range(0,
                                times
                               )
-                        .mapToObj(
-                                n -> Cons.of(() -> generatorProcess.apply(TIME_WAITING_MS)
-                                                                   .flatMap(filterProcess.andThen(mapProcess)
-                                                                                         .andThen(reduceProcess)
-                                                                           )
-                                                                   .get()
-                                            )
+                        .mapToObj(n -> Cons.of(() -> generator.apply(DELAY)
+                                                              .flatMap(filter.andThen(map)
+                                                                             .andThen(reduce)
+                                                                      )
+                                                              .get()
+                                              )
                                  )
                         .reduce(SeqVal.parallel(),
                                 SeqVal::append,
@@ -36,8 +38,4 @@ public class CountStringProcesses implements λ<Integer, Integer> {
 
     }
 
-
 }
-
-
-

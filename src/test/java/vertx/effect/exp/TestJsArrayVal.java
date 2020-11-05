@@ -112,7 +112,7 @@ public class TestJsArrayVal {
                             b.get()
                            )
                   .retry(ATTEMPTS,
-                         (error, n) -> vertxRef.timer(100,
+                         (error, n) -> vertxRef.delay(100,
                                                       MILLISECONDS
                                                      )
                         )
@@ -149,8 +149,8 @@ public class TestJsArrayVal {
                              )
                   .retryIf(e -> e instanceof RuntimeException,
                            ATTEMPTS,
-                           (error, n) -> vertxRef.timer(100,
-                                                       MILLISECONDS
+                           (error, n) -> vertxRef.delay(100,
+                                                        MILLISECONDS
                                                        )
                           )
                   .get()
@@ -185,7 +185,7 @@ public class TestJsArrayVal {
                               b.get()
                              )
                   .retry(ATTEMPTS,
-                         (error, n) -> vertxRef.timer(100,
+                         (error, n) -> vertxRef.delay(100,
                                                       MILLISECONDS
                                                      )
                         )
@@ -253,7 +253,7 @@ public class TestJsArrayVal {
                             b.get()
                            )
                   .retry(ATTEMPTS - 1,
-                         (error, n) -> vertxRef.timer(100,
+                         (error, n) -> vertxRef.delay(100,
                                                       MILLISECONDS
                                                      )
                         )
@@ -285,8 +285,8 @@ public class TestJsArrayVal {
                            )
                   .retryIf(e -> e instanceof RuntimeException,
                            ATTEMPTS - 1,
-                           (error, n) -> vertxRef.timer(100,
-                                                       MILLISECONDS
+                           (error, n) -> vertxRef.delay(100,
+                                                        MILLISECONDS
                                                        )
                           )
                   .get()

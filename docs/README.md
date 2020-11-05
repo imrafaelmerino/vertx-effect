@@ -11,12 +11,12 @@
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.5)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.5/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
-
 - [vertx-effect manifesto](#manifesto)
 - [How persistent data structures makes a difference working with actors](#persistendata)
 - [vertx-effect in a few lines of code](#fewlinesofcode)
 - [Effects](#effects)
 - [Expressions](#exp)
+- [Being reactive](#reactive)
 - [Modules](#modules)
 - [Logging](#logging)
     - [Publishing events](#events)
@@ -24,6 +24,8 @@
 - [Spawning verticles](#spawning-verticles)
 - [Reactive http client](#httpclient)
 - [Reactive OAuth http client](#oauth-httpclient)
+    - [Client credentials flow](#clientcredentials)
+    - [Authorization flow](#authorizationflow)
 - [What to use _vertx-effect_ for and when to use it](#whatfor)
 - [Performance](#perf)
 - [Requirements](#requirements)
@@ -39,7 +41,7 @@
     . Simplicity matters.
     . If there is a bug and you can't spot it quickly, then there are two bugs. Fix both of them.
 
-## <a name="persistendata"><a/>How persistent data structures makes a different working with actors 
+## <a name="persistendata"><a/>How persistent data structures makes a difference working with actors 
 
 **Every message that can be sent across the event bus has an associated MessageCodec**. Go to the package
 _io.vertx.core.eventbus.impl.codecs_ to check out what types Vertx supports. The Json implemented in Vertx with 
@@ -85,10 +87,18 @@ JacksonVsJsValues.jsonValues  thrpt    5    51183.223 ± 10154.660   ops/s
 ## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
 
 ```java
-import jsonvalues.*;
+import jsonvalues.JsInt;
+import jsonvalues.JsObj;
+import jsonvalues.JsStr;
 import jsonvalues.spec.JsObjSpec;
-import vertx.effect.*;
-import vertx.effect.exp.*;
+import static jsonvalues.JsPath.path;
+import static jsonvalues.spec.JsSpecs.*;
+import vertx.effect.Validators;
+import vertx.effect.VertxModule;
+import vertx.effect.exp.Cons;
+import vertx.effect.exp.JsArrayVal;
+import vertx.effect.exp.JsObjVal;
+import vertx.effect.λ;
 
 public class MyModule extends VertxModule {
 
@@ -103,7 +113,7 @@ public class MyModule extends VertxModule {
     this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
     this.deploy("inc", (Integer n) -> Cons.success(n+1));
      
-    // json-values uses specs to define the structure of a Json 
+    // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]} 
     JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
     this.deploy("validate", Validators.validateJsObj(spec));
 
@@ -114,8 +124,9 @@ public class MyModule extends VertxModule {
                                                      toUpperCase.apply(obj.getStr(path("/b/1")))
                                                                 .map(JsStr::of)
                                                      )
-                            );   
-    this.deploy("validateAnMap",validate.apply(obj).flatMap(map));
+                            )
+                  .retry(2);   
+    this.deploy("validateAnMap",(JsObj obj) -> validate.apply(obj).flatMap(map));
 
   }
 
@@ -132,13 +143,16 @@ public class MyModule extends VertxModule {
 }
 ```
 
-**A module is a regular verticle that deploys other verticles and exposes functions to communicate with them.** 
-In the above example, it deploys five verticles. It's worth mentioning how the _validateAndMap_ verticle is 
-defined using composition and the _JsObjVal_ expression. **It shows the essence of vertx-effect and functional programming**. 
+**A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them.** 
+A lamda is just a function that takes an input and produces an output. In the above example, _MyModule_ deploys five verticles. 
+It's worth mentioning how the _validateAndMap_ verticle is defined using composition and the _JsObjVal_ and _JsArrayVal_ expressions. **It shows the essence of vertx-effect**. 
+Later on, we'll see more expressions like **Cons**, **Cond**, **Case**, **IfElse**, **Pair**, **Triple**  etc.
 
 _ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, 
 _ValidateAndMap_  computes the output sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
-composing a Json from their responses **in parallel**. 
+composing a Json from their responses **in parallel**. If for some reason you prefer to operate sequentially instead
+of in parallel, you can use the sequential constructors _JsObjVal.sequential_ and _JsArrayVal.sequential_. Thanks to
+the _retry_ function, if **any** verticle failed computing their value, it would retry the computation up to two times.
 
 It's important to notice that you can still send messages to the module verticles using the Vertx API:
 
@@ -152,12 +166,19 @@ eventBus.send("inc", 1);
 ```
 
 Let's write some tests. Vertx doesn't support json-values, so we need to register a _MessageCodec_ to be 
-able to send its persistent Json across the event bus: 
+able to send its persistent Json across the event bus. 
 
 ```java
-import vertx.effect.*;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import jsonvalues.JsArray;
+import jsonvalues.JsInt;
+import jsonvalues.JsObj;
+import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.VertxRef;
 import vertx.effect.exp.Pair;
-import jsonvalues.*;
 
 @ExtendWith(VertxExtension.class)
 public class TestMyModule {
@@ -183,7 +204,7 @@ public class TestMyModule {
                                        Assertions.assertTrue(result.failed());
                                        System.out.println(result.cause());
                                        context.completeNow();
-                                   });
+                                   })
                                            )
                                .get();
     }
@@ -252,6 +273,9 @@ public class TestMyModule {
 **This is extremely convenient and productive in order to do your testing. You don't need to mock anything. 
 Passing around functions that produce outputs given some inputs is enough to check that your verticles 
 will do their job.** 
+
+**The take away from this section is how using function composition and different expressions you'll be able
+to handle complexity and implement and test any imaginable flow very quickly.**  
 
 
 ## <a name="effects"><a/> Effects 
@@ -323,7 +347,7 @@ Val<Customer> b = c;
 ```
 This property is fundamental. Whenever you see _insertDb(customer)_ in your program, 
 you can think of it as it was _c_. Pure FP programming helps us reason about the programs
-we write. On the other hand, do notice that a Val is lazy. It's a description of an effect. 
+we write. A Val is lazy. It's a description of an effect. 
 **In FP, we describe programs, and it's at the very last moment when they're executed.**
 
 I always wanted to name **λ** to something, and I finally got the chance!
@@ -479,51 +503,72 @@ following example:
 
 ```java
 
-import jsonval.JsValue
+IfElse<JsStr> a = IfElse.<JsStr>predicate(Val<Boolean>)
+                        .consequence(Val<JsStr>)
+                        .alternative(Val<JsStr>); 
 
-JsObjVal.parallel("a", IfElse.<String>predicate(Val<Boolean>)
-                                     .consequence(Val<JsValue>)
-                                     .alternative(Val<JsValue>),
-                  "b", JsArrayVal.sequential(new Case<Integer,String>(Integer).of(1, Val<JsValue>,
-                                                                                  2, Val<JsValue>,
-                                                                                  Val<JsValue> 
-                                                                                 ),
-                                             Cond.of(Val<Boolean>, Val<JsValue>,
-                                                     Val<Boolean>, Val<JsValue>,
-                                                     Val<JsValue>
-                                                     )
-                                             ),
-                  "c", JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>),
-                                         "e", And.parallel(Val<Boolean>, Val<Boolean>),
-                                         "f", JsArrayVal.parallel(Val<JsValue>,
-                                                                  Val<JsValue> 
-                                                                 ) 
-                                        )
-                  );
+JsArrayVal b = JsArrayVal.sequential(new Case<Integer,JsValue>(n).of(1, Val<JsValue>,
+                                                                     2, Val<JsValue>,
+                                                                     Val<JsValue> 
+                                                                    ),
+                                     Cond.of(Val<Boolean>, Val<JsValue>,
+                                             Val<Boolean>, Val<JsValue>,
+                                             Val<JsValue>
+                                            )
+                                     );
 
+JsObjVal c = JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>).map(JsBool::of),
+                               "e", And.parallel(Val<Boolean>, Val<Boolean>).map(JsBool::of),
+                               "f", JsArrayVal.parallel(Val<JsValue>,
+                                                        Val<JsValue> 
+                                                       ) 
+                              )
+
+JsObjVal obj = JsObjVal.parallel("a",a,
+                                 "b",b,
+                                 "c",c 
+                                );
 ```
-
-
-
 
 It's important to notice **that any value of the above expressions can be computed by a different verticle of
 any machine of a cluster**. Imagine ten machines collaborating to compute a JsObj, is not this amazing?
- 
+
+- **SeqVal and MapVal**
+
+They represent sequences and maps. **Modules use them internally**. For example the _deploy_ method uses a MapVal
+to put the deployed verticles using their addresses as keys. They also use a SeqVal when more than a verticle instance
+is deployed. As with the other expressions, you can compute their values either in parallel or sequentially.
+
+```
+
+MapVal<String> map = MapVal.parallel("a",Val<String>,
+                                     "b",Val<String>,
+                                     "c",Val<String>
+                                     );
+
+SeqVal<Integer> seq = SeqVal.parallel(Val<Integer>,Val<Integer>);
+
+Val<Integer> firstFinishing = seq.race();
+
+```
+
+The race function returns the value that finishes first. You can race a _JsArrayVal_ as well.
+
+## <a name="reactive"><a/> Being reactive 
 
 Find below some of the most critical operations defined in the **Val** interface that will help us make our code
 more resilient:
 
-
 ```java
 public interface Val<O> extends Supplier<Future<O>> {
-  <P> Val<P> map(final Function<O, P> fn);
-
-  <Q> Val<Q> flatMap(λ<O,Q> fn);
 
   Val<O> retry(int attempts);
 
   Val<O> retryIf(Predicate<Throwable> predicate, int attempts);
-  
+
+  Val<O> retry(int attempts,
+               BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);  
+
   Val<O> recoverWith(final λ<Throwable, O> fn);
 
   Val<O> fallbackTo(λ<Throwable, O> fn);
@@ -532,6 +577,30 @@ public interface Val<O> extends Supplier<Future<O>> {
 }
  ``` 
 
+**recoverWith**: it switches to an alternative lambda when a failure happens.
+
+**fallbackTo**: It's like recoverWith, but if the second lambda fails too, it returns the error of the first one. 
+
+**recover**: returns a constant if the computation fails
+
+**retry**: retries the computation the specified number of attempts. An action can be specified to be executed before
+any attempt. The type of action is Val<Void>. You can create any imaginable retry policy, for example:
+
+```java
+// for ever
+retry(Integer.MAX_VALUE)
+
+// constant delay n seconds
+retry(attemps, e -> remaining -> vertxRef.delay(n,SECONDS))
+
+// incremental delay: waiting one sec before first attempt, two secs before second attempt and so on
+retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS))
+
+```
+
+**retryIf**: retries the computation the specified number of attempts if the error matches the predicate
+
+
 ## <a name="modules"><a/> Modules 
  
 In **vertx-effect**, **a module is a special verticle whose purpose is to deploy other verticles and expose lambdas to 
@@ -539,6 +608,10 @@ communicate with them**. Let's put an example:
 
 ```java
 import jsonvalues.JsObj;
+import jsonvalues.JsStr;
+import vertx.effect.VertxModule;
+import vertx.effect.exp.Cons;
+import vertx.effect.λ;
 
 public class MyModule extends VertxModule {
 
@@ -551,16 +624,14 @@ public class MyModule extends VertxModule {
   @Override
   public void deploy() {
  
-     this.deploy(REMOVE_NULL_ADDRESS,
-                (JsObj o) -> Cons.success(o.filterAllValues(pair -> pair.value.isNotNull())) 
-                );
- 
-     this.deploy(TRIM_ADDRESS,
-                (JsObj o)->  Cons.success(o.mapAllValues(pair -> JsStr.prism.modify.apply(String::trim)
-                                                                                   .apply(pair.value)
-                                                        )
-                                         ) 
-                );
+   this.deploy(REMOVE_NULL_ADDRESS,
+              (JsObj o) -> Cons.success(o.filterAllValues(pair -> pair.value.isNotNull())) 
+              );
+   
+   Function<JsValue, JsValue> trim = JsStr.prism.modify.apply(String::trim);
+   this.deploy(TRIM_ADDRESS,
+              (JsObj o)->  Cons.success(o.mapAllValues(pair -> trim.apply(pair.value)))
+              );
   }
  
   @Override
@@ -589,11 +660,10 @@ It's vital to work with this kind of data structure in the actor model (and in g
 it's considered good practice).
 
 The **ask** method returns a lambda to establish bidirectional communication with a verticle.
-In contrast, the **tell** method would return a consumer because either no answer is expected or ignored
+In contrast, the **tell** method would return a consumer because the answer is either not expected or ignored.
 Let's deploy our module and do some testing.
 
 ```java
-
  @BeforeAll
  public static void prepare(final Vertx vertx,
                             final VertxTestContext context) 
@@ -603,8 +673,8 @@ Let's deploy our module and do some testing.
     // prints out events published by vertx-effect
     vertxRef.registerConsumer(EVENTS_ADDRESS, System.out::println); 
 
-    Pair.sequential(vertxRef.deploy(new RegisterJsValuesCodecs()),
-                    vertxRef.deploy(new MyModule()) 
+    Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                    vertxRef.deployVerticle(new MyModule()) 
                    )
         .onSuccess(pair -> {
                             System.out.println(String.format("Ids deployed: %s and %s",
@@ -619,9 +689,9 @@ Let's deploy our module and do some testing.
  }
 
  @Test
- public void test_composition(final VertxTestContext context)
+ public void test_remove_and_then_trim(final VertxTestContext context)
  {
-    λ<JsObj, JsObj> removeAndNull = MyModule.removeNull.andThen(MyModule.trim);
+    λ<JsObj, JsObj> removeAndTrim = MyModule.removeNull.andThen(MyModule.trim);
 
     JsObj input = JsObj.of("a", JsStr.of("  hi  "),
                            "b", JsNull.NULL,
@@ -634,7 +704,7 @@ Let's deploy our module and do some testing.
                               "c", JsObj.of("d", JsStr.of("bye"))
                              );
 
-    removeAndNull.apply(input)
+    removeAndTrim.apply(input)
                  .onSuccess(it -> {
                      context.verify(()-> {
                                           Assertions.assertEquals(expected,it);
@@ -738,29 +808,23 @@ and a random value to distinguish between transactions from the same email. That
     @Override
     protected void initialize() {
         isLegalAge = this.trace(IS_LEGAL_AGE);
+  
         isValidId = this.trace(IS_VALID_ID);
+  
         isValidEmail = this.trace(IS_VALID_EMAIL);
+  
         isValid = this.trace(IS_VALID);
     }
 
     @Override
     protected void deploy() {
 
-        λ<Integer, Boolean> isLegalAge = age -> Cons.success(age > 16)
-        this.deploy(IS_LEGAL_AGE,
-                    UserAccountFunctions.isLegalAge
-                   );
-   
-        λ<String, Boolean> isValidId = id -> Cons.success(!id.isEmpty());
-        this.deploy(IS_VALID_ID,
-                    UserAccountFunctions.isValidId
-                   );
-       
-        λ<String, Boolean> isValidEmail = email -> Cons.success(!email.isEmpty()); 
-        this.deploy(IS_VALID_EMAIL,
-                    UserAccountFunctions.isValidEmail
-                   );
+        this.deploy(IS_LEGAL_AGE, (Integer age) -> Cons.success(age > 16));
+
+        this.deploy(IS_VALID_ID, (String id) -> Cons.success(!id.isEmpty()));
         
+        this.deploy(IS_VALID_EMAIL, (String email) -> Cons.success(!email.isEmpty()));
+
         λc<JsObj, Boolean> isValid = (context, obj) ->
                 And.parallel(isLegalAge.apply(context,
                                               obj.getInt("age")
@@ -771,14 +835,10 @@ and a random value to distinguish between transactions from the same email. That
                              isValidEmail.apply(context,
                                                 obj.getStr("email")
                                                )
-                             );
-        this.deploy(IS_VALID,
-                    isValid
-                   );
-
+                            );
+        this.deploy(IS_VALID, isValid);
     }
 }
-
 ```
 
 As you can see, we've implemented a module that deploys five verticles and exposes five λc to interact 
@@ -826,12 +886,58 @@ verticle replies, it is undeployed right away.
 
 The goal is to get the most out of the cores! **Erlang taught us how to develop concurrent software that doubles 
 in speed if you double the number of cores without changing a code line:  spawning as many verticles as possible**. 
-In Erlang jargon, a verticle is kind of a process. On the 
-other hand, if you have a cluster, every computation could be done on different machines.
+In Erlang jargon, a verticle is kind of a process.
+
+Let's generate a fixed number of Jsons n, and for every Json we'll apply a
+filter, map and reduce functions to count the length all the Json values that are strings. We'll aggregate
+all the results adding them up.
+We're going to compare two different approaches:
+
+    - The Json generator, and the functions filter, map and reduce are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle 
+    - Using the spawn function, so the json generator, filter, map and reduce are verticles that are deployed on the fly, and undeployed
+    when their computation is done. 
+
+In both approaches, the generator is a worker that produces a Json with a specified delay. We'll vary this delay
+to see how it affects the results.
+
+    
+```java
+public class SumJsonStringLength implements λ<Integer, Integer> {
+
+    @Override
+    public Val<Integer> apply(final Integer n) {
+        
+        return IntStream.range(0,
+                               n 
+                              )
+                        //generate json with delay -> filter -> map -> reduce
+                        .mapToObj(n -> Cons.of(() -> generator.apply(DELAY)
+                                                              .flatMap(filter.andThen(map)
+                                                                             .andThen(reduce)
+                                                                      )
+                                                              .get()
+                                              )
+                                 )
+                        //add partial results into a seq
+                        .reduce(SeqVal.parallel(),
+                                SeqVal::append,
+                                SeqVal::appendAll
+                               )
+                        //reduce the seq summing all the partial results
+                        .map(list -> list
+                                .map(it -> ((Integer) it))
+                                .reduce(Integer::sum)
+                            );
+    }
+}
+
+```    
+
+
 
 ## <a name="httpclient"><a/> Reactive http client 
 vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple
-as extending the class HttpClientModule and defining a constructor to initialize the HTTP options and the internal
+as extending the class _HttpClientModule_ and defining a constructor to initialize the HTTP options and the internal
 address of the verticle that will perform the requests.
 
 ```java
@@ -845,17 +951,16 @@ public class MyHttpModule extends HttpClientModule {
               "myhttp-client-address"
              );
     }
-
 }
 
 HttpClientOptions options = new HttpClientOptions().setDefaultHost("www.google.com")
                                                    .setDefaultPort(80);
 MyHttpModule httpModule = new MyHttpModule(options);
 
-Pair.of(vertxRef.deploy(new RegisterJsValuesCodecs()),
-        vertxRef.deploy(httpModule)
-       ).get()
-
+Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                vertxRef.deployVerticle(httpModule)
+               )
+    .get()
 ```
 
 Find below the types of some of the most relevant lambdas that you can use to make HTTP requests
@@ -873,29 +978,36 @@ httpModule.patch  ::  λc<PatchReq, JsObj>
 
 The response is a Json with the following fields and types:
 
-**body**:String, **status_code**:int, **status_message**:int, **cookies**:JsArray, **headers**:JsObj
+   - **body** :: String
+   - **status_code** :: int
+   - **status_message** :: int
+   - **cookies** :: JsArray
+   - **headers** :: JsObj 
 
 Let's create a function that takes two arguments; the number of retries in case of a timeout 
-takes place, and a search term. We wait one second before making the first attempt, two seconds before
+takes place or the tcp connection is closed, and a search term. We wait one second before making the first attempt, two seconds before
 making the second one and so forth. If other error happens, or the function uses up the number of attempts,
 the function returns an empty json. 
 
 ```java 
 import static vertx.effect.Failures.HTTP_CONNECT_TIMEOUT_PRISM;
 import static vertx.effect.Failures.HTTP_REQUEST_TIMEOUT_PRISM; 
+import static vertx.effect.Failures.TCP_CONNECTION_CLOSED_PRISM;
 
-BiFunction<Integer,String,JsObj> search =  
-       (attempts,term) -> httpModule.get.apply(new GetReq().uri("/search?q=" + term))
-                                    .retryIf(Failures.or(HTTP_CONNECT_TIMEOUT_PRISM,
-                                                         HTTP_REQUEST_TIMEOUT_PRISM
-                                                        ),
-                                             attempts,
-                                             (error,remainingAttempt) -> 
-                                                              vertxRef.timer(attempts-remainingAttempt+1,
-                                                                             SECONDS
-                                                                             )
-                                            )
-                                    .recoverWith(e -> Cons.success(JsObj.EMPTY));
+BiFunction<Integer, String, Val<JsObj>> search =
+      (attempts, term) ->
+            httpModule.get.apply(new GetReq().uri("/search?q=" + term))
+                          .retryIf(Failures.or(HTTP_CONNECT_TIMEOUT_PRISM,
+                                               HTTP_REQUEST_TIMEOUT_PRISM,
+                                               TCP_CONNECTION_CLOSED_PRISM 
+                                              ),
+                                   attempts,
+                                   (error, remainingAttempts) ->
+                                             vertxRef.delay(attempts - remainingAttempts + 1,
+                                                            SECONDS
+                                                           )
+                                   )
+                          .recoverWith(e -> Cons.success(JsObj.EMPTY));
 
 search.apply(3, "vertx").get();
 
@@ -909,18 +1021,113 @@ All the request events are also published into the address **vertx-effect-events
 {"event":"DEPLOYED_VERTICLE","class":"MyHttpModule","instant":"2020-10-12T17:29:01.803823Z","id":"0395c2ec-9959-4aa5-bd71-84c894c35f0f","thread":"vert.x-eventloop-thread-5"}
 
 {"event":"SENT_MESSAGE","to":"myhttp-client","message":{"type":0,"host":"www.google.com","uri":"/search?q=vertx"},"instant":"2020-10-12T17:29:01.817395Z","thread":"main"}
-{"event":"RECEIVED_MESSAGE","address":"myhttp-client","instant":"2020-10-12T17:29:01.819720Z","thread":"vert.x-eventloop-thread-4"}
-{"event":"REPLIED_RESP","address":"myhttp-client","message":{"status_code":200,"status_message":"OK","cookies":[], "headers": {},"body":""}
-{"event":"RECEIVED_RESP","from":"myhttp-client","instant":"2020-10-12T17:29:03.189085Z","thread":"vert.x-eventloop-thread-7"}
+{"event":"RECEIVED_MESSAGE","address":"myhttp-client-address","instant":"2020-10-12T17:29:01.819720Z","thread":"vert.x-eventloop-thread-4"}
+{"event":"REPLIED_RESP","address":"myhttp-client-address","message":{"status_code":200,"status_message":"OK","cookies":[], "headers": {},"body":""}
+{"event":"RECEIVED_RESP","from":"myhttp-client-address","instant":"2020-10-12T17:29:03.189085Z","thread":"vert.x-eventloop-thread-7"}
 
 ```
 
-As you can see two verticles were deployed: the module and an iternal verticle listening on the specified address _myhttp-client-adress_,
-that performs the requests. The cookies, headers and body received from Google are ommited.
-Every request message has a type that is an integer for performance reasons. In the example the type 0 means that
-it's a GET.
+As you can see two verticles were deployed: the module and an internal verticle listening on the specified address _myhttp-client-adress_.
+This verticle performs the requests. The cookies, headers and body received from Google are omitted.
 
 ## <a name="oauth-httpclient"><a/> Reactive OAuth http client
+
+Following the philosophy we've seen so far, the oauth http clients implemented in vertx-effect are
+verticles that exposes lambdas to make http request. Getting and refreshing the access token is something
+you don't have to worry about. It's all handled for you. The good thing is that you can customize everything.
+
+### <a name="clientcredentials"><a/> Client credentials flow 
+
+```java
+ClientCredentialsFlowBuilder builder  = 
+            new ClientCredentialsFlowBuilder(new HttpClientOptions().setDefaultPort(port)
+                                                                    .setDefaultHost("localhost"),
+                                             "my-httpclient-address",
+                                             new GetAccessTokenRequest(clientId,clientSecret)
+                                            );
+
+ClientCredentialsModule httpClient = builder.createModule();
+
+vertxRef.deployVerticle(httpClient);
+
+```
+
+After deploying the http client module, you can use the lambdas it exposes to make any requests:
+
+```java
+
+public final λc<GetReq, JsObj> getOauth;
+public final λc<PostReq, JsObj> postOauth;
+public final λc<PutReq, JsObj> putOauth;
+public final λc<DeleteReq, JsObj> deleteOauth;
+public final λc<PatchReq, JsObj> patchOauth;
+public final λc<HeadReq, JsObj> headOauth;
+public final λc<ConnectReq, JsObj> connectOauth;
+public final λc<OptionsReq, JsObj> optionsOauth;
+public final λc<TraceReq, JsObj> traceOauth;
+
+```
+
+You can customize anything using the builder:
+
+```java
+
+// by default Authorization
+builder.setAuthorizationHeaderName(final String authorizationHeaderName) 
+
+// by default token -> "Bearer "+token
+builder.setAuthorizationHeaderValue(final Function<String, String> authorizationHeaderValue) 
+
+// predicate to check if we need to refresh the token
+// by default resp -> resp.getInt("status_code") == 401
+builder.setRefreshTokenPredicate(final Predicate<JsObj> refreshTokenPredicate) 
+
+// lambda to get the access token from the resp
+// by default parse the body into a Json a get the access_token field 
+builder.setReadNewAccessTokenAfterRefresh(final λ<JsObj, String> readNewAccessTokenAfterRefresh) 
+
+// predicate to check if retrying in case of an error making the request to get the token
+// by default connection timeout, unknown host or access_token is not found in the response
+builder.setRetryAccessTokenReqPredicate(final Predicate<Throwable> retryGetTokenPredicate)
+
+// default number of attempts in case of retryGetTokenPredicate is tested true 
+builder.setAccessTokenReqAttempts(final int accessTokenReqAttempts) 
+
+// predicate to check if retrying in case of an error making the request
+// by default connection timeout or unknown host 
+builder.setRetryReqPredicate(final Predicate<Throwable> retryReqPredicate) 
+
+// default number of attempts in case of setRetryReqPredicate is tested true 
+builder.setReqAttempts(final int reqAttempts) 
+
+```
+
+The default request to get the token is
+
+```text
+POST https://{{host}}:{{port}}/token
+Authorization: Basic Base64(clientId:clientSecret) 
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+```
+
+Since _GetAccessTokenRequest_ is just a function, it can be also customized:
+
+```java
+new ClientCredentialsFlowBuilder(httpOptions,   
+                                 "address",
+                                 (context,httpclient) -> { 
+                                                         PostReq postReq = ???;
+                                                         return httpclient.post
+                                                                          .apply(context,
+                                                                                 postReq);
+                                                       }
+                                )           
+```
+
+
+### <a name="authorizationflow"><a/> Authorization flow
 in progress
  
 ## <a name="whatfor"><a/> What to use json-values for and when to use it
