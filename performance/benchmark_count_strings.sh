@@ -1,10 +1,17 @@
-mvn clean package
+#!/bin/bash
 
-TIMES=10
-DELAY=0
-INSTANCES=1
+TIMES=$1
+DELAY=$2
+INSTANCES=$3
+
+mvn clean package \
+-Dtimes=${TIMES} \
+-Ddelay=${DELAY} \
+-Dinstances=${INSTANCES} \
 
 DIR=${TIMES}/${DELAY}/${INSTANCES}
+
+mkdir -p results/"$DIR"
 
 java -Xms256m -jar \
 -Dpublish.events=false \
@@ -12,13 +19,7 @@ java -Xms256m -jar \
 -Ddelay=${DELAY} \
 -Dinstances=${INSTANCES} \
 target/benchmark.jar \
--o results/${DIR}/count_strings_multiple_verticles.txt \
-vertx\.effect\.performance\.benchmarks\.VerticlesVsProcesses\.test_count_string_verticles
+-o results/${DIR}/verticlesVsProcesses.txt \
+vertx\.effect\.performance\.benchmarks\.VerticlesVsProcesses\.*
 
-java -Xms256m -jar \
--Dpublish.events=false \
--Dtimes=${TIMES} \
--Ddelay=${DELAY} \
--Dinstances=${INSTANCES} \
--o results/${DIR}/count_strings_processes.txt \
-vertx\.effect\.performance\.benchmarks\.VerticlesVsProcesses\.test_count_string_processes
+

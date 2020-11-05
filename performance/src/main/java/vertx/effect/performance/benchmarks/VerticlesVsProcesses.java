@@ -4,7 +4,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
@@ -30,13 +29,14 @@ public class VerticlesVsProcesses {
                       );
     }
 
-    private static final int TIMES = 100;
-    private  static final int TIME_WAITING = 200;
-
+    public static final int TIMES = Integer.parseInt(System.getProperty("times"));
+    public   static final int DELAY = Integer.parseInt(System.getProperty("delay"));
+    public static final int VERTICLE_INSTANCES = Integer.parseInt(System.getProperty("instances"));
+    private  static final int TIME_WAITING = 60;
 
     @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    public void test_count_string_multi_verticles()  {
+    @BenchmarkMode(Mode.All)
+    public void count_string_verticles()  {
 
         awaitForEnding(countStringsLengthMultiVerticles.apply(TIMES),
                        TIME_WAITING,
@@ -46,8 +46,8 @@ public class VerticlesVsProcesses {
     }
 
     @Benchmark
-    @BenchmarkMode(Mode.Throughput)
-    public void test_count_string_processes()  {
+    @BenchmarkMode(Mode.All)
+    public void count_string_processes()  {
 
         awaitForEnding(countStringsLengthMultiProcesses.apply(TIMES),
                        TIME_WAITING,

@@ -20,9 +20,6 @@ import java.util.function.Supplier;
 public class TestPerformance {
     private static final Supplier<JsObj> objSupplier = Functions.generator.apply(new Random());
 
-    private static final Supplier<String> strGen = () -> objSupplier.get()
-                                                                    .toString();
-
     @BeforeAll
     public static void prepare(Vertx vertx,
                                VertxTestContext testContext

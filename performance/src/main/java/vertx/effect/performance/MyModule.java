@@ -9,6 +9,8 @@ import vertx.effect.*;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
 
+import static vertx.effect.performance.benchmarks.VerticlesVsProcesses.VERTICLE_INSTANCES;
+
 
 public class MyModule extends VertxModule {
 
@@ -61,7 +63,6 @@ public class MyModule extends VertxModule {
 
         generator = this.ask(GENERATOR_ADDRESS);
 
-
         countStringsLengthMultiVerticles = this.ask(COUNT_STRING_LENGTH_MULTIVERTICLE_ADDRESS);
 
         countStringsLengthMultiProcesses = this.ask(COUNT_STRING_LENGTH_MULTIPROCESSES_ADDRESS);
@@ -100,35 +101,35 @@ public class MyModule extends VertxModule {
 
         this.deploy(FILTER_ADDRESS,
                     filterFn,
-                    new DeploymentOptions().setInstances(4)
+                    new DeploymentOptions().setInstances(VERTICLE_INSTANCES)
                    );
 
 
         this.deploy(MAP_ADDRESS,
                     mapFn,
-                    new DeploymentOptions().setInstances(4)
+                    new DeploymentOptions().setInstances(VERTICLE_INSTANCES)
 
                    );
 
 
         this.deploy(REDUCE_ADDRESS,
                     reduceFn,
-                    new DeploymentOptions().setInstances(4)
+                    new DeploymentOptions().setInstances(VERTICLE_INSTANCES)
                    );
 
         this.deploy(GENERATOR_ADDRESS,
                     new JsGenVerticle(),
-                    WORKER.setInstances(4)
+                    WORKER.setInstances(VERTICLE_INSTANCES)
                    );
 
 
         this.deploy(COUNT_STRING_LENGTH_MULTIVERTICLE_ADDRESS,
-                    new CountStringMultiVerticle(),
+                    new SumJsonStringLengthWithVerticles(),
                     WORKER
                    );
 
         this.deploy(COUNT_STRING_LENGTH_MULTIPROCESSES_ADDRESS,
-                    new CountStringProcesses(),
+                    new SumJsonStringLengthWithProcesses(),
                     WORKER
                    );
 

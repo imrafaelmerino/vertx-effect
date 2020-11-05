@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 
 import static vertx.effect.performance.Functions.TIME_WAITING_MS;
 import static vertx.effect.performance.MyModule.*;
+import static vertx.effect.performance.benchmarks.VerticlesVsProcesses.DELAY;
 
 
 public class SumJsonStringLengthWithVerticles implements λ<Integer, Integer> {
@@ -19,7 +20,7 @@ public class SumJsonStringLengthWithVerticles implements λ<Integer, Integer> {
         return IntStream.range(0,
                                times
                               )
-                        .mapToObj(n -> Cons.of(() -> generator.apply(TIME_WAITING_MS)
+                        .mapToObj(n -> Cons.of(() -> generator.apply(DELAY)
                                                               .flatMap(filter.andThen(map)
                                                                              .andThen(reduce)
                                                                       )
