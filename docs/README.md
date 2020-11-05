@@ -26,7 +26,6 @@
 - [Reactive OAuth http client](#oauth-httpclient)
     - [Client credentials flow](#clientcredentials)
     - [Authorization flow](#authorizationflow)
-- [What to use _vertx-effect_ for and when to use it](#whatfor)
 - [Performance](#perf)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -933,8 +932,6 @@ public class SumJsonStringLength implements λ<Integer, Integer> {
 
 ```    
 
-
-
 ## <a name="httpclient"><a/> Reactive http client 
 vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple
 as extending the class _HttpClientModule_ and defining a constructor to initialize the HTTP options and the internal
@@ -1130,17 +1127,14 @@ new ClientCredentialsFlowBuilder(httpOptions,
 ### <a name="authorizationflow"><a/> Authorization flow
 in progress
  
-## <a name="whatfor"><a/> What to use json-values for and when to use it
-in progress
-
 ## <a name="perf"><a/> Performance 
 in progress
 
 ## <a name="requirements"><a/> Requirements
 Java 11 or greater.
+Vertx version 4.0.0-milestone5
 
 ## <a name="installation"><a/> Installation
-Add the following dependency to your building tool:
 ```
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
@@ -1150,6 +1144,9 @@ Add the following dependency to your building tool:
 ```
 
 ## <a name="rp"><a/> Related projects
+
+vertx-effect uses the persistent Json from [json-values](https://github.com/imrafaelmerino/json-scala-values)
+[vertx-mongodb-effect](https://github.com/imrafaelmerino/vertx-mongodb-effect) to work with MongoDB using lambdas
 
 ## <a name="release"><a/> Release process
 Every time a tagged commit is pushed into master, a Travis CI build will be triggered automatically and 
