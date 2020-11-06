@@ -58,11 +58,11 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_one_element(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -71,20 +71,20 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_two_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -96,22 +96,22 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_three_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -126,7 +126,7 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
@@ -134,17 +134,17 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_four_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -162,26 +162,26 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_five_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -202,7 +202,7 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
@@ -210,21 +210,21 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_six_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -248,30 +248,30 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_seven_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -298,32 +298,32 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_eight_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -353,34 +353,34 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_nine_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h"),
-                                      "i",
-                                      Cons.success("i")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h"),
+                        "i",
+                        Cons.success("i")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -413,36 +413,36 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_ten_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h"),
-                                      "i",
-                                      Cons.success("i"),
-                                      "j",
-                                      Cons.success("j")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h"),
+                        "i",
+                        Cons.success("i"),
+                        "j",
+                        Cons.success("j")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -478,38 +478,38 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_eleven_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h"),
-                                      "i",
-                                      Cons.success("i"),
-                                      "j",
-                                      Cons.success("j"),
-                                      "k",
-                                      Cons.success("k")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h"),
+                        "i",
+                        Cons.success("i"),
+                        "j",
+                        Cons.success("j"),
+                        "k",
+                        Cons.success("k")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -548,40 +548,40 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
     }
 
     @Test
     public void test_map_exp_map_twelve_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h"),
-                                      "i",
-                                      Cons.success("i"),
-                                      "j",
-                                      Cons.success("j"),
-                                      "k",
-                                      Cons.success("k"),
-                                      "l",
-                                      Cons.success("l")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h"),
+                        "i",
+                        Cons.success("i"),
+                        "j",
+                        Cons.success("j"),
+                        "k",
+                        Cons.success("k"),
+                        "l",
+                        Cons.success("l")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -623,41 +623,41 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
     }
 
     @Test
     public void test_map_exp_map_thirteen_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h"),
-                                      "i",
-                                      Cons.success("i"),
-                                      "j",
-                                      Cons.success("j"),
-                                      "k",
-                                      Cons.success("k"),
-                                      "l",
-                                      Cons.success("l"),
-                                      "m",
-                                      Cons.success("m")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h"),
+                        "i",
+                        Cons.success("i"),
+                        "j",
+                        Cons.success("j"),
+                        "k",
+                        Cons.success("k"),
+                        "l",
+                        Cons.success("l"),
+                        "m",
+                        Cons.success("m")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -702,43 +702,43 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
     }
 
     @Test
     public void test_map_exp_map_fourteen_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h"),
-                                      "i",
-                                      Cons.success("i"),
-                                      "j",
-                                      Cons.success("j"),
-                                      "k",
-                                      Cons.success("k"),
-                                      "l",
-                                      Cons.success("l"),
-                                      "m",
-                                      Cons.success("m"),
-                                      "n",
-                                      Cons.success("n")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h"),
+                        "i",
+                        Cons.success("i"),
+                        "j",
+                        Cons.success("j"),
+                        "k",
+                        Cons.success("k"),
+                        "l",
+                        Cons.success("l"),
+                        "m",
+                        Cons.success("m"),
+                        "n",
+                        Cons.success("n")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -786,45 +786,45 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
     }
 
     @Test
     public void test_map_exp_map_fifteen_elements(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b"),
-                                      "c",
-                                      Cons.success("c"),
-                                      "d",
-                                      Cons.success("d"),
-                                      "e",
-                                      Cons.success("e"),
-                                      "f",
-                                      Cons.success("f"),
-                                      "g",
-                                      Cons.success("g"),
-                                      "h",
-                                      Cons.success("h"),
-                                      "i",
-                                      Cons.success("i"),
-                                      "j",
-                                      Cons.success("j"),
-                                      "k",
-                                      Cons.success("k"),
-                                      "l",
-                                      Cons.success("l"),
-                                      "m",
-                                      Cons.success("m"),
-                                      "n",
-                                      Cons.success("n"),
-                                      "o",
-                                      Cons.success("o")
-                                     )
-                            .map(m -> m.mapValues(String::toUpperCase))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b"),
+                        "c",
+                        Cons.success("c"),
+                        "d",
+                        Cons.success("d"),
+                        "e",
+                        Cons.success("e"),
+                        "f",
+                        Cons.success("f"),
+                        "g",
+                        Cons.success("g"),
+                        "h",
+                        Cons.success("h"),
+                        "i",
+                        Cons.success("i"),
+                        "j",
+                        Cons.success("j"),
+                        "k",
+                        Cons.success("k"),
+                        "l",
+                        Cons.success("l"),
+                        "m",
+                        Cons.success("m"),
+                        "n",
+                        Cons.success("n"),
+                        "o",
+                        Cons.success("o")
+                       )
+              .map(m -> m.mapValues(String::toUpperCase))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -875,19 +875,19 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
     }
 
     @Test
     public void test_map_exp_flatmap_success(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b")
-                                     )
-                            .flatMap(m -> Cons.success(m.mapValues(String::toUpperCase)))
-                            .onSuccess(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b")
+                       )
+              .flatMap(m -> Cons.success(m.mapValues(String::toUpperCase)))
+              .onSuccess(r -> context.verify(() -> {
                                 Assertions.assertEquals(TreeMap.<String, String>empty()
                                                                 .put("a",
                                                                      "A"
@@ -899,7 +899,7 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
 
     }
@@ -907,17 +907,17 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_flatmap_failure(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.success("a"),
-                                      "b",
-                                      Cons.success("b")
-                                     )
-                            .flatMap(s -> Cons.failure(new RuntimeException()))
-                            .onComplete(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.success("a"),
+                        "b",
+                        Cons.success("b")
+                       )
+              .flatMap(s -> Cons.failure(new RuntimeException()))
+              .onComplete(r -> context.verify(() -> {
                                 Assertions.assertTrue(r.failed());
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
 
 
     }
@@ -927,13 +927,13 @@ public class TestParallelMap {
     public void test_retries(VertxTestContext context) {
 
 
-        vertx.effect.exp.Map.parallel("a",
-                                      a.get(),
-                                      "b",
-                                      one.get()
-                                     )
-                            .retry(2)
-                            .onComplete(map ->
+        MapVal.parallel("a",
+                        a.get(),
+                        "b",
+                        one.get()
+                       )
+              .retry(2)
+              .onComplete(map ->
                                                 context.verify(() -> {
                                                     Map<String, ?> expected =
                                                             LinkedHashMap.<String, Object>empty()
@@ -949,7 +949,7 @@ public class TestParallelMap {
                                                                            );
                                                     context.completeNow();
                                                 }))
-                            .get();
+              .get();
 
 
     }
@@ -957,48 +957,48 @@ public class TestParallelMap {
     @Test
     public void test_mapval_exp_fails_and_recover_with_success(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.failure(new RuntimeException()),
-                                      "b",
-                                      b.get()
-                                     )
-                            .recoverWith(e -> Cons.success(LinkedHashMap.empty()))
-                            .onSuccess(map -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.failure(new RuntimeException()),
+                        "b",
+                        b.get()
+                       )
+              .recoverWith(e -> Cons.success(LinkedHashMap.empty()))
+              .onSuccess(map -> context.verify(() -> {
                                 Assertions.assertEquals(LinkedHashMap.empty(),
                                                         map
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
     }
 
     @Test
     public void test_mapval_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
-        vertx.effect.exp.Map.parallel("a",
-                                      Cons.failure(new RuntimeException()),
-                                      "b",
-                                      b.get()
-                                     )
-                            .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
-                            .onComplete(r -> context.verify(() -> {
+        MapVal.parallel("a",
+                        Cons.failure(new RuntimeException()),
+                        "b",
+                        b.get()
+                       )
+              .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+              .onComplete(r -> context.verify(() -> {
                                 Assertions.assertTrue(r.failed());
                                 Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
     }
 
     @Test
     public void test_mapval_exp_recover_with_success(VertxTestContext context) {
-        vertx.effect.exp.Map.parallel("a",
-                                      a.get(),
-                                      "b",
-                                      b.get()
-                                     )
-                            .retry(ATTEMPTS)
-                            .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
-                            .onSuccess(map -> context.verify(() -> {
+        MapVal.parallel("a",
+                        a.get(),
+                        "b",
+                        b.get()
+                       )
+              .retry(ATTEMPTS)
+              .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+              .onSuccess(map -> context.verify(() -> {
                                 Assertions.assertEquals(LinkedHashMap.<String, Object>empty()
                                                                 .put("a",
                                                                      "a"
@@ -1010,7 +1010,7 @@ public class TestParallelMap {
                                                        );
                                 context.completeNow();
                             }))
-                            .get();
+              .get();
     }
 
 
@@ -1019,18 +1019,18 @@ public class TestParallelMap {
 
         long start = System.nanoTime();
 
-        vertx.effect.exp.Map.parallel("a",
-                                      a.get(),
-                                      "b",
-                                      b.get()
-                                     )
-                            .retry(ATTEMPTS,
+        MapVal.parallel("a",
+                        a.get(),
+                        "b",
+                        b.get()
+                       )
+              .retry(ATTEMPTS,
                                    (error, n) -> vertxRef.delay(100,
                                                                 MILLISECONDS
                                                                )
                                   )
-                            .get()
-                            .onComplete(r -> context.verify(() -> {
+              .get()
+              .onComplete(r -> context.verify(() -> {
                                 Assertions.assertEquals(LinkedHashMap.<String, Object>empty()
                                                                 .put("a",
                                                                      "a"

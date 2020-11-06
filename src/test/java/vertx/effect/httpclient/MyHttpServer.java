@@ -2,7 +2,6 @@ package vertx.effect.httpclient;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import jsonvalues.JsObj;
@@ -44,30 +43,42 @@ public class MyHttpServer {
     public Future<io.vertx.core.http.HttpServer> start() {
         return vertx.createHttpServer(new HttpServerOptions())
                     .requestHandler(req -> {
-                                        int            n       = counter.incrementAndGet();
-                                        Future<Buffer> bodyFut = req.body();
-                                        bodyFut.onSuccess(buffer -> {
-                                                              System.out.println("server req #" + n);
-                                                              req.response()
-                                                                 .putHeader("Content-Type",
-                                                                            "application/json"
-                                                                           );
-                                                              String bodyStr = buffer.toString();
+                                        int n = counter.incrementAndGet();
+                                        req.body()
+                                           .onComplete(event -> {
 
-                                                              Integer statusCode = statusCodeRes.apply(n)
-                                                                                                .apply(req)
-                                                                                                .apply(bodyStr);
+                                                           if (event.succeeded()) {
+                                                               System.out.println("server req #" + n);
+                                                               req.response()
+                                                                  .putHeader("Content-Type",
+                                                                             "application/json"
+                                                                            );
+                                                               String bodyStr = event.result()
+                                                                                     .toString();
 
-                                                              String response = bodyRes.apply(n)
-                                                                                       .apply(req)
-                                                                                       .apply(bodyStr)
-                                                                                       .toPrettyString();
-                                                              req.response()
-                                                                 .setStatusCode(statusCode)
-                                                                 .end(response);
+                                                               Integer statusCode = statusCodeRes.apply(n)
+                                                                                                 .apply(req)
+                                                                                                 .apply(bodyStr);
 
-                                                          }
-                                                         );
+                                                               String response = bodyRes.apply(n)
+                                                                                        .apply(req)
+                                                                                        .apply(bodyStr)
+                                                                                        .toPrettyString();
+                                                               req.response()
+                                                                  .setStatusCode(statusCode)
+                                                                  .end(response);
+                                                           }
+                                                           else {
+                                                               event.cause()
+                                                                    .printStackTrace();
+                                                               req.response()
+                                                                  .setStatusCode(500)
+                                                                  .end(event.cause()
+                                                                            .getMessage());
+                                                           }
+
+                                                       }
+                                                      );
 
                                     }
                                    )

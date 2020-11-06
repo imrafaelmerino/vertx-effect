@@ -14,11 +14,13 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static vertx.effect.performance.Functions.awaitForEnding;
 import static vertx.effect.performance.MyModule.countStringsLengthMultiProcesses;
 import static vertx.effect.performance.MyModule.countStringsLengthMultiVerticles;
+import static vertx.effect.performance.benchmarks.Inputs.TIMES;
 
 public class VerticlesVsProcesses {
+    private  static final int TIME_WAITING = 60;
 
     static {
-        VertxRef vertxRef = new VertxRef(Vertx.vertx(new VertxOptions().setWorkerPoolSize(100)));
+        VertxRef vertxRef = new VertxRef(Vertx.vertx(new VertxOptions().setWorkerPoolSize(Inputs.WORKERS)));
 
 
         awaitForEnding(Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
@@ -29,10 +31,7 @@ public class VerticlesVsProcesses {
                       );
     }
 
-    public static final int TIMES = Integer.parseInt(System.getProperty("times"));
-    public   static final int DELAY = Integer.parseInt(System.getProperty("delay"));
-    public static final int VERTICLE_INSTANCES = Integer.parseInt(System.getProperty("instances"));
-    private  static final int TIME_WAITING = 60;
+
 
     @Benchmark
     @BenchmarkMode(Mode.All)

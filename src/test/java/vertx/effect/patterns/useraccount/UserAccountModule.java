@@ -2,7 +2,7 @@ package vertx.effect.patterns.useraccount;
 
 import jsonvalues.JsObj;
 import vertx.effect.VertxModule;
-import vertx.effect.exp.And;
+import vertx.effect.exp.All;
 import vertx.effect.λc;
 
 public class UserAccountModule extends VertxModule {
@@ -44,7 +44,7 @@ public class UserAccountModule extends VertxModule {
                    );
 
         λc<JsObj, Boolean> isValid = (context, obj) ->
-                And.parallel(isLegalAge.apply(context,
+                All.parallel(isLegalAge.apply(context,
                                               obj.getInt("age")
                                              ),
                              isValidId.apply(context,

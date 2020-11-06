@@ -42,12 +42,13 @@
 
 ## <a name="persistendata"><a/>How persistent data structures makes a difference working with actors 
 
-**Every message that can be sent across the event bus has an associated MessageCodec**. Go to the package
+**Every message that can be sent across the event bus has an associated MessageCodec**. Go to the package 
 _io.vertx.core.eventbus.impl.codecs_ to check out what types Vertx supports. The Json implemented in Vertx with 
 **Jackson** has the codec _JsonObjectMessageCodec_.
  
-When a verticle sends a message to the event bus, **Vertx intercepts that message and calls the _transform_ method 
-of its codec**. Since **Jackson** is not immutable at all, the _transform_ method of _JsonObjectMessageCodec_ has to make a copy of the message before sending it to the event bus: 
+When a verticle sends a message to the event bus, **Vertx intercepts that message and calls its codec's transform method**. 
+Since **Jackson** is not immutable at all, the _transform_ method of _JsonObjectMessageCodec_ has to make a copy of the 
+message before sending it to the event bus. 
 
 ```java
 // Vertx impl 
@@ -56,9 +57,8 @@ public JsonObject transform(JsonObject message) {
 }
 ```
 
-Since vertx-effect uses [json-values](https://github.com/imrafaelmerino/json-values), which is a truly immutable
-Json implemented with persistent data structures, the _transform_ method of its codec **returns the same message sent
-by the verticle without making any copy**:
+Vertx-effect uses [json-values](https://github.com/imrafaelmerino/json-values). It's a truly immutable Json implemented with 
+persistent data structures. Its codec's _transform_ method **returns the same message sent by the verticle without making any copy**.
 
 ```java
 // vertx-effect impl
@@ -67,15 +67,14 @@ public JsObj transform(final JsObj message) {
 }
 ```
 
-As you can imagine, using Jackson, the more verticles you have, the more messages have to be copied, putting 
-a lot of pressure on the garbage collector and decreasing performance. Furthermore, the bigger 
-the Jsons are, the longer it takes to copy them. **This is a problem since, to get the most out
-of the actor model, you need to create as many verticles as possible**.
+Using Jackson, the more verticles you have, the more messages have to be copied. It puts a lot of pressure on the garbage 
+collector and decreasing performance. Furthermore, the bigger the Jsons are, the longer it takes to copy them. **This is a 
+problem since you need to create as many verticles as possible to get the most out of the actor model.**
 
 Find below the result of a benchmark carried out with [jmh](https://openjdk.java.net/projects/code-tools/jmh/), comparing 
-the Jsons from **Jackson** and **json-values**. The benchmark consists of sending messages to a verticle that just returns 
-them back without doing any computation nor modification (go to [JacksonVsJsValues](https://github.com/imrafaelmerino/vertx-effect/blob/master/performance/src/main/java/vertx/effect/performance/benchmarks/JacksonVsJsValues.java) 
-for further details on the benchmark).
+the Jsons from Jackson and json-values. The benchmark consists of sending messages to a verticle that just returns them 
+back (go to [JacksonVsJsValues](https://github.com/imrafaelmerino/vertx-effect/blob/master/performance/src/main/java/vertx/effect/performance/benchmarks/JacksonVsJsValues.java) for further details on the benchmark).
+
 
 ```text
 Benchmark                     Mode    Cnt      Score     Error      Units
@@ -141,31 +140,22 @@ public class MyModule extends VertxModule {
   }
 }
 ```
+**A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them**. 
+A lambda is just a function that takes an input and produces an output. In the above example, _MyModule_ deploys 
+five verticles. It's worth mentioning how the verticle _ValidateAndMap_ is defined using composition and the expressions 
+_JsObjVal_ and _JsArrayVal_. It shows the essence of the goal of vertx-effect. Later on, we'll see more expressions like 
+**Cons**, **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, etc.
 
-**A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them.** 
-A lamda is just a function that takes an input and produces an output. In the above example, _MyModule_ deploys five verticles. 
-It's worth mentioning how the _validateAndMap_ verticle is defined using composition and the _JsObjVal_ and _JsArrayVal_ expressions. **It shows the essence of vertx-effect**. 
-Later on, we'll see more expressions like **Cons**, **Cond**, **Case**, **IfElse**, **Pair**, **Triple**  etc.
+_ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, _ValidateAndMap_ computes the output 
+sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and composing a Json from their responses in parallel. 
+You can operate sequentially instead of in parallel using the constructors _JsObjVal.sequential_ and _JsArrayVal.sequential_. 
+Thanks to the _retry_ function, if _any_ verticle failed to compute their value, it would retry the computation up to two times.
 
-_ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, 
-_ValidateAndMap_  computes the output sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and 
-composing a Json from their responses **in parallel**. If for some reason you prefer to operate sequentially instead
-of in parallel, you can use the sequential constructors _JsObjVal.sequential_ and _JsArrayVal.sequential_. Thanks to
-the _retry_ function, if **any** verticle failed computing their value, it would retry the computation up to two times.
+It's important to notice that you can still send messages to the module verticles using the Vertx API, but one of the 
+points of vertx-effect is to use functions for that.
 
-It's important to notice that you can still send messages to the module verticles using the Vertx API:
-
-```java
-eventBus.send("toLowerCase", "AAA");
-
-eventBus.send("toUperCase", "aaa");
-
-eventBus.send("inc", 1);
-
-```
-
-Let's write some tests. Vertx doesn't support json-values, so we need to register a _MessageCodec_ to be 
-able to send its persistent Json across the event bus. 
+Let's write some tests. Vertx doesn't support json-values, so we need to register a _MessageCodec_ to send its persistent 
+Json across the event bus.
 
 ```java
 import io.vertx.core.Vertx;
@@ -269,19 +259,18 @@ public class TestMyModule {
 
 ```
 
-**This is extremely convenient and productive in order to do your testing. You don't need to mock anything. 
-Passing around functions that produce outputs given some inputs is enough to check that your verticles 
-will do their job.** 
+**This is extremely convenient and productive to do your testing. You don't need to mock anything. 
+Passing around functions that produce outputs given some inputs is enough to check that your verticles
+will do their job.**
 
-**The take away from this section is how using function composition and different expressions you'll be able
-to handle complexity and implement and test any imaginable flow very quickly.**  
+**The takeaway from this section is how using function composition and different expressions, you'll 
+be able to handle complexity and implement and test any imaginable flow very quickly.**
 
 
 ## <a name="effects"><a/> Effects 
 
-**Functional Programming is all about working with pure functions and values**. That's all. 
-One of the points where FP especially shines is dealing with effects. An effect is 
-something you can't call twice unless you intended to: 
+Functional Programming is all about working with pure functions and values. That's all. **One of the points where FP 
+especially shines is dealing with effects**. An effect is something you can't call twice unless you intended to:
 
 ```java 
 
@@ -291,8 +280,8 @@ Future<Customer> b = insertDb(customer);
 
 ```
 
-Both calls can fail, or they can create two different customers, or one of them can fail, who knows. 
-That code is not referentially transparent. For obvious reasons, you can't do the following refactoring:
+Both calls can fail, or they can create two different customers, or one of them can fail, who knows. That code is not 
+referentially transparent. For obvious reasons, you can't do the following refactoring:
 
 ```java
 
@@ -304,12 +293,11 @@ Future<Customer> b = c;
 
 ```
 
-A vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a 
-computation. **Haskell** has proven to us how laziness is an essential property to stay pure. We need to define an immutable 
-and lazy data structure that allows us to control the effect of latency.
+A Vertx future represents an asynchronous effect. We don't want to block the event loop because of the latency of a computation. 
+**Haskell** has proven to us how laziness is an essential property to stay pure. We need to define an immutable and lazy data structure 
+that allows us to control the effect of latency.
 
-Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value 
-is in vertx-effect:
+Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what a value is in vertx-effect:
   
 ```java
 
@@ -320,8 +308,8 @@ public interface Val<O> extends Supplier<Future<O>> {}
 
 ```
 
-A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) an 
-asynchronous effect that will compute a value of type O**.
+A **Val** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes (and not execute) an asynchronous 
+effect that will compute a value of type O**.
 
 If we turn Future into Val in the previous example:
 
@@ -333,7 +321,7 @@ Val<Customer> b = insertDb(customer);
 
 ```
 
-The above example is completely equivalent to:
+The above example is entirely equivalent to:
 
 ```java
 
@@ -344,10 +332,10 @@ Val<Customer> a = c;
 Val<Customer> b = c;
 
 ```
-This property is fundamental. Whenever you see _insertDb(customer)_ in your program, 
-you can think of it as it was _c_. Pure FP programming helps us reason about the programs
-we write. A Val is lazy. It's a description of an effect. 
-**In FP, we describe programs, and it's at the very last moment when they're executed.**
+
+This property is fundamental. Whenever you see the expression _insertDb(customer)_ in your program, you can think of 
+it as it was c. Pure FP programming helps us reason about the programs we write. Val is lazy. It's a description 
+of an effect. **In FP, we describe programs, and it's at the very last moment when they're executed.**
 
 I always wanted to name **λ** to something, and I finally got the chance!
 
@@ -358,14 +346,15 @@ import java.util.function.Function
 public interface λ<I,O> extends Function<I, Val<O>> { }
 
 ```
-A lambda is a function that returns a **Val** of type **O** given a type **I**. **It models the communication with a verticle**:
-a message is sent, the verticle receives and processes the message, and replies with a response. The message and the response has to
-be of a type that can be sent across the EvenBus; otherwise, you must implement a [MessageCodec](https://vertx.io/docs/apidocs/io/vertx/core/eventbus/MessageCodec.html).
 
+A lambda is a function that returns a **Val** of type **O** given a type **I**. **It models the communication with a verticle**: a message 
+is sent, the verticle receives and processes the message, and replies with a response. The message and the answer have to 
+be of a type that can be sent across the event bus; otherwise, you must implement a [MessageCodec](https://vertx.io/docs/apidocs/io/vertx/core/eventbus/MessageCodec.html). 
+ 
 ## <a name="exp"><a/> Expressions 
 
 **Using expressions and function composition is how we deal with complexity in functional programming**. 
-Let's go over the essential expressions in **vertx-effect**:
+Let's go over the essential expressions in vertx-effect:
 
 - **Cons** (stands for constant). 
 
@@ -385,7 +374,7 @@ Val<JsObj> profile = Cons.of( () -> getProfile(id)); // from a Future
 ``` 
 
 
-- **IfElse**. If the predicate returns true, it executes and returns the consequence; otherwise, the alternative.
+- **IfElse**. If the predicate returns true, it executes and returns the consequence; otherwise, the alternative. 
 
 
 ```java
@@ -398,9 +387,9 @@ IfElse.<O>predicate(Val<Bool>)
 
 ```
  
-- **Cond**. It's a set of branches and a default value. Each branch consists of a predicate and a value.
-It computes and returns the value of the first branch which predicate is true. 
-If no predicate is true, then it returns the default value, which is the last value of the clause.
+- **Cond**. It's a set of branches and a default value. Each branch consists of a predicate and a value. 
+It computes and returns the value of the first branch, which predicate is true. If no predicate is true, it returns the 
+default value, which is the last value clause. 
 
 
 ```java
@@ -415,9 +404,8 @@ Cond.<O>of(Val<Boolean>, Val<O>,
 ``` 
  
 
-- **Case**. The case construct implements multiple predicate-value branches like the Cond construct. 
-However, it evaluates a value of type **I** and allows multiple value clauses based on the evaluation of 
-that value.
+- **Case**. The case construct implements multiple predicate-value branches like the Cond construct. However, it evaluates 
+a type I value and allows multiple value clauses based on evaluating that value. 
 
 
 ```java
@@ -459,16 +447,16 @@ new Case<Integer,String>(Cons.success(20))
 ```
     
 
-- **And** and **Or**. You can compute all the values either in parallel or sequentially.
+- **All** and **Any**. You can compute all the values either in parallel or sequentially.
 
 
 ```java
 
-And.parallel(Val<Boolean>,....)
-And.sequential(Val<Boolean>,....)
+All.parallel(Val<Boolean>,....)
+All.sequential(Val<Boolean>,....)
                          
-Or.parallel(Val<Boolean>,...)
-Or.sequential(Val<Boolean>,...)
+Any.parallel(Val<Boolean>,...)
+Any.sequential(Val<Boolean>,...)
 
 ```  
 
@@ -495,9 +483,9 @@ Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>, Val<B>, Val<C>);
 ```
  
 - **JsObjVal** and **JsArrayVal**. 
-_JsObjVal_ and _JsArrayVal_ are data structures that look like raw Json. You can compute all the values either in parallel or sequentially.
-You can mix all the expressions we've seen so far and nest them, going as deeper as necessary, like in the
-following example:  
+_JsObjVal_ and _JsArrayVal_ are data structures that look like raw Json. You can compute all the values either in parallel
+or sequentially. You can mix all the expressions we've seen so far and nest them, going as deeper as necessary,
+like in the following example:
 
 
 ```java
@@ -516,8 +504,8 @@ JsArrayVal b = JsArrayVal.sequential(new Case<Integer,JsValue>(n).of(1, Val<JsVa
                                             )
                                      );
 
-JsObjVal c = JsObjVal.parallel("d", Or.sequential(Val<Boolean>, Val<Boolean>).map(JsBool::of),
-                               "e", And.parallel(Val<Boolean>, Val<Boolean>).map(JsBool::of),
+JsObjVal c = JsObjVal.parallel("d", Any.sequential(Val<Boolean>, Val<Boolean>).map(JsBool::of),
+                               "e", All.parallel(Val<Boolean>, Val<Boolean>).map(JsBool::of),
                                "f", JsArrayVal.parallel(Val<JsValue>,
                                                         Val<JsValue> 
                                                        ) 
@@ -529,14 +517,14 @@ JsObjVal obj = JsObjVal.parallel("a",a,
                                 );
 ```
 
-It's important to notice **that any value of the above expressions can be computed by a different verticle of
-any machine of a cluster**. Imagine ten machines collaborating to compute a JsObj, is not this amazing?
+It's important to notice that any value of the above expressions can be computed by a different cluster machine's verticle. 
+Imagine ten machines collaborating to compute a JsObj. Is not this amazing?
 
 - **SeqVal and MapVal**
 
-They represent sequences and maps. **Modules use them internally**. For example the _deploy_ method uses a MapVal
-to put the deployed verticles using their addresses as keys. They also use a SeqVal when more than a verticle instance
-is deployed. As with the other expressions, you can compute their values either in parallel or sequentially.
+They represent sequences and maps. **Modules use them internally**. For example, the deploy method uses a MapVal to put the 
+deployed verticles using their addresses as keys. They also use a SeqVal when more than a verticle instance is deployed. 
+As with the other expressions, you can compute their values either in parallel or sequentially.
 
 ```
 
@@ -551,12 +539,11 @@ Val<Integer> firstFinishing = seq.race();
 
 ```
 
-The race function returns the value that finishes first. You can race a _JsArrayVal_ as well.
+The _race_ function returns the value that finishes first. You can race a _JsArrayVal_ as well.
 
 ## <a name="reactive"><a/> Being reactive 
 
-Find below some of the most critical operations defined in the **Val** interface that will help us make our code
-more resilient:
+Find below some of the most critical operations defined in the _Val_ interface that will help us make our code more resilient:
 
 ```java
 public interface Val<O> extends Supplier<Future<O>> {
@@ -576,14 +563,14 @@ public interface Val<O> extends Supplier<Future<O>> {
 }
  ``` 
 
-**recoverWith**: it switches to an alternative lambda when a failure happens.
+**recoverWith**:  it switches to an alternative lambda when a failure happens. 
 
-**fallbackTo**: It's like recoverWith, but if the second lambda fails too, it returns the error of the first one. 
+**fallbackTo**: It's like recoverWith, but if the second lambda fails too, it returns the first one error. 
 
-**recover**: returns a constant if the computation fails
+**recover**: returns a constant if the computation fails. 
 
-**retry**: retries the computation the specified number of attempts. An action can be specified to be executed before
-any attempt. The type of action is Val<Void>. You can create any imaginable retry policy, for example:
+**retry**: retries the computation. The maximum number of attempts, and an action before any attempt can be specified. 
+You can create any imaginable retry policy, for example: 
 
 ```java
 // for ever
@@ -597,13 +584,13 @@ retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS)
 
 ```
 
-**retryIf**: retries the computation the specified number of attempts if the error matches the predicate
+**retryIf**: retries the computation the specified number of attempts if the error matches the predicate.
 
 
-## <a name="modules"><a/> Modules 
+## <a name="modules"><a/> Modules
  
-In **vertx-effect**, **a module is a special verticle whose purpose is to deploy other verticles and expose lambdas to 
-communicate with them**. Let's put an example:
+In vertx-effect, **a module is a special verticle whose purpose is to deploy other verticles and expose lambdas 
+to communicate with them**. Let's put an example. 
 
 ```java
 import jsonvalues.JsObj;
@@ -642,25 +629,16 @@ public class MyModule extends VertxModule {
 ```
 
 We usually divide modules into four main blocks:
+. The addresses where the module verticles will be listening on.
+. The lambdas that are exposed to the outside world to communicate with the deployed verticles.
+. The deploy method, where the module deploys the verticles.
+. The initialize method, where the module initializes the lambdas.
 
-  . The addresses where the module verticles will be listening on.
-  
-  . The lambdas that are exposed to the outside world to communicate with the deployed verticles. 
-  
-  . The deploy method, where the module deploys the verticles. 
-  
-  . The initialize method, where the module initializes the lambdas. 
-    
-You can still communicate with the module verticles using the Vertx API, but one of the 
-points of vertx-effect is to use functions for that. 
-  
-In our example, **we are using a persistent and immutable Json from the library [json-values](https://imrafaelmerino.github.io/json-values/)**. 
-It's vital to work with this kind of data structure in the actor model (and in general, when possible, 
-it's considered good practice).
+In our example, we are using the persistent and immutable Json from json-values.
+The **ask** method returns a lambda to establish bidirectional communication with a verticle. In contrast, the **tell** 
+method would return a consumer because a response is either not expected or ignored. Let's deploy our module and do some testing.
+We usually divide modules into four main blocks:
 
-The **ask** method returns a lambda to establish bidirectional communication with a verticle.
-In contrast, the **tell** method would return a consumer because the answer is either not expected or ignored.
-Let's deploy our module and do some testing.
 
 ```java
  @BeforeAll
@@ -716,24 +694,20 @@ Let's deploy our module and do some testing.
  }
 
 ```
-
 To send the persistent objects from [json-values](https://imrafaelmerino.github.io/json-values/) across the event bus, 
-we need to register some codecs. The verticle **RegisterJsValuesCodecs** does this task.
+we need to register some codecs. The verticle RegisterJsValuesCodecs does this task.
+The VertxRef class is a wrapper around the Vertx instance to deploy and spawn verticles from lambdas. Modules use this class internally.
 
-The **VertxRef** class is a wrapper around the Vertx instance to deploy and spawn verticles from lambdas. 
-Modules use this class internally.
+The _VertxRef_ class is a wrapper around the Vertx instance to deploy and spawn verticles from lambdas. Modules use this class internally.
 
 
 ## <a name="logging"><a/> Logging 
-Logging is essential in software. There are many logging libraries. Sometimes it is
-not clear what dependencies you have to use because there isn't a standard solution. 
-Each library uses its own. I didn't want to be opinionated. At the same time, I 
-wanted to provide a simple and decouple solution to know what is going on in any system 
-using vertx-effect. That's why I decided to publish remarkable events in a specific address. 
-If you want to use your favorite slf4j implementation, just implement it in a consumer.
-On the other hand, consuming all those events during testing will give you instant feedback on 
-your system and agility spotting bugs. You can disable this future with the Java system 
-property **-Dpublish.events=false**. 
+Logging is essential in software. There are many logging libraries. Sometimes it is not clear what dependencies you have 
+to use because there isn't a standard solution. Each library uses its own. I didn't want to be opinionated. At the same 
+time, I wanted to provide a simple and decouple solution to know what is going on in any system using vertx-effect. 
+That's why I decided to publish remarkable events in a specific address. If you want to use your favorite slf4j implementation,
+ just implement it in a consumer. On the other hand, consuming all those events during testing will give you instant feedback 
+ on your system and agility spotting bugs. You can disable this future with the Java system property **-Dpublish.events=false**.
 
 ### <a name="events"><a/> Publishing events 
 **vertx-effect** publishes events to the address **vertx-effect-events**. Find below some of the most important predefined
@@ -743,14 +717,13 @@ events:
     - UNDEPLOYED_VERTICLE
     - SENT_MESSAGE: a message is sent to a verticle
     - RECEIVED_MESSAGE: a verticle received a message
-    - REPLIED_RESP : a verticle replied with a message
+    - REPLIED_RESP: a verticle replied with a message
     - REPLIED_FAILURE: a verticle replied with an error
     - RECEIVED_RESP: a response is received from a verticle
     - RECEIVED_FAILURE: an error is received from a verticle
     - INTERNAL_ERROR_XXX: go to github and open and issue. 
 
-A real example from the previous example where we filter and trim the strings of 
-a Json would be:
+An example from the previous example would be:
 
 ```json
 
@@ -772,12 +745,10 @@ a Json would be:
 ``` 
 
 ### <a name="correlated-events"><a/> Publishing correlated events  
-
-In async event-driven systems is extremely difficult to correlate events.
-Having this solved is a killer future that saves you from working hours trying to gather all the different events 
-associated with a specific transaction. In vertx-effect
-is really easy! As always, functions and composition come to the rescue.
-Before checking out an example, let's see what a λc is
+In async event-driven systems is extremely difficult to correlate events. Having this solved is a killer future that 
+saves you from working hours trying to gather all the different events associated with a specific transaction. 
+In vertx-effect is really easy! As always, functions and composition come to the rescue. Before checking out an example, 
+let's see what a λc is:
 
 ```java
 import io.vertx.core.MultiMap;
@@ -787,9 +758,9 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {}
 ```
 
 A λc is a function that takes two arguments, a map representing the context in which an operation will be executed, 
-and the message of type I sent to the verticle across the event bus.
-You can put the user's email into the context to filter all the events associated with that email
-and a random value to distinguish between transactions from the same email. That's only an example.
+and the message of type I sent to the verticle across the event bus. You can put the user's email into the context 
+to filter all the events associated with that email and a random value to distinguish between transactions from the 
+same email. That's only an example.
 
 ```java
     public static λc<Integer, Boolean> isLegalAge;
@@ -825,7 +796,7 @@ and a random value to distinguish between transactions from the same email. That
         this.deploy(IS_VALID_EMAIL, (String email) -> Cons.success(!email.isEmpty()));
 
         λc<JsObj, Boolean> isValid = (context, obj) ->
-                And.parallel(isLegalAge.apply(context,
+                All.parallel(isLegalAge.apply(context,
                                               obj.getInt("age")
                                              ),
                              isValidId.apply(context,
@@ -840,10 +811,9 @@ and a random value to distinguish between transactions from the same email. That
 }
 ```
 
-As you can see, we've implemented a module that deploys five verticles and exposes five λc to interact 
-with them. The method trace returns a λc (in the previous example, we used the **ask** method that returns a λ). 
-The isValid lambda is implemented using the And expression. The context is passed through all the lambdas 
-of the And expression.
+As you can see, we've implemented a module that deploys five verticles and exposes five λc to interact with them. 
+The method trace returns a λc (in the previous example, we used the ask method that returns a λ). The isValid lambda 
+is implemented using the _All_ expression. The context is passed through all the lambdas of the And expression.
 
 ```java
  Function<JsObj,Multimap> context = user -> MultiMap.caseInsensitiveMultiMap()
@@ -862,6 +832,7 @@ of the And expression.
  UserAccountModule.isValid.apply(contex.apply(user1), user1).get();
       
 ```
+
 Let's take a look at the events that are published during the execution of the previous code:
 
 ```json
@@ -880,25 +851,20 @@ Let's take a look at the events that are published during the execution of the p
  
 ## <a name="spawning-verticles"><a/> Spawning verticles 
 With vertx-effect, you can spawn verticles, which means that verticles are deployed and undeployed on the fly. 
-Every time something needs to be computed, a new verticle is deployed. When the computation is done, and the 
-verticle replies, it is undeployed right away. 
+Every time something needs to be computed, a new verticle is deployed. When the computation is done and the 
+verticle replies, it is undeployed right away. The goal is to get the most out of the cores! Erlang taught us
+how to develop concurrent software that doubles in speed if you double the number of cores without changing a 
+code line: spawning as many verticles as possible. In Erlang jargon, a verticle is kind of a process.
 
-The goal is to get the most out of the cores! **Erlang taught us how to develop concurrent software that doubles 
-in speed if you double the number of cores without changing a code line:  spawning as many verticles as possible**. 
-In Erlang jargon, a verticle is kind of a process.
+Let's generate a fixed number of Jsons **n**. For every Json, we'll apply a filter, map, and reduce functions to count 
+the length of all the Json values that are strings. We'll aggregate all the results, adding them up. We're going to 
+compare two different approaches. In the first one, the Json generator, and the functions filter, map and reduce 
+are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle. The
+second one, using the spawn function, so the json generator, filter, map and reduce are verticles that are deployed on the fly, 
+and undeployed when their computation is done.
 
-Let's generate a fixed number of Jsons n, and for every Json we'll apply a
-filter, map and reduce functions to count the length all the Json values that are strings. We'll aggregate
-all the results adding them up.
-We're going to compare two different approaches:
-
-    - The Json generator, and the functions filter, map and reduce are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle 
-    - Using the spawn function, so the json generator, filter, map and reduce are verticles that are deployed on the fly, and undeployed
-    when their computation is done. 
-
-In both approaches, the generator is a worker that produces a Json with a specified delay. We'll vary this delay
+In both approaches, the generator is a worker that produces a Json with a specified delay. We'll increase this delay little by little 
 to see how it affects the results.
-
     
 ```java
 public class SumJsonStringLength implements λ<Integer, Integer> {
@@ -933,9 +899,8 @@ public class SumJsonStringLength implements λ<Integer, Integer> {
 ```    
 
 ## <a name="httpclient"><a/> Reactive http client 
-vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple
-as extending the class _HttpClientModule_ and defining a constructor to initialize the HTTP options and the internal
-address of the verticle that will perform the requests.
+vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple as extending the class 
+HttpClientModule and defining a constructor to initialize the HTTP options and the verticle's internal address that will perform the requests.
 
 ```java
 import vertx.effect.httpclient.HttpClientModule
@@ -960,8 +925,7 @@ Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
     .get()
 ```
 
-Find below the types of some of the most relevant lambdas that you can use to make HTTP requests
-after deploying the module:
+Find below the types of some of the most relevant lambdas that you can use to make HTTP requests after deploying the module.
 
 ``` java
 
@@ -981,10 +945,9 @@ The response is a Json with the following fields and types:
    - **cookies** :: JsArray
    - **headers** :: JsObj 
 
-Let's create a function that takes two arguments; the number of retries in case of a timeout 
-takes place or the tcp connection is closed, and a search term. We wait one second before making the first attempt, two seconds before
-making the second one and so forth. If other error happens, or the function uses up the number of attempts,
-the function returns an empty json. 
+Let's create a function that takes two arguments; the number of retries in case of a timeout occurs or the TCP connection 
+is closed and a search term. We wait one second before making the first attempt, two seconds before making the second one, 
+and so forth. If another error happens, or the function uses up the number of attempts, the function returns an empty json.
 
 ```java 
 import static vertx.effect.Failures.HTTP_CONNECT_TIMEOUT_PRISM;
@@ -1024,14 +987,14 @@ All the request events are also published into the address **vertx-effect-events
 
 ```
 
-As you can see two verticles were deployed: the module and an internal verticle listening on the specified address _myhttp-client-adress_.
-This verticle performs the requests. The cookies, headers and body received from Google are omitted.
+As you can see, two verticles were deployed: the module and an internal verticle listening on the specified address myhttp-client-address.
+This verticle performs the requests. The cookies, headers, and body received from Google are omitted.
 
 ## <a name="oauth-httpclient"><a/> Reactive OAuth http client
 
-Following the philosophy we've seen so far, the oauth http clients implemented in vertx-effect are
-verticles that exposes lambdas to make http request. Getting and refreshing the access token is something
-you don't have to worry about. It's all handled for you. The good thing is that you can customize everything.
+Following the philosophy we've seen so far, the OAuth Http clients implemented in vertx-effect are verticles that expose 
+lambdas to make Http request. Getting and refreshing the access token is something you don't have to worry about. It's all 
+handled for you. The good thing is that you can customize everything.
 
 ### <a name="clientcredentials"><a/> Client credentials flow 
 
@@ -1049,7 +1012,7 @@ vertxRef.deployVerticle(httpClient);
 
 ```
 
-After deploying the http client module, you can use the lambdas it exposes to make any requests:
+After deploying the Http client module, you can use the lambdas it exposes to make any requests:
 
 ```java
 
@@ -1109,8 +1072,7 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=client_credentials
 ```
 
-Since _GetAccessTokenRequest_ is just a function, it can be also customized:
-
+Since _GetAccessTokenRequest_ is just a function, it can also be customized:
 ```java
 
 new ClientCredentialsFlowBuilder(httpOptions,   
@@ -1130,8 +1092,7 @@ new ClientCredentialsFlowBuilder(httpOptions,
 ### <a name="authorizationflow"><a/> Authorization flow
 
 
-You need to get the access and refresh token making an authentication request. You will need
-tipically a code, a redirect_uri etc
+You need to get the access and refresh token, making an authentication request. You will typically need a code, a redirect_uri, etc.
 
 ```java
 JsObj inputs = JsObj.of("code",???,"redirect_uri",???);
@@ -1161,7 +1122,7 @@ tokens.get().onSucess(tuple -> { //at
  
 ```
 
-You already have the refresh token. You don't need to make any authorization requests.
+You already have the refresh token. You don't need to make any authorization request.
 
 ```java
 String refreshToken = ???;
@@ -1177,10 +1138,10 @@ vertxRef.deployVerticle(httpClient);
 
 ```
 
-There are implementations of the requests to get the tokens and authenticate your app for Spotify.
-Go to _vertx.effect.httpclient.oauth.Spotify_ for further details. In case you can implement any just
-defining a couple of functions. Like it was shown in the previous section, you can customize everything:
-retries under certain errors, number of attempts etc 
+There are implementations of the requests to get the tokens and authenticate your app for Spotify. 
+Go to vertx.effect.httpclient.oauth.Spotify for further details. In any case you can implement any just 
+defining a couple of functions. As shown in the previous section, you can customize everything: 
+retries under certain errors, number of attempts, function to extract the tokens from the authentication request etc.
  
 ## <a name="perf"><a/> Performance 
 in progress

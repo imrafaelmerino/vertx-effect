@@ -9,7 +9,7 @@ import vertx.effect.*;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
 
-import static vertx.effect.performance.benchmarks.VerticlesVsProcesses.VERTICLE_INSTANCES;
+import static vertx.effect.performance.benchmarks.Inputs.VERTICLE_INSTANCES;
 
 
 public class MyModule extends VertxModule {

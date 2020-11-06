@@ -5,7 +5,7 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import vertx.effect.Val;
-import vertx.effect.exp.And;
+import vertx.effect.exp.All;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.IfElse;
 import vertx.effect.httpclient.*;
@@ -120,7 +120,7 @@ public abstract class OauthModule extends HttpClientModule {
                                                  reqParams
                                                 )
                                           .recoverWith(e ->
-                                                               IfElse.<JsObj>predicate(And.of(retryReqPredicate.test(e),
+                                                               IfElse.<JsObj>predicate(All.of(retryReqPredicate.test(e),
                                                                                               reqAttempts > 0
                                                                                              )
                                                                                       )

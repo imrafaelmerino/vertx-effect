@@ -8,7 +8,7 @@ import vertx.effect.λ;
 import java.util.stream.IntStream;
 
 import static vertx.effect.performance.MyModule.*;
-import static vertx.effect.performance.benchmarks.VerticlesVsProcesses.DELAY;
+import static vertx.effect.performance.benchmarks.Inputs.DELAY;
 
 public class SumJsonStringLengthWithProcesses implements λ<Integer, Integer> {
 

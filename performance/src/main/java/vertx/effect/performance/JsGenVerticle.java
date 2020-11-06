@@ -20,9 +20,10 @@ public class JsGenVerticle implements λ<Integer, JsObj>
 
 
   @Override
-  public Val<JsObj> apply(final Integer time) {
+  public Val<JsObj> apply(final Integer delay) {
+    if(delay==0)return Cons.success(supplier.get());
     try {
-      Thread.sleep(time);
+      Thread.sleep(delay);
       return Cons.success(supplier.get());
     } catch (InterruptedException e) {
        return Cons.failure(e);
