@@ -6,7 +6,7 @@
     <groupId>com.github.imrafaelmerino</groupId>
     <artifactId>vertx-effect</artifactId>
     <packaging>jar</packaging>
-    <version>0.5</version>
+    <version>0.6</version>
     <name>vertx-effect</name>
     <description>When actors meet Functional Programming</description>
     <url>https://github.com/imrafaelmerino/vertx-effect</url>
