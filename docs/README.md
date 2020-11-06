@@ -73,7 +73,7 @@ problem since you need to create as many verticles as possible to get the most o
 
 Find below the result of a benchmark carried out with [jmh](https://openjdk.java.net/projects/code-tools/jmh/), comparing 
 the Jsons from Jackson and json-values. The benchmark consists of sending messages to a verticle that just returns them 
-back without any computation or modification (go to [JacksonVsJsValues](https://github.com/imrafaelmerino/vertx-effect/blob/master/performance/src/main/java/vertx/effect/performance/benchmarks/JacksonVsJsValues.java) for further details on the benchmark).
+back (go to [JacksonVsJsValues](https://github.com/imrafaelmerino/vertx-effect/blob/master/performance/src/main/java/vertx/effect/performance/benchmarks/JacksonVsJsValues.java) for further details on the benchmark).
 
 
 ```text
@@ -144,7 +144,7 @@ public class MyModule extends VertxModule {
 A lambda is just a function that takes an input and produces an output. In the above example, _MyModule_ deploys 
 five verticles. It's worth mentioning how the verticle _ValidateAndMap_ is defined using composition and the expressions 
 _JsObjVal_ and _JsArrayVal_. It shows the essence of the goal of vertx-effect. Later on, we'll see more expressions like 
-**Cons**, **Cond**, Cas****e, **IfElse**, **All**, **Any**, **Pair**, **Triple**, etc.
+**Cons**, **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, etc.
 
 _ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, _ValidateAndMap_ computes the output 
 sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and composing a Json from their responses in parallel. 
@@ -261,16 +261,16 @@ public class TestMyModule {
 
 **This is extremely convenient and productive to do your testing. You don't need to mock anything. 
 Passing around functions that produce outputs given some inputs is enough to check that your verticles
-will do their job.
+will do their job.**
 
-The takeaway from this section is how using function composition and different expressions, you'll 
+**The takeaway from this section is how using function composition and different expressions, you'll 
 be able to handle complexity and implement and test any imaginable flow very quickly.**
 
 
 ## <a name="effects"><a/> Effects 
 
-Functional Programming is all about working with pure functions and values. That's all. One of the points where FP 
-especially shines is dealing with effects. An effect is something you can't call twice unless you intended to:
+Functional Programming is all about working with pure functions and values. That's all. **One of the points where FP 
+especially shines is dealing with effects**. An effect is something you can't call twice unless you intended to:
 
 ```java 
 
@@ -539,7 +539,7 @@ Val<Integer> firstFinishing = seq.race();
 
 ```
 
-The race function returns the value that finishes first. You can race a _JsArrayVal_ as well.
+The _race_ function returns the value that finishes first. You can race a _JsArrayVal_ as well.
 
 ## <a name="reactive"><a/> Being reactive 
 
@@ -584,7 +584,7 @@ retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS)
 
 ```
 
-**retryIf**: retries the computation the specified number of attempts if the error matches the predicate
+**retryIf**: retries the computation the specified number of attempts if the error matches the predicate.
 
 
 ## <a name="modules"><a/> Modules
@@ -856,16 +856,15 @@ verticle replies, it is undeployed right away. The goal is to get the most out o
 how to develop concurrent software that doubles in speed if you double the number of cores without changing a 
 code line: spawning as many verticles as possible. In Erlang jargon, a verticle is kind of a process.
 
-Let's generate a fixed number of Jsons n, and for every Json, we'll apply a filter, map, and reduce functions to count 
+Let's generate a fixed number of Jsons **n**. For every Json, we'll apply a filter, map, and reduce functions to count 
 the length of all the Json values that are strings. We'll aggregate all the results, adding them up. We're going to 
-compare two different approaches:
+compare two different approaches. In the first one, the Json generator, and the functions filter, map and reduce 
+are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle. The
+second one, using the spawn function, so the json generator, filter, map and reduce are verticles that are deployed on the fly, 
+and undeployed when their computation is done.
 
-    - The Json generator, and the functions filter, map and reduce are verticles deployed at the beginning of the benchmark. 
-    We'll use different number of instances per verticle 
-    - Using the spawn function, so the json generator, filter, map and reduce are verticles that are deployed on the fly, 
-    and undeployed when their computation is done. 
-
-In both approaches, the generator is a worker that produces a Json with a specified delay. We'll vary this delay to see how it affects the results.
+In both approaches, the generator is a worker that produces a Json with a specified delay. We'll increase this delay little by little 
+to see how it affects the results.
     
 ```java
 public class SumJsonStringLength implements λ<Integer, Integer> {
