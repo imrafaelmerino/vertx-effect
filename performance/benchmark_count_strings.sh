@@ -1,13 +1,16 @@
 #!/bin/bash
 
-TIMES=$1
-DELAY=$2
-INSTANCES=$3
+export TIMES=$1
+export DELAY=$2
+export INSTANCES=$3
+export WORKERS=$4
 
-mvn clean package \
+mvn \
 -Dtimes=${TIMES} \
 -Ddelay=${DELAY} \
 -Dinstances=${INSTANCES} \
+-Dworkers=${WORKERS} \
+package
 
 DIR=${TIMES}/${DELAY}/${INSTANCES}
 
@@ -18,6 +21,7 @@ java -Xms256m -jar \
 -Dtimes=${TIMES} \
 -Ddelay=${DELAY} \
 -Dinstances=${INSTANCES} \
+-Dworkers=${WORKERS} \
 target/benchmark.jar \
 -o results/${DIR}/verticlesVsProcesses.txt \
 vertx\.effect\.performance\.benchmarks\.VerticlesVsProcesses\.*
