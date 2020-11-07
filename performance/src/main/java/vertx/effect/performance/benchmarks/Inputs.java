@@ -7,8 +7,6 @@ public class Inputs {
     public static int WORKERS;
 
     static {
-        System.out.println("------------------------------------");
-
             String times = System.getProperty("times");
             String delay = System.getProperty("delay");
             String instances = System.getProperty("instances");

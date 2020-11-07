@@ -1,13 +1,20 @@
 package vertx.effect.httpclient;
 
+import io.vavr.Tuple2;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import jsonvalues.JsObj;
+import org.junit.jupiter.api.Test;
+import vertx.effect.Val;
+import vertx.effect.VertxRef;
+import vertx.effect.httpclient.oauth.*;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class MyHttpServer {
@@ -84,4 +91,5 @@ public class MyHttpServer {
                                    )
                     .listen(port);
     }
+
 }

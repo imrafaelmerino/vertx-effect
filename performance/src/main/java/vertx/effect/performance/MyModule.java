@@ -154,23 +154,4 @@ public class MyModule extends VertxModule {
 
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        final Vertx vertx = Vertx.vertx();
-
-        final VertxRef vertxRef = new VertxRef(vertx);
-
-        vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,System.out::println);
-
-        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                        vertxRef.deployVerticle(new MyModule()))
-            .onSuccess(it ->  MyModule.countStringsLengthMultiVerticles.apply(10).onSuccess(System.out::println))
-            .get();
-
-
-        Thread.sleep(10000);
-
-
-    }
-
-
 }

@@ -20,8 +20,6 @@ public abstract class OauthModule extends HttpClientModule {
 
     protected String accessToken;
 
-
-
     protected BiFunction<MultiMap, HttpClientModule, Val<JsObj>> accessTokenReq;
     protected final λ<JsObj, String> readNewAccessTokenAfterRefresh;
     protected final int accessTokenReqAttempts;
@@ -175,7 +173,6 @@ public abstract class OauthModule extends HttpClientModule {
                                 );
     }
 
-    ;
 
 
 }

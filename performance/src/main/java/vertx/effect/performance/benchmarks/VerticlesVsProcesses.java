@@ -4,6 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
@@ -35,25 +36,24 @@ public class VerticlesVsProcesses {
 
     @Benchmark
     @BenchmarkMode(Mode.All)
+    @Fork(2)
     public void count_string_verticles()  {
 
         awaitForEnding(countStringsLengthMultiVerticles.apply(TIMES),
                        TIME_WAITING,
                        SECONDS
                       );
-
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
+    @Fork(2)
     public void count_string_processes()  {
 
         awaitForEnding(countStringsLengthMultiProcesses.apply(TIMES),
                        TIME_WAITING,
                        SECONDS
                       );
-
-
     }
 
 }

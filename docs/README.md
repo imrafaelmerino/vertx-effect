@@ -26,7 +26,6 @@
 - [Reactive OAuth http client](#oauth-httpclient)
     - [Client credentials flow](#clientcredentials)
     - [Authorization flow](#authorizationflow)
-- [Performance](#perf)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Related projects](#rp)
@@ -856,6 +855,46 @@ verticle replies, it is undeployed right away. The goal is to get the most out o
 how to develop concurrent software that doubles in speed if you double the number of cores without changing a 
 code line: spawning as many verticles as possible. In Erlang jargon, a verticle is kind of a process.
 
+Will deploy and undeploy verticles continuously slow down the system? It depends, like everything related to performance. 
+There are times when the cost of reaching a greater level of parallelization is worth it. Other times it's not. 
+Let's see how long it takes to deploy and undeploy one million verticles:
+
+```java
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void deploy_undeploy() throws InterruptedException {
+        int processes = 1000000; 
+        CountDownLatch latch = new CountDownLatch(processes);
+
+        for (int i = 0; i < processes; i++) {
+            vertxRef.deploy("id" + i,
+                            λ.<JsObj>identity()
+                           )
+                    .onComplete(vr -> {
+                        vr.result()
+                          .undeploy()
+                          .onSuccess(it -> latch.countDown());
+                    })
+                    .get();
+        }
+
+        latch.await(10,
+                    SECONDS 
+                   );
+
+    }
+```
+
+It takes almost three seconds, 3 microseconds per verticle:
+
+```text
+Benchmark                  Mode  Cnt  Score   Error  Units
+Processes.deploy_undeploy  avgt   10  2.907 ± 0.658   s/op
+```
+
+In the following example, we are going to explore a scenario where there are times when spawning verticles is faster,
+and there are times when it is slower.
+
 Let's generate a fixed number of Jsons **n**. For every Json, we'll apply a filter, map, and reduce functions to count 
 the length of all the Json values that are strings. We'll aggregate all the results, adding them up. We're going to 
 compare two different approaches. In the first one, the Json generator, and the functions filter, map and reduce 
@@ -1160,9 +1199,6 @@ There is an implementation of the requests to get the tokens and authenticate yo
 _Go to vertx.effect.httpclient.oauth.Spotify_ for further details. More implementations will be added 
 little by little. As shown in the previous section, you can customize everything: retries under certain 
 errors, number of attempts, function to extract the tokens from the authentication request etc.
- 
-## <a name="perf"><a/> Performance 
-in progress
 
 ## <a name="requirements"><a/> Requirements
 Java 11 or greater

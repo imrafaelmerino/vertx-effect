@@ -36,7 +36,7 @@ public class JacksonVsJsValues {
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
+    @Fork(2)
     public void jsonValues(Blackhole blackhole) {
         awaitForEnding(MyModule.id.apply(jsonValuesObj),
                        3,
@@ -46,7 +46,7 @@ public class JacksonVsJsValues {
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Fork(1)
+    @Fork(2)
     public void jackson(Blackhole blackhole) {
         awaitForEnding(MyModule.jacksonId.apply(jacksonObj),
                        3,
