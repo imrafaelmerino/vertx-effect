@@ -994,11 +994,16 @@ This verticle performs the requests. The cookies, headers, and body received fro
 
 Following the philosophy we've seen so far, the OAuth Http clients implemented in vertx-effect are verticles that expose 
 lambdas to make Http request. Getting and refreshing the access token is something you don't have to worry about. It's all 
-handled for you. The good thing is that you can customize everything.
+handled for you. 
 
 ### <a name="clientcredentials"><a/> Client credentials flow 
 
 ```java
+import vertx.effect.httpclient.oauth.GetAccessTokenRequest;
+import vertx.effect.httpclient.oauth.ClientCredentialsModule;
+import vertx.effect.httpclient.oauth.ClientCredentialsFlowBuilder;
+import io.vertx.core.http.HttpClientOptions;
+
 ClientCredentialsFlowBuilder builder  = 
             new ClientCredentialsFlowBuilder(new HttpClientOptions().setDefaultPort(port)
                                                                     .setDefaultHost("localhost"),
@@ -1033,36 +1038,36 @@ You can customize anything using the builder:
 ```java
 
 // by default Authorization
-builder.setAuthorizationHeaderName(final String authorizationHeaderName) 
+builder.setAuthorizationHeaderName(String authorizationHeaderName) 
 
 // by default token -> "Bearer "+token
-builder.setAuthorizationHeaderValue(final Function<String, String> authorizationHeaderValue) 
+builder.setAuthorizationHeaderValue(Function<String, String> authorizationHeaderValue) 
 
 // predicate to check if we need to refresh the token
 // by default resp -> resp.getInt("status_code") == 401
-builder.setRefreshTokenPredicate(final Predicate<JsObj> refreshTokenPredicate) 
+builder.setRefreshTokenPredicate(Predicate<JsObj> refreshTokenPredicate) 
 
 // lambda to get the access token from the resp
 // by default parse the body into a Json a get the access_token field 
-builder.setReadNewAccessTokenAfterRefresh(final λ<JsObj, String> readNewAccessTokenAfterRefresh) 
+builder.setReadNewAccessTokenAfterRefresh(λ<JsObj, String> readNewAccessTokenAfterRefresh) 
 
 // predicate to check if retrying in case of an error making the request to get the token
 // by default connection timeout, unknown host or access_token is not found in the response
-builder.setRetryAccessTokenReqPredicate(final Predicate<Throwable> retryGetTokenPredicate)
+builder.setRetryAccessTokenReqPredicate(Predicate<Throwable> retryGetTokenPredicate)
 
 // default number of attempts in case of retryGetTokenPredicate is tested true 
-builder.setAccessTokenReqAttempts(final int accessTokenReqAttempts) 
+builder.setAccessTokenReqAttempts(int accessTokenReqAttempts) 
 
 // predicate to check if retrying in case of an error making the request
 // by default connection timeout or unknown host 
-builder.setRetryReqPredicate(final Predicate<Throwable> retryReqPredicate) 
+builder.setRetryReqPredicate(Predicate<Throwable> retryReqPredicate) 
 
 // default number of attempts in case of setRetryReqPredicate is tested true 
-builder.setReqAttempts(final int reqAttempts) 
+builder.setReqAttempts(int reqAttempts) 
 
 ```
 
-The default request to get the token is
+The default request to get the token is:
 
 ```text
 POST https://{{host}}:{{port}}/token
@@ -1073,19 +1078,19 @@ grant_type=client_credentials
 ```
 
 Since _GetAccessTokenRequest_ is just a function, it can also be customized:
+
 ```java
+GetAccessTokenRequest accessTokenReq = 
+                (context,httpclient) -> { 
+                                          PostReq postReq = ???;
+                                          return httpclient.post
+                                                           .apply(context,postReq);
+                                        };
 
 new ClientCredentialsFlowBuilder(httpOptions,   
                                  "address",
-                                 (context,httpclient) -> { 
-                                                         PostReq postReq = ???;
-                                                         return httpclient.post
-                                                                          .apply(context,
-                                                                                 postReq);
-                                                       }
-                                )
-
-         
+                                 accessTokenReq 
+                                );
 ```
 
 
@@ -1095,34 +1100,46 @@ new ClientCredentialsFlowBuilder(httpOptions,
 You need to get the access and refresh token, making an authentication request. You will typically need a code, a redirect_uri, etc.
 
 ```java
-JsObj inputs = JsObj.of("code",???,"redirect_uri",???);
 
-// (module,inputs) -> http response
+HttpClientOptions options = new HttpClientOptions().setDefaultPort(port)
+                                                   .setDefaultHost("localhost");
+
+
+// authenticateReq :: (module,inputs) -> http response
+// inputs will be passed in when calling the authenticate method
 BiFunction<HttpClientModule, JsObj, Val<JsObj>> authenticateReq = ???;
 
-AuthorizationCodeModule httpClient = 
-                new AuthorizationCodeFlowBuilder(options,
-                                                 "oauth-http-client",
-                                                 new RefreshAccessTokenReq("client_id",
-                                                                           "client_secret"
-                                                ).createFromAuthReq(authenticateReq);
+
+AuthorizationCodeModule httpClient =
+           new AuthorizationCodeFlowBuilder(options,
+                                            "oauth-http-client",
+                                            new RefreshAccessTokenReq("client_id",
+                                                                      "client_secret")
+                                           ).createFromAuthReq(authenticateReq);
 
 vertxRef.deployVerticle(httpClient);
 
-//(access_token, refresh_token)  
+// data needed to do the authentication
+JsObj inputs = JsObj.of("code",???,"redirect_uri",???);
+        
 Val<Tuple2<String, String>> tokens = httpClient.authenticate(inputs);
 
-tokens.get().onSucess(tuple -> { //at
-                                // store refresh token if applied
-                                // use lambdas to make requests
-                                GetReq req = ???;
-                                httpClient.getOauth(req)
-                               }
-                     );
- 
+tokens.get()
+      .onSuccess(tuple -> {
+                            String accessToken = tuple._1;
+                            String refreshToken = tuple._2;
+                                
+                            // after authentication you can make any request
+                            GetReq getReq = ???;
+                            httpClient.getOauth.apply(getReq);
+                                  
+                            PostReq postReq = ???;
+                            httpClient.postOauth.apply(postReq)
+                          }
+                );
 ```
 
-You already have the refresh token. You don't need to make any authorization request.
+You already have the refresh token. You don't need to make any authorization request:
 
 ```java
 String refreshToken = ???;
@@ -1136,18 +1153,20 @@ AuthorizationCodeModule httpClient =
                
 vertxRef.deployVerticle(httpClient);
 
+
 ```
 
-There are implementations of the requests to get the tokens and authenticate your app for Spotify. 
-Go to vertx.effect.httpclient.oauth.Spotify for further details. In any case you can implement any just 
-defining a couple of functions. As shown in the previous section, you can customize everything: 
-retries under certain errors, number of attempts, function to extract the tokens from the authentication request etc.
+There is an implementation of the requests to get the tokens and authenticate your app for Spotify. 
+_Go to vertx.effect.httpclient.oauth.Spotify_ for further details. More implementations will be added 
+little by little. As shown in the previous section, you can customize everything: retries under certain 
+errors, number of attempts, function to extract the tokens from the authentication request etc.
  
 ## <a name="perf"><a/> Performance 
 in progress
 
 ## <a name="requirements"><a/> Requirements
-Java 11 or greater.
+Java 11 or greater
+
 Vertx version 4.0.0-milestone5
 
 ## <a name="installation"><a/> Installation
@@ -1161,8 +1180,9 @@ Vertx version 4.0.0-milestone5
 
 ## <a name="rp"><a/> Related projects
 
-vertx-effect uses the persistent Json from [json-values](https://github.com/imrafaelmerino/json-scala-values)
-[vertx-mongodb-effect](https://github.com/imrafaelmerino/vertx-mongodb-effect) to work with MongoDB using lambdas
+vertx-effect uses the persistent Json from [json-values](https://github.com/imrafaelmerino/json-scala-values).
+[vertx-mongodb-effect](https://github.com/imrafaelmerino/vertx-mongodb-effect) uses vertx-effect to work with 
+MongoDB using lambdas.
 
 ## <a name="release"><a/> Release process
 Every time a tagged commit is pushed into master, a Travis CI build will be triggered automatically and 
