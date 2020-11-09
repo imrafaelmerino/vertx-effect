@@ -52,6 +52,7 @@ public final class Failures {
     public static final int EMPTY_REDIRECT_URL_CODE = 4005;
     public static final int REFRESH_TOKEN_NOT_FOUND_CODE = 4006;
     public static final int CONNECTION_WAS_CLOSED_CODE = 4007;
+    public static final int HTTP_REQUEST_NOT_SENT = 4008;
     public static final int HTTP_METHOD_NOT_IMPLEMENTED_CODE = 4098;
     public static final int DEFAULT_HTTP_EXCEPTION_CODE = 4999;
 
@@ -221,6 +222,12 @@ public final class Failures {
     public static final Function<Throwable, ReplyException> GET_EXCEPTION_STOPPING_VERTICLE =
             exc -> new ReplyException(RECIPIENT_FAILURE,
                                       EXCEPTION_STOPPING_VERTICLE_CODE,
+                                      getMessage(exc)
+            );
+
+    public static final Function<Throwable, ReplyException> GET_EXCEPTION_HTTP_REQUEST_NOT_SENT =
+            exc -> new ReplyException(RECIPIENT_FAILURE,
+                                      HTTP_REQUEST_NOT_SENT,
                                       getMessage(exc)
             );
 

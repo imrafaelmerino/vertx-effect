@@ -6,6 +6,7 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpHeaders;
 import vertx.effect.core.EventPublisher;
 import vertx.effect.exp.Cons;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
@@ -40,7 +42,7 @@ public class VerticleRef<I, O> {
      To undeploy a verticle, its identifier is needed.
      */
     public final Set<String> ids;
-    private static final MultiMap EMPTY_HEADERS = MultiMap.caseInsensitiveMultiMap();
+    private static final Supplier<MultiMap> EMPTY_HEADERS = HttpHeaders::headers;
 
     public VerticleRef(final Vertx vertx,
                        final String address) {
@@ -83,7 +85,7 @@ public class VerticleRef<I, O> {
                                                .onComplete(event -> {
                                                    if (event.succeeded()) {
                                                        EventPublisher.PUBLISHER.receivedResp(address,
-                                                                                             EMPTY_HEADERS
+                                                                                             EMPTY_HEADERS.get()
                                                                                             )
                                                                                .accept(vertx);
                                                    }
