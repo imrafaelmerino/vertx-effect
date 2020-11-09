@@ -1206,7 +1206,8 @@ Java 11 or greater
 Vertx version 4.0.0-milestone5
 
 ## <a name="installation"><a/> Installation
-```
+
+```xml
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
