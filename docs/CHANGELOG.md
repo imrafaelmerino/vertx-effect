@@ -1,11 +1,7 @@
 # VERTX-EFFECT
-## v0.8  ( Mon Nov 09 2020 12:57:59 GMT+0100 (Central European Standard Time) )
+## v0.8  ( Mon Nov 09 2020 22:16:54 GMT+0100 (Central European Standard Time) )
 
-## Breaking changes
-  λc accepts now empty headers
-
-## Bug Fixes
-  - 🐛 bug when λc is deployed and headers are empty
-
-
+## Features
+  - 🎸 upgrade vertx version 4.0.0.CR1
+ 
 
