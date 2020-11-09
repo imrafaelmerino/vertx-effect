@@ -593,52 +593,40 @@ public class VertxRef {
                                                     )
                                     .accept(vertx);
 
-            if (headers.isEmpty()) {
-                ReplyException error = Failures.GET_EMPTY_CONTEXT_EXCEPTION.apply(address);
-                message.reply(Cons.failure(error),
-                              deliveryOpt.apply(headers)
-                             );
-                EventPublisher.PUBLISHER.repliedError(address,
-                                                      error,
-                                                      headers
-                                                     )
-                                        .accept(vertx);
-            }
-            else {
-                fn.apply(headers,
-                         message.body()
-                        )
-                  .onComplete(event -> {
-                      if (event.succeeded()) {
-                          message.reply(event.result(),
-                                        deliveryOpt.apply(headers)
-                                       );
-                          EventPublisher.PUBLISHER.repliedResp(address,
-                                                               event.result(),
-                                                               headers
-                                                              )
-                                                  .accept(vertx);
-                      }
-                      else {
+            fn.apply(headers,
+                     message.body()
+                    )
+              .onComplete(event -> {
+                  if (event.succeeded()) {
+                      message.reply(event.result(),
+                                    deliveryOpt.apply(headers)
+                                   );
+                      EventPublisher.PUBLISHER.repliedResp(address,
+                                                           event.result(),
+                                                           headers
+                                                          )
+                                              .accept(vertx);
+                  }
+                  else {
 
-                          ReplyException error = Failures
-                                  .REPLY_EXCEPTION_PRISM
-                                  .getOptional.apply(event.cause())
-                                              .orElse(Failures.GET_UNKNOWN_ERROR_EXCEPTION.apply(event.cause()));
-                          message.reply(error,
-                                        deliveryOpt.apply(headers)
-                                       );
-                          EventPublisher.PUBLISHER.repliedError(address,
-                                                                error,
-                                                                headers
-                                                               )
-                                                  .accept(vertx);
-                      }
+                      ReplyException error = Failures
+                              .REPLY_EXCEPTION_PRISM
+                              .getOptional.apply(event.cause())
+                                          .orElse(Failures.GET_UNKNOWN_ERROR_EXCEPTION.apply(event.cause()));
+                      message.reply(error,
+                                    deliveryOpt.apply(headers)
+                                   );
+                      EventPublisher.PUBLISHER.repliedError(address,
+                                                            error,
+                                                            headers
+                                                           )
+                                              .accept(vertx);
+                  }
 
 
-                  })
-                  .get();
-            }
+              })
+              .get();
+
         } catch (Exception exc) {
             message.reply(Failures.GET_INTERNAL_ERROR_EXCEPTION.apply(exc),
                           deliveryOpt.apply(headers)

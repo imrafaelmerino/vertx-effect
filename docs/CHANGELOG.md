@@ -1,13 +1,11 @@
 # VERTX-EFFECT
-## v0.6  ( Fri Nov 06 2020 21:54:53 GMT+0100 (Central European Standard Time) )
+## v0.7  ( Mon Nov 09 2020 12:57:59 GMT+0100 (Central European Standard Time) )
 
-## Documentation
-  - ✏️ readme
+## Breaking changes
+  λc accepts now empty headers
 
-## Refactor
-  - 💡 vertx.timer into vertx.delay
-  - 💡 And -> All,  Or -> Any 
-
+## Bug Fixes
+  - 🐛 bug when λc is deployed and headers are empty
 
 
 

@@ -34,7 +34,6 @@ public final class Failures {
     public static final int EXCEPTION_DEPLOYING_MODULE_CODE = 3003;
     public static final int EXCEPTION_DEPLOYING_VERTICLE_CODE = 3004;
     public static final int EXCEPTION_STOPPING_VERTICLE_CODE = 3005;
-    public static final int EMPTY_CONTEXT_CODE = 3006;
 
     /**
      A ReplyException was expected, but another one was received
@@ -154,14 +153,6 @@ public final class Failures {
                         return Optional.empty();
                     },
                     v -> v
-            );
-
-    public static final Function<String, ReplyException> GET_EMPTY_CONTEXT_EXCEPTION =
-            address -> new ReplyException(RECIPIENT_FAILURE,
-                                          EMPTY_CONTEXT_CODE,
-                                          String.format("Verticle listening on %s received empty headers",
-                                                        address
-                                                       )
             );
 
     public static final Function<Throwable, ReplyException> GET_UNKNOWN_ERROR_EXCEPTION =
