@@ -1203,7 +1203,7 @@ errors, number of attempts, function to extract the tokens from the authenticati
 ## <a name="requirements"><a/> Requirements
 Java 11 or greater
 
-Vertx version 4.0.0-milestone5
+Vertx version 4.0.0.CR1 
 
 ## <a name="installation"><a/> Installation
 

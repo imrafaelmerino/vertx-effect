@@ -57,52 +57,83 @@ public abstract class AbstractHttpClientModule extends VertxModule {
             RequestOptions options = HttpReq.toReqOptions.apply(req);
             switch (type) {
                 case 0:
-                    client.get(options,
-                               getHandler(message)
-                              );
+                    client.request(options.setMethod(GET))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(getHandler(message));
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
+
                     break;
                 case 1:
-                    client.post(options,
-                                Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
-                                getHandler(message)
-                               );
+                    client.request(options.setMethod(POST))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
+                                                                getHandler(message)
+                                                               );
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
+
                     break;
                 case 2:
-                    client.put(options,
-                               Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
-                               getHandler(message)
-                              );
+                    client.request(options.setMethod(PUT))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
+                                                                getHandler(message)
+                                                               );
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
                     break;
                 case 3:
-                    client.delete(options,
-                                  getHandler(message)
-                                 );
+                    client.request(options.setMethod(DELETE))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(getHandler(message));
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
                     break;
                 case 4:
-                    client.options(options,
-                                   getHandler(message)
-                                  );
+                    client.request(options.setMethod(OPTIONS))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(getHandler(message));
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
                     break;
                 case 5:
-                    client.head(options,
-                                getHandler(message)
-                               );
+                    client.request(options.setMethod(HEAD))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(getHandler(message));
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
                     break;
                 case 6:
-                    client.send(options.setMethod(TRACE),
-                                getHandler(message)
-                               );
+                    client.request(options.setMethod(TRACE))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(getHandler(message));
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
                     break;
                 case 7:
-                    client.send(options.setMethod(PATCH),
-                                Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
-                                getHandler(message)
-                               );
+                    client.request(options.setMethod(PATCH))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
+                                                                getHandler(message));
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
                     break;
                 case 8:
-                    client.send(options.setMethod(CONNECT),
-                                getHandler(message)
-                               );
+                    client.request(options.setMethod(CONNECT))
+                          .onComplete(event -> {
+                              if (event.succeeded()) event.result()
+                                                          .send(getHandler(message));
+                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                          });
                     break;
                 default:
                     message.reply(GET_HTTP_METHOD_NOT_IMPLEMENTED_EXCEPTION.apply(type)
