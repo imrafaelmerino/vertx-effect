@@ -8,7 +8,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.8)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.8/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.9)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.9/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 - [vertx-effect manifesto](#manifesto)
@@ -628,10 +628,11 @@ public class MyModule extends VertxModule {
 ```
 
 We usually divide modules into four main blocks:
-. The addresses where the module verticles will be listening on.
-. The lambdas that are exposed to the outside world to communicate with the deployed verticles.
-. The deploy method, where the module deploys the verticles.
-. The initialize method, where the module initializes the lambdas.
+
+    . The addresses where the module verticles will be listening on.
+    . The lambdas that are exposed to the outside world to communicate with the deployed verticles.
+    . The deploy method, where the module deploys the verticles.
+    . The initialize method, where the module initializes the lambdas.
 
 In our example, we are using the persistent and immutable Json from json-values.
 The **ask** method returns a lambda to establish bidirectional communication with a verticle. In contrast, the **tell** 
@@ -934,6 +935,17 @@ public class SumJsonStringLength implements λ<Integer, Integer> {
                             );
     }
 }
+          
+                
+(times, delay(ms))  
+ 
+                 (10,0)  ops      (10,100) so     (100,0) ops      (100,100) so      
+spawn             1363.097          0.109          128.641            0.221
+verticles 1       2410.275          1.063          388.151            10.633
+verticles 4       2667.663          0.320          445.398            2.662 
+verticles 8       2667.663          0.214          415.277            1.384
+verticles 16      2891.338          0.108          444.262            0.747
+
 
 ```    
 
@@ -1211,7 +1223,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>0.8</version>
+  <version>0.9</version>
 </dependency>
 ```
 

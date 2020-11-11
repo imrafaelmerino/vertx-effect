@@ -1,8 +1,8 @@
 {
     "app_name": "vertx-effect",
-    "branch" : "release-0.8",
+    "branch" : "release-0.9",
     "repo_url": "",
-    "version_name" : "v0.8",
+    "version_name" : "v0.9",
     "file": "docs/CHANGELOG.md",
     "template": ".gitlog-template.md",
     "sections": [
