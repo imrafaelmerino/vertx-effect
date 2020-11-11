@@ -935,7 +935,8 @@ public class SumJsonStringLength implements λ<Integer, Integer> {
                             );
     }
 }
-          
+
+```    
                 
 (times, delay(ms))  
  
@@ -946,8 +947,6 @@ verticles 4       2667.663          0.320          445.398            2.662
 verticles 8       2667.663          0.214          415.277            1.384
 verticles 16      2891.338          0.108          444.262            0.747
 
-
-```    
 
 ## <a name="httpclient"><a/> Reactive http client 
 vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple as extending the class 
