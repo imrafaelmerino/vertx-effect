@@ -118,13 +118,14 @@ public class ClientCredentialsModuleTest {
     @Test
     public void test_get_success_after_three_retries(VertxTestContext context) {
 
+
+
         server.resetCounter();
 
         server.setStatusCodeRes(counter ->
                                         req -> body -> {
                                             if (counter <= 3) return 401;
                                             else if (counter == 4) return 200;
-                                            else if (counter <= 7) throw new RuntimeException();
                                             else return 200;
                                         });
 
@@ -141,6 +142,10 @@ public class ClientCredentialsModuleTest {
                                 JsStr.of("foooo")
                                );
 
+            }
+            else if (counter <= 7) {
+                req.response().close();
+                return JsObj.empty();
             }
             else return JsObj.of("name",
                                  JsStr.of("Rafael")

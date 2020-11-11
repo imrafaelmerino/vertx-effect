@@ -8,7 +8,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.8)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.8/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.9)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.9/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 - [vertx-effect manifesto](#manifesto)
@@ -628,10 +628,11 @@ public class MyModule extends VertxModule {
 ```
 
 We usually divide modules into four main blocks:
-. The addresses where the module verticles will be listening on.
-. The lambdas that are exposed to the outside world to communicate with the deployed verticles.
-. The deploy method, where the module deploys the verticles.
-. The initialize method, where the module initializes the lambdas.
+
+    . The addresses where the module verticles will be listening on.
+    . The lambdas that are exposed to the outside world to communicate with the deployed verticles.
+    . The deploy method, where the module deploys the verticles.
+    . The initialize method, where the module initializes the lambdas.
 
 In our example, we are using the persistent and immutable Json from json-values.
 The **ask** method returns a lambda to establish bidirectional communication with a verticle. In contrast, the **tell** 
@@ -891,51 +892,6 @@ It takes almost three seconds, 3 microseconds per verticle:
 Benchmark                  Mode  Cnt  Score   Error  Units
 Processes.deploy_undeploy  avgt   10  2.907 ± 0.658   s/op
 ```
-
-In the following example, we are going to explore a scenario where there are times when spawning verticles is faster,
-and there are times when it is slower.
-
-Let's generate a fixed number of Jsons **n**. For every Json, we'll apply a filter, map, and reduce functions to count 
-the length of all the Json values that are strings. We'll aggregate all the results, adding them up. We're going to 
-compare two different approaches. In the first one, the Json generator, and the functions filter, map and reduce 
-are verticles deployed at the beginning of the benchmark. We'll use different number of instances per verticle. The
-second one, using the spawn function, so the json generator, filter, map and reduce are verticles that are deployed on the fly, 
-and undeployed when their computation is done.
-
-In both approaches, the generator is a worker that produces a Json with a specified delay. We'll increase this delay little by little 
-to see how it affects the results.
-    
-```java
-public class SumJsonStringLength implements λ<Integer, Integer> {
-
-    @Override
-    public Val<Integer> apply(final Integer n) {
-        
-        return IntStream.range(0,
-                               n 
-                              )
-                        //generate json with delay -> filter -> map -> reduce
-                        .mapToObj(n -> Cons.of(() -> generator.apply(DELAY)
-                                                              .flatMap(filter.andThen(map)
-                                                                             .andThen(reduce)
-                                                                      )
-                                                              .get()
-                                              )
-                                 )
-                        //add partial results into a seq
-                        .reduce(SeqVal.parallel(),
-                                SeqVal::append,
-                                SeqVal::appendAll
-                               )
-                        //reduce the seq summing all the partial results
-                        .map(list -> list
-                                .map(it -> ((Integer) it))
-                                .reduce(Integer::sum)
-                            );
-    }
-}
-
-```    
 
 ## <a name="httpclient"><a/> Reactive http client 
 vertx-effect implements a reactive HTTP client that exposes a lambda per HTTP method. It's as simple as extending the class 
@@ -1211,7 +1167,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>0.8</version>
+  <version>0.9</version>
 </dependency>
 ```
 

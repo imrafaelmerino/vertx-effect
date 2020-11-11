@@ -1,7 +1,6 @@
 package vertx.effect;
 
 import io.vertx.core.MultiMap;
-import io.vertx.core.http.HttpHeaders;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
@@ -39,7 +38,7 @@ public class TestLambdas {
             return Cons.success(str.length());
         };
 
-        λ<String, Integer> lambda = count.apply(HttpHeaders.headers()
+        λ<String, Integer> lambda = count.apply(MultiMap.caseInsensitiveMultiMap()
                                                         .add("status",
                                                              "happy"
                                                             )
@@ -48,7 +47,8 @@ public class TestLambdas {
         lambda.apply("hi")
               .onSuccess(n -> context.verify(() -> {
                   Assertions.assertEquals(2,
-                                          n);
+                                          n
+                                         );
                   context.completeNow();
               }))
               .get();

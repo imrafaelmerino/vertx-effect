@@ -48,7 +48,8 @@ public class AuthorizationCodeModuleTest {
                                           try {
                                               Thread.sleep(500);
                                           } catch (InterruptedException e) {
-                                              throw new RuntimeException(e);
+                                              req.response().close();
+                                              return JsObj.empty();
                                           }
                                           return JsObj.empty();
                                       }
@@ -100,7 +101,7 @@ public class AuthorizationCodeModuleTest {
     @Test
     public void test_create_from_refresh_token_with_retries(VertxTestContext context) {
         GetReq t = new GetReq().uri("/uri")
-                               .timeout(400,
+                               .timeout(500,
                                         TimeUnit.MILLISECONDS
                                        );
         httpClient.getOauth.apply(t)

@@ -6,7 +6,6 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.http.HttpHeaders;
 import vertx.effect.core.EventPublisher;
 import vertx.effect.exp.Cons;
 
@@ -42,7 +41,7 @@ public class VerticleRef<I, O> {
      To undeploy a verticle, its identifier is needed.
      */
     public final Set<String> ids;
-    private static final Supplier<MultiMap> EMPTY_HEADERS = HttpHeaders::headers;
+    private static final Supplier<MultiMap> EMPTY_HEADERS = MultiMap::caseInsensitiveMultiMap;
 
     public VerticleRef(final Vertx vertx,
                        final String address) {
