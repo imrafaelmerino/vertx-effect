@@ -126,7 +126,6 @@ public class ClientCredentialsModuleTest {
                                         req -> body -> {
                                             if (counter <= 3) return 401;
                                             else if (counter == 4) return 200;
-                                            else if (counter <= 7) throw new RuntimeException();
                                             else return 200;
                                         });
 
@@ -144,6 +143,10 @@ public class ClientCredentialsModuleTest {
                                );
 
             }
+            else if (counter <= 7) {
+                req.response().close();
+                return JsObj.empty();
+            }
             else return JsObj.of("name",
                                  JsStr.of("Rafael")
                                 );
@@ -155,7 +158,7 @@ public class ClientCredentialsModuleTest {
                                                               .timeout(300,
                                                                        TimeUnit.MILLISECONDS
                                                                       ))
-                                           .retryIf(r->HttpResp.STATUS_CODE_LENS.get.apply(r),3),
+                                           .retry(3),
                         context
                        );
 

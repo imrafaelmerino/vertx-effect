@@ -48,7 +48,8 @@ public class AuthorizationCodeModuleTest {
                                           try {
                                               Thread.sleep(500);
                                           } catch (InterruptedException e) {
-                                              throw new RuntimeException(e);
+                                              req.response().close();
+                                              return JsObj.empty();
                                           }
                                           return JsObj.empty();
                                       }
