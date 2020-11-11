@@ -3,7 +3,6 @@ package vertx.effect.patterns.useraccount;
 import io.vavr.Tuple2;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpHeaders;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jsonvalues.JsInt;
@@ -86,7 +85,7 @@ public class UserAccountModuleTests {
 
 
         UserAccountModule.isValid
-                .apply(HttpHeaders.headers()
+                .apply(MultiMap.caseInsensitiveMultiMap()
                                .add("email",
                                     user.getStr("email")
                                    ),

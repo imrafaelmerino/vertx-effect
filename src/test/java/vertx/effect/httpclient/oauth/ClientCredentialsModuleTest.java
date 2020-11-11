@@ -118,6 +118,8 @@ public class ClientCredentialsModuleTest {
     @Test
     public void test_get_success_after_three_retries(VertxTestContext context) {
 
+
+
         server.resetCounter();
 
         server.setStatusCodeRes(counter ->
@@ -153,7 +155,7 @@ public class ClientCredentialsModuleTest {
                                                               .timeout(300,
                                                                        TimeUnit.MILLISECONDS
                                                                       ))
-                                           .retry(3),
+                                           .retryIf(r->HttpResp.STATUS_CODE_LENS.get.apply(r),3),
                         context
                        );
 
