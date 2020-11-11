@@ -937,15 +937,34 @@ public class SumJsonStringLength implements λ<Integer, Integer> {
 }
 
 ```    
-                
-(times, delay(ms))  
- 
-                 (10,0)  ops      (10,100) so     (100,0) ops      (100,100) so      
-spawn             1363.097          0.109          128.641            0.221
-verticles 1       2410.275          1.063          388.151            10.633
-verticles 4       2667.663          0.320          445.398            2.662 
-verticles 8       2667.663          0.214          415.277            1.384
-verticles 16      2891.338          0.108          444.262            0.747
+Please find below the results, where ops=operations per seconds and so=seconds per operation.
+
+
+
+**n = 10**               **delay=0**       **delay=100ms**
+                   
+**spawn**                  1363 ops           0.109 so
+            
+**verticles 1  ins**       2410 ops           0.630 so   
+          
+**verticles 4  ins**       2667 ops           0.320 so   
+        
+**verticles 8  ins**       2667 ops           0.214 so   
+         
+**verticles 16 ins**       2891 ops           0.108 so   
+         
+
+**n=100**             **delay=0**          **delay=100ms**     
+                  
+**spawn**                128 ops            0.221 so
+
+**verticles 1 ins**      388 ops            10.633 so
+
+**verticles 4 ins**      445 ops            2.662 so
+
+**verticles 8 ins**      415 ops            1.384 so
+
+**verticles 16 ins**     444 ops            0.747 so
 
 
 ## <a name="httpclient"><a/> Reactive http client 
