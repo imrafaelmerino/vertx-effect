@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
     <version>0.8</version>
     <name>vertx-effect</name>
-    <description>When actors meet Functional Programming</description>
+    <description>Where actors meet Functional Programming</description>
     <url>https://github.com/imrafaelmerino/vertx-effect</url>
     <licenses>
         <license>
