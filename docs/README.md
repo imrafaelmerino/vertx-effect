@@ -142,7 +142,7 @@ public class MyModule extends VertxModule {
 **A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them**. 
 A lambda is just a function that takes an input and produces an output. In the above example, _MyModule_ deploys 
 five verticles. It's worth mentioning how the verticle _ValidateAndMap_ is defined using composition and the expressions 
-_JsObjVal_ and _JsArrayVal_. It shows the essence of the goal of vertx-effect. Later on, we'll see more expressions like 
+_JsObjVal_ and _JsArrayVal_. It shows the essence and the goal of vertx-effect. Later on, we'll see more expressions like 
 **Cons**, **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, etc.
 
 _ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, _ValidateAndMap_ computes the output 
