@@ -87,7 +87,8 @@ public class MyHttpServer {
                           final int n,
                           final String bodyStr) {
         System.out.println("server req #" + n);
-        System.out.println("req method" + req.method().name());
+        System.out.println("req method " + req.method()
+                                              .name());
 
         Integer statusCode = statusCodeRes.apply(n)
                                           .apply(req)
