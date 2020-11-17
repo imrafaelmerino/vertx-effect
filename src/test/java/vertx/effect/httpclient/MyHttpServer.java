@@ -87,11 +87,7 @@ public class MyHttpServer {
                           final int n,
                           final String bodyStr) {
         System.out.println("server req #" + n);
-        req.response()
-           .putHeader("Content-Type",
-                      "application/json"
-                     );
-
+        System.out.println("req method" + req.method().name());
 
         Integer statusCode = statusCodeRes.apply(n)
                                           .apply(req)
@@ -102,6 +98,9 @@ public class MyHttpServer {
                                  .apply(bodyStr)
                                  .toPrettyString();
         req.response()
+           .putHeader("Content-Type",
+                      "application/json"
+                     )
            .setStatusCode(statusCode)
            .end(response);
     }
