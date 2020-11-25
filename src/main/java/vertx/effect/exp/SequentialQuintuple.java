@@ -31,15 +31,6 @@ final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> 
         this._5 = _5;
     }
 
-
-    @Override
-    public <P> Val<P> map(final Function<Tuple5<A, B, C, D, E>, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
-
     @Override
     public Val<Tuple5<A, B, C, D, E>> retry(final int attempts) {
         if (attempts < 1)

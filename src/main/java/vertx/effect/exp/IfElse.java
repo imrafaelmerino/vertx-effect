@@ -45,13 +45,6 @@ public final class IfElse<O> extends AbstractVal<O> {
         });
     }
 
-    @Override
-    public <P> Val<P> map(final Function<O, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return new IfElse<P>(predicate).alternative(alternative.map(fn))
-                                       .consequence(consequence.map(fn));
-    }
 
     @Override
     public Val<O> retry(final int attempts) {

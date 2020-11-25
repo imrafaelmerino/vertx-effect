@@ -44,15 +44,7 @@ public final class Cons<O> extends AbstractVal<O> {
         return futureSupplier.get();
     }
 
-    @Override
-    public <P> Val<P> map(final Function<O, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> futureSupplier.get()
-                                           .map(fn)
 
-                      );
-    }
 
     @Override
     public Val<O> retry(final int attempts) {

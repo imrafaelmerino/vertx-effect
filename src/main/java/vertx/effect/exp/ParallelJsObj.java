@@ -84,15 +84,6 @@ final class ParallelJsObj extends JsObjVal {
                               });
     }
 
-
-    @Override
-    public <P> Val<P> map(final Function<JsObj, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
-
     @Override
     public Val<JsObj> retry(final int attempts) {
         if (attempts < 1)

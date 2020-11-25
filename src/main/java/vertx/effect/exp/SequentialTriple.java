@@ -26,13 +26,6 @@ public final class SequentialTriple<A, B, C> extends Triple<A, B, C> {
         this._3 = _3;
     }
 
-    @Override
-    public <P> Val<P> map(final Function<Tuple3<A, B, C>, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
 
     @Override
     public Val<Tuple3<A, B, C>> retry(final int attempts) {

@@ -83,13 +83,6 @@ final class ParallelJsArray extends JsArrayVal {
       return Functions.race(seq);
     }
 
-    @Override
-    public <P> Val<P> map(final Function<JsArray, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
 
     @Override
     public Val<JsArray> retry(final int attempts) {

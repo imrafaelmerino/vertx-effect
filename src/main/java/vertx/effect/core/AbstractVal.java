@@ -3,9 +3,10 @@ package vertx.effect.core;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import vertx.effect.exp.Cons;
 import vertx.effect.Val;
+import vertx.effect.exp.Cons;
 import vertx.effect.λ;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -18,9 +19,9 @@ public abstract class AbstractVal<O> implements Val<O> {
 
     @Override
     public Val<O> recover(final Function<Throwable, O> lambda) {
-        if(lambda==null)
+        if (lambda == null)
             return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
-        
+
         return Cons.of(() -> get().compose(Future::succeededFuture,
                                            e -> Future.succeededFuture(lambda.apply(e))
                                           )
@@ -28,26 +29,36 @@ public abstract class AbstractVal<O> implements Val<O> {
     }
 
     @Override
+    public <P> Val<P> map(final Function<O, P> fn) {
+        if (fn == null)
+            return Cons.failure(new NullPointerException("fn is null"));
+        return Cons.of(() -> get()
+                               .map(fn)
+
+                      );
+    }
+
+    @Override
     public Val<O> recoverWith(final λ<Throwable, O> lambda) {
-        if(lambda==null)
+        if (lambda == null)
             return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
         return Cons.of(() -> get().compose(Future::succeededFuture,
                                            e -> lambda.apply(e)
-                                                  .get()
+                                                      .get()
                                           )
                       );
     }
 
     @Override
     public Val<O> fallbackTo(final λ<Throwable, O> lambda) {
-        if(lambda==null)
+        if (lambda == null)
             return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
         return Cons.of(() -> get().compose(Future::succeededFuture,
                                            e -> lambda.apply(e)
-                                                  .get()
-                                                  .compose(Future::succeededFuture,
-                                                           e1 -> Future.failedFuture(e)
-                                                          )
+                                                      .get()
+                                                      .compose(Future::succeededFuture,
+                                                               e1 -> Future.failedFuture(e)
+                                                              )
                                           )
                       );
 
@@ -55,16 +66,16 @@ public abstract class AbstractVal<O> implements Val<O> {
 
     @Override
     public <Q> Val<Q> flatMap(final λ<O, Q> lambda) {
-        if(lambda==null)
+        if (lambda == null)
             return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
         return Cons.of(() -> get().flatMap(o -> lambda.apply(o)
-                                                  .get())
+                                                      .get())
                       );
     }
 
     @Override
     public Val<O> onSuccess(final Consumer<O> successConsumer) {
-        if(successConsumer==null)
+        if (successConsumer == null)
             return Cons.failure(new NullPointerException(SUCCESS_CONSUMER_IS_NULL));
         return Cons.of(() -> get().onSuccess(successConsumer::accept));
     }
@@ -72,9 +83,9 @@ public abstract class AbstractVal<O> implements Val<O> {
     @Override
     public Val<O> onComplete(final Consumer<O> successConsumer,
                              final Consumer<Throwable> failureConsumer) {
-        if(successConsumer==null)
+        if (successConsumer == null)
             return Cons.failure(new NullPointerException(SUCCESS_CONSUMER_IS_NULL));
-        if(failureConsumer==null)
+        if (failureConsumer == null)
             return Cons.failure(new NullPointerException("failureConsumer is null"));
         return Cons.of(() -> get().onComplete(event -> {
                            if (event.succeeded()) successConsumer.accept(event.result());
@@ -86,9 +97,9 @@ public abstract class AbstractVal<O> implements Val<O> {
     @Override
     public <U> Val<U> flatMap(final λ<O, U> successMapper,
                               final λ<Throwable, U> failureMapper) {
-        if(successMapper==null)
+        if (successMapper == null)
             return Cons.failure(new NullPointerException("successMapper is null"));
-        if(failureMapper==null)
+        if (failureMapper == null)
             return Cons.failure(new NullPointerException("failureMapper is null"));
         return Cons.of(() -> get().compose(result -> successMapper.apply(result)
                                                                   .get(),
@@ -101,7 +112,7 @@ public abstract class AbstractVal<O> implements Val<O> {
 
     @Override
     public Val<O> onComplete(final Handler<AsyncResult<O>> handler) {
-        if(handler==null)
+        if (handler == null)
             return Cons.failure(new NullPointerException("handler is null"));
         return Cons.of(() -> get().onComplete(handler));
 

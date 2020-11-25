@@ -329,12 +329,6 @@ public final class Cond<O> extends AbstractVal<O> {
         );
     }
 
-    @Override
-    public <P> Val<P> map(final Function<O, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
 
 
     @Override

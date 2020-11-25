@@ -24,14 +24,6 @@ final class ParallelPair<A, B> extends Pair<A, B> {
         this._2 = requireNonNull(_2);
     }
 
-
-    @Override
-    public <P> Val<P> map(final Function<Tuple2<A, B>, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
     @Override
     public Val<Tuple2<A, B>> retry(final int attempts) {
         if (attempts < 1)

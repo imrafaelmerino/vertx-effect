@@ -40,13 +40,6 @@ public abstract class SeqVal<O> extends AbstractVal<List<O>> {
         this.seq = seq;
     }
 
-    @Override
-    public <P> Val<P> map(final Function<List<O>, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
     @SuppressWarnings("unchecked")
     public Val<O> head() {
         return (Val<O>) seq.head();

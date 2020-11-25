@@ -23,13 +23,6 @@ final class ParallelAll extends All {
     private final List<Val<Boolean>> exps;
 
     @Override
-    public <P> Val<P> map(final Function<Boolean, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
-    @Override
     public Val<Boolean> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));

@@ -27,13 +27,6 @@ class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
         this._4 = _4;
     }
 
-    @Override
-    public <P> Val<P> map(final Function<Tuple4<A, B, C, D>, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
 
     @Override
     public Val<Tuple4<A, B, C, D>> retry(final int attempts) {

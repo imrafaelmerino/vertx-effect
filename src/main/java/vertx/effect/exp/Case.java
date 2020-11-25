@@ -617,11 +617,6 @@ public final class Case<I, O> extends AbstractVal<O> {
         return this;
     }
 
-    @Override
-    public <P> Val<P> map(final Function<O, P> fn) {
-        return cond.map(fn);
-    }
-
 
     @Override
     public Val<O> retry(final int attempts) {

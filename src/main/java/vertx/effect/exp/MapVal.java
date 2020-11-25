@@ -16,12 +16,6 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
     protected io.vavr.collection.Map<String, Val<? extends O>> bindings = LinkedHashMap.empty();
 
 
-    @Override
-    public <P> Val<P> map(final Function<io.vavr.collection.Map<String, O>, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
 
     public boolean isEmpty() {
         return bindings.isEmpty();
