@@ -41,7 +41,7 @@ public class MyHttpServer {
     }
 
     public Future<io.vertx.core.http.HttpServer> start() {
-        return vertx.createHttpServer(new HttpServerOptions())
+        return vertx.createHttpServer(new HttpServerOptions().setLogActivity(true))
                     .requestHandler(req -> {
                                         String method = req.method()
                                                            .name();
