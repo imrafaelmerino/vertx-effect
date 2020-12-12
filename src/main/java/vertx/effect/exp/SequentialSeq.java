@@ -85,10 +85,12 @@ class SequentialSeq<O> extends SeqVal<O> {
 
     }
 
+    @Override
     public SeqVal<O> append(final Val<? extends O> exp) {
         return new SequentialSeq<>(seq.append(requireNonNull(exp)));
     }
 
+    @Override
     public SeqVal<O> prepend(final Val<? extends O> exp) {
         return new SequentialSeq<>(seq.prepend(requireNonNull(exp)));
     }
@@ -99,6 +101,7 @@ class SequentialSeq<O> extends SeqVal<O> {
 
     }
 
+    @Override
     public SeqVal<O> tail() {
         return new SequentialSeq<>(seq.tail());
     }

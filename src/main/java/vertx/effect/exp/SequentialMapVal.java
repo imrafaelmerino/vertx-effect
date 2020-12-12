@@ -39,6 +39,7 @@ final class SequentialMapVal<O> extends MapVal<O> {
      @param exp the given future
      @return a new JsObjFuture
      */
+    @Override
     public MapVal<O> set(final String key,
                          final Val<? extends O> exp
                         ) {

@@ -4,12 +4,8 @@ import io.vavr.Tuple4;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.Val;
-
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
-
-
 
 class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
 

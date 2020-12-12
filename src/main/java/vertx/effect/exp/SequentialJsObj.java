@@ -9,7 +9,6 @@ import jsonvalues.JsValue;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
@@ -56,7 +55,6 @@ final class SequentialJsObj extends JsObjVal {
      @return a Future of a json object
      */
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public Future<JsObj> get() {
         Set<String>   keySet = bindings.keySet();
         Future<JsObj> result = Future.succeededFuture(JsObj.empty());

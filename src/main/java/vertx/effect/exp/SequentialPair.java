@@ -3,9 +3,7 @@ package vertx.effect.exp;
 import io.vavr.Tuple2;
 import io.vertx.core.Future;
 import vertx.effect.Val;
-
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
@@ -21,8 +19,6 @@ final class SequentialPair<A, B> extends Pair<A, B> {
         this._1 = requireNonNull(_1);
         this._2 = requireNonNull(_2);
     }
-
-
 
 
     @Override

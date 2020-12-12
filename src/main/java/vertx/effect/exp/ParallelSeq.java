@@ -88,10 +88,12 @@ class ParallelSeq<O> extends SeqVal<O> {
 
     }
 
+    @Override
     public SeqVal<O> append(final Val<? extends O> exp) {
         return new ParallelSeq<>(seq.append(requireNonNull(exp)));
     }
 
+    @Override
     public SeqVal<O> prepend(final Val<? extends O> exp) {
         return new ParallelSeq<>(seq.prepend(requireNonNull(exp)));
     }
@@ -101,6 +103,7 @@ class ParallelSeq<O> extends SeqVal<O> {
         return Functions.race(seq);
     }
 
+    @Override
     public SeqVal<O> tail() {
         return new ParallelSeq<>(seq.tail());
     }

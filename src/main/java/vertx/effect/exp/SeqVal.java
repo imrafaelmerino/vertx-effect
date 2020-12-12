@@ -4,8 +4,6 @@ import io.vavr.collection.List;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
 
-import java.util.function.Function;
-
 import static java.util.Objects.requireNonNull;
 
 public abstract class SeqVal<O> extends AbstractVal<List<O>> {

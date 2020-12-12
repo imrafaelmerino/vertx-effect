@@ -4,12 +4,9 @@ import io.vavr.Tuple3;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.Val;
-
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.util.Objects.requireNonNull;
 
 
 public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
