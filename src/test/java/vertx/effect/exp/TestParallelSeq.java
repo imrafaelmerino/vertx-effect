@@ -44,7 +44,7 @@ public class TestParallelSeq {
     public void test_head_returns_the_first_element(VertxTestContext context) {
 
 
-        Val<String> val = SeqVal.<String>parallel()
+        Val<String> val = ListExp.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .head();
@@ -62,7 +62,7 @@ public class TestParallelSeq {
     public void test_head_returns_the_tail(VertxTestContext context) {
 
 
-        SeqVal<String> val = SeqVal.<String>parallel()
+        ListExp<String> val = ListExp.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .append(Cons.success("c"))
@@ -97,7 +97,7 @@ public class TestParallelSeq {
                                  "b"
                 );
 
-        Val<List<String>> val = SeqVal.<String>parallel()
+        Val<List<String>> val = ListExp.<String>parallel()
                 .append(b.get())
                 .prepend(a.get())
                 .retry(ATTEMPTS);
@@ -134,7 +134,7 @@ public class TestParallelSeq {
                 (error, n) -> vertxRef.delay(100,
                                              MILLISECONDS
                                             );
-        Val<List<String>> val = SeqVal.<String>parallel()
+        Val<List<String>> val = ListExp.<String>parallel()
                 .append(b.get())
                 .prepend(a.get())
                 .retry(ATTEMPTS,
@@ -157,7 +157,7 @@ public class TestParallelSeq {
     @Test
     public void test_map(VertxTestContext context) {
 
-        Val<List<String>> val = SeqVal.<String>parallel()
+        Val<List<String>> val = ListExp.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .map(it -> it.map(String::toUpperCase));
@@ -178,7 +178,7 @@ public class TestParallelSeq {
     @Test
     public void test_seqval_exp_flatmap_failure(VertxTestContext context) {
 
-        Val<List<String>> val = SeqVal.<String>parallel()
+        Val<List<String>> val = ListExp.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .flatMap(s -> Cons.failure(new RuntimeException()));
@@ -198,13 +198,13 @@ public class TestParallelSeq {
                                                  i -> new IllegalArgumentException(),
                                                  "hi"
         );
-        SeqVal.parallel(hi.get(),
-                        hi.get()
-                       )
-              .retryIf(it -> it instanceof IllegalArgumentException,
+        ListExp.parallel(hi.get(),
+                         hi.get()
+                        )
+               .retryIf(it -> it instanceof IllegalArgumentException,
                        3
                       )
-              .onSuccess(it -> {
+               .onSuccess(it -> {
                   context.verify(() -> {
                       Assertions.assertEquals(List.empty()
                                                   .append("hi")
@@ -214,7 +214,7 @@ public class TestParallelSeq {
                       context.completeNow();
                   });
               })
-              .get();
+               .get();
     }
 
     @Test
@@ -223,16 +223,16 @@ public class TestParallelSeq {
                                                  i -> new IllegalArgumentException(),
                                                  "hi"
         );
-        SeqVal.parallel(hi.get(),
-                        hi.get()
-                       )
-              .retryIf(it -> it instanceof IllegalArgumentException,
+        ListExp.parallel(hi.get(),
+                         hi.get()
+                        )
+               .retryIf(it -> it instanceof IllegalArgumentException,
                        3,
                        (e, i) -> vertxRef.delay(100,
                                                 MILLISECONDS
                                                )
                       )
-              .onSuccess(it -> {
+               .onSuccess(it -> {
                   context.verify(() -> {
                       Assertions.assertEquals(List.empty()
                                                   .append("hi")
@@ -242,12 +242,12 @@ public class TestParallelSeq {
                       context.completeNow();
                   });
               })
-              .get();
+               .get();
     }
 
     @Test
     public void test_quintuple_exp_flatmap_success(VertxTestContext context) {
-        Val<List<String>> val = SeqVal.<String>parallel()
+        Val<List<String>> val = ListExp.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
                 .flatMap(list -> Cons.success(list.map(String::toUpperCase)));
@@ -266,13 +266,13 @@ public class TestParallelSeq {
 
     @Test
     public void test_append_all(VertxTestContext context) {
-        SeqVal<String> a = SeqVal.parallel(Cons.success("a"),
-                                           Cons.success("b")
-                                          );
+        ListExp<String> a = ListExp.parallel(Cons.success("a"),
+                                             Cons.success("b")
+                                            );
 
-        SeqVal<String> b = SeqVal.parallel(Cons.success("c"),
-                                           Cons.success("d")
-                                          );
+        ListExp<String> b = ListExp.parallel(Cons.success("c"),
+                                             Cons.success("d")
+                                            );
 
         a.appendAll(b)
          .onSuccess(list -> context.verify(() -> {
@@ -292,11 +292,11 @@ public class TestParallelSeq {
     @Test
     public void test_size(VertxTestContext context) {
         Assertions.assertEquals(3,
-                                SeqVal.parallel(Cons.success(1),
-                                                Cons.success(2),
-                                                Cons.success(3)
-                                               )
-                                      .size()
+                                ListExp.parallel(Cons.success(1),
+                                                 Cons.success(2),
+                                                 Cons.success(3)
+                                                )
+                                       .size()
                                );
         context.completeNow();
     }
@@ -304,8 +304,8 @@ public class TestParallelSeq {
     @Test
     public void test_is_empty(VertxTestContext context) {
 
-        Assertions.assertTrue(SeqVal.parallel()
-                                    .isEmpty());
+        Assertions.assertTrue(ListExp.parallel()
+                                     .isEmpty());
         context.completeNow();
     }
 
@@ -313,16 +313,16 @@ public class TestParallelSeq {
     public void test_race(final VertxTestContext context) {
         Val<String> a = Cons.of(() -> Future.succeededFuture("a"));
         Val<String> b = Cons.of(() -> Future.succeededFuture("b"));
-        SeqVal.parallel(a,
-                        b)
-              .race()
-              .onSuccess(it -> context.verify(() -> {
+        ListExp.parallel(a,
+                         b)
+               .race()
+               .onSuccess(it -> context.verify(() -> {
                   Assertions.assertEquals("a",
                                           it
                                          );
                   context.completeNow();
               }))
-              .get();
+               .get();
     }
 
 }

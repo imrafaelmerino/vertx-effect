@@ -11,10 +11,10 @@ import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
-class ParallelSeq<O> extends SeqVal<O> {
+class ParallelSeq<O> extends ListExp<O> {
 
     @SuppressWarnings("rawtypes")
-    protected static final SeqVal EMPTY = new ParallelSeq<>(List.empty());
+    protected static final ListExp EMPTY = new ParallelSeq<>(List.empty());
 
     ParallelSeq(final List<Val<? extends O>> seq) {
         super(seq);
@@ -89,12 +89,12 @@ class ParallelSeq<O> extends SeqVal<O> {
     }
 
     @Override
-    public SeqVal<O> append(final Val<? extends O> exp) {
+    public ListExp<O> append(final Val<? extends O> exp) {
         return new ParallelSeq<>(seq.append(requireNonNull(exp)));
     }
 
     @Override
-    public SeqVal<O> prepend(final Val<? extends O> exp) {
+    public ListExp<O> prepend(final Val<? extends O> exp) {
         return new ParallelSeq<>(seq.prepend(requireNonNull(exp)));
     }
 
@@ -104,7 +104,7 @@ class ParallelSeq<O> extends SeqVal<O> {
     }
 
     @Override
-    public SeqVal<O> tail() {
+    public ListExp<O> tail() {
         return new ParallelSeq<>(seq.tail());
     }
 

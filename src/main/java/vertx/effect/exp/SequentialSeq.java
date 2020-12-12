@@ -3,19 +3,17 @@ package vertx.effect.exp;
 import io.vavr.collection.List;
 import io.vertx.core.Future;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-class SequentialSeq<O> extends SeqVal<O> {
+class SequentialSeq<O> extends ListExp<O> {
 
     @SuppressWarnings("rawtypes")
-    protected static final SeqVal EMPTY = new SequentialSeq<>(List.empty());
+    protected static final ListExp EMPTY = new SequentialSeq<>(List.empty());
 
      SequentialSeq(final List<Val<? extends O>> seq) {
        super(seq);
@@ -86,12 +84,12 @@ class SequentialSeq<O> extends SeqVal<O> {
     }
 
     @Override
-    public SeqVal<O> append(final Val<? extends O> exp) {
+    public ListExp<O> append(final Val<? extends O> exp) {
         return new SequentialSeq<>(seq.append(requireNonNull(exp)));
     }
 
     @Override
-    public SeqVal<O> prepend(final Val<? extends O> exp) {
+    public ListExp<O> prepend(final Val<? extends O> exp) {
         return new SequentialSeq<>(seq.prepend(requireNonNull(exp)));
     }
 
@@ -102,7 +100,7 @@ class SequentialSeq<O> extends SeqVal<O> {
     }
 
     @Override
-    public SeqVal<O> tail() {
+    public ListExp<O> tail() {
         return new SequentialSeq<>(seq.tail());
     }
 

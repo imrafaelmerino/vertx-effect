@@ -7,7 +7,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import vertx.effect.exp.MapExp;
 import vertx.effect.exp.Pair;
-import vertx.effect.exp.SeqVal;
+import vertx.effect.exp.ListExp;
 
 import java.util.function.Consumer;
 
@@ -23,7 +23,7 @@ public abstract class VertxModule extends AbstractVerticle {
 
     private static final DeploymentOptions DEFAULT_DEPLOYMENT_OPTIONS = new DeploymentOptions();
     protected final DeploymentOptions deploymentOptions;
-    private SeqVal<String> idValSeq;
+    private ListExp<String> idValSeq;
     private MapExp<VerticleRef<?, ?>> refValMap;
     private io.vavr.collection.Map<String, VerticleRef<?, ?>> refMap;
 
@@ -33,7 +33,7 @@ public abstract class VertxModule extends AbstractVerticle {
                         final DeploymentOptions deploymentOptions) {
         this.refValMap = requireNonNull(refExp);
         this.deploymentOptions = requireNonNull(deploymentOptions);
-        idValSeq = SeqVal.sequential();
+        idValSeq = ListExp.sequential();
     }
 
 
@@ -47,7 +47,7 @@ public abstract class VertxModule extends AbstractVerticle {
         this(MapExp.sequential(),
              requireNonNull(options)
             );
-        idValSeq = SeqVal.sequential();
+        idValSeq = ListExp.sequential();
     }
 
     /**
@@ -64,7 +64,7 @@ public abstract class VertxModule extends AbstractVerticle {
         this(MapExp.sequential(),
              DEFAULT_DEPLOYMENT_OPTIONS
             );
-        idValSeq = SeqVal.sequential();
+        idValSeq = ListExp.sequential();
 
     }
 
