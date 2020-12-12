@@ -31,4 +31,23 @@ class Functions {
                                                      );
                        });
     }
+
+    public static <O> Val<O> raceFirst(List<Val<? extends O>> seq) {
+        return Cons.of(() ->
+                       {
+                           java.util.List futures = seq.map(Supplier::get)
+                                                       .toJavaList();
+                           return CompositeFuture.any(futures)
+                                                 .map(cf -> {
+                                                          int index = IntStream.range(0,
+                                                                                      futures.size()
+                                                                                     )
+                                                                               .filter(cf::isComplete)
+                                                                               .findFirst()
+                                                                               .getAsInt();//TODO
+                                                          return cf.resultAt(index);
+                                                      }
+                                                     );
+                       });
+    }
 }

@@ -15,8 +15,8 @@ class SequentialSeq<O> extends ListExp<O> {
     @SuppressWarnings("rawtypes")
     protected static final ListExp EMPTY = new SequentialSeq<>(List.empty());
 
-     SequentialSeq(final List<Val<? extends O>> seq) {
-       super(seq);
+    SequentialSeq(final List<Val<? extends O>> seq) {
+        super(seq);
     }
 
 
@@ -96,16 +96,17 @@ class SequentialSeq<O> extends ListExp<O> {
     @Override
     public Val<O> race() {
         return Cons.failure(new OperationNotSupportedException("race doesn't make any sense in a sequential execution"));
+    }
 
+    @Override
+    public Val<O> raceFirst() {
+        return Cons.failure(new OperationNotSupportedException("raceFirst doesn't make any sense in a sequential execution"));
     }
 
     @Override
     public ListExp<O> tail() {
         return new SequentialSeq<>(seq.tail());
     }
-
-
-
 
 
 }

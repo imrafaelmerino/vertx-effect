@@ -72,4 +72,6 @@ public abstract class ListExp<O> extends AbstractVal<List<O>> {
 
     public abstract Val<O> race();
 
+    public abstract Val<O> raceFirst();
+
 }
