@@ -47,8 +47,6 @@ public interface Val<O> extends Supplier<Future<O>> {
     Val<O> retry(final int attempts);
 
 
-
-
     /**
      returns a new value tha will retry its execution after the an action.
 
@@ -135,5 +133,7 @@ public interface Val<O> extends Supplier<Future<O>> {
     Val<O> onComplete(final Handler<AsyncResult<O>> handler);
 
 
+    Val<O> retryUntil(final Predicate<O> predicate,
+                      final int attempts);
 
 }

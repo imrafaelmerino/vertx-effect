@@ -34,6 +34,7 @@ public final class Failures {
     public static final int EXCEPTION_DEPLOYING_MODULE_CODE = 3003;
     public static final int EXCEPTION_DEPLOYING_VERTICLE_CODE = 3004;
     public static final int EXCEPTION_STOPPING_VERTICLE_CODE = 3005;
+    public static final int RETRIES_EXHAUSTED_CODE = 3006;
 
     /**
      A ReplyException was expected, but another one was received

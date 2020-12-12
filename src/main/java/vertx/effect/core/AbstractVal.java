@@ -3,17 +3,25 @@ package vertx.effect.core;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.ReplyException;
+import io.vertx.core.eventbus.ReplyFailure;
+import vertx.effect.Failures;
 import vertx.effect.Val;
 import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 
 public abstract class AbstractVal<O> implements Val<O> {
 
-
+    private static final ReplyException RETRIES_EXHAUSTED =
+            new ReplyException(ReplyFailure.RECIPIENT_FAILURE,
+                               Failures.RETRIES_EXHAUSTED_CODE,
+                               "retryUntil didn't get the expected result after attempts."
+            );
     private static final String LAMBDA_IS_NULL = "λ is null";
     private static final String SUCCESS_CONSUMER_IS_NULL = "successConsumer is null";
 
@@ -118,5 +126,27 @@ public abstract class AbstractVal<O> implements Val<O> {
 
     }
 
+    @Override
+    public Val<O> retryUntil(final Predicate<O> predicate,
+                             final int attempts) {
+        if (attempts < 0) return Cons.failure(RETRIES_EXHAUSTED);
+
+
+        return flatMap(output -> {
+                           if (predicate.test(output)) return Cons.success(output);
+                           return retryUntil(predicate,
+                                             attempts - 1
+                                            );
+                       },
+                       failure -> {
+                           if (Failures.or(Failures.REPLY_EXCEPTION_PRISM)
+                                       .test(failure))
+                               return Cons.failure(failure);
+                           return attempts > 0 ? retryUntil(predicate,
+                                                            attempts - 1
+                                                           ) : Cons.failure(RETRIES_EXHAUSTED);
+                       }
+                      );
+    }
 
 }
