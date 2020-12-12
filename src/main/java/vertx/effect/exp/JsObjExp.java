@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-public abstract class JsObjVal extends AbstractVal<JsObj> {
+public abstract class JsObjExp extends AbstractVal<JsObj> {
 
     /**
      static factory method to create a JsObjFuture of one mapping
@@ -22,7 +22,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @param val the mapping associated to the key
      @return a JsObjFuture
      */
-    public static JsObjVal parallel(final String key,
+    public static JsObjExp parallel(final String key,
                                     final Val<? extends JsValue> val
                                    ) {
         ParallelJsObj obj = new ParallelJsObj();
@@ -42,7 +42,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @param val2 the mapping associated to the second key
      @return a JsObjFuture
      */
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2
@@ -71,7 +71,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -109,7 +109,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -155,7 +155,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -209,7 +209,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -271,7 +271,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -341,7 +341,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -420,7 +420,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -508,7 +508,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -604,7 +604,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -706,7 +706,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -816,7 +816,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -934,7 +934,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -1060,7 +1060,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal parallel(final String key1,
+    public static JsObjExp parallel(final String key1,
                                     final Val<? extends JsValue> val1,
                                     final String key2,
                                     final Val<? extends JsValue> val2,
@@ -1192,7 +1192,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1307,7 +1307,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1415,7 +1415,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1516,7 +1516,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1610,7 +1610,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1697,7 +1697,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1777,7 +1777,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1851,7 +1851,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1917,7 +1917,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -1975,7 +1975,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -2026,7 +2026,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -2070,7 +2070,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -2107,7 +2107,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2,
@@ -2136,7 +2136,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @param val2 the mapping associated to the second key
      @return a JsObjFuture
      */
-    public static JsObjVal sequential(final String key1,
+    public static JsObjExp sequential(final String key1,
                                       final Val<? extends JsValue> val1,
                                       final String key2,
                                       final Val<? extends JsValue> val2
@@ -2158,7 +2158,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
      @param val the mapping associated to the key
      @return a JsObjFuture
      */
-    public static JsObjVal sequential(final String key,
+    public static JsObjExp sequential(final String key,
                                       final Val<? extends JsValue> val
                                      ) {
         SequentialJsObj obj = new SequentialJsObj();
@@ -2168,7 +2168,7 @@ public abstract class JsObjVal extends AbstractVal<JsObj> {
         return obj;
     }
 
-    public abstract JsObjVal set(final String key,
+    public abstract JsObjExp set(final String key,
                                  final Val<? extends JsValue> val);
 
 }

@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class ParallelJsObj extends JsObjVal {
+final class ParallelJsObj extends JsObjExp {
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();

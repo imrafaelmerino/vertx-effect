@@ -225,7 +225,7 @@ public class TestIfElse {
                                                         .alternative(c);
 
 
-        JsObjVal of = JsObjVal.sequential("a",
+        JsObjExp of = JsObjExp.sequential("a",
                                           a.map(JsBool::of),
                                           "b",
                                           b.map(JsInt::of),

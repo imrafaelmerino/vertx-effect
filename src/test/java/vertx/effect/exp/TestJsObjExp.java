@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import static java.util.concurrent.TimeUnit.*;
 
 @ExtendWith(VertxExtension.class)
-public class TestJsObjVal {
+public class TestJsObjExp {
 
     private static VertxRef vertxRef;
 
@@ -39,7 +39,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_one_elem(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a"))
                            )
                 .onSuccess(r -> context.verify(() -> {
@@ -55,7 +55,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_one_elem(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a"))
                          )
                 .onSuccess(r -> context.verify(() -> {
@@ -71,7 +71,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_two_elems(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b"))
@@ -91,7 +91,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_two_elems(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b"))
@@ -111,7 +111,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_three_elems(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -135,7 +135,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_three_elems(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -159,7 +159,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_four_elems(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -187,7 +187,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_four_elems(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -215,7 +215,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_five_elems(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -247,7 +247,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_five_elems(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -279,7 +279,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_six_elems(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -315,7 +315,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_six_elems(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -351,7 +351,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_seven_elems(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -397,7 +397,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_seven_elems(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -443,7 +443,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_parallel_jsobj_exp_eight_elems(VertxTestContext context) {
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -493,7 +493,7 @@ public class TestJsObjVal {
 
     @Test
     public void test_sequential_jsobj_exp_eight_elems(VertxTestContext context) {
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -544,7 +544,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_nine_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -599,7 +599,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_nine_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -654,7 +654,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_ten_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -713,7 +713,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_ten_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -772,7 +772,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_eleven_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -835,7 +835,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_eleven_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -898,7 +898,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_twelve_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -965,7 +965,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_twelve_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -1032,7 +1032,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_thirteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -1107,7 +1107,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_thirteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -1182,7 +1182,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_fourteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -1262,7 +1262,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_fourteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -1342,7 +1342,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_fifteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b")),
@@ -1426,7 +1426,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_fifteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b")),
@@ -1519,7 +1519,7 @@ public class TestJsObjVal {
                 );
 
 
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           val.get(),
                           "b",
                           val.get(),
@@ -1528,7 +1528,7 @@ public class TestJsObjVal {
                           "d",
                           JsArrayExp.parallel(val.get(),
                                               val.get(),
-                                              JsObjVal.parallel("a",
+                                              JsObjExp.parallel("a",
                                                                 val.get()
                                                                )
                                              )
@@ -1573,7 +1573,7 @@ public class TestJsObjVal {
                 );
 
 
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             val.get(),
                             "b",
                             val.get(),
@@ -1582,7 +1582,7 @@ public class TestJsObjVal {
                             "d",
                             JsArrayExp.parallel(val.get(),
                                                 val.get(),
-                                                JsObjVal.parallel("a",
+                                                JsObjExp.parallel("a",
                                                                   val.get()
                                                                  )
                                                )
@@ -1618,7 +1618,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_map(VertxTestContext context) {
 
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b"))
@@ -1644,7 +1644,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_map(VertxTestContext context) {
 
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b"))
@@ -1670,7 +1670,7 @@ public class TestJsObjVal {
     @Test
     public void test_parallel_jsobj_exp_flatmap_success(VertxTestContext context) {
 
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b"))
@@ -1697,7 +1697,7 @@ public class TestJsObjVal {
     @Test
     public void test_sequential_jsobj_exp_flatmap_success(VertxTestContext context) {
 
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b"))
@@ -1725,7 +1725,7 @@ public class TestJsObjVal {
     public void test_parallel_jsobj_exp_flatmap_failure(VertxTestContext context) {
 
 
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           Cons.success(JsStr.of("a")),
                           "b",
                           Cons.success(JsStr.of("b"))
@@ -1744,7 +1744,7 @@ public class TestJsObjVal {
     public void test_sequential_jsobj_exp_flatmap_failure(VertxTestContext context) {
 
 
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             Cons.success(JsStr.of("a")),
                             "b",
                             Cons.success(JsStr.of("b"))
@@ -1773,7 +1773,7 @@ public class TestJsObjVal {
                                                 "b"
         );
 
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           a.get()
                            .map(JsStr::of),
                           "b",
@@ -1815,7 +1815,7 @@ public class TestJsObjVal {
                                                 "b"
         );
 
-        JsObjVal.sequential("a",
+        JsObjExp.sequential("a",
                             a.get()
                              .map(JsStr::of),
                             "b",

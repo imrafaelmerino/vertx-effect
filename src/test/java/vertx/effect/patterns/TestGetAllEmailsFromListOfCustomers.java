@@ -14,7 +14,7 @@ import vertx.effect.Val;
 import vertx.effect.Validators;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.JsArrayExp;
-import vertx.effect.exp.JsObjVal;
+import vertx.effect.exp.JsObjExp;
 import vertx.effect.patterns.oauth.GetTokenReqVerticle;
 import vertx.effect.patterns.oauth.GetTokenVerticle;
 import vertx.effect.λ;
@@ -70,7 +70,7 @@ public class TestGetAllEmailsFromListOfCustomers {
                 String head = ids.head()
                                  .toJsStr().value;
 
-                return JsObjVal.sequential("ids",
+                return JsObjExp.sequential("ids",
                                            Cons.success(ids.tail()),
                                            "acc",
                                            getCustomerEmails.apply(head)
