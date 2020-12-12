@@ -21,15 +21,15 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class ParallelJsObj extends JsObjExp {
+final class ParallelJsObjExp extends JsObjExp {
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
 
-    ParallelJsObj() {
+    ParallelJsObjExp() {
     }
 
-    ParallelJsObj(final Map<String, Val<? extends JsValue>> bindings) {
+    ParallelJsObjExp(final Map<String, Val<? extends JsValue>> bindings) {
         this.bindings = bindings;
     }
 
@@ -41,13 +41,13 @@ final class ParallelJsObj extends JsObjExp {
      @return a new JsObjFuture
      */
     @Override
-    public ParallelJsObj set(final String key,
-                             final Val<? extends JsValue> future
-                            ) {
+    public ParallelJsObjExp set(final String key,
+                                final Val<? extends JsValue> future
+                               ) {
         final Map<String, Val<? extends JsValue>> a = bindings.put(requireNonNull(key),
                                                                    requireNonNull(future)
                                                                   );
-        return new ParallelJsObj(a);
+        return new ParallelJsObjExp(a);
     }
 
 
@@ -88,7 +88,7 @@ final class ParallelJsObj extends JsObjExp {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new ParallelJsObj(bindings.mapValues(it -> it.retry(attempts)));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(attempts)));
     }
 
 
@@ -101,9 +101,9 @@ final class ParallelJsObj extends JsObjExp {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelJsObj(bindings.mapValues(it -> it.retry(attempts,
-                                                                   actionBeforeRetry
-                                                                  )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(attempts,
+                                                                      actionBeforeRetry
+                                                                     )));
     }
 
     @Override
@@ -113,9 +113,9 @@ final class ParallelJsObj extends JsObjExp {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelJsObj(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                     attempts
-                                                                    )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retryIf(predicate,
+                                                                        attempts
+                                                                       )));
 
     }
 
@@ -131,10 +131,10 @@ final class ParallelJsObj extends JsObjExp {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelJsObj(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                     attempts,
-                                                                     actionBeforeRetry
-                                                                    )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retryIf(predicate,
+                                                                        attempts,
+                                                                        actionBeforeRetry
+                                                                       )));
     }
 
 }

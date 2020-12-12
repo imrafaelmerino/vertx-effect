@@ -19,25 +19,25 @@ import java.util.function.Supplier;
  a json array.
  */
 
-final class ParallelJsArray extends JsArrayExp {
+final class ParallelJsArrayExp extends JsArrayExp {
 
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     private List<Val<? extends JsValue>> seq = List.empty();
 
-    static final ParallelJsArray EMPTY = new ParallelJsArray();
+    static final ParallelJsArrayExp EMPTY = new ParallelJsArrayExp();
 
-    ParallelJsArray(List<Val<? extends JsValue>> seq) {
+    ParallelJsArrayExp(List<Val<? extends JsValue>> seq) {
         this.seq = seq;
     }
 
-    ParallelJsArray() {
+    ParallelJsArrayExp() {
     }
 
     @SafeVarargs
-    ParallelJsArray(final Val<? extends JsValue> val,
-                    final Val<? extends JsValue>... others
-                   ) {
+    ParallelJsArrayExp(final Val<? extends JsValue> val,
+                       final Val<? extends JsValue>... others
+                      ) {
         seq = seq.append(val);
         for (Val<? extends JsValue> other : others) {
             seq = seq.append(other);
@@ -70,9 +70,9 @@ final class ParallelJsArray extends JsArrayExp {
     }
 
     @Override
-    public ParallelJsArray append(final Val<? extends JsValue> future) {
+    public ParallelJsArrayExp append(final Val<? extends JsValue> future) {
 
-        final ParallelJsArray arrayFuture = new ParallelJsArray();
+        final ParallelJsArrayExp arrayFuture = new ParallelJsArrayExp();
         arrayFuture.seq = this.seq.append(future);
         return arrayFuture;
     }
@@ -89,7 +89,7 @@ final class ParallelJsArray extends JsArrayExp {
 
     @Override
     public JsArrayExp tail() {
-        return new ParallelJsArray(seq.tail());
+        return new ParallelJsArrayExp(seq.tail());
     }
 
 
@@ -99,7 +99,7 @@ final class ParallelJsArray extends JsArrayExp {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new ParallelJsArray(seq.map(it -> it.retry(attempts)));
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(attempts)));
     }
 
 
@@ -110,9 +110,9 @@ final class ParallelJsArray extends JsArrayExp {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new ParallelJsArray(seq.map(it -> it.retry(attempts,
-                                                          actionBeforeRetry
-                                                         )));
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(attempts,
+                                                             actionBeforeRetry
+                                                            )));
     }
 
     @Override
@@ -123,9 +123,9 @@ final class ParallelJsArray extends JsArrayExp {
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
-        return new ParallelJsArray(seq.map(it -> it.retryIf(predicate,
-                                                            attempts
-                                                           )));
+        return new ParallelJsArrayExp(seq.map(it -> it.retryIf(predicate,
+                                                               attempts
+                                                              )));
 
     }
 
@@ -139,10 +139,10 @@ final class ParallelJsArray extends JsArrayExp {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new ParallelJsArray(seq.map(it -> it.retryIf(predicate,
-                                                            attempts,
-                                                            actionBeforeRetry
-                                                           ))
+        return new ParallelJsArrayExp(seq.map(it -> it.retryIf(predicate,
+                                                               attempts,
+                                                               actionBeforeRetry
+                                                              ))
         );
     }
 

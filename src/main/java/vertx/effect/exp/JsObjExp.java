@@ -25,7 +25,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
     public static JsObjExp parallel(final String key,
                                     final Val<? extends JsValue> val
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
         obj.bindings = obj.bindings.put(key,
                                         val
                                        );
@@ -47,7 +47,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key2,
                                     final Val<? extends JsValue> val2
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -78,7 +78,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key3,
                                     final Val<? extends JsValue> val3
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -118,7 +118,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key4,
                                     final Val<? extends JsValue> val4
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -166,7 +166,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key5,
                                     final Val<? extends JsValue> val5
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -222,7 +222,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key6,
                                     final Val<? extends JsValue> val6
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -286,7 +286,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key7,
                                     final Val<? extends JsValue> val7
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -358,7 +358,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key8,
                                     final Val<? extends JsValue> val8
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -439,7 +439,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key9,
                                     final Val<? extends JsValue> val9
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -529,7 +529,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key10,
                                     final Val<? extends JsValue> val10
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -627,7 +627,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key11,
                                     final Val<? extends JsValue> val11
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -731,7 +731,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key12,
                                     final Val<? extends JsValue> val12
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -843,7 +843,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key13,
                                     final Val<? extends JsValue> val13
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -963,7 +963,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key14,
                                     final Val<? extends JsValue> val14
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)
@@ -1091,7 +1091,7 @@ public abstract class JsObjExp extends AbstractVal<JsObj> {
                                     final String key15,
                                     final Val<? extends JsValue> val15
                                    ) {
-        ParallelJsObj obj = new ParallelJsObj();
+        ParallelJsObjExp obj = new ParallelJsObjExp();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(val1)

@@ -41,13 +41,13 @@ public abstract class JsArrayExp extends AbstractVal<JsArray> {
     public static JsArrayExp parallel(final Val<? extends JsValue> head,
                                       final Val<? extends JsValue>... tail
                                      ) {
-        return new ParallelJsArray(requireNonNull(head),
-                                   requireNonNull(tail)
+        return new ParallelJsArrayExp(requireNonNull(head),
+                                      requireNonNull(tail)
         );
     }
 
     public static JsArrayExp parallel() {
-        return ParallelJsArray.EMPTY;
+        return ParallelJsArrayExp.EMPTY;
     }
 
     public abstract JsArrayExp append(final Val<? extends JsValue> val);
