@@ -58,7 +58,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_one_element(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a")
                        )
               .map(m -> m.mapValues(String::toUpperCase))
@@ -78,7 +78,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_two_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b")
@@ -103,7 +103,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_three_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -134,7 +134,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_four_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -169,7 +169,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_five_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -210,7 +210,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_six_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -255,7 +255,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_seven_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -305,7 +305,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_eight_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -360,7 +360,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_nine_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -420,7 +420,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_ten_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -485,7 +485,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_eleven_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -555,7 +555,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_twelve_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -629,7 +629,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_thirteen_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -708,7 +708,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_fourteen_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -792,7 +792,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_fifteen_elements(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b"),
@@ -881,7 +881,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_flatmap_success(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b")
@@ -907,7 +907,7 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_flatmap_failure(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b")
@@ -927,7 +927,7 @@ public class TestParallelMap {
     public void test_retries(VertxTestContext context) {
 
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         a.get(),
                         "b",
                         one.get()
@@ -957,7 +957,7 @@ public class TestParallelMap {
     @Test
     public void test_mapval_exp_fails_and_recover_with_success(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.failure(new RuntimeException()),
                         "b",
                         b.get()
@@ -975,7 +975,7 @@ public class TestParallelMap {
     @Test
     public void test_mapval_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         Cons.failure(new RuntimeException()),
                         "b",
                         b.get()
@@ -991,7 +991,7 @@ public class TestParallelMap {
 
     @Test
     public void test_mapval_exp_recover_with_success(VertxTestContext context) {
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         a.get(),
                         "b",
                         b.get()
@@ -1019,7 +1019,7 @@ public class TestParallelMap {
 
         long start = System.nanoTime();
 
-        MapVal.parallel("a",
+        MapExp.parallel("a",
                         a.get(),
                         "b",
                         b.get()

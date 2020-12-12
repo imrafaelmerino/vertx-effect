@@ -5,7 +5,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import vertx.effect.exp.MapVal;
+import vertx.effect.exp.MapExp;
 import vertx.effect.exp.Pair;
 import vertx.effect.exp.SeqVal;
 
@@ -24,12 +24,12 @@ public abstract class VertxModule extends AbstractVerticle {
     private static final DeploymentOptions DEFAULT_DEPLOYMENT_OPTIONS = new DeploymentOptions();
     protected final DeploymentOptions deploymentOptions;
     private SeqVal<String> idValSeq;
-    private MapVal<VerticleRef<?, ?>> refValMap;
+    private MapExp<VerticleRef<?, ?>> refValMap;
     private io.vavr.collection.Map<String, VerticleRef<?, ?>> refMap;
 
 
     @SuppressWarnings({"rawtypes", "unchecked", "squid:S3740"})
-    private VertxModule(final MapVal refExp,
+    private VertxModule(final MapExp refExp,
                         final DeploymentOptions deploymentOptions) {
         this.refValMap = requireNonNull(refExp);
         this.deploymentOptions = requireNonNull(deploymentOptions);
@@ -44,7 +44,7 @@ public abstract class VertxModule extends AbstractVerticle {
      */
     @SuppressWarnings("unchecked")
     public VertxModule(final DeploymentOptions options) {
-        this(MapVal.sequential(),
+        this(MapExp.sequential(),
              requireNonNull(options)
             );
         idValSeq = SeqVal.sequential();
@@ -61,7 +61,7 @@ public abstract class VertxModule extends AbstractVerticle {
      */
     @SuppressWarnings("unchecked")
     public VertxModule() {
-        this(MapVal.sequential(),
+        this(MapExp.sequential(),
              DEFAULT_DEPLOYMENT_OPTIONS
             );
         idValSeq = SeqVal.sequential();

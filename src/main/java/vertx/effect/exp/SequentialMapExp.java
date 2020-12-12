@@ -18,16 +18,16 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class SequentialMapVal<O> extends MapVal<O> {
+final class SequentialMapExp<O> extends MapExp<O> {
 
     @SuppressWarnings({"rawtypes"})
-    public static final SequentialMapVal EMPTY = new SequentialMapVal<>();
+    public static final SequentialMapExp EMPTY = new SequentialMapExp<>();
 
 
-    SequentialMapVal() {
+    SequentialMapExp() {
     }
 
-    SequentialMapVal(final Map<String, Val<? extends O>> bindings) {
+    SequentialMapExp(final Map<String, Val<? extends O>> bindings) {
         this.bindings = requireNonNull(bindings);
     }
 
@@ -40,10 +40,10 @@ final class SequentialMapVal<O> extends MapVal<O> {
      @return a new JsObjFuture
      */
     @Override
-    public MapVal<O> set(final String key,
+    public MapExp<O> set(final String key,
                          final Val<? extends O> exp
                         ) {
-        return new SequentialMapVal<>(bindings.put(requireNonNull(key),
+        return new SequentialMapExp<>(bindings.put(requireNonNull(key),
                                                    requireNonNull(exp)
                                                   ));
     }
@@ -53,7 +53,7 @@ final class SequentialMapVal<O> extends MapVal<O> {
     public Val<Map<String, O>> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retry(attempts)));
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(attempts)));
     }
 
 
@@ -63,7 +63,7 @@ final class SequentialMapVal<O> extends MapVal<O> {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retry(attempts,
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(attempts,
                                                                         actionBeforeRetry
                                                                        )
                                                         ));
@@ -78,7 +78,7 @@ final class SequentialMapVal<O> extends MapVal<O> {
             return Cons.failure(new NullPointerException("predicate is null"));
 
 
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retryIf(predicate,
                                                                           attempts
                                                                          ))
         );
@@ -98,7 +98,7 @@ final class SequentialMapVal<O> extends MapVal<O> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retryIf(predicate,
                                                                           attempts,
                                                                           actionBeforeRetry
                                                                          )));

@@ -4,12 +4,10 @@ import io.vavr.collection.LinkedHashMap;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
 
-import java.util.function.Function;
-
 import static java.util.Objects.requireNonNull;
 
 
-public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<String, O>> {
+public abstract class MapExp<O> extends AbstractVal<io.vavr.collection.Map<String, O>> {
 
     protected static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
@@ -22,8 +20,8 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
     }
 
     @SuppressWarnings({"unchecked"})
-    public static <O> MapVal<O> parallel(){
-        return ParallelMapVal.EMPTY;
+    public static <O> MapExp<O> parallel(){
+        return ParallelMapExp.EMPTY;
     }
     /**
      static factory method to create a JsObjFuture of one mapping
@@ -33,10 +31,10 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @param <O> the type of the map values
      @return a JsObjFuture
      */
-    public static <O> MapVal<O> parallel(final String key,
+    public static <O> MapExp<O> parallel(final String key,
                                          final Val<? extends O> exp
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key),
                                         requireNonNull(exp)
                                        );
@@ -54,12 +52,12 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @param <O>  the type of the map values
      @return a JsObjFuture
      */
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -82,14 +80,14 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
                                          final String key3,
                                          final Val<? extends O> exp3
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -118,7 +116,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -127,7 +125,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key4,
                                          final Val<? extends O> exp4
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -161,7 +159,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -172,7 +170,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key5,
                                          final Val<? extends O> exp5
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -212,7 +210,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -226,7 +224,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final Val<? extends O> exp6
                                         ) {
 
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -270,7 +268,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -285,7 +283,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key7,
                                          final Val<? extends O> exp7
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -335,7 +333,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -352,7 +350,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key8,
                                          final Val<? extends O> exp8
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -408,7 +406,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -427,7 +425,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key9,
                                          final Val<? extends O> exp9
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -488,7 +486,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -509,7 +507,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key10,
                                          final Val<? extends O> exp10
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -574,7 +572,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -597,7 +595,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key11,
                                          final Val<? extends O> exp11
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -669,7 +667,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -694,7 +692,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key12,
                                          final Val<? extends O> exp12
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -770,7 +768,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -797,7 +795,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key13,
                                          final Val<? extends O> exp13
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -878,7 +876,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -907,7 +905,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key14,
                                          final Val<? extends O> exp14
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -994,7 +992,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> parallel(final String key1,
+    public static <O> MapExp<O> parallel(final String key1,
                                          final Val<? extends O> exp1,
                                          final String key2,
                                          final Val<? extends O> exp2,
@@ -1025,7 +1023,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                          final String key15,
                                          final Val<? extends O> exp15
                                         ) {
-        ParallelMapVal<O> obj = new ParallelMapVal<>();
+        ParallelMapExp<O> obj = new ParallelMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -1078,13 +1076,13 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
 
     }
 
-    public abstract MapVal<O> set(final String key,
+    public abstract MapExp<O> set(final String key,
                                   final Val<? extends O> exp
                                  );
 
     @SuppressWarnings({"unchecked"})
-    public static <O> MapVal<O> sequential(){
-        return SequentialMapVal.EMPTY;
+    public static <O> MapExp<O> sequential(){
+        return SequentialMapExp.EMPTY;
     }
 
     /**
@@ -1095,10 +1093,10 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @param <O> the type of the map values
      @return a JsObjFuture
      */
-    public static <O> MapVal<O> sequential(final String key,
+    public static <O> MapExp<O> sequential(final String key,
                                            final Val<? extends O> exp
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key),
                                         requireNonNull(exp)
                                        );
@@ -1116,12 +1114,12 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @param <O>  the type of the map values
      @return a JsObjFuture
      */
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1144,14 +1142,14 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
                                            final String key3,
                                            final Val<? extends O> exp3
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1180,7 +1178,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1189,7 +1187,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key4,
                                            final Val<? extends O> exp4
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1223,7 +1221,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1234,7 +1232,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key5,
                                            final Val<? extends O> exp5
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1274,7 +1272,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1288,7 +1286,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final Val<? extends O> exp6
                                           ) {
 
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1332,7 +1330,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1347,7 +1345,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key7,
                                            final Val<? extends O> exp7
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1397,7 +1395,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1414,7 +1412,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key8,
                                            final Val<? extends O> exp8
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1470,7 +1468,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1489,7 +1487,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key9,
                                            final Val<? extends O> exp9
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1550,7 +1548,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1571,7 +1569,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key10,
                                            final Val<? extends O> exp10
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
                                        )
@@ -1636,7 +1634,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1659,7 +1657,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key11,
                                            final Val<? extends O> exp11
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -1731,7 +1729,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1756,7 +1754,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key12,
                                            final Val<? extends O> exp12
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -1832,7 +1830,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1859,7 +1857,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key13,
                                            final Val<? extends O> exp13
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -1940,7 +1938,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -1969,7 +1967,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key14,
                                            final Val<? extends O> exp14
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)
@@ -2056,7 +2054,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
      @return a JsObjFuture
      */
     @SuppressWarnings("squid:S00107")
-    public static <O> MapVal<O> sequential(final String key1,
+    public static <O> MapExp<O> sequential(final String key1,
                                            final Val<? extends O> exp1,
                                            final String key2,
                                            final Val<? extends O> exp2,
@@ -2087,7 +2085,7 @@ public abstract class MapVal<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                            final String key15,
                                            final Val<? extends O> exp15
                                           ) {
-        SequentialMapVal<O> obj = new SequentialMapVal<>();
+        SequentialMapExp<O> obj = new SequentialMapExp<>();
 
         obj.bindings = obj.bindings.put(requireNonNull(key1),
                                         requireNonNull(exp1)

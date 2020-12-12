@@ -19,16 +19,16 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class ParallelMapVal<O> extends MapVal<O> {
+final class ParallelMapExp<O> extends MapExp<O> {
 
     @SuppressWarnings({"rawtypes"})
-    public static final ParallelMapVal EMPTY = new ParallelMapVal<>();
+    public static final ParallelMapExp EMPTY = new ParallelMapExp<>();
 
 
-    ParallelMapVal() {
+    ParallelMapExp() {
     }
 
-    ParallelMapVal(final Map<String, Val<? extends O>> bindings) {
+    ParallelMapExp(final Map<String, Val<? extends O>> bindings) {
         this.bindings = requireNonNull(bindings);
     }
 
@@ -40,10 +40,10 @@ final class ParallelMapVal<O> extends MapVal<O> {
      @param exp the given future
      @return a new JsObjFuture
      */
-    public ParallelMapVal<O> set(final String key,
+    public ParallelMapExp<O> set(final String key,
                                  final Val<? extends O> exp
                                 ) {
-        return new ParallelMapVal<>(bindings.put(requireNonNull(key),
+        return new ParallelMapExp<>(bindings.put(requireNonNull(key),
                                                  requireNonNull(exp)
                                                 ));
     }
@@ -52,7 +52,7 @@ final class ParallelMapVal<O> extends MapVal<O> {
     public Val<Map<String, O>> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retry(attempts)));
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(attempts)));
     }
 
 
@@ -62,7 +62,7 @@ final class ParallelMapVal<O> extends MapVal<O> {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retry(attempts,
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(attempts,
                                                                       actionBeforeRetry
                                                                      )
                                                       ));
@@ -77,7 +77,7 @@ final class ParallelMapVal<O> extends MapVal<O> {
             return Cons.failure(new NullPointerException("predicate is null"));
 
 
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retryIf(predicate,
                                                                         attempts
                                                                        ))
         );
@@ -97,7 +97,7 @@ final class ParallelMapVal<O> extends MapVal<O> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retryIf(predicate,
                                                                         attempts,
                                                                         actionBeforeRetry
                                                                        )));
