@@ -1526,7 +1526,7 @@ public class TestJsObjVal {
                           "c",
                           val.get(),
                           "d",
-                          JsArrayVal.parallel(val.get(),
+                          JsArrayExp.parallel(val.get(),
                                               val.get(),
                                               JsObjVal.parallel("a",
                                                                 val.get()
@@ -1580,7 +1580,7 @@ public class TestJsObjVal {
                             "c",
                             val.get(),
                             "d",
-                            JsArrayVal.parallel(val.get(),
+                            JsArrayExp.parallel(val.get(),
                                                 val.get(),
                                                 JsObjVal.parallel("a",
                                                                   val.get()

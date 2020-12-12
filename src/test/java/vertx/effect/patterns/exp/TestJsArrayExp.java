@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
-import vertx.effect.exp.JsArrayVal;
+import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.Pair;
 
 @ExtendWith(VertxExtension.class)
-public class TestJsArrayVal {
+public class TestJsArrayExp {
 
     @Test
     public void test_race(final VertxTestContext context,
@@ -24,7 +24,7 @@ public class TestJsArrayVal {
                         ref.deployVerticle(new Module())
                        )
             .onSuccess(pair ->
-                               JsArrayVal.parallel()
+                               JsArrayExp.parallel()
                                          .append(Module.head.apply("Aa")
                                                             .map(JsStr::of))
                                          .append(Module.tail.apply("Aa")

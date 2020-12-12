@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.Val;
 import vertx.effect.Validators;
 import vertx.effect.exp.Cons;
-import vertx.effect.exp.JsArrayVal;
+import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.JsObjVal;
 import vertx.effect.patterns.oauth.GetTokenReqVerticle;
 import vertx.effect.patterns.oauth.GetTokenVerticle;
@@ -24,7 +24,7 @@ import vertx.effect.λ;
 public class TestGetAllEmailsFromListOfCustomers {
 
     public static λ<String, JsArray> getCustomerEmails =
-            id -> JsArrayVal.sequential()
+            id -> JsArrayExp.sequential()
                             .append(Cons.success(JsStr.of(id + "_a")))
                             .append(Cons.success(JsStr.of(id + "_b")));
 

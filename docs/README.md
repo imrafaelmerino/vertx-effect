@@ -93,7 +93,7 @@ import static jsonvalues.spec.JsSpecs.*;
 import vertx.effect.Validators;
 import vertx.effect.VertxModule;
 import vertx.effect.exp.Cons;
-import vertx.effect.exp.JsArrayVal;
+import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.JsObjVal;
 import vertx.effect.λ;
 
@@ -116,7 +116,7 @@ public class MyModule extends VertxModule {
 
     λ<JsObj, JsObj> map = obj-> 
           JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
-                            "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+                            "b", JsArrayExp.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
                                                                 .map(JsStr::of),
                                                      toUpperCase.apply(obj.getStr(path("/b/1")))
                                                                 .map(JsStr::of)

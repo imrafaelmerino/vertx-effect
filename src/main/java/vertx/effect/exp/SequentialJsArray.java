@@ -18,7 +18,7 @@ import java.util.function.Predicate;
  a json array.
  */
 
-final class SequentialJsArray extends JsArrayVal {
+final class SequentialJsArray extends JsArrayExp {
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     private List<Val<? extends JsValue>> seq = List.empty();
@@ -113,7 +113,7 @@ final class SequentialJsArray extends JsArrayVal {
     }
 
     @Override
-    public JsArrayVal append(final Val<? extends JsValue> future) {
+    public JsArrayExp append(final Val<? extends JsValue> future) {
 
         final SequentialJsArray arrayFuture = new SequentialJsArray();
         arrayFuture.seq = this.seq.append(future);
@@ -131,7 +131,7 @@ final class SequentialJsArray extends JsArrayVal {
     }
 
     @Override
-    public JsArrayVal tail() {
+    public JsArrayExp tail() {
         return new SequentialJsArray(seq.tail());
     }
 

@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  a json array.
  */
 
-final class ParallelJsArray extends JsArrayVal {
+final class ParallelJsArray extends JsArrayExp {
 
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
@@ -88,7 +88,7 @@ final class ParallelJsArray extends JsArrayVal {
     }
 
     @Override
-    public JsArrayVal tail() {
+    public JsArrayExp tail() {
         return new ParallelJsArray(seq.tail());
     }
 
