@@ -113,6 +113,7 @@ final class SequentialJsArray extends JsArrayVal {
         );
     }
 
+    @Override
     public JsArrayVal append(final Val<? extends JsValue> future) {
 
         final SequentialJsArray arrayFuture = new SequentialJsArray();
@@ -123,6 +124,16 @@ final class SequentialJsArray extends JsArrayVal {
     @Override
     public Val<JsValue> race() {
         return Cons.failure(new OperationNotSupportedException("race doesn't make any sense in a sequential execution"));
+    }
+
+    @Override
+    public Val<JsValue> head() {
+        return (Val<JsValue>) seq.head();
+    }
+
+    @Override
+    public JsArrayVal tail() {
+        return new SequentialJsArray(seq.tail());
     }
 
 }

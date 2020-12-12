@@ -8,10 +8,8 @@ import jsonvalues.JsValue;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 
 /**
@@ -71,6 +69,7 @@ final class ParallelJsArray extends JsArrayVal {
 
     }
 
+    @Override
     public ParallelJsArray append(final Val<? extends JsValue> future) {
 
         final ParallelJsArray arrayFuture = new ParallelJsArray();
@@ -81,6 +80,16 @@ final class ParallelJsArray extends JsArrayVal {
     @Override
     public Val<JsValue> race() {
       return Functions.race(seq);
+    }
+
+    @Override
+    public Val<JsValue> head() {
+        return (Val<JsValue>) seq.head();
+    }
+
+    @Override
+    public JsArrayVal tail() {
+        return new ParallelJsArray(seq.tail());
     }
 
 

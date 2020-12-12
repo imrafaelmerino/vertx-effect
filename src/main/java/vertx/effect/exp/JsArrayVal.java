@@ -53,4 +53,10 @@ public abstract class JsArrayVal extends AbstractVal<JsArray> {
     public abstract JsArrayVal append(final Val<? extends JsValue> val);
 
     public abstract Val<JsValue> race();
+
+    public abstract Val<JsValue> head();
+
+    public abstract JsArrayVal tail();
+
+
 }
