@@ -1,12 +1,12 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.LinkedHashMap;
 import io.vavr.collection.List;
-import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
 import io.vertx.core.Future;
 import vertx.effect.Val;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -27,7 +27,7 @@ final class SequentialMapExp<O> extends MapExp<O> {
     SequentialMapExp() {
     }
 
-    SequentialMapExp(final Map<String, Val<? extends O>> bindings) {
+    SequentialMapExp(final io.vavr.collection.Map<String, Val<? extends O>> bindings) {
         this.bindings = requireNonNull(bindings);
     }
 
@@ -112,22 +112,23 @@ final class SequentialMapExp<O> extends MapExp<O> {
                                     .toList();
         Seq<Val<? extends O>> values = bindings.values();
 
-        Future<Map<String, O>> acc = Future.succeededFuture(LinkedHashMap.empty());
+        Future<Map<String, O>> acc = Future.succeededFuture(new LinkedHashMap<>());
 
         for (int i = 0; i < keys.size(); i++) {
             String           k   = keys.get(i);
             Val<? extends O> val = values.get(i);
             acc = acc.flatMap(m -> val.get()
-                                      .map(fut -> m.put(k,
-                                                        fut
-                                                       )
+                                      .map(fut -> {
+                                               m.put(k,
+                                                     fut
+                                                    );
+                                               return m;
+                                           }
                                           )
                              );
         }
 
-
         return acc;
-
     }
 
 }

@@ -1,8 +1,5 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.LinkedHashMap;
-import io.vavr.collection.Map;
-import io.vavr.collection.TreeMap;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -14,7 +11,10 @@ import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -58,51 +58,73 @@ public class TestParallelMap {
     @Test
     public void test_map_exp_map_one_element(VertxTestContext context) {
 
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+
         MapExp.parallel("a",
                         Cons.success("a")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(java.util.Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_two_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  ))
+                  )
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_three_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -110,22 +132,18 @@ public class TestParallelMap {
                         "c",
                         Cons.success("c")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
@@ -133,7 +151,19 @@ public class TestParallelMap {
 
     @Test
     public void test_map_exp_map_four_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -143,32 +173,40 @@ public class TestParallelMap {
                         "d",
                         Cons.success("d")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_five_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -180,28 +218,18 @@ public class TestParallelMap {
                         "e",
                         Cons.success("e")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
@@ -209,7 +237,25 @@ public class TestParallelMap {
 
     @Test
     public void test_map_exp_map_six_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -223,38 +269,46 @@ public class TestParallelMap {
                         "f",
                         Cons.success("f")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_seven_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -270,41 +324,49 @@ public class TestParallelMap {
                         "g",
                         Cons.success("g")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_eight_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -322,44 +384,52 @@ public class TestParallelMap {
                         "h",
                         Cons.success("h")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_nine_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
+        expected.put("i",
+                     "I"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -379,47 +449,55 @@ public class TestParallelMap {
                         "i",
                         Cons.success("i")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    )
-                                                                .put("i",
-                                                                     "I"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_ten_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
+        expected.put("i",
+                     "I"
+                    );
+        expected.put("j",
+                     "J"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -441,50 +519,58 @@ public class TestParallelMap {
                         "j",
                         Cons.success("j")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    )
-                                                                .put("i",
-                                                                     "I"
-                                                                    )
-                                                                .put("j",
-                                                                     "J"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_eleven_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
+        expected.put("i",
+                     "I"
+                    );
+        expected.put("j",
+                     "J"
+                    );
+        expected.put("k",
+                     "K"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -508,53 +594,61 @@ public class TestParallelMap {
                         "k",
                         Cons.success("k")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    )
-                                                                .put("i",
-                                                                     "I"
-                                                                    )
-                                                                .put("j",
-                                                                     "J"
-                                                                    )
-                                                                .put("k",
-                                                                     "K"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
     }
 
     @Test
     public void test_map_exp_map_twelve_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
+        expected.put("i",
+                     "I"
+                    );
+        expected.put("j",
+                     "J"
+                    );
+        expected.put("k",
+                     "K"
+                    );
+        expected.put("l",
+                     "L"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -580,55 +674,63 @@ public class TestParallelMap {
                         "l",
                         Cons.success("l")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    )
-                                                                .put("i",
-                                                                     "I"
-                                                                    )
-                                                                .put("j",
-                                                                     "J"
-                                                                    )
-                                                                .put("k",
-                                                                     "K"
-                                                                    )
-                                                                .put("l",
-                                                                     "L"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
     }
 
     @Test
     public void test_map_exp_map_thirteen_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
+        expected.put("i",
+                     "I"
+                    );
+        expected.put("j",
+                     "J"
+                    );
+        expected.put("k",
+                     "K"
+                    );
+        expected.put("l",
+                     "L"
+                    );
+        expected.put("m",
+                     "M"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -656,58 +758,66 @@ public class TestParallelMap {
                         "m",
                         Cons.success("m")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    )
-                                                                .put("i",
-                                                                     "I"
-                                                                    )
-                                                                .put("j",
-                                                                     "J"
-                                                                    )
-                                                                .put("k",
-                                                                     "K"
-                                                                    )
-                                                                .put("l",
-                                                                     "L"
-                                                                    )
-                                                                .put("m",
-                                                                     "M"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
     }
 
     @Test
     public void test_map_exp_map_fourteen_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
+        expected.put("i",
+                     "I"
+                    );
+        expected.put("j",
+                     "J"
+                    );
+        expected.put("k",
+                     "K"
+                    );
+        expected.put("l",
+                     "L"
+                    );
+        expected.put("m",
+                     "M"
+                    );
+        expected.put("n",
+                     "N"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -737,61 +847,69 @@ public class TestParallelMap {
                         "n",
                         Cons.success("n")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    )
-                                                                .put("i",
-                                                                     "I"
-                                                                    )
-                                                                .put("j",
-                                                                     "J"
-                                                                    )
-                                                                .put("k",
-                                                                     "K"
-                                                                    )
-                                                                .put("l",
-                                                                     "L"
-                                                                    )
-                                                                .put("m",
-                                                                     "M"
-                                                                    )
-                                                                .put("n",
-                                                                     "N"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
     }
 
     @Test
     public void test_map_exp_map_fifteen_elements(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
+        expected.put("c",
+                     "C"
+                    );
+        expected.put("d",
+                     "D"
+                    );
+        expected.put("e",
+                     "E"
+                    );
+        expected.put("f",
+                     "F"
+                    );
+        expected.put("g",
+                     "G"
+                    );
+        expected.put("h",
+                     "H"
+                    );
+        expected.put("i",
+                     "I"
+                    );
+        expected.put("j",
+                     "J"
+                    );
+        expected.put("k",
+                     "K"
+                    );
+        expected.put("l",
+                     "L"
+                    );
+        expected.put("m",
+                     "M"
+                    );
+        expected.put("n",
+                     "N"
+                    );
+        expected.put("o",
+                     "O"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
@@ -823,82 +941,47 @@ public class TestParallelMap {
                         "o",
                         Cons.success("o")
                        )
-              .map(m -> m.mapValues(String::toUpperCase))
+              .map(m -> m.entrySet()
+                         .stream()
+                         .collect(Collectors.toMap(Map.Entry::getKey,
+                                                   e -> e.getValue()
+                                                         .toUpperCase()
+                                                  )))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    )
-                                                                .put("c",
-                                                                     "C"
-                                                                    )
-                                                                .put("d",
-                                                                     "D"
-                                                                    )
-                                                                .put("e",
-                                                                     "E"
-                                                                    )
-                                                                .put("f",
-                                                                     "F"
-                                                                    )
-                                                                .put("g",
-                                                                     "G"
-                                                                    )
-                                                                .put("h",
-                                                                     "H"
-                                                                    )
-                                                                .put("i",
-                                                                     "I"
-                                                                    )
-                                                                .put("j",
-                                                                     "J"
-                                                                    )
-                                                                .put("k",
-                                                                     "K"
-                                                                    )
-                                                                .put("l",
-                                                                     "L"
-                                                                    )
-                                                                .put("m",
-                                                                     "M"
-                                                                    )
-                                                                .put("n",
-                                                                     "N"
-                                                                    )
-                                                                .put("o",
-                                                                     "O"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
     }
 
     @Test
     public void test_map_exp_flatmap_success(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "A"
+                    );
+        expected.put("b",
+                     "B"
+                    );
         MapExp.parallel("a",
                         Cons.success("a"),
                         "b",
                         Cons.success("b")
                        )
-              .flatMap(m -> Cons.success(m.mapValues(String::toUpperCase)))
+              .flatMap(m -> Cons.success(m.entrySet()
+                                          .stream()
+                                          .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                    e -> e.getValue()
+                                                                          .toUpperCase()
+                                                                   ))))
               .onSuccess(r -> context.verify(() -> {
-                                Assertions.assertEquals(TreeMap.<String, String>empty()
-                                                                .put("a",
-                                                                     "A"
-                                                                    )
-                                                                .put("b",
-                                                                     "B"
-                                                                    ),
-                                                        r
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          r
+                                         );
+                  context.completeNow();
+              }))
               .get();
 
 
@@ -914,9 +997,9 @@ public class TestParallelMap {
                        )
               .flatMap(s -> Cons.failure(new RuntimeException()))
               .onComplete(r -> context.verify(() -> {
-                                Assertions.assertTrue(r.failed());
-                                context.completeNow();
-                            }))
+                  Assertions.assertTrue(r.failed());
+                  context.completeNow();
+              }))
               .get();
 
 
@@ -926,7 +1009,13 @@ public class TestParallelMap {
     @Test
     public void test_retries(VertxTestContext context) {
 
-
+        Map<String, Object> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "a"
+                    );
+        expected.put("b",
+                     1
+                    );
         MapExp.parallel("a",
                         a.get(),
                         "b",
@@ -934,21 +1023,12 @@ public class TestParallelMap {
                        )
               .retry(2)
               .onComplete(map ->
-                                                context.verify(() -> {
-                                                    Map<String, ?> expected =
-                                                            LinkedHashMap.<String, Object>empty()
-                                                                    .put("a",
-                                                                         "a"
-                                                                        )
-                                                                    .put("b",
-                                                                         1
-
-                                                                        );
-                                                    Assertions.assertEquals(expected,
-                                                                            map.result()
-                                                                           );
-                                                    context.completeNow();
-                                                }))
+                                  context.verify(() -> {
+                                      Assertions.assertEquals(expected,
+                                                              map.result()
+                                                             );
+                                      context.completeNow();
+                                  }))
               .get();
 
 
@@ -956,19 +1036,19 @@ public class TestParallelMap {
 
     @Test
     public void test_mapval_exp_fails_and_recover_with_success(VertxTestContext context) {
-
+        Map empty = new LinkedHashMap();
         MapExp.parallel("a",
                         Cons.failure(new RuntimeException()),
                         "b",
                         b.get()
                        )
-              .recoverWith(e -> Cons.success(LinkedHashMap.empty()))
+              .recoverWith(e -> Cons.success(empty))
               .onSuccess(map -> context.verify(() -> {
-                                Assertions.assertEquals(LinkedHashMap.empty(),
-                                                        map
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(empty,
+                                          map
+                                         );
+                  context.completeNow();
+              }))
               .get();
     }
 
@@ -982,15 +1062,22 @@ public class TestParallelMap {
                        )
               .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
               .onComplete(r -> context.verify(() -> {
-                                Assertions.assertTrue(r.failed());
-                                Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
-                                context.completeNow();
-                            }))
+                  Assertions.assertTrue(r.failed());
+                  Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
+                  context.completeNow();
+              }))
               .get();
     }
 
     @Test
     public void test_mapval_exp_recover_with_success(VertxTestContext context) {
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "a"
+                    );
+        expected.put("b",
+                     "b"
+                    );
         MapExp.parallel("a",
                         a.get(),
                         "b",
@@ -999,24 +1086,24 @@ public class TestParallelMap {
               .retry(ATTEMPTS)
               .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
               .onSuccess(map -> context.verify(() -> {
-                                Assertions.assertEquals(LinkedHashMap.<String, Object>empty()
-                                                                .put("a",
-                                                                     "a"
-                                                                    )
-                                                                .put("b",
-                                                                     "b"
-                                                                    ),
-                                                        map
-                                                       );
-                                context.completeNow();
-                            }))
+                  Assertions.assertEquals(expected,
+                                          map
+                                         );
+                  context.completeNow();
+              }))
               .get();
     }
 
 
     @Test
     public void test_retry_with_delay(VertxTestContext context) {
-
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("a",
+                     "a"
+                    );
+        expected.put("b",
+                     "b"
+                    );
         long start = System.nanoTime();
 
         MapExp.parallel("a",
@@ -1025,25 +1112,19 @@ public class TestParallelMap {
                         b.get()
                        )
               .retry(ATTEMPTS,
-                                   (error, n) -> vertxRef.delay(100,
-                                                                MILLISECONDS
-                                                               )
-                                  )
+                     (error, n) -> vertxRef.delay(100,
+                                                  MILLISECONDS
+                                                 )
+                    )
               .get()
               .onComplete(r -> context.verify(() -> {
-                                Assertions.assertEquals(LinkedHashMap.<String, Object>empty()
-                                                                .put("a",
-                                                                     "a"
-                                                                    )
-                                                                .put("b",
-                                                                     "b"
-                                                                    ),
-                                                        r.result()
-                                                       );
-                                Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
-                                context.completeNow();
+                  Assertions.assertEquals(expected,
+                                          r.result()
+                                         );
+                  Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
+                  context.completeNow();
 
-                            }));
+              }));
 
     }
 

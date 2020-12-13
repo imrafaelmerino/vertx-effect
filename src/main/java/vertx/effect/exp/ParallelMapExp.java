@@ -1,13 +1,13 @@
 package vertx.effect.exp;
 
 import io.vavr.Tuple2;
-import io.vavr.collection.LinkedHashMap;
 import io.vavr.collection.List;
-import io.vavr.collection.Map;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.Val;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -28,7 +28,7 @@ final class ParallelMapExp<O> extends MapExp<O> {
     ParallelMapExp() {
     }
 
-    ParallelMapExp(final Map<String, Val<? extends O>> bindings) {
+    ParallelMapExp(final io.vavr.collection.Map<String, Val<? extends O>> bindings) {
         this.bindings = requireNonNull(bindings);
     }
 
@@ -40,6 +40,7 @@ final class ParallelMapExp<O> extends MapExp<O> {
      @param exp the given future
      @return a new JsObjFuture
      */
+    @Override
     public ParallelMapExp<O> set(final String key,
                                  final Val<? extends O> exp
                                 ) {
@@ -110,22 +111,21 @@ final class ParallelMapExp<O> extends MapExp<O> {
         List<String> keys = bindings.keysIterator()
                                     .toList();
         @SuppressWarnings({"rawtypes"})
-        Map<String, Future> futures = bindings.map((k, v) -> new Tuple2<>(k,
-                                                                          v.get()
-                                                   )
-                                                  );
+        io.vavr.collection.Map<String, Future> futures = bindings.map((k, v) -> new Tuple2<>(k,
+                                                                                             v.get()
+                                                                      )
+                                                                     );
         return CompositeFuture.all(futures.values()
                                           .toJavaList()
                                   )
                               .map(r -> {
-                                  Map<String, O> result = LinkedHashMap.empty();
+                                  Map<String, O> result = new LinkedHashMap<>();
                                   java.util.List<O> list = r.result()
                                                             .list();
                                   for (int i = 0; i < list.size(); i++) {
-                                      result = result.put(new Tuple2<>(keys.get(i),
-                                                                       list.get(i)
-                                                          )
-                                                         );
+                                      result.put(keys.get(i),
+                                                 list.get(i)
+                                                );
 
                                   }
 

@@ -107,9 +107,7 @@ public class TestSequentialSeq {
                 .retry(ATTEMPTS);
 
 
-        Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     expected
-                                                                    ))
+        Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list, expected))
                 .accept(val,
                         context
                        );

@@ -4,15 +4,16 @@ import io.vavr.collection.LinkedHashMap;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
 
+import java.util.Map;
+
 import static java.util.Objects.requireNonNull;
 
 
-public abstract class MapExp<O> extends AbstractVal<io.vavr.collection.Map<String, O>> {
+public abstract class MapExp<O> extends AbstractVal<Map<String, O>> {
 
     protected static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     protected io.vavr.collection.Map<String, Val<? extends O>> bindings = LinkedHashMap.empty();
-
 
 
     public boolean isEmpty() {
@@ -20,9 +21,10 @@ public abstract class MapExp<O> extends AbstractVal<io.vavr.collection.Map<Strin
     }
 
     @SuppressWarnings({"unchecked"})
-    public static <O> MapExp<O> parallel(){
+    public static <O> MapExp<O> parallel() {
         return ParallelMapExp.EMPTY;
     }
+
     /**
      static factory method to create a JsObjFuture of one mapping
 
@@ -1081,7 +1083,7 @@ public abstract class MapExp<O> extends AbstractVal<io.vavr.collection.Map<Strin
                                  );
 
     @SuppressWarnings({"unchecked"})
-    public static <O> MapExp<O> sequential(){
+    public static <O> MapExp<O> sequential() {
         return SequentialMapExp.EMPTY;
     }
 
