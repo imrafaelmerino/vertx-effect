@@ -148,4 +148,30 @@ final class ParallelQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> {
                               ));
     }
 
+    @Override
+    public Val<A> first() {
+        return _1;
+    }
+
+    @Override
+    public Val<B> second() {
+        return _2;
+    }
+
+    @Override
+    public Val<C> third() {
+        return _3;
+    }
+
+    @Override
+    public Val<D> forth() {
+        return _4;
+    }
+
+    @Override
+    public Val<E> fifth() {
+        return _5;
+    }
+
+
 }

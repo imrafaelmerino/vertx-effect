@@ -97,5 +97,13 @@ final class ParallelPair<A, B> extends Pair<A, B> {
     }
 
 
+    @Override
+    public Val<A> first() {
+        return _1;
+    }
 
+    @Override
+    public Val<B> second() {
+        return _2;
+    }
 }

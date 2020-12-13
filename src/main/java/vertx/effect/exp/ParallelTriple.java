@@ -113,5 +113,19 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
                               ));
     }
 
+    @Override
+    public Val<A> first() {
+        return _1;
+    }
+
+    @Override
+    public Val<B> second() {
+        return _2;
+    }
+
+    @Override
+    public Val<C> third() {
+        return _3;
+    }
 
 }
