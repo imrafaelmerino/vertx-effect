@@ -52,7 +52,7 @@ public final class Failures {
     public static final int ACCESS_TOKEN_NOT_FOUND_CODE = 4004;
     public static final int EMPTY_REDIRECT_URL_CODE = 4005;
     public static final int REFRESH_TOKEN_NOT_FOUND_CODE = 4006;
-    public static final int CONNECTION_WAS_CLOSED_CODE = 4007;
+    public static final int TCP_CONNECTION_WAS_CLOSED_CODE = 4007;
     public static final int HTTP_REQUEST_NOT_SENT = 4008;
     public static final int HTTP_METHOD_NOT_IMPLEMENTED_CODE = 4098;
     public static final int DEFAULT_HTTP_EXCEPTION_CODE = 4999;
@@ -127,7 +127,7 @@ public final class Failures {
                     t -> {
                         if (t instanceof ReplyException) {
                             ReplyException replyException = (ReplyException) t;
-                            if (replyException.failureCode() == CONNECTION_WAS_CLOSED_CODE)
+                            if (replyException.failureCode() == TCP_CONNECTION_WAS_CLOSED_CODE)
                                 return Optional.of(replyException);
                             return Optional.empty();
                         }
@@ -262,7 +262,7 @@ public final class Failures {
                         VertxException vertxException = (VertxException) exc;
                         if (vertxException == CLOSED_EXCEPTION) {
                             return new ReplyException(RECIPIENT_FAILURE,
-                                                      CONNECTION_WAS_CLOSED_CODE,
+                                                      TCP_CONNECTION_WAS_CLOSED_CODE,
                                                       CLOSED_EXCEPTION.getMessage()
                             );
                         }
