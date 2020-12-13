@@ -1,10 +1,11 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.List;
 import io.vertx.core.Future;
 import vertx.effect.Val;
 
 import javax.naming.OperationNotSupportedException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -13,9 +14,9 @@ import static java.util.Objects.requireNonNull;
 class SequentialSeq<O> extends ListExp<O> {
 
     @SuppressWarnings("rawtypes")
-    protected static final ListExp EMPTY = new SequentialSeq<>(List.empty());
+    protected static final ListExp EMPTY = new SequentialSeq<>(io.vavr.collection.List.empty());
 
-    SequentialSeq(final List<Val<? extends O>> seq) {
+    SequentialSeq(final io.vavr.collection.List<Val<? extends O>> seq) {
         super(seq);
     }
 
@@ -73,11 +74,14 @@ class SequentialSeq<O> extends ListExp<O> {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Future<List<O>> get() {
-        Future<List<O>> acc = Future.succeededFuture(List.empty());
+        Future<List<O>> acc = Future.succeededFuture(new ArrayList<>());
 
         for (final Val<? extends O> val : seq)
             acc = acc.flatMap(l -> val.get()
-                                      .map(l::append));
+                                      .map(it -> {
+                                          l.add(it);
+                                          return l;
+                                      }));
 
         return acc;
 

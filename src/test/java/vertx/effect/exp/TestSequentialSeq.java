@@ -1,6 +1,5 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.List;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -13,9 +12,12 @@ import vertx.effect.Val;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -60,7 +62,9 @@ public class TestSequentialSeq {
     @Test
     public void test_head_returns_the_tail(VertxTestContext context) {
 
-
+        List<String> expected = new ArrayList<>();
+        expected.add("b");
+        expected.add("c");
         ListExp<String> val = ListExp.<String>sequential()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
@@ -69,9 +73,7 @@ public class TestSequentialSeq {
 
 
         Verifiers.<List<String>>verifySuccess(tail -> Objects.equals(tail,
-                                                                     List.empty()
-                                                                         .append("b")
-                                                                         .append("c")
+                                                                     expected
                                                                     )
                                              ).accept(val,
                                                       context
@@ -82,6 +84,9 @@ public class TestSequentialSeq {
 
     @Test
     public void test_retries(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("a");
+        expected.add("b");
         int ATTEMPTS = 3;
 
         Supplier<Val<String>> a =
@@ -103,9 +108,7 @@ public class TestSequentialSeq {
 
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("a")
-                                                                         .append("b")
+                                                                     expected
                                                                     ))
                 .accept(val,
                         context
@@ -115,6 +118,9 @@ public class TestSequentialSeq {
 
     @Test
     public void test_retry_if(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("hi");
+        expected.add("hi");
         ErrorWhile<String> hi = new ErrorWhile<>(3,
                                                  i -> new IllegalArgumentException(),
                                                  "hi"
@@ -123,24 +129,27 @@ public class TestSequentialSeq {
                            hi.get()
                           )
                .retryIf(it -> it instanceof IllegalArgumentException,
-                       3
-                      )
+                        3
+                       )
                .onSuccess(it -> {
-                  context.verify(() -> {
-                      Assertions.assertEquals(List.empty()
-                                                  .append("hi")
-                                                  .append("hi"),
-                                              it
-                                             );
-                      context.completeNow();
-                  });
-              })
+                   context.verify(() -> {
+                       Assertions.assertEquals(expected,
+                                               it
+                                              );
+                       context.completeNow();
+                   });
+               })
                .get();
     }
 
 
     @Test
     public void test_append_all(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("a");
+        expected.add("b");
+        expected.add("c");
+        expected.add("d");
         ListExp<String> a = ListExp.sequential(Cons.success("a"),
                                                Cons.success("b")
                                               );
@@ -151,11 +160,7 @@ public class TestSequentialSeq {
 
         a.appendAll(b)
          .onSuccess(list -> context.verify(() -> {
-             Assertions.assertEquals(List.empty()
-                                         .append("a")
-                                         .append("b")
-                                         .append("c")
-                                         .append("d"),
+             Assertions.assertEquals(expected,
                                      list
                                     );
              context.completeNow();
@@ -166,6 +171,9 @@ public class TestSequentialSeq {
 
     @Test
     public void test_retry_if_with_action(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("hi");
+        expected.add("hi");
         ErrorWhile<String> hi = new ErrorWhile<>(3,
                                                  i -> new IllegalArgumentException(),
                                                  "hi"
@@ -174,26 +182,27 @@ public class TestSequentialSeq {
                            hi.get()
                           )
                .retryIf(it -> it instanceof IllegalArgumentException,
-                       3,
-                       (e, i) -> vertxRef.delay(100,
-                                                MILLISECONDS
-                                               )
-                      )
+                        3,
+                        (e, i) -> vertxRef.delay(100,
+                                                 MILLISECONDS
+                                                )
+                       )
                .onSuccess(it -> {
-                  context.verify(() -> {
-                      Assertions.assertEquals(List.empty()
-                                                  .append("hi")
-                                                  .append("hi"),
-                                              it
-                                             );
-                      context.completeNow();
-                  });
-              })
+                   context.verify(() -> {
+                       Assertions.assertEquals(expected,
+                                               it
+                                              );
+                       context.completeNow();
+                   });
+               })
                .get();
     }
 
     @Test
     public void test_retry_with_delay(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("a");
+        expected.add("b");
         int ATTEMPTS = 3;
         Supplier<Val<String>> a =
                 new ErrorWhile<>(counter -> counter <= ATTEMPTS,
@@ -222,9 +231,7 @@ public class TestSequentialSeq {
 
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("a")
-                                                                         .append("b")
+                                                                     expected
                                                                     )
                 && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
                 .accept(val,
@@ -235,17 +242,19 @@ public class TestSequentialSeq {
 
     @Test
     public void test_map(VertxTestContext context) {
-
+        List<String> expected = new ArrayList<>();
+        expected.add("A");
+        expected.add("B");
         Val<List<String>> val = ListExp.<String>sequential()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
-                .map(it -> it.map(String::toUpperCase));
+                .map(it -> it.stream()
+                             .map(String::toUpperCase)
+                             .collect(Collectors.toList()));
 
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("A")
-                                                                         .append("B")
+                                                                     expected
                                                                     )
                                              )
                 .accept(val,
@@ -273,16 +282,18 @@ public class TestSequentialSeq {
 
     @Test
     public void test_quintuple_exp_flatmap_success(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("A");
+        expected.add("B");
         Val<List<String>> val = ListExp.<String>sequential()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
-                .flatMap(list -> Cons.success(list.map(String::toUpperCase)));
+                .flatMap(list -> Cons.success(list.stream()
+                                                  .map(String::toUpperCase)
+                                                  .collect(Collectors.toList())));
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("A")
-                                                                         .append("B")
-                                                                    ))
+                                                                     expected))
                 .accept(val,
                         context
                        );
@@ -295,15 +306,18 @@ public class TestSequentialSeq {
         Assertions.assertEquals(3,
                                 ListExp.sequential(Cons.success(1),
                                                    Cons.success(2),
-                                                   Cons.success(3))
-                                       .size());
+                                                   Cons.success(3)
+                                                  )
+                                       .size()
+                               );
         context.completeNow();
     }
 
     @Test
     public void test_is_empty(VertxTestContext context) {
 
-        Assertions.assertTrue(ListExp.sequential().isEmpty());
+        Assertions.assertTrue(ListExp.sequential()
+                                     .isEmpty());
         context.completeNow();
     }
 }

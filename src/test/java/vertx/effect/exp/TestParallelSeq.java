@@ -1,6 +1,5 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.List;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
@@ -14,9 +13,12 @@ import vertx.effect.Val;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -68,11 +70,11 @@ public class TestParallelSeq {
                 .append(Cons.success("c"))
                 .tail();
 
-
+        List<String> expected = new ArrayList<>();
+        expected.add("b");
+        expected.add("c");
         Verifiers.<List<String>>verifySuccess(tail -> Objects.equals(tail,
-                                                                     List.empty()
-                                                                         .append("b")
-                                                                         .append("c")
+                                                                     expected
                                                                     )
                                              ).accept(val,
                                                       context
@@ -101,12 +103,12 @@ public class TestParallelSeq {
                 .append(b.get())
                 .prepend(a.get())
                 .retry(ATTEMPTS);
-
+        List<String> expected = new ArrayList<>();
+        expected.add("a");
+        expected.add("b");
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("a")
-                                                                         .append("b")
+                                                                     expected
                                                                     ))
                 .accept(val,
                         context
@@ -141,11 +143,11 @@ public class TestParallelSeq {
                        oneSecDelay
                       );
 
-
+        List<String> expected = new ArrayList<>();
+        expected.add("a");
+        expected.add("b");
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("a")
-                                                                         .append("b")
+                                                                     expected
                                                                     )
                 && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
                 .accept(val,
@@ -160,13 +162,15 @@ public class TestParallelSeq {
         Val<List<String>> val = ListExp.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
-                .map(it -> it.map(String::toUpperCase));
+                .map(it -> it.stream()
+                             .map(String::toUpperCase)
+                             .collect(Collectors.toList()));
 
-
+        List<String> expected = new ArrayList<>();
+        expected.add("A");
+        expected.add("B");
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("A")
-                                                                         .append("B")
+                                                                     expected
                                                                     )
                                              )
                 .accept(val,
@@ -194,6 +198,9 @@ public class TestParallelSeq {
 
     @Test
     public void test_retry_if(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("hi");
+        expected.add("hi");
         ErrorWhile<String> hi = new ErrorWhile<>(3,
                                                  i -> new IllegalArgumentException(),
                                                  "hi"
@@ -202,23 +209,24 @@ public class TestParallelSeq {
                          hi.get()
                         )
                .retryIf(it -> it instanceof IllegalArgumentException,
-                       3
-                      )
+                        3
+                       )
                .onSuccess(it -> {
-                  context.verify(() -> {
-                      Assertions.assertEquals(List.empty()
-                                                  .append("hi")
-                                                  .append("hi"),
-                                              it
-                                             );
-                      context.completeNow();
-                  });
-              })
+                   context.verify(() -> {
+                       Assertions.assertEquals(expected,
+                                               it
+                                              );
+                       context.completeNow();
+                   });
+               })
                .get();
     }
 
     @Test
     public void test_retry_if_with_action(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("hi");
+        expected.add("hi");
         ErrorWhile<String> hi = new ErrorWhile<>(3,
                                                  i -> new IllegalArgumentException(),
                                                  "hi"
@@ -227,35 +235,36 @@ public class TestParallelSeq {
                          hi.get()
                         )
                .retryIf(it -> it instanceof IllegalArgumentException,
-                       3,
-                       (e, i) -> vertxRef.delay(100,
-                                                MILLISECONDS
-                                               )
-                      )
+                        3,
+                        (e, i) -> vertxRef.delay(100,
+                                                 MILLISECONDS
+                                                )
+                       )
                .onSuccess(it -> {
-                  context.verify(() -> {
-                      Assertions.assertEquals(List.empty()
-                                                  .append("hi")
-                                                  .append("hi"),
-                                              it
-                                             );
-                      context.completeNow();
-                  });
-              })
+                   context.verify(() -> {
+                       Assertions.assertEquals(expected,
+                                               it
+                                              );
+                       context.completeNow();
+                   });
+               })
                .get();
     }
 
     @Test
     public void test_quintuple_exp_flatmap_success(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("A");
+        expected.add("B");
         Val<List<String>> val = ListExp.<String>parallel()
                 .append(Cons.success("a"))
                 .append(Cons.success("b"))
-                .flatMap(list -> Cons.success(list.map(String::toUpperCase)));
+                .flatMap(list -> Cons.success(list.stream()
+                                                  .map(String::toUpperCase)
+                                                  .collect(Collectors.toList())));
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     List.empty()
-                                                                         .append("A")
-                                                                         .append("B")
+                                                                     expected
                                                                     ))
                 .accept(val,
                         context
@@ -266,6 +275,11 @@ public class TestParallelSeq {
 
     @Test
     public void test_append_all(VertxTestContext context) {
+        List<String> expected = new ArrayList<>();
+        expected.add("a");
+        expected.add("b");
+        expected.add("c");
+        expected.add("d");
         ListExp<String> a = ListExp.parallel(Cons.success("a"),
                                              Cons.success("b")
                                             );
@@ -276,11 +290,7 @@ public class TestParallelSeq {
 
         a.appendAll(b)
          .onSuccess(list -> context.verify(() -> {
-             Assertions.assertEquals(List.empty()
-                                         .append("a")
-                                         .append("b")
-                                         .append("c")
-                                         .append("d"),
+             Assertions.assertEquals(expected,
                                      list
                                     );
              context.completeNow();
@@ -314,14 +324,15 @@ public class TestParallelSeq {
         Val<String> a = Cons.of(() -> Future.succeededFuture("a"));
         Val<String> b = Cons.of(() -> Future.succeededFuture("b"));
         ListExp.parallel(a,
-                         b)
+                         b
+                        )
                .race()
                .onSuccess(it -> context.verify(() -> {
-                  Assertions.assertEquals("a",
-                                          it
-                                         );
-                  context.completeNow();
-              }))
+                   Assertions.assertEquals("a",
+                                           it
+                                          );
+                   context.completeNow();
+               }))
                .get();
     }
 

@@ -1,8 +1,9 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.List;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
+
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
@@ -32,9 +33,9 @@ public abstract class ListExp<O> extends AbstractVal<List<O>> {
 
     protected static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
-    protected final List<Val<? extends O>> seq;
+    protected final io.vavr.collection.List<Val<? extends O>> seq;
 
-    public ListExp(final List<Val<? extends O>> seq) {
+    ListExp(final io.vavr.collection.List<Val<? extends O>> seq) {
         this.seq = seq;
     }
 

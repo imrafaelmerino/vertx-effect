@@ -1,10 +1,11 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.List;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.Val;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -14,9 +15,9 @@ import static java.util.Objects.requireNonNull;
 class ParallelSeq<O> extends ListExp<O> {
 
     @SuppressWarnings("rawtypes")
-    protected static final ListExp EMPTY = new ParallelSeq<>(List.empty());
+    protected static final ListExp EMPTY = new ParallelSeq<>(io.vavr.collection.List.empty());
 
-    ParallelSeq(final List<Val<? extends O>> seq) {
+    ParallelSeq(final io.vavr.collection.List<Val<? extends O>> seq) {
         super(seq);
     }
 
@@ -76,15 +77,7 @@ class ParallelSeq<O> extends ListExp<O> {
         java.util.List futures = seq.map(Supplier::get)
                                     .toJavaList();
         return CompositeFuture.all(futures)
-                              .map(c -> {
-                                  List<O>                result    = List.empty();
-                                  java.util.List<Object> completed = c.list();
-                                  for (Object o : completed) {
-                                      O element = (O) o;
-                                      result = result.append(element);
-                                  }
-                                  return result;
-                              });
+                              .map(CompositeFuture::list);
 
     }
 
