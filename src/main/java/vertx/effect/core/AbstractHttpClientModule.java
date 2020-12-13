@@ -2,6 +2,7 @@ package vertx.effect.core;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.VertxException;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.ReplyException;
@@ -18,12 +19,15 @@ import vertx.effect.λc;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static io.vertx.core.http.HttpMethod.*;
+import static io.vertx.core.net.impl.ConnectionBase.CLOSED_EXCEPTION;
 import static java.util.Objects.requireNonNull;
-import static vertx.effect.Failures.GET_HTTP_METHOD_NOT_IMPLEMENTED_EXCEPTION;
-import static vertx.effect.Failures.GET_HTTP_REPLY_EXCEPTION;
+import static vertx.effect.Failures.*;
+import static vertx.effect.core.Functions.getErrorMessage;
 import static vertx.effect.core.ReqEvent.RESULT.FAILURE;
 import static vertx.effect.core.ReqEvent.RESULT.SUCCESS;
 import static vertx.effect.httpclient.HttpResp.*;
@@ -218,7 +222,9 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                           });
                     break;
                 default:
-                    message.reply(GET_HTTP_METHOD_NOT_IMPLEMENTED_EXCEPTION.apply(type)
+                    message.reply(new ReplyException(RECIPIENT_FAILURE,
+                                                     HTTP_METHOD_NOT_IMPLEMENTED_CODE,
+                                                     "The method type " + type + " is not supported. Supported types are in enum HttpReqBuilder.TYPE.")
                                  );
             }
         };
@@ -314,4 +320,46 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                                         .andThen(COOKIES_LENS.set.apply(cookies2JsArray(httpResp.cookies())))
                                         .apply(JsObj.empty());
 
+    private static final Function<Throwable, ReplyException> GET_HTTP_REPLY_EXCEPTION =
+            exc -> {
+                switch (exc.getClass()
+                           .getSimpleName()) {
+
+                    case "ConnectTimeoutException":
+                        return new ReplyException(RECIPIENT_FAILURE,
+                                                  HTTP_CONNECT_TIMEOUT_CODE,
+                                                  getErrorMessage(exc)
+                        );
+                    case "UnknownHostException":
+                        return new ReplyException(RECIPIENT_FAILURE,
+                                                  HTTP_UNKNOWN_HOST_CODE,
+                                                  getErrorMessage(exc)
+                        );
+                    case "NoStackTraceTimeoutException":
+                        return new ReplyException(RECIPIENT_FAILURE,
+                                                  HTTP_REQUEST_TIMEOUT_CODE,
+                                                  getErrorMessage(exc)
+                        );
+                    case "VertxException": {
+                        VertxException vertxException = (VertxException) exc;
+                        if (vertxException == CLOSED_EXCEPTION) {
+                            return new ReplyException(RECIPIENT_FAILURE,
+                                                      HTTP_CONNECTION_WAS_CLOSED_CODE,
+                                                      CLOSED_EXCEPTION.getMessage()
+                            );
+                        }
+                        else return new ReplyException(RECIPIENT_FAILURE,
+                                                       HTTP_FAILURE_CODE,
+                                                       getErrorMessage(exc)
+                        );
+
+                    }
+
+                    default:
+                        return new ReplyException(RECIPIENT_FAILURE,
+                                                  HTTP_FAILURE_CODE,
+                                                  getErrorMessage(exc)
+                        );
+                }
+            };
 }

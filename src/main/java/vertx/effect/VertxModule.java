@@ -5,14 +5,18 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.ReplyException;
+import vertx.effect.core.Functions;
+import vertx.effect.exp.ListExp;
 import vertx.effect.exp.MapExp;
 import vertx.effect.exp.Pair;
-import vertx.effect.exp.ListExp;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static java.util.Objects.requireNonNull;
+import static vertx.effect.Failures.EXCEPTION_DEPLOYING_MODULE_CODE;
 
 
 /**
@@ -113,14 +117,20 @@ public abstract class VertxModule extends AbstractVerticle {
                             initialize();
                             start.complete();
                         } catch (Exception e) {
-                            start.fail(Failures.GET_EXCEPTION_DEPLOYING_MODULE.apply(e));
+                            start.fail(new ReplyException(RECIPIENT_FAILURE,
+                                                          EXCEPTION_DEPLOYING_MODULE_CODE,
+                                                          Functions.getErrorMessage(e)
+                            ));
                         }
                     }
                 })
                 .get();
 
         } catch (Exception e) {
-            start.fail(Failures.GET_EXCEPTION_DEPLOYING_MODULE.apply(e));
+            start.fail(new ReplyException(RECIPIENT_FAILURE,
+                                          EXCEPTION_DEPLOYING_MODULE_CODE,
+                                          Functions.getErrorMessage(e)
+            ));
         }
     }
 

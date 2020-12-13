@@ -11,9 +11,8 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import static vertx.effect.Failures.GET_EMPTY_AUTHORIZATION_CODE_EXCEPTION;
-import static vertx.effect.Failures.GET_EMPTY_REDIRECT_URL_CODE_EXCEPTION;
+import static vertx.effect.httpclient.oauth.OauthFailures.GET_EMPTY_AUTHORIZATION_CODE_EXCEPTION;
+import static vertx.effect.httpclient.oauth.OauthFailures.GET_EMPTY_REDIRECT_URL_CODE_EXCEPTION;
 
 public class Spotify {
 

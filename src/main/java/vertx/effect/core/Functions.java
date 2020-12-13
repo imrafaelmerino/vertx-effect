@@ -4,6 +4,8 @@ import io.vertx.core.MultiMap;
 import jsonvalues.JsArray;
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
+
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -40,5 +42,9 @@ public class Functions {
                 }
                 return result;
             };
-
+    public static String getErrorMessage(final Throwable e) {
+        return e.getStackTrace().length == 0 ?
+               e.toString() :
+               e.toString() + "@" + Arrays.toString(e.getStackTrace());
+    }
 }

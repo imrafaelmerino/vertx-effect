@@ -4,9 +4,11 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.eventbus.ReplyException;
 
 import java.util.function.Consumer;
 
+import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static java.util.Objects.requireNonNull;
 import static vertx.effect.Event.INTERNAL_ERROR_PROCESSING_MESSAGE;
 import static vertx.effect.Event.INTERNAL_ERROR_STARTING_VERTICLE;
@@ -54,7 +56,9 @@ public class MyVerticle<I> extends AbstractVerticle {
                                                  try {
                                                      this.consumer.accept((Message<I>) message);
                                                  } catch (Exception exc) {
-                                                     message.reply(GET_INTERNAL_ERROR_EXCEPTION.apply(exc));
+                                                     message.reply(new ReplyException(RECIPIENT_FAILURE,
+                                                                                      INTERNAL_ERROR_CODE,
+                                                                                      Functions.getErrorMessage(exc)));
                                                      promise.fail(exc);
                                                      EventPublisher.PUBLISHER.internalError(INTERNAL_ERROR_PROCESSING_MESSAGE,
                                                                                             address,
@@ -66,7 +70,10 @@ public class MyVerticle<I> extends AbstractVerticle {
                                             );
             messageConsumer.completionHandler(promise);
         } catch (Exception exc) {
-            promise.fail(GET_EXCEPTION_DEPLOYING_VERTICLE.apply(exc));
+            promise.fail(new ReplyException(RECIPIENT_FAILURE,
+                                            EXCEPTION_DEPLOYING_VERTICLE_CODE,
+                                            Functions.getErrorMessage(exc))
+                        );
             EventPublisher.PUBLISHER.internalError(INTERNAL_ERROR_STARTING_VERTICLE,
                                                    address,
                                                    exc
@@ -87,7 +94,9 @@ public class MyVerticle<I> extends AbstractVerticle {
                 messageConsumer.unregister(promise);
             else promise.complete();
         } catch (Exception e) {
-            promise.fail(GET_EXCEPTION_STOPPING_VERTICLE.apply(e));
+            promise.fail(new ReplyException(RECIPIENT_FAILURE,
+                                            EXCEPTION_STOPPING_VERTICLE_CODE,
+                                            Functions.getErrorMessage(e)));
 
         }
     }

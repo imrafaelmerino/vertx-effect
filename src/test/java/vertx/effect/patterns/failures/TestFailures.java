@@ -148,8 +148,7 @@ public class TestFailures {
                       if (it.succeeded()) context.failNow(new RuntimeException("abcd is really a host!"));
                       else {
                           context.verify(() -> {
-                              Assertions.assertTrue(UNKNOWN_HOST_PRISM.getOptional.apply(it.cause())
-                                                                                  .isPresent());
+                              Assertions.assertTrue(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE).test(it.cause()));
                               context.completeNow();
                           });
                       }

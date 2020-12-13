@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 import static vertx.effect.Failures.*;
+import static vertx.effect.httpclient.oauth.OauthFailures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION;
 
 @SuppressWarnings("unchecked")
 public abstract class OauthBuilder<T extends OauthBuilder<T>> {
@@ -34,10 +35,10 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
                                           .key("body")
                                           .key("access_token"));
                     if (token == null || token.isEmpty())
-                        return Cons.failure(Failures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                        return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                     return Cons.success(token);
                 } catch (Exception e) {
-                    return Cons.failure(Failures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                    return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                 }
             };
     protected Predicate<JsObj> refreshTokenPredicate = resp -> {

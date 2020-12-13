@@ -6,6 +6,7 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import vertx.effect.core.EventPublisher;
+import vertx.effect.core.Functions;
 import vertx.effect.core.MyVerticle;
 import vertx.effect.exp.Cons;
 
@@ -15,7 +16,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static java.util.Objects.requireNonNull;
+import static vertx.effect.Failures.INTERNAL_ERROR_CODE;
+import static vertx.effect.Failures.UNKNOWN_ERROR_CODE;
 
 /**
  Wrapper around the vertx instance. It deploys and spawns functions and tasks as Verticles.
@@ -484,7 +488,9 @@ public class VertxRef {
                                                                                  message.headers()
                                                                                 )
                                                                   .accept(vertx);
-                                          message.reply(Failures.GET_INTERNAL_ERROR_EXCEPTION.apply(exc));
+                                          message.reply(new ReplyException(RECIPIENT_FAILURE,
+                                                                           INTERNAL_ERROR_CODE,
+                                                                           Functions.getErrorMessage(exc)));
                                       }
                                   }
                                  );
@@ -497,7 +503,9 @@ public class VertxRef {
                                            consumer.accept(body);
                                            message.reply(null);
                                        } catch (Exception exc) {
-                                           message.reply(Failures.GET_INTERNAL_ERROR_EXCEPTION.apply(exc));
+                                           message.reply(new ReplyException(RECIPIENT_FAILURE,
+                                                                            INTERNAL_ERROR_CODE,
+                                                                            Functions.getErrorMessage(exc)));
                                        }
                                    }
                                   );
@@ -556,7 +564,9 @@ public class VertxRef {
 
                       ReplyException error = Failures.REPLY_EXCEPTION_PRISM
                               .getOptional.apply(event.cause())
-                                          .orElse(Failures.GET_UNKNOWN_ERROR_EXCEPTION.apply(event.cause()));
+                                          .orElse(new ReplyException(RECIPIENT_FAILURE,
+                                                                     UNKNOWN_ERROR_CODE,
+                                                                     Functions.getErrorMessage(event.cause())));
                       message.reply(error,
                                     deliveryOpt.apply(headers)
                                    );
@@ -571,7 +581,9 @@ public class VertxRef {
               })
               .get();
         } catch (Exception exc) {
-            message.reply(Failures.GET_INTERNAL_ERROR_EXCEPTION.apply(exc),
+            message.reply(new ReplyException(RECIPIENT_FAILURE,
+                                             INTERNAL_ERROR_CODE,
+                                             Functions.getErrorMessage(exc)),
                           deliveryOpt.apply(headers)
                          );
             EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_PROCESSING_MESSAGE,
@@ -612,7 +624,9 @@ public class VertxRef {
                       ReplyException error = Failures
                               .REPLY_EXCEPTION_PRISM
                               .getOptional.apply(event.cause())
-                                          .orElse(Failures.GET_UNKNOWN_ERROR_EXCEPTION.apply(event.cause()));
+                                          .orElse(new ReplyException(RECIPIENT_FAILURE,
+                                                                     UNKNOWN_ERROR_CODE,
+                                                                     Functions.getErrorMessage(event.cause())));
                       message.reply(error,
                                     deliveryOpt.apply(headers)
                                    );
@@ -628,7 +642,9 @@ public class VertxRef {
               .get();
 
         } catch (Exception exc) {
-            message.reply(Failures.GET_INTERNAL_ERROR_EXCEPTION.apply(exc),
+            message.reply(new ReplyException(RECIPIENT_FAILURE,
+                                             INTERNAL_ERROR_CODE,
+                                             Functions.getErrorMessage(exc)),
                           deliveryOpt.apply(headers)
                          );
             EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_PROCESSING_MESSAGE,
