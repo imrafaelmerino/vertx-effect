@@ -4,9 +4,9 @@ import io.vertx.core.http.HttpMethod;
 import jdk.jfr.*;
 
 @Label("http request")
-@Name("jio.httpclient.Request")
-@Category("JIO")
-@Description("Http request made by JIO using the native HTTP Java client.")
+@Name("vertx.effect.httpclient.Request")
+@Category("vertx.effect")
+@Description("Http request made by vertx-effect http client.")
  public class ReqEvent extends Event {
 
     public enum RESULT {SUCCESS, FAILURE}
