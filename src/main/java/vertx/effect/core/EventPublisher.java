@@ -348,7 +348,7 @@ public class EventPublisher {
                                                 .andThen(Event.instantLens.set.apply(Instant.now()))
                                                 .andThen(Event.threadLens.set.apply(Thread.currentThread()
                                                                                           .getName())
-                                                           )
+                                                        )
                                                 .apply(JsObj.empty())
                             );
         };

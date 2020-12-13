@@ -24,6 +24,8 @@ import static io.vertx.core.http.HttpMethod.*;
 import static java.util.Objects.requireNonNull;
 import static vertx.effect.Failures.GET_HTTP_METHOD_NOT_IMPLEMENTED_EXCEPTION;
 import static vertx.effect.Failures.GET_HTTP_REPLY_EXCEPTION;
+import static vertx.effect.core.ReqEvent.RESULT.FAILURE;
+import static vertx.effect.core.ReqEvent.RESULT.SUCCESS;
 import static vertx.effect.httpclient.HttpResp.*;
 
 public abstract class AbstractHttpClientModule extends VertxModule {
@@ -47,6 +49,9 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
     Consumer<Message<JsObj>> consumer(final HttpClient client) {
         return message -> {
+            ReqEvent reqEvent = new ReqEvent();
+
+
             JsObj req = message.body();
             EventPublisher.PUBLISHER.receivedMessage(httpClientAddress,
                                                      message.headers()
@@ -55,84 +60,161 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
             Integer        type    = HttpReq.TYPE_LENS.get.apply(req);
             RequestOptions options = HttpReq.toReqOptions.apply(req);
+            reqEvent.uri = options.getURI();
             switch (type) {
                 case 0:
+                    reqEvent.method = GET;
+                    reqEvent.begin();
                     client.request(options.setMethod(GET))
                           .onComplete(event -> {
-                              if (event.succeeded()) event.result()
-                                                          .send(getHandler(message));
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              if (event.succeeded()) {
+                                  event.result()
+                                       .send(getHandler(message,
+                                                        reqEvent
+                                                       ));
+                              }
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
 
                     break;
                 case 1:
+                    reqEvent.method = POST;
                     client.request(options.setMethod(POST))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
                                                           .send(Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
-                                                                getHandler(message)
+                                                                getHandler(message,
+                                                                           reqEvent
+                                                                          )
                                                                );
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
 
                     break;
                 case 2:
+                    reqEvent.method = PUT;
                     client.request(options.setMethod(PUT))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
                                                           .send(Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
-                                                                getHandler(message)
+                                                                getHandler(message,
+                                                                           reqEvent
+                                                                          )
                                                                );
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
                     break;
                 case 3:
+                    reqEvent.method = DELETE;
                     client.request(options.setMethod(DELETE))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
-                                                          .send(getHandler(message));
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                                                          .send(getHandler(message,
+                                                                           reqEvent
+                                                                          ));
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
                     break;
                 case 4:
+                    reqEvent.method = OPTIONS;
                     client.request(options.setMethod(OPTIONS))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
-                                                          .send(getHandler(message));
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                                                          .send(getHandler(message,
+                                                                           reqEvent
+                                                                          ));
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
                     break;
                 case 5:
+                    reqEvent.method = HEAD;
                     client.request(options.setMethod(HEAD))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
-                                                          .send(getHandler(message));
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                                                          .send(getHandler(message,
+                                                                           reqEvent
+                                                                          ));
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
                     break;
                 case 6:
+                    reqEvent.method = TRACE;
                     client.request(options.setMethod(TRACE))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
-                                                          .send(getHandler(message));
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                                                          .send(getHandler(message,
+                                                                           reqEvent
+                                                                          ));
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
                     break;
                 case 7:
+                    reqEvent.method = PATCH;
                     client.request(options.setMethod(PATCH))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
                                                           .send(Buffer.buffer(HttpReq.BYTES_BODY_LENS.get.apply(req)),
-                                                                getHandler(message));
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                                                                getHandler(message,
+                                                                           reqEvent
+                                                                          )
+                                                               );
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
                     break;
                 case 8:
+                    reqEvent.method = CONNECT;
                     client.request(options.setMethod(CONNECT))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
-                                                          .send(getHandler(message));
-                              else message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                                                          .send(getHandler(message,
+                                                                           reqEvent
+                                                                          ));
+                              else {
+                                  commitFailure(reqEvent,
+                                                event.cause()
+                                               );
+                                  message.reply(GET_HTTP_REPLY_EXCEPTION.apply(event.cause()));
+                              }
                           });
                     break;
                 default:
@@ -142,11 +224,24 @@ public abstract class AbstractHttpClientModule extends VertxModule {
         };
     }
 
+    private void commitFailure(final ReqEvent reqEvent,
+                               final Throwable failure) {
+        reqEvent.result = FAILURE;
+        reqEvent.failure = failure;
+        reqEvent.commit();
+        reqEvent.end();
+    }
 
-    private Handler<AsyncResult<HttpClientResponse>> getHandler(final Message<JsObj> message) {
+
+    private Handler<AsyncResult<HttpClientResponse>> getHandler(final Message<JsObj> message,
+                                                                final ReqEvent event) {
         return r -> {
             if (r.succeeded()) {
                 HttpClientResponse resp = r.result();
+                event.result = SUCCESS;
+                event.statusCode = resp.statusCode();
+                event.commit();
+                event.end();
                 resp.body()
                     .onComplete(it -> {
                                     if (it.succeeded()) {
