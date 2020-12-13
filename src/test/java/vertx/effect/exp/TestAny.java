@@ -199,7 +199,7 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.REQUEST_TIMEOUT_CODE),
+           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
                    2
                   )
            .get()
@@ -218,7 +218,7 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.REQUEST_TIMEOUT_CODE),
+           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
                    2
                   )
            .get()

@@ -101,18 +101,15 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     }
 
     private static final Predicate<Throwable> RETRY_ACCESS_TOKEN_REQ_PREDICATE =
-            Failures.or(UNKNOWN_HOST_PRISM,
-                        HTTP_CONNECT_TIMEOUT_PRISM
-                       )
-                    .or(REPLY_EXCEPTION_PRISM
-                                .exists
-                                .apply(exc ->
-                                               Failures.ACCESS_TOKEN_NOT_FOUND_CODE == exc.failureCode()
-                                      ));
+            Failures.anyOf(HTTP_UNKNOWN_HOST_CODE,
+                           HTTP_CONNECT_TIMEOUT_CODE,
+                           HTTP_ACCESS_TOKEN_NOT_FOUND_CODE
+                          );
+
 
     private static final Predicate<Throwable> RETRY_REQ_PREDICATE =
-            Failures.or(UNKNOWN_HOST_PRISM,
-                        HTTP_CONNECT_TIMEOUT_PRISM
-                       );
+            Failures.anyOf(HTTP_UNKNOWN_HOST_CODE,
+                           HTTP_CONNECT_TIMEOUT_CODE
+                          );
 
 }

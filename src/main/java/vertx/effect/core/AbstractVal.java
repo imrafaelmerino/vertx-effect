@@ -139,7 +139,7 @@ public abstract class AbstractVal<O> implements Val<O> {
                                             );
                        },
                        failure -> {
-                           if (Failures.or(Failures.REPLY_EXCEPTION_PRISM)
+                           if (Failures.REPLY_EXCEPTION_PRISM.isEmpty.negate()
                                        .test(failure))
                                return Cons.failure(failure);
                            return attempts > 0 ? retryUntil(predicate,

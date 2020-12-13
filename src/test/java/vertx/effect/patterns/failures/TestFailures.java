@@ -96,8 +96,7 @@ public class TestFailures {
                           context.failNow(new RuntimeException("the server was supposed to close the connection"));
                       else {
                           context.verify(() -> {
-                              Assertions.assertTrue(TCP_CONNECTION_CLOSED_PRISM.getOptional.apply(it.cause())
-                                                                                           .isPresent());
+                              Assertions.assertTrue(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE).test(it.cause()));
                               context.completeNow();
                           });
                       }
@@ -114,7 +113,7 @@ public class TestFailures {
                                      .port(portServerClosesConnection)
                                      .uri("/hi")
                         )
-                  .retryIf(or(TCP_CONNECTION_CLOSED_PRISM),
+                  .retryIf(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
                            1
                           )
                   .onComplete(it -> {
@@ -142,7 +141,7 @@ public class TestFailures {
                                              )
                                      .uri("/hi")
                         )
-                  .retryIf(or(UNKNOWN_HOST_PRISM),
+                  .retryIf(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE),
                            1
                           )
                   .onComplete(it -> {
@@ -169,9 +168,9 @@ public class TestFailures {
                                              )
                                      .uri("/hi")
                         )
-                  .retryIf(Failures.or(HTTP_REQUEST_TIMEOUT_PRISM,
-                                       HTTP_CONNECT_TIMEOUT_PRISM
-                                      ),
+                  .retryIf(Failures.anyOf(HTTP_REQUEST_TIMEOUT_CODE,
+                                          HTTP_CONNECT_TIMEOUT_CODE
+                                         ),
                            1
                           )
                   .onComplete(it -> {

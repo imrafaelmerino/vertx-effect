@@ -62,13 +62,13 @@ public class AuthorizationCodeFlowAuthenticateReq {
                 ).setReqAttempts(4)
                  .setRetryReqPredicate(Failures.REPLY_EXCEPTION_PRISM
                                                .exists
-                                               .apply(exc -> Objects.equals(Failures.UNKNOWN_HOST_CODE,
+                                               .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
                                                                             exc.failureCode()
                                                                            ) ||
-                                                       Objects.equals(Failures.CONNECT_TIMEOUT_CODE,
+                                                       Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
                                                                       exc.failureCode()
                                                                      )
-                                                       || Objects.equals(Failures.REQUEST_TIMEOUT_CODE,
+                                                       || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
                                                                          exc.failureCode()
                                                                         )
                                                      ))
