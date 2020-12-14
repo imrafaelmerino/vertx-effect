@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.ReplyException;
 import jsonvalues.*;
 import vertx.effect.Event;
+import vertx.effect.MessageEvent;
 import vertx.effect.VertxRef;
 
 import java.math.BigDecimal;
@@ -35,98 +36,136 @@ public class EventPublisher {
 
     public Consumer<Vertx> receivedError(final String address,
                                          final Throwable exc,
-                                         final MultiMap context) {
+                                         final MultiMap context,
+                                         final MessageEvent event) {
         return vertx -> {
-            if (enabled) {
-                Optional<ReplyException> opt = REPLY_EXCEPTION_PRISM
-                        .getOptional.apply(exc);
-                opt.ifPresentOrElse(error -> vertx
-                                            .eventBus()
-                                            .publish(VertxRef.EVENTS_ADDRESS,
-                                                     eventLens.set.apply(RECEIVED_FAILURE_EVENT)
-                                                                  .andThen(fromOpt.set.apply(address))
-                                                                  .andThen(contextLens.set.apply(context.isEmpty() ? NOTHING : headers2JsObj.apply(context)))
-                                                                  .andThen(failureTypeLens.set.apply(error.failureType()
-                                                                                                          .name())
-                                                                          )
-                                                                  .andThen(failureCodeLens.set.apply(error.failureCode()))
-                                                                  .andThen(failureMessageLens.set.apply(error.getMessage()))
-                                                                  .andThen(Event.instantLens.set.apply(Instant.now())
-                                                                          )
-                                                                  .andThen(Event.threadLens.set.apply(Thread.currentThread()
-                                                                                                            .getName())
-                                                                          )
-                                                                  .apply(JsObj.empty())
+            Optional<ReplyException> opt = REPLY_EXCEPTION_PRISM
+                    .getOptional.apply(exc);
 
-                                                    ),
-                                    () -> vertx
-                                            .eventBus()
-                                            .publish(VertxRef.EVENTS_ADDRESS,
-                                                     eventLens.set.apply(RECEIVED_FAILURE_EVENT)
-                                                                  .andThen(fromOpt.set.apply(address))
-                                                                  .andThen(contextLens.set.apply(context.isEmpty() ? NOTHING : headers2JsObj.apply(context)))
-                                                                  .andThen(exceptionOpt.set.apply(exc.getClass()
-                                                                                                     .getCanonicalName()))
-                                                                  .andThen(exceptionMessageOpt.set.apply(exc.getMessage()))
-                                                                  .andThen(exceptionStackOpt.set.apply(Arrays.toString(exc.getStackTrace())))
-                                                                  .andThen(Event.instantLens.set.apply(Instant.now())
-                                                                          )
-                                                                  .andThen(Event.threadLens.set.apply(Thread.currentThread()
-                                                                                                            .getName())
-                                                                          )
-                                                                  .apply(JsObj.empty())
 
-                                                    )
-                                   );
+            opt.ifPresentOrElse(error -> {
+                                    event.result = MessageEvent.Result.FAILURE.name();
+                                    event.failureType = error.failureType().name();
+                                    event.failureCode = error.failureCode();
+                                    event.commit();
+                                    event.end();
+                                    if (enabled) {
+                                        vertx.eventBus()
+                                             .publish(VertxRef.EVENTS_ADDRESS,
+                                                      eventLens.set.apply(RECEIVED_FAILURE_EVENT)
+                                                                   .andThen(fromOpt.set.apply(address))
+                                                                   .andThen(contextLens.set.apply(context.isEmpty() ? NOTHING : headers2JsObj.apply(context)))
+                                                                   .andThen(failureTypeLens.set.apply(error.failureType()
+                                                                                                           .name())
+                                                                           )
+                                                                   .andThen(failureCodeLens.set.apply(error.failureCode()))
+                                                                   .andThen(failureMessageLens.set.apply(error.getMessage()))
+                                                                   .andThen(Event.instantLens.set.apply(Instant.now())
+                                                                           )
+                                                                   .andThen(Event.threadLens.set.apply(Thread.currentThread()
+                                                                                                             .getName())
+                                                                           )
+                                                                   .apply(JsObj.empty())
 
-            }
+                                                     );
+                                    }
+                                },
+                                () -> {
+                                    event.result = MessageEvent.Result.FAILURE.name();
+                                    event.exceptionClass = exc.getClass().getCanonicalName();
+                                    event.exceptionMessage = exc.getMessage();
+                                    event.commit();
+                                    event.end();
+                                    if (enabled) {
+                                        vertx
+                                                .eventBus()
+                                                .publish(VertxRef.EVENTS_ADDRESS,
+                                                         eventLens.set.apply(RECEIVED_FAILURE_EVENT)
+                                                                      .andThen(fromOpt.set.apply(address))
+                                                                      .andThen(contextLens.set.apply(context.isEmpty() ? NOTHING : headers2JsObj.apply(context)))
+                                                                      .andThen(exceptionOpt.set.apply(exc.getClass()
+                                                                                                         .getCanonicalName()))
+                                                                      .andThen(exceptionMessageOpt.set.apply(exc.getMessage()))
+                                                                      .andThen(exceptionStackOpt.set.apply(Arrays.toString(exc.getStackTrace())))
+                                                                      .andThen(Event.instantLens.set.apply(Instant.now())
+                                                                              )
+                                                                      .andThen(Event.threadLens.set.apply(Thread.currentThread()
+                                                                                                                .getName())
+                                                                              )
+                                                                      .apply(JsObj.empty())
+
+                                                        );
+                                    }
+                                }
+                               );
+
+
         };
     }
 
 
     public Consumer<Vertx> receivedError(final String address,
-                                         final Throwable exc) {
+                                         final Throwable exc,
+                                         final MessageEvent event) {
         return vertx -> {
-            if (enabled) {
 
-                Optional<ReplyException> opt = REPLY_EXCEPTION_PRISM.getOptional.apply(exc);
-                opt.ifPresentOrElse(error -> vertx
-                                            .eventBus()
-                                            .publish(VertxRef.EVENTS_ADDRESS,
-                                                     eventLens.set.apply(RECEIVED_FAILURE_EVENT)
-                                                                  .andThen(fromOpt.set.apply(address))
-                                                                  .andThen(failureTypeLens.set.apply(error.failureType()
-                                                                                                          .name())
-                                                                          )
-                                                                  .andThen(failureCodeLens.set.apply(error.failureCode()))
-                                                                  .andThen(failureMessageLens.set.apply(error.getMessage()))
-                                                                  .andThen(Event.instantLens.set.apply(Instant.now())
-                                                                          )
-                                                                  .andThen(Event.threadLens.set.apply(Thread.currentThread()
-                                                                                                            .getName())
-                                                                          )
-                                                                  .apply(JsObj.empty())
 
-                                                    ),
-                                    () -> vertx
-                                            .eventBus()
-                                            .publish(VertxRef.EVENTS_ADDRESS,
-                                                     eventLens.set.apply(RECEIVED_FAILURE_EVENT)
-                                                                  .andThen(fromOpt.set.apply(address))
-                                                                  .andThen(exceptionOpt.set.apply(exc.getClass()
-                                                                                                     .getCanonicalName()))
-                                                                  .andThen(exceptionMessageOpt.set.apply(exc.getMessage()))
-                                                                  .andThen(exceptionStackOpt.set.apply(Arrays.toString(exc.getStackTrace())))
-                                                                  .andThen(Event.instantLens.set.apply(Instant.now())
-                                                                          )
-                                                                  .andThen(Event.threadLens.set.apply(Thread.currentThread()
-                                                                                                            .getName())
-                                                                          )
-                                                                  .apply(JsObj.empty())
+            Optional<ReplyException> opt = REPLY_EXCEPTION_PRISM.getOptional.apply(exc);
+            opt.ifPresentOrElse(error -> {
+                                    if (enabled) {
+                                        vertx
+                                                .eventBus()
+                                                .publish(VertxRef.EVENTS_ADDRESS,
+                                                         eventLens.set.apply(RECEIVED_FAILURE_EVENT)
+                                                                      .andThen(fromOpt.set.apply(address))
+                                                                      .andThen(failureTypeLens.set.apply(error.failureType()
+                                                                                                              .name())
+                                                                              )
+                                                                      .andThen(failureCodeLens.set.apply(error.failureCode()))
+                                                                      .andThen(failureMessageLens.set.apply(error.getMessage()))
+                                                                      .andThen(Event.instantLens.set.apply(Instant.now())
+                                                                              )
+                                                                      .andThen(Event.threadLens.set.apply(Thread.currentThread()
+                                                                                                                .getName())
+                                                                              )
+                                                                      .apply(JsObj.empty())
 
-                                                    )
-                                   );
-            }
+                                                        );
+                                    }
+                                    event.result = MessageEvent.Result.FAILURE.name();
+                                    event.failureType = error.failureType().name();
+                                    event.failureCode = error.failureCode();
+                                    event.commit();
+                                    event.end();
+                                },
+                                () -> {
+                                    if (enabled) {
+                                        vertx
+                                                .eventBus()
+                                                .publish(VertxRef.EVENTS_ADDRESS,
+                                                         eventLens.set.apply(RECEIVED_FAILURE_EVENT)
+                                                                      .andThen(fromOpt.set.apply(address))
+                                                                      .andThen(exceptionOpt.set.apply(exc.getClass()
+                                                                                                         .getCanonicalName()))
+                                                                      .andThen(exceptionMessageOpt.set.apply(exc.getMessage()))
+                                                                      .andThen(exceptionStackOpt.set.apply(Arrays.toString(exc.getStackTrace())))
+                                                                      .andThen(Event.instantLens.set.apply(Instant.now())
+                                                                              )
+                                                                      .andThen(Event.threadLens.set.apply(Thread.currentThread()
+                                                                                                                .getName())
+                                                                              )
+                                                                      .apply(JsObj.empty())
+
+                                                        );
+                                    }
+                                    event.result = MessageEvent.Result.FAILURE.name();
+                                    event.exceptionClass = exc.getClass().getCanonicalName();
+                                    event.exceptionMessage = exc.getMessage();
+                                    event.commit();
+                                    event.end();
+                                }
+                               );
+
         };
 
     }
@@ -232,8 +271,12 @@ public class EventPublisher {
     }
 
     public Consumer<Vertx> receivedResp(final String address,
-                                        final MultiMap headers) {
+                                        final MultiMap headers,
+                                        final MessageEvent event) {
         return vertx -> {
+            event.result = MessageEvent.Result.SUCCESS.name();
+            event.commit();
+            event.end();
             if (enabled) {
                 vertx
                         .eventBus()

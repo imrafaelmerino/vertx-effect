@@ -10,6 +10,7 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.RequestOptions;
+import io.vertx.core.http.impl.HttpClientImpl;
 import jsonvalues.JsArray;
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
@@ -28,8 +29,6 @@ import static io.vertx.core.net.impl.ConnectionBase.CLOSED_EXCEPTION;
 import static java.util.Objects.requireNonNull;
 import static vertx.effect.Failures.*;
 import static vertx.effect.core.Functions.getErrorMessage;
-import static vertx.effect.core.ReqEvent.RESULT.FAILURE;
-import static vertx.effect.core.ReqEvent.RESULT.SUCCESS;
 import static vertx.effect.httpclient.HttpResp.*;
 
 public abstract class AbstractHttpClientModule extends VertxModule {
@@ -54,8 +53,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
     Consumer<Message<JsObj>> consumer(final HttpClient client) {
         return message -> {
             ReqEvent reqEvent = new ReqEvent();
-
-
+            reqEvent.begin();
             JsObj req = message.body();
             EventPublisher.PUBLISHER.receivedMessage(httpClientAddress,
                                                      message.headers()
@@ -65,10 +63,13 @@ public abstract class AbstractHttpClientModule extends VertxModule {
             Integer        type    = HttpReq.TYPE_LENS.get.apply(req);
             RequestOptions options = HttpReq.toReqOptions.apply(req);
             reqEvent.uri = options.getURI();
+            String defaultHost = ((HttpClientImpl) client).getOptions()
+                                                          .getDefaultHost();
+            reqEvent.host = (defaultHost == null) ? options.getHost() : defaultHost;
+
             switch (type) {
                 case 0:
-                    reqEvent.method = GET;
-                    reqEvent.begin();
+                    reqEvent.method = GET.name();
                     client.request(options.setMethod(GET))
                           .onComplete(event -> {
                               if (event.succeeded()) {
@@ -87,7 +88,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
                     break;
                 case 1:
-                    reqEvent.method = POST;
+                    reqEvent.method = POST.name();
                     client.request(options.setMethod(POST))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -106,7 +107,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
                     break;
                 case 2:
-                    reqEvent.method = PUT;
+                    reqEvent.method = PUT.name();
                     client.request(options.setMethod(PUT))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -124,7 +125,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                           });
                     break;
                 case 3:
-                    reqEvent.method = DELETE;
+                    reqEvent.method = DELETE.name();
                     client.request(options.setMethod(DELETE))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -140,7 +141,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                           });
                     break;
                 case 4:
-                    reqEvent.method = OPTIONS;
+                    reqEvent.method = OPTIONS.name();
                     client.request(options.setMethod(OPTIONS))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -156,7 +157,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                           });
                     break;
                 case 5:
-                    reqEvent.method = HEAD;
+                    reqEvent.method = HEAD.name();
                     client.request(options.setMethod(HEAD))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -172,7 +173,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                           });
                     break;
                 case 6:
-                    reqEvent.method = TRACE;
+                    reqEvent.method = TRACE.name();
                     client.request(options.setMethod(TRACE))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -188,7 +189,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                           });
                     break;
                 case 7:
-                    reqEvent.method = PATCH;
+                    reqEvent.method = PATCH.name();
                     client.request(options.setMethod(PATCH))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -206,7 +207,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                           });
                     break;
                 case 8:
-                    reqEvent.method = CONNECT;
+                    reqEvent.method = CONNECT.name();
                     client.request(options.setMethod(CONNECT))
                           .onComplete(event -> {
                               if (event.succeeded()) event.result()
@@ -224,7 +225,8 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                 default:
                     message.reply(new ReplyException(RECIPIENT_FAILURE,
                                                      HTTP_METHOD_NOT_IMPLEMENTED_CODE,
-                                                     "The method type " + type + " is not supported. Supported types are in enum HttpReqBuilder.TYPE.")
+                                                     "The method type " + type + " is not supported. Supported types are in enum HttpReqBuilder.TYPE."
+                                  )
                                  );
             }
         };
@@ -232,8 +234,10 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
     private void commitFailure(final ReqEvent reqEvent,
                                final Throwable failure) {
-        reqEvent.result = FAILURE;
-        reqEvent.failure = failure;
+        reqEvent.result = ReqEvent.RESULT.FAILURE.name();
+        reqEvent.exceptionClass = failure.getClass()
+                                         .getCanonicalName();
+        reqEvent.exceptionMessage = failure.getMessage();
         reqEvent.commit();
         reqEvent.end();
     }
@@ -244,7 +248,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
         return r -> {
             if (r.succeeded()) {
                 HttpClientResponse resp = r.result();
-                event.result = SUCCESS;
+                event.result = ReqEvent.RESULT.SUCCESS.name();
                 event.statusCode = resp.statusCode();
                 event.commit();
                 event.end();
