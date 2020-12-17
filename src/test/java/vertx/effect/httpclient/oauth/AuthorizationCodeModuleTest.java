@@ -10,11 +10,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
-import vertx.effect.httpclient.MyHttpServer;
+import vertx.effect.httpserver.*;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -23,42 +24,14 @@ import java.util.concurrent.TimeUnit;
 public class AuthorizationCodeModuleTest {
 
     static AuthorizationCodeModule httpClient;
-    static MyHttpServer server;
 
     @BeforeAll
     public static void prepare(final Vertx vertx,
                                final VertxTestContext context
                               ) {
-        int port = Port.number.incrementAndGet();
-
-
-        server = new MyHttpServer(vertx,
-                                  port,
-                                  counter -> req -> body -> {
-                                      if (counter <= 3) return JsObj.empty()
-                                                                    .set("error",
-                                                                         JsStr.of("Error generating token")
-                                                                        );
-                                      else if (counter == 4) return JsObj.empty()
-                                                                         .set("access_token",
-                                                                              JsStr.of(UUID.randomUUID()
-                                                                                           .toString())
-                                                                             );
-                                      else if (counter <= 7) {
-                                          try {
-                                              Thread.sleep(500);
-                                          } catch (InterruptedException e) {
-                                              req.response().close();
-                                              return JsObj.empty();
-                                          }
-                                          return JsObj.empty();
-                                      }
-                                      else return JsObj.empty();
-
-                                  },
-                                  counter -> req -> body -> (counter <= 3) ? 401 : 200
-        );
+        int      port     = Port.number.incrementAndGet();
         VertxRef vertxRef = new VertxRef(vertx);
+
 
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
@@ -88,7 +61,36 @@ public class AuthorizationCodeModuleTest {
                  .createFromRefreshToken("refresh_token");
 
         Triple.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                        Cons.of(() -> server.start()),
+                        new HttpServerBuilder(vertx).addHandler(ReqHandler.when(ReqHandler.REQ_LET.apply(3))
+                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.of("error",
+                                                                                                                     JsStr.of("Error generating token")
+                                                                                                                    )
+                                                                                                           )
+                                                                                       )
+                                                                          .setStatusCodeResp(StatusRespHandler._401)
+                                                                          .setHeadersResp(HeadersRespHandler.JSON)
+                                                               )
+                                                    .addHandler(ReqHandler.when(ReqHandler.FORTH_REQ)
+                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.of("access_token",
+                                                                                                                     JsStr.of(UUID.randomUUID()
+                                                                                                                                .toString())
+                                                                                                                    ))
+                                                                                       )
+                                                                          .setStatusCodeResp(StatusRespHandler._200)
+                                                                          .setHeadersResp(HeadersRespHandler.JSON))
+                                                    .addHandler(ReqHandler.when(ReqHandler.REQ_LET.apply(7))
+                                                                          .setBodyResp(BodyRespHandler.consAfter(Duration.of(500,
+                                                                                                                             ChronoUnit.MILLIS
+                                                                                                                            ),
+                                                                                                                 JsObj.empty()
+                                                                                                                ))
+                                                                          .setStatusCodeResp(StatusRespHandler._200)
+                                                                          .setHeadersResp(HeadersRespHandler.JSON))
+                                                    .addHandler(ReqHandler.when(ReqHandler.REQ_GT.apply(7))
+                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.empty()))
+                                                                          .setStatusCodeResp(StatusRespHandler._200)
+                                                                          .setHeadersResp(HeadersRespHandler.JSON))
+                                                    .start(port),
                         vertxRef.deployVerticle(httpClient)
                        )
               .onComplete(Verifiers.pipeTo(context))

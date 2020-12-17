@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 
 
-public class Behaviour {
+public class ReqHandler {
 
     public static final BiPredicate<Integer, HttpServerRequest> ALWAYS = (c, req) -> true;
     public static final BiPredicate<Integer, HttpServerRequest> FIRST_REQ = (c, req) -> c == 1;
@@ -28,28 +28,28 @@ public class Behaviour {
     IntFunction<Function<Buffer, Function<HttpServerRequest, Integer>>> code;
     IntFunction<Function<Buffer, Function<HttpServerRequest, String>>> body;
 
-    private Behaviour(final BiPredicate<Integer, HttpServerRequest> predicate) {
+    private ReqHandler(final BiPredicate<Integer, HttpServerRequest> predicate) {
         this.predicate = predicate;
-        this.headers = MockHeadersResp.EMPTY;
-        this.code = MockStatusCodeResp._200;
-        this.body = MockBodyResp.EMPTY;
+        this.headers = HeadersRespHandler.EMPTY;
+        this.code = StatusRespHandler._200;
+        this.body = BodyRespHandler.EMPTY;
     }
 
-    public static Behaviour when(final BiPredicate<Integer, HttpServerRequest> predicate) {
-        return new Behaviour(predicate);
+    public static ReqHandler when(final BiPredicate<Integer, HttpServerRequest> predicate) {
+        return new ReqHandler(predicate);
     }
 
-    public Behaviour setHeadersResp(final IntFunction<Function<Buffer, Function<HttpServerRequest, MultiMap>>> headersResp) {
+    public ReqHandler setHeadersResp(final IntFunction<Function<Buffer, Function<HttpServerRequest, MultiMap>>> headersResp) {
         this.headers = Objects.requireNonNull(headersResp);
         return this;
     }
 
-    public Behaviour setBodyResp(final IntFunction<Function<Buffer, Function<HttpServerRequest, String>>> bodyResp) {
+    public ReqHandler setBodyResp(final IntFunction<Function<Buffer, Function<HttpServerRequest, String>>> bodyResp) {
         this.body = Objects.requireNonNull(bodyResp);
         return this;
     }
 
-    public Behaviour setStatusCodeResp(final IntFunction<Function<Buffer, Function<HttpServerRequest, Integer>>> statusCodeResp) {
+    public ReqHandler setStatusCodeResp(final IntFunction<Function<Buffer, Function<HttpServerRequest, Integer>>> statusCodeResp) {
         this.code = Objects.requireNonNull(statusCodeResp);
         return this;
     }

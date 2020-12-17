@@ -3,6 +3,7 @@ package vertx.effect.patterns.failures;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
+import io.vertx.core.http.HttpServer;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import jsonvalues.JsObj;
@@ -14,15 +15,20 @@ import vertx.effect.Failures;
 import vertx.effect.Port;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
-import vertx.effect.exp.Cons;
-import vertx.effect.exp.Quintuple;
+import vertx.effect.exp.Quadruple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.HttpResp;
-import vertx.effect.httpclient.MyHttpServer;
+import vertx.effect.httpserver.HttpServerBuilder;
+import vertx.effect.httpserver.BodyRespHandler;
+import vertx.effect.httpserver.ReqHandler;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static vertx.effect.Failures.*;
+import static vertx.effect.httpserver.ReqHandler.FIRST_REQ;
+import static vertx.effect.httpserver.ReqHandler.REQ_LT;
 
 @ExtendWith(VertxExtension.class)
 public class TestFailures {
@@ -31,7 +37,8 @@ public class TestFailures {
     final static MyHttpClient client = new MyHttpClient();
     final static int port = Port.number.incrementAndGet();
     final static int portServerClosesConnection = Port.number.incrementAndGet();
-    static MyHttpServer serverCloseConnection;
+    static HttpServer server;
+    static HttpServerBuilder serverCloseConnection;
 
     @BeforeAll
     public static void prepare(VertxTestContext context,
@@ -44,116 +51,128 @@ public class TestFailures {
                             );
 
 
-        serverCloseConnection = new MyHttpServer(vertx,
-                                                 portServerClosesConnection,
-                                                 counter -> req -> body -> {
-                                                     if (counter == 1) req.response()
-                                                                          .close();
-                                                     return JsObj.empty();
-                                                 },
-                                                 counter -> req -> body -> 200
-        );
-
-        MyHttpServer server = new MyHttpServer(vertx,
-                                               port,
-                                               counter -> req -> body -> {
-                                                   if (counter == 1) {
-                                                       try {
-                                                           Thread.sleep(1000);
-                                                       } catch (InterruptedException e) {
-                                                           e.printStackTrace();
-                                                       }
-                                                       return new JsObj();
-                                                   }
-                                                   else {
-                                                       return new JsObj();
-                                                   }
-                                               },
-                                               counter -> req -> body -> 200
-        );
-
-        Quintuple.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()),
+        Quadruple.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()),
                              ref.deployVerticle(new Module()),
                              ref.deployVerticle(client),
-                             Cons.of(server::start),
-                             Cons.of(serverCloseConnection::start)
+                             new HttpServerBuilder(vertx)
+                                     .addHandler(ReqHandler.when(FIRST_REQ)
+                                                           .setBodyResp(BodyRespHandler.consAfter(Duration.of(1,
+                                                                                                              SECONDS
+                                                                                                             ),
+                                                                                                  JsObj.empty()
+                                                                                                 )
+                                                                       )
+
+                                                )
+                                     .addHandler(ReqHandler.when(REQ_LT.apply(1))
+                                                           .setBodyResp(BodyRespHandler.cons(JsObj.empty())))
+                                     .start(port)
                             )
-                 .onComplete(result -> context.completeNow())
+                 .onComplete(tuple -> {
+                     context.completeNow();
+                     server = tuple.result()._4;
+                 })
                  .get();
+
+        serverCloseConnection =
+                new HttpServerBuilder(vertx).addHandler(ReqHandler.when(FIRST_REQ)
+                                                                  .setBodyResp(c -> b -> req -> {
+                                                                      req.response()
+                                                                         .close();
+                                                                      return "{}";
+                                                                  })
+                                                       )
+                                            .addHandler(ReqHandler.when(ReqHandler.REQ_GT.apply(1))
+                                                                  .setBodyResp(BodyRespHandler.cons(JsObj.empty()))
+                                                       );
 
     }
 
     @Test
-    public void test_close_connection_fails(VertxTestContext context) {
-        serverCloseConnection.resetCounter();
+    public void test_close_connection_fails(final Vertx vertx,
+                                            final VertxTestContext context) {
 
-        client.get.apply(new GetReq().host("localhost")
-                                     .port(portServerClosesConnection)
-                                     .uri("/hi")
-                        )
-                  .onComplete(it -> {
-                      if (it.succeeded())
-                          context.failNow(new RuntimeException("the server was supposed to close the connection"));
-                      else {
-                          context.verify(() -> {
-                              Assertions.assertTrue(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE).test(it.cause()));
-                              context.completeNow();
-                          });
-                      }
-                  })
-                  .get();
+        serverCloseConnection.start(portServerClosesConnection)
+                             .get()
+                             .onSuccess(server ->
+                                                client.get.apply(new GetReq().host("localhost")
+                                                                             .port(portServerClosesConnection)
+                                                                             .uri("/hi")
+                                                                )
+                                                          .onComplete(it -> {
+                                                              if (it.succeeded())
+                                                                  context.failNow(new RuntimeException("the server was supposed to close the connection"));
+                                                              else {
+                                                                  context.verify(() -> {
+                                                                      Assertions.assertTrue(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE)
+                                                                                                    .test(it.cause()));
+                                                                      context.completeNow();
+                                                                  });
+                                                              }
+                                                          })
+                                                          .get()
+        );
     }
 
 
     @Test
     public void test_close_connection_success(VertxTestContext context) {
-        serverCloseConnection.resetCounter();
+        serverCloseConnection.start(portServerClosesConnection)
+                             .get()
+                             .onSuccess(server -> {
+                                 client.get.apply(new GetReq().host("localhost")
+                                                              .port(portServerClosesConnection)
+                                                              .uri("/hi")
+                                                 )
+                                           .retryIf(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
+                                                    1
+                                                   )
+                                           .onComplete(it -> {
+                                               if (it.succeeded())
+                                                   context.verify(() -> {
+                                                       Assertions.assertEquals(200,
+                                                                               HttpResp.STATUS_CODE_LENS.get.apply(it.result())
+                                                                              );
+                                                       context.completeNow();
+                                                   });
+                                               else {
+                                                   context.failNow(it.cause());
+                                               }
+                                           })
+                                           .get();
+                             });
 
-        client.get.apply(new GetReq().host("localhost")
-                                     .port(portServerClosesConnection)
-                                     .uri("/hi")
-                        )
-                  .retryIf(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
-                           1
-                          )
-                  .onComplete(it -> {
-                      if (it.succeeded())
-                          context.verify(() -> {
-                              Assertions.assertEquals(200,
-                                                      HttpResp.STATUS_CODE_LENS.get.apply(it.result())
-                                                     );
-                              context.completeNow();
-                          });
-                      else {
-                          context.failNow(it.cause());
-                      }
-                  })
-                  .get();
     }
 
     @Test
     public void test_http_unkown_host(VertxTestContext context) {
+        serverCloseConnection.start(portServerClosesConnection)
+                             .get()
+                             .onSuccess(server -> {
+                                 client.get.apply(new GetReq().host("abcd")
+                                                              .port(portServerClosesConnection)
+                                                              .timeout(900,
+                                                                       TimeUnit.MILLISECONDS
+                                                                      )
+                                                              .uri("/hi")
+                                                 )
+                                           .retryIf(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE),
+                                                    1
+                                                   )
+                                           .onComplete(it -> {
+                                               if (it.succeeded())
+                                                   context.failNow(new RuntimeException("abcd is really a host!"));
+                                               else {
+                                                   context.verify(() -> {
+                                                       Assertions.assertTrue(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE)
+                                                                                     .test(it.cause()));
+                                                       context.completeNow();
+                                                   });
+                                               }
+                                           })
+                                           .get();
+                             });
 
-        client.get.apply(new GetReq().host("abcd")
-                                     .port(port)
-                                     .timeout(900,
-                                              TimeUnit.MILLISECONDS
-                                             )
-                                     .uri("/hi")
-                        )
-                  .retryIf(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE),
-                           1
-                          )
-                  .onComplete(it -> {
-                      if (it.succeeded()) context.failNow(new RuntimeException("abcd is really a host!"));
-                      else {
-                          context.verify(() -> {
-                              Assertions.assertTrue(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE).test(it.cause()));
-                              context.completeNow();
-                          });
-                      }
-                  })
-                  .get();
 
     }
 

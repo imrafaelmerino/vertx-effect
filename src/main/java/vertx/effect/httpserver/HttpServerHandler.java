@@ -11,63 +11,63 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MyReqHandler implements Handler<HttpServerRequest> {
+class HttpServerHandler implements Handler<HttpServerRequest> {
 
     protected AtomicInteger counter = new AtomicInteger(0);
 
-    final List<Behaviour> behaviours;
+    final List<ReqHandler> reqHandlers;
 
-    public MyReqHandler(final List<Behaviour> behaviours) {
-        this.behaviours = Objects.requireNonNull(behaviours);
+    HttpServerHandler(final List<ReqHandler> reqHandlers) {
+        this.reqHandlers = Objects.requireNonNull(reqHandlers);
     }
 
     @Override
     public void handle(final HttpServerRequest req) {
 
         int counter = this.counter.incrementAndGet();
-        behaviours.stream()
-                  .filter(it -> it.predicate.test(counter,
-                                                  req
-                                                 )
-                         )
-                  .findFirst()
-                  .ifPresentOrElse(it -> req.body(event ->
-                                                  {
-                                                      if (event.succeeded()) {
-                                                          Buffer buffer = event.result();
-                                                          HttpServerResponse response = req.response()
-                                                                                           .setStatusCode(it.code.apply(counter)
-                                                                                                                 .apply(buffer)
-                                                                                                                 .apply(req)
-                                                                                                         );
-                                                          MultiMap respHeaders = it.headers.apply(counter)
-                                                                                           .apply(buffer)
-                                                                                           .apply(req);
+        reqHandlers.stream()
+                   .filter(it -> it.predicate.test(counter,
+                                                   req
+                                                  )
+                          )
+                   .findFirst()
+                   .ifPresentOrElse(it -> req.body(event ->
+                                                   {
+                                                       if (event.succeeded()) {
+                                                           Buffer buffer = event.result();
+                                                           HttpServerResponse response = req.response()
+                                                                                            .setStatusCode(it.code.apply(counter)
+                                                                                                                  .apply(buffer)
+                                                                                                                  .apply(req)
+                                                                                                          );
+                                                           MultiMap respHeaders = it.headers.apply(counter)
+                                                                                            .apply(buffer)
+                                                                                            .apply(req);
 
-                                                          respHeaders.forEach(header -> response.putHeader(header.getKey(),
-                                                                                                           header.getValue()
-                                                                                                          )
-                                                                             );
-                                                          response
-                                                                  .end(it.body.apply(counter)
-                                                                              .apply(buffer)
-                                                                              .apply(req)
-                                                                      );
-                                                      }
-                                                      else {
-                                                          req.response()
-                                                             .setStatusCode(500)
-                                                             .end(Arrays.toString(event.cause()
-                                                                                       .getStackTrace()));
-                                                      }
-                                                  }
-                                                 )
+                                                           respHeaders.forEach(header -> response.putHeader(header.getKey(),
+                                                                                                            header.getValue()
+                                                                                                           )
+                                                                              );
+                                                           response
+                                                                   .end(it.body.apply(counter)
+                                                                               .apply(buffer)
+                                                                               .apply(req)
+                                                                       );
+                                                       }
+                                                       else {
+                                                           req.response()
+                                                              .setStatusCode(500)
+                                                              .end(Arrays.toString(event.cause()
+                                                                                        .getStackTrace()));
+                                                       }
+                                                   }
+                                                  )
 
-                          ,
-                                   () -> req.response()
-                                            .setStatusCode(404)
-                                            .end("No handler matched the req")
-                                  );
+                           ,
+                                    () -> req.response()
+                                             .setStatusCode(404)
+                                             .end("No handler matched the req")
+                                   );
 
     }
 
