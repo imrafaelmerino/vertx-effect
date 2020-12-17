@@ -78,7 +78,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${MAVEN-SUREFIRE-PLUGIN.VERSION}</version>
                 <configuration>
-                    <argLine>-XX:+FlightRecorder -XX:StartFlightRecording=duration=120s,filename=myrecording.jfr</argLine>
+                    <argLine>-XX:+FlightRecorder -XX:StartFlightRecording=duration=180s,filename=myrecording.jfr</argLine>
                 </configuration>
             </plugin>
             <plugin>
