@@ -133,7 +133,7 @@ public interface Val<O> extends Supplier<Future<O>> {
     Val<O> onComplete(final Handler<AsyncResult<O>> handler);
 
 
-    Val<O> retryUntil(final Predicate<O> predicate,
+    Val<O> retryWhile(final Predicate<O> predicate,
                       final int attempts);
 
 }

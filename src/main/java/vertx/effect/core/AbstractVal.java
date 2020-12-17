@@ -127,14 +127,14 @@ public abstract class AbstractVal<O> implements Val<O> {
     }
 
     @Override
-    public Val<O> retryUntil(final Predicate<O> predicate,
+    public Val<O> retryWhile(final Predicate<O> predicate,
                              final int attempts) {
         if (attempts < 0) return Cons.failure(RETRIES_EXHAUSTED);
 
 
         return flatMap(output -> {
-                           if (predicate.test(output)) return Cons.success(output);
-                           return retryUntil(predicate,
+                           if (!predicate.test(output)) return Cons.success(output);
+                           return retryWhile(predicate,
                                              attempts - 1
                                             );
                        },
@@ -142,7 +142,7 @@ public abstract class AbstractVal<O> implements Val<O> {
                            if (Failures.REPLY_EXCEPTION_PRISM.isEmpty.negate()
                                        .test(failure))
                                return Cons.failure(failure);
-                           return attempts > 0 ? retryUntil(predicate,
+                           return attempts > 0 ? retryWhile(predicate,
                                                             attempts - 1
                                                            ) : Cons.failure(RETRIES_EXHAUSTED);
                        }
