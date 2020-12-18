@@ -34,38 +34,28 @@ public abstract class Quintuple<A, B, C, D, E> extends AbstractVal<Tuple5<A, B, 
         );
     }
 
-    public abstract Val<A> first();
+    public abstract Val<A> _1();
 
-    public abstract Val<B> second();
+    public abstract Val<B> _2();
 
-    public abstract Val<C> third();
+    public abstract Val<C> _3();
 
-    public abstract Val<D> forth();
+    public abstract Val<D> _4();
 
-    public abstract Val<E> fifth();
+    public abstract Val<E> _5();
 
 
     public static <O> Val<O> race(final Quintuple<O, O, O, O, O> quintuple) {
         if (quintuple == null)
             return Cons.failure(new IllegalArgumentException("Quintuple.race: pair is null"));
-        return ListExp.parallel(quintuple.first(),
-                                quintuple.second(),
-                                quintuple.third(),
-                                quintuple.forth(),
-                                quintuple.fifth()
+        return ListExp.parallel(quintuple._1(),
+                                quintuple._2(),
+                                quintuple._3(),
+                                quintuple._4(),
+                                quintuple._5()
                                )
                       .race();
     }
 
-    public static <O> Val<O> raceFirst(final Quintuple<O, O, O, O, O> quintuple) {
-        if (quintuple == null)
-            return Cons.failure(new IllegalArgumentException("Quintuple.race: pair is null"));
-        return ListExp.parallel(quintuple.first(),
-                                quintuple.second(),
-                                quintuple.third(),
-                                quintuple.forth(),
-                                quintuple.fifth()
-                               )
-                      .raceFirst();
-    }
+
 }

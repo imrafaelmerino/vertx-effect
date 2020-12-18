@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
@@ -18,15 +19,15 @@ import static java.util.concurrent.TimeUnit.*;
 public class TestQuadruple {
 
     final Supplier<Val<String>> a =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                              counter -> new RuntimeException("counter: " + counter),
-                             "a"
+                                 "a"
             );
 
     final Supplier<Val<String>> b =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                              counter -> new RuntimeException("counter: " + counter),
-                             "b"
+                                 "b"
             );
 
     private static VertxRef vertxRef;
@@ -49,9 +50,9 @@ public class TestQuadruple {
     public void test_parallel_retries(VertxTestContext context) {
 
         final Supplier<Val<String>> a =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter: " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Val<Tuple4<String, String, String, String>> val =
@@ -75,9 +76,9 @@ public class TestQuadruple {
     public void test_sequential_retries(VertxTestContext context) {
 
         final Supplier<Val<String>> a =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter: " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Val<Tuple4<String, String, String, String>> val =
@@ -103,9 +104,9 @@ public class TestQuadruple {
     public void test_parallel_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quadruple.parallel(val.get(),
@@ -135,9 +136,9 @@ public class TestQuadruple {
     public void test_sequential_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quadruple.sequential(val.get(),
@@ -167,9 +168,9 @@ public class TestQuadruple {
     public void test_parallel_retries_if_failure(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quadruple.parallel(val.get(),
@@ -193,9 +194,9 @@ public class TestQuadruple {
     public void test_sequential_retries_if_failure(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quadruple.sequential(val.get(),
@@ -494,9 +495,9 @@ public class TestQuadruple {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<String> a = new ErrorWhile<>(counter -> counter <= ATTEMPTS,
+        ValOrErrorMock<String> a = new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
                                                 counter -> new RuntimeException("counter: " + counter),
-                                                "a"
+                                                        "a"
         );
         Quadruple.parallel(a.get(),
                            a.get(),
@@ -529,9 +530,9 @@ public class TestQuadruple {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<String> a = new ErrorWhile<>(counter -> counter <= ATTEMPTS,
+        ValOrErrorMock<String> a = new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
                                                 counter -> new RuntimeException("counter: " + counter),
-                                                "a"
+                                                        "a"
         );
         Quadruple.sequential(a.get(),
                              a.get(),

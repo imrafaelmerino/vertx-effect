@@ -132,22 +132,22 @@ class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
     }
 
     @Override
-    public Val<A> first() {
+    public Val<A> _1() {
         return _1;
     }
 
     @Override
-    public Val<B> second() {
+    public Val<B> _2() {
         return _2;
     }
 
     @Override
-    public Val<C> third() {
+    public Val<C> _3() {
         return _3;
     }
 
     @Override
-    public Val<D> forth() {
+    public Val<D> _4() {
         return _4;
     }
 }

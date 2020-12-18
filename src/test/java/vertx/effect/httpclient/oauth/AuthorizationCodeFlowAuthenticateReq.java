@@ -13,13 +13,13 @@ import vertx.effect.*;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.PostReq;
-import vertx.effect.httpserver.ReqHandler;
-import vertx.effect.httpserver.HttpServerBuilder;
-import vertx.effect.httpserver.HeadersRespHandler;
+import vertx.effect.mock.MockReqResp;
+import vertx.effect.mock.HttpServerBuilder;
+import vertx.effect.mock.MockHeadersResp;
 
 import java.util.Objects;
 
-import static vertx.effect.httpserver.ReqHandler.ALWAYS;
+import static vertx.effect.mock.MockReqResp.ALWAYS;
 
 @ExtendWith(VertxExtension.class)
 public class AuthorizationCodeFlowAuthenticateReq {
@@ -34,9 +34,9 @@ public class AuthorizationCodeFlowAuthenticateReq {
                               ) {
 
         VertxRef vertxRef = new VertxRef(vertx);
-        ReqHandler reqHandler =
-                ReqHandler.when(ALWAYS)
-                          .setBodyResp(n -> body -> req -> JsObj.empty()
+        MockReqResp mockReqResp =
+                MockReqResp.when(ALWAYS)
+                           .setBodyResp(n -> body -> req -> JsObj.empty()
                                                                .set("access_token",
                                                                     JsStr.of("access_token_value")
                                                                    )
@@ -45,7 +45,7 @@ public class AuthorizationCodeFlowAuthenticateReq {
                                                                    )
                                                                .toPrettyString()
                                      )
-                          .setHeadersResp(HeadersRespHandler.JSON);
+                           .setHeadersResp(MockHeadersResp.JSON);
 
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
@@ -84,7 +84,7 @@ public class AuthorizationCodeFlowAuthenticateReq {
 
 
         Triple.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                          new HttpServerBuilder(vertx).addHandler(reqHandler)
+                          new HttpServerBuilder(vertx).addMock(mockReqResp)
                                                       .start(PORT),
                           vertxRef.deployVerticle(httpClient)
                          )

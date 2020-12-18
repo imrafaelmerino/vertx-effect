@@ -1,4 +1,4 @@
-package vertx.effect.httpserver;
+package vertx.effect.mock;
 
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -15,23 +15,23 @@ class HttpServerHandler implements Handler<HttpServerRequest> {
 
     protected AtomicInteger counter = new AtomicInteger(0);
 
-    final List<ReqHandler> reqHandlers;
+    final List<MockReqResp> mockReqResps;
 
-    HttpServerHandler(final List<ReqHandler> reqHandlers) {
-        this.reqHandlers = Objects.requireNonNull(reqHandlers);
+    HttpServerHandler(final List<MockReqResp> mockReqResps) {
+        this.mockReqResps = Objects.requireNonNull(mockReqResps);
     }
 
     @Override
     public void handle(final HttpServerRequest req) {
 
         int counter = this.counter.incrementAndGet();
-        reqHandlers.stream()
-                   .filter(it -> it.predicate.test(counter,
+        mockReqResps.stream()
+                    .filter(it -> it.predicate.test(counter,
                                                    req
                                                   )
                           )
-                   .findFirst()
-                   .ifPresentOrElse(it -> req.body(event ->
+                    .findFirst()
+                    .ifPresentOrElse(it -> req.body(event ->
                                                    {
                                                        if (event.succeeded()) {
                                                            Buffer buffer = event.result();

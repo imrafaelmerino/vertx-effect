@@ -12,6 +12,7 @@ import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
@@ -22,9 +23,9 @@ public class TestPair {
 
 
     private static final Supplier<Val<String>> a =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                              counter -> new RuntimeException("counter: " + counter),
-                             "a"
+                                 "a"
             );
     static VertxRef vertxRef;
     private static Val<Void> oneSec;
@@ -51,9 +52,9 @@ public class TestPair {
 
 
         int ATTEMPTS = 3;
-        ErrorWhile<Integer> one = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<Integer> one = new ValOrErrorMock<>(ATTEMPTS,
                                                    i -> new IllegalArgumentException(),
-                                                   1
+                                                           1
         );
         Pair.parallel(one.get(),
                       one.get()
@@ -82,9 +83,9 @@ public class TestPair {
 
 
         int ATTEMPTS = 3;
-        ErrorWhile<Integer> one = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<Integer> one = new ValOrErrorMock<>(ATTEMPTS,
                                                    i -> new IllegalArgumentException(),
-                                                   1
+                                                           1
         );
         Pair.sequential(one.get(),
                         one.get()
@@ -154,9 +155,9 @@ public class TestPair {
     public void test_parallel_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Pair.parallel(val.get(),
@@ -182,9 +183,9 @@ public class TestPair {
     public void test_sequential_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Pair.sequential(val.get(),
@@ -210,9 +211,9 @@ public class TestPair {
     public void test_parallel_retries_if_failure(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Pair.parallel(val.get(),
@@ -234,9 +235,9 @@ public class TestPair {
     public void test_sequential_retries_if_failure(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Pair.sequential(val.get(),

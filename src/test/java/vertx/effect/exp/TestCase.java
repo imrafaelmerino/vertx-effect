@@ -11,6 +11,7 @@ import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.Val;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.Arrays;
 import java.util.function.BiFunction;
@@ -27,14 +28,14 @@ public class TestCase {
     private static int ATTEMPTS = 2;
 
     private static Supplier<Val<String>> a =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> new RuntimeException("counter:+" + counter),
-                             "a"
+                                 "a"
             );
     private static Supplier<Val<String>> b =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> new RuntimeException("counter:+" + counter),
-                             "b"
+                                 "b"
             );
 
 

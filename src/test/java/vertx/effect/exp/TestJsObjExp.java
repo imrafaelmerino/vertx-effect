@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.time.Instant;
 import java.util.function.Supplier;
@@ -1513,9 +1514,9 @@ public class TestJsObjExp {
         JsStr a = JsStr.of("a");
 
         final Supplier<Val<JsStr>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter: " + counter),
-                                 a
+                                     a
                 );
 
 
@@ -1567,9 +1568,9 @@ public class TestJsObjExp {
         JsStr a = JsStr.of("a");
 
         final Supplier<Val<JsStr>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter: " + counter),
-                                 a
+                                     a
                 );
 
 
@@ -1764,13 +1765,13 @@ public class TestJsObjExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<String> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<String> a = new ValOrErrorMock<>(ATTEMPTS,
                                                 counter -> new RuntimeException("counter: " + counter),
-                                                "a"
+                                                        "a"
         );
-        ErrorWhile<String> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<String> b = new ValOrErrorMock<>(ATTEMPTS,
                                                 counter -> new RuntimeException("counter: " + counter),
-                                                "b"
+                                                        "b"
         );
 
         JsObjExp.parallel("a",
@@ -1806,13 +1807,13 @@ public class TestJsObjExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<String> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<String> a = new ValOrErrorMock<>(ATTEMPTS,
                                                 counter -> new RuntimeException("counter: " + counter),
-                                                "a"
+                                                        "a"
         );
-        ErrorWhile<String> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<String> b = new ValOrErrorMock<>(ATTEMPTS,
                                                 counter -> new RuntimeException("counter: " + counter),
-                                                "b"
+                                                        "b"
         );
 
         JsObjExp.sequential("a",

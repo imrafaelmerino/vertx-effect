@@ -16,11 +16,11 @@ import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Triple;
-import vertx.effect.httpserver.ReqHandler;
-import vertx.effect.httpserver.HttpServerBuilder;
-import vertx.effect.httpserver.HeadersRespHandler;
+import vertx.effect.mock.MockReqResp;
+import vertx.effect.mock.HttpServerBuilder;
+import vertx.effect.mock.MockHeadersResp;
 
-import static vertx.effect.httpserver.ReqHandler.ALWAYS;
+import static vertx.effect.mock.MockReqResp.ALWAYS;
 
 
 @ExtendWith(VertxExtension.class)
@@ -39,9 +39,9 @@ public class HttpClientMethodsTests {
                                  );
         httpClient = new HttpExampleModule(new HttpClientOptions());
 
-        ReqHandler reqHandler =
-                ReqHandler.when(ALWAYS)
-                          .setBodyResp(n -> body -> req -> JsObj.of("req_method",
+        MockReqResp mockReqResp =
+                MockReqResp.when(ALWAYS)
+                           .setBodyResp(n -> body -> req -> JsObj.of("req_method",
                                                                    JsStr.of(req.method()
                                                                                .name()
                                                                            ),
@@ -52,10 +52,10 @@ public class HttpClientMethodsTests {
                                                                   )
                                                                .toPrettyString()
                                      )
-                          .setHeadersResp(HeadersRespHandler.JSON);
+                           .setHeadersResp(MockHeadersResp.JSON);
 
         Triple.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                          new HttpServerBuilder(vertx).addHandler(reqHandler)
+                          new HttpServerBuilder(vertx).addMock(mockReqResp)
                                                       .start(PORT),
                           vertxRef.deployVerticle(httpClient)
                          )

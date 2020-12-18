@@ -12,6 +12,7 @@ import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,15 +89,15 @@ public class TestParallelSeq {
         int ATTEMPTS = 3;
 
         Supplier<Val<String>> a =
-                new ErrorWhile<>(counter -> counter <= ATTEMPTS,
+                new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 "a"
+                                     "a"
                 );
 
         Supplier<Val<String>> b =
-                new ErrorWhile<>(counter -> counter <= ATTEMPTS,
+                new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 "b"
+                                     "b"
                 );
 
         Val<List<String>> val = ListExp.<String>parallel()
@@ -120,15 +121,15 @@ public class TestParallelSeq {
     public void test_retry_with_delay(VertxTestContext context) {
         int ATTEMPTS = 3;
         Supplier<Val<String>> a =
-                new ErrorWhile<>(counter -> counter <= ATTEMPTS,
+                new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 "a"
+                                     "a"
                 );
 
         Supplier<Val<String>> b =
-                new ErrorWhile<>(counter -> counter <= ATTEMPTS,
+                new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 "b"
+                                     "b"
                 );
 
         long start = System.nanoTime();
@@ -201,9 +202,9 @@ public class TestParallelSeq {
         List<String> expected = new ArrayList<>();
         expected.add("hi");
         expected.add("hi");
-        ErrorWhile<String> hi = new ErrorWhile<>(3,
+        ValOrErrorMock<String> hi = new ValOrErrorMock<>(3,
                                                  i -> new IllegalArgumentException(),
-                                                 "hi"
+                                                         "hi"
         );
         ListExp.parallel(hi.get(),
                          hi.get()
@@ -227,9 +228,9 @@ public class TestParallelSeq {
         List<String> expected = new ArrayList<>();
         expected.add("hi");
         expected.add("hi");
-        ErrorWhile<String> hi = new ErrorWhile<>(3,
+        ValOrErrorMock<String> hi = new ValOrErrorMock<>(3,
                                                  i -> new IllegalArgumentException(),
-                                                 "hi"
+                                                         "hi"
         );
         ListExp.parallel(hi.get(),
                          hi.get()
@@ -335,5 +336,6 @@ public class TestParallelSeq {
                }))
                .get();
     }
+
 
 }

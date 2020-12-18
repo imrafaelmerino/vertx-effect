@@ -11,6 +11,7 @@ import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
@@ -22,17 +23,17 @@ public class TestAny {
     static VertxRef vertxRef;
     static final int ATTEMPTS = 2;
     static final Supplier<Val<Boolean>> TRUE =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter ->
                                      Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                             true
+                                 true
             );
 
 
     static final Supplier<Val<Boolean>> FALSE =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                             false
+                                 false
             );
 
     @BeforeAll
@@ -234,9 +235,9 @@ public class TestAny {
     public void test_parallel_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         Any.parallel(True.get(),
                      True.get()
@@ -260,9 +261,9 @@ public class TestAny {
     public void test_sequential_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         Any.sequential(True.get(),
                        True.get()

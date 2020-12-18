@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import static java.util.concurrent.TimeUnit.*;
 
@@ -99,13 +100,13 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<JsStr> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> a = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("a")
+                                                       JsStr.of("a")
         );
-        ErrorWhile<JsStr> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> b = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("b")
+                                                       JsStr.of("b")
         );
 
         JsArrayExp.parallel(a.get(),
@@ -135,13 +136,13 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<JsStr> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> a = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("a")
+                                                       JsStr.of("a")
         );
-        ErrorWhile<JsStr> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> b = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("b")
+                                                       JsStr.of("b")
         );
 
         JsArrayExp.sequential(a.get(),
@@ -172,13 +173,13 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<JsStr> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> a = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("a")
+                                                       JsStr.of("a")
         );
-        ErrorWhile<JsStr> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> b = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("b")
+                                                       JsStr.of("b")
         );
 
         JsArrayExp.sequential(a.get(),
@@ -207,13 +208,13 @@ public class TestJsArrayExp {
     public void test_array_exp_retry_if_success(VertxTestContext context) {
         int ATTEMPTS = 3;
 
-        ErrorWhile<JsStr> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> a = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("a")
+                                                       JsStr.of("a")
         );
-        ErrorWhile<JsStr> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> b = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("b")
+                                                       JsStr.of("b")
         );
 
         JsArrayExp.sequential(a.get(),
@@ -240,13 +241,13 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<JsStr> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> a = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("a")
+                                                       JsStr.of("a")
         );
-        ErrorWhile<JsStr> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> b = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("b")
+                                                       JsStr.of("b")
         );
 
         JsArrayExp.parallel(a.get(),
@@ -271,13 +272,13 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<JsStr> a = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> a = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("a")
+                                                       JsStr.of("a")
         );
-        ErrorWhile<JsStr> b = new ErrorWhile<>(ATTEMPTS,
+        ValOrErrorMock<JsStr> b = new ValOrErrorMock<>(ATTEMPTS,
                                                counter -> new RuntimeException("counter: " + counter),
-                                               JsStr.of("b")
+                                                       JsStr.of("b")
         );
 
         JsArrayExp.parallel(a.get(),

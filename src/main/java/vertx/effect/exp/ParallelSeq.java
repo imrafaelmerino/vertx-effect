@@ -96,10 +96,6 @@ class ParallelSeq<O> extends ListExp<O> {
         return Functions.race(seq);
     }
 
-    @Override
-    public Val<O> raceFirst() {
-        return Functions.raceFirst(seq);
-    }
 
     @Override
     public ListExp<O> tail() {

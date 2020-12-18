@@ -1,4 +1,4 @@
-package vertx.effect.httpserver;
+package vertx.effect.mock;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -13,7 +13,7 @@ import java.util.Objects;
 public class HttpServerBuilder {
 
     private final Vertx vertx;
-    private final List<ReqHandler> reqHandlers = new ArrayList<>();
+    private final List<MockReqResp> mockReqResps = new ArrayList<>();
 
     private final HttpServerOptions options;
     private static final String DEFAULT_HOST = "localhost";
@@ -30,8 +30,8 @@ public class HttpServerBuilder {
             );
     }
 
-    public HttpServerBuilder addHandler(final ReqHandler reqHandler) {
-        reqHandlers.add(Objects.requireNonNull(reqHandler));
+    public HttpServerBuilder addMock(final MockReqResp mockReqResp) {
+        mockReqResps.add(Objects.requireNonNull(mockReqResp));
         return this;
     }
 
@@ -70,7 +70,7 @@ public class HttpServerBuilder {
     public Val<HttpServer> start(final String host,
                                  final int port) {
         return Cons.of(() -> vertx.createHttpServer(options.setHost(host))
-                                  .requestHandler(new HttpServerHandler(reqHandlers))
+                                  .requestHandler(new HttpServerHandler(mockReqResps))
                                   .listen(port)
                       );
     }

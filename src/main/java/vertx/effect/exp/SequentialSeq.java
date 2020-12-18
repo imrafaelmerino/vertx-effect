@@ -102,10 +102,6 @@ class SequentialSeq<O> extends ListExp<O> {
         return Cons.failure(new OperationNotSupportedException("race doesn't make any sense in a sequential execution"));
     }
 
-    @Override
-    public Val<O> raceFirst() {
-        return Cons.failure(new OperationNotSupportedException("raceFirst doesn't make any sense in a sequential execution"));
-    }
 
     @Override
     public ListExp<O> tail() {

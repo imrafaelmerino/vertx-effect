@@ -30,33 +30,24 @@ public abstract class Quadruple<A, B, C, D> extends AbstractVal<Tuple4<A, B, C, 
         );
     }
 
-    public abstract Val<A> first();
+    public abstract Val<A> _1();
 
-    public abstract Val<B> second();
+    public abstract Val<B> _2();
 
-    public abstract Val<C> third();
+    public abstract Val<C> _3();
 
-    public abstract Val<D> forth();
+    public abstract Val<D> _4();
 
     public static <O> Val<O> race(final Quadruple<O, O, O, O> quadruple) {
         if (quadruple == null)
             return Cons.failure(new IllegalArgumentException("Quadruple.race: pair is null"));
-        return ListExp.parallel(quadruple.first(),
-                                quadruple.second(),
-                                quadruple.third(),
-                                quadruple.forth()
+        return ListExp.parallel(quadruple._1(),
+                                quadruple._2(),
+                                quadruple._3(),
+                                quadruple._4()
                                )
                       .race();
     }
 
-    public static <O> Val<O> raceFirst(final Quadruple<O, O, O, O> quadruple) {
-        if (quadruple == null)
-            return Cons.failure(new IllegalArgumentException("Quadruple.raceFirst: pair is null"));
-        return ListExp.parallel(quadruple.first(),
-                                quadruple.second(),
-                                quadruple.third(),
-                                quadruple.forth()
-                               )
-                      .raceFirst();
-    }
+
 }

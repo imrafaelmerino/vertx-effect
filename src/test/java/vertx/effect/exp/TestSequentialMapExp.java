@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,20 +26,20 @@ public class TestSequentialMapExp {
     static final int ATTEMPTS = 2;
 
     static final Supplier<Val<String>> a =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> new RuntimeException("counter: " + counter),
-                             "a"
+                                 "a"
             );
 
     static final Supplier<Val<String>> b =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> new RuntimeException("counter: " + counter),
-                             "b"
+                                 "b"
             );
     static final Supplier<Val<Integer>> one =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> new RuntimeException("counter: " + counter),
-                             1
+                                 1
             );
 
     private static VertxRef vertxRef;

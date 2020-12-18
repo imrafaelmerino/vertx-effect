@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
@@ -38,9 +39,9 @@ public class TestAll {
         int attempts = 2;
 
         Supplier<Val<Boolean>> trueVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 true
+                                     true
                 );
 
         All.sequential(trueVal.get(),
@@ -61,9 +62,9 @@ public class TestAll {
         int attempts = 2;
 
         Supplier<Val<Boolean>> trueVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 true
+                                     true
                 );
 
         All.parallel(trueVal.get(),
@@ -84,9 +85,9 @@ public class TestAll {
 
         int attempts = 2;
         Supplier<Val<Boolean>> falseVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 false
+                                     false
                 );
 
 
@@ -108,9 +109,9 @@ public class TestAll {
 
         int attempts = 2;
         Supplier<Val<Boolean>> falseVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 false
+                                     false
                 );
 
 
@@ -131,15 +132,15 @@ public class TestAll {
     public void test_parallel_retry_with_delay(VertxTestContext context) {
         int attempts = 3;
         Supplier<Val<Boolean>> trueVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 true
+                                     true
                 );
 
         Supplier<Val<Boolean>> falseVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 false
+                                     false
                 );
         long start = System.nanoTime();
         All.parallel(trueVal.get(),
@@ -163,15 +164,15 @@ public class TestAll {
     public void test_sequential_retry_with_delay(VertxTestContext context) {
         int attempts = 3;
         Supplier<Val<Boolean>> trueVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 true
+                                     true
                 );
 
         Supplier<Val<Boolean>> falseVal =
-                new ErrorWhile<>(attempts,
+                new ValOrErrorMock<>(attempts,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 false
+                                     false
                 );
         long start = System.nanoTime();
         All.sequential(trueVal.get(),
@@ -229,9 +230,9 @@ public class TestAll {
     public void test_parallel_retry_if_success(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         All.parallel(True.get(),
                      True.get()
@@ -252,9 +253,9 @@ public class TestAll {
     public void test_sequential_retry_if_success(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         All.sequential(True.get(),
                        True.get()
@@ -275,9 +276,9 @@ public class TestAll {
     public void test_parallel_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         All.parallel(True.get(),
                      True.get()
@@ -301,9 +302,9 @@ public class TestAll {
     public void test_sequential_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         All.sequential(True.get(),
                        True.get()
@@ -327,9 +328,9 @@ public class TestAll {
     public void test_sequential_retry_if_failure(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         All.sequential(True.get(),
                        True.get()
@@ -350,9 +351,9 @@ public class TestAll {
     public void test_parallel_retry_if_failure(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         All.parallel(True.get(),
                      True.get()

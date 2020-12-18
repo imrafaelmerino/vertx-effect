@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
-import vertx.effect.httpserver.*;
+import vertx.effect.mock.*;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -61,35 +61,35 @@ public class AuthorizationCodeModuleTest {
                  .createFromRefreshToken("refresh_token");
 
         Triple.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                        new HttpServerBuilder(vertx).addHandler(ReqHandler.when(ReqHandler.REQ_LET.apply(3))
-                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.of("error",
-                                                                                                                     JsStr.of("Error generating token")
-                                                                                                                    )
-                                                                                                           )
+                        new HttpServerBuilder(vertx).addMock(MockReqResp.when(MockReqResp.REQ_LET.apply(3))
+                                                                        .setBodyResp(MockBodyResp.cons(JsObj.of("error",
+                                                                                                                JsStr.of("Error generating token")
+                                                                                                               )
+                                                                                                      )
                                                                                        )
-                                                                          .setStatusCodeResp(StatusRespHandler._401)
-                                                                          .setHeadersResp(HeadersRespHandler.JSON)
-                                                               )
-                                                    .addHandler(ReqHandler.when(ReqHandler.FORTH_REQ)
-                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.of("access_token",
-                                                                                                                     JsStr.of(UUID.randomUUID()
+                                                                        .setStatusCodeResp(MockStatusCodeResp._401)
+                                                                        .setHeadersResp(MockHeadersResp.JSON)
+                                                            )
+                                                    .addMock(MockReqResp.when(MockReqResp.FORTH_REQ)
+                                                                        .setBodyResp(MockBodyResp.cons(JsObj.of("access_token",
+                                                                                                                  JsStr.of(UUID.randomUUID()
                                                                                                                                 .toString())
-                                                                                                                    ))
+                                                                                                                 ))
                                                                                        )
-                                                                          .setStatusCodeResp(StatusRespHandler._200)
-                                                                          .setHeadersResp(HeadersRespHandler.JSON))
-                                                    .addHandler(ReqHandler.when(ReqHandler.REQ_LET.apply(7))
-                                                                          .setBodyResp(BodyRespHandler.consAfter(Duration.of(500,
-                                                                                                                             ChronoUnit.MILLIS
-                                                                                                                            ),
-                                                                                                                 JsObj.empty()
-                                                                                                                ))
-                                                                          .setStatusCodeResp(StatusRespHandler._200)
-                                                                          .setHeadersResp(HeadersRespHandler.JSON))
-                                                    .addHandler(ReqHandler.when(ReqHandler.REQ_GT.apply(7))
-                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.empty()))
-                                                                          .setStatusCodeResp(StatusRespHandler._200)
-                                                                          .setHeadersResp(HeadersRespHandler.JSON))
+                                                                        .setStatusCodeResp(MockStatusCodeResp._200)
+                                                                        .setHeadersResp(MockHeadersResp.JSON))
+                                                    .addMock(MockReqResp.when(MockReqResp.REQ_LET.apply(7))
+                                                                        .setBodyResp(MockBodyResp.consAfter(Duration.of(500,
+                                                                                                                          ChronoUnit.MILLIS
+                                                                                                                         ),
+                                                                                                              JsObj.empty()
+                                                                                                             ))
+                                                                        .setStatusCodeResp(MockStatusCodeResp._200)
+                                                                        .setHeadersResp(MockHeadersResp.JSON))
+                                                    .addMock(MockReqResp.when(MockReqResp.REQ_GT.apply(7))
+                                                                        .setBodyResp(MockBodyResp.cons(JsObj.empty()))
+                                                                        .setStatusCodeResp(MockStatusCodeResp._200)
+                                                                        .setHeadersResp(MockHeadersResp.JSON))
                                                     .start(port),
                         vertxRef.deployVerticle(httpClient)
                        )

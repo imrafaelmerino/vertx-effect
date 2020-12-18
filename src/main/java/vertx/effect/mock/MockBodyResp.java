@@ -1,4 +1,4 @@
-package vertx.effect.httpserver;
+package vertx.effect.mock;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
@@ -9,13 +9,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
-public interface BodyRespHandler extends IntFunction<Function<Buffer, Function<HttpServerRequest, String>>> {
+public interface MockBodyResp extends IntFunction<Function<Buffer, Function<HttpServerRequest, String>>> {
 
-    static BodyRespHandler cons(final String respBody) {
+    static MockBodyResp cons(final String respBody) {
         return n -> body -> req -> respBody;
     }
 
-    static BodyRespHandler consAfter(final Duration duration, final String respBody) {
+    static MockBodyResp consAfter(final Duration duration, final String respBody) {
         return n -> body -> req -> {
             try {
                 TimeUnit.MILLISECONDS.sleep(duration.toMillis());
@@ -25,11 +25,11 @@ public interface BodyRespHandler extends IntFunction<Function<Buffer, Function<H
             return respBody;
         };
     }
-    static BodyRespHandler cons(final JsObj respBody) {
+    static MockBodyResp cons(final JsObj respBody) {
         return n -> body -> req -> respBody.toPrettyString();
     }
 
-    static BodyRespHandler consAfter(final Duration duration, final JsObj respBody) {
+    static MockBodyResp consAfter(final Duration duration, final JsObj respBody) {
         return n -> body -> req -> {
             try {
                 TimeUnit.MILLISECONDS.sleep(duration.toMillis());
@@ -40,7 +40,7 @@ public interface BodyRespHandler extends IntFunction<Function<Buffer, Function<H
         };
     }
 
-    BodyRespHandler EMPTY = n -> body -> req -> "";
+    MockBodyResp EMPTY = n -> body -> req -> "";
 
 
 }

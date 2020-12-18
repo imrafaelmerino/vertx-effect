@@ -16,14 +16,14 @@ import vertx.effect.VertxRef;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.HttpResp;
-import vertx.effect.httpserver.ReqHandler;
-import vertx.effect.httpserver.HttpServerBuilder;
-import vertx.effect.httpserver.BodyRespHandler;
-import vertx.effect.httpserver.StatusRespHandler;
+import vertx.effect.mock.MockReqResp;
+import vertx.effect.mock.HttpServerBuilder;
+import vertx.effect.mock.MockBodyResp;
+import vertx.effect.mock.MockStatusCodeResp;
 
 import static jsonvalues.JsBool.FALSE;
 import static jsonvalues.JsBool.TRUE;
-import static vertx.effect.httpserver.ReqHandler.*;
+import static vertx.effect.mock.MockReqResp.*;
 
 @ExtendWith(VertxExtension.class)
 public class AuthorizationSuccessAfterRetries {
@@ -56,32 +56,32 @@ public class AuthorizationSuccessAfterRetries {
 
 
         Triple.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                        new HttpServerBuilder(vertx).addHandler(ReqHandler.when(REQ_LET.apply(3))
-                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.of("token_found",
-                                                                                                                     FALSE
-                                                                                                                    )
-                                                                                                           )
+                        new HttpServerBuilder(vertx).addMock(MockReqResp.when(REQ_LET.apply(3))
+                                                                        .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
+                                                                                                                  FALSE
+                                                                                                                 )
+                                                                                                        )
                                                                                        )
-                                                                          .setStatusCodeResp(StatusRespHandler._401)
-                                                               )
-                                                    .addHandler(ReqHandler.when(FORTH_REQ)
-                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.of("token_found",
-                                                                                                                     TRUE,
-                                                                                                                     "access_token",
-                                                                                                                     JsStr.of("foooo")
-                                                                                                                    )
-                                                                                                           )
+                                                                        .setStatusCodeResp(MockStatusCodeResp._401)
+                                                            )
+                                                    .addMock(MockReqResp.when(FORTH_REQ)
+                                                                        .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
+                                                                                                                  TRUE,
+                                                                                                                  "access_token",
+                                                                                                                  JsStr.of("foooo")
+                                                                                                                 )
+                                                                                                        )
                                                                                        )
-                                                                          .setStatusCodeResp(StatusRespHandler._200)
-                                                               )
-                                                    .addHandler(ReqHandler.when(REQ_GT.apply(4))
-                                                                          .setBodyResp(BodyRespHandler.cons(JsObj.of("name",
-                                                                                                                     JsStr.of("Rafael")
-                                                                                                                    )
-                                                                                                           )
+                                                                        .setStatusCodeResp(MockStatusCodeResp._200)
+                                                            )
+                                                    .addMock(MockReqResp.when(REQ_GT.apply(4))
+                                                                        .setBodyResp(MockBodyResp.cons(JsObj.of("name",
+                                                                                                                  JsStr.of("Rafael")
+                                                                                                                 )
+                                                                                                        )
                                                                                        )
-                                                                          .setStatusCodeResp(StatusRespHandler._200)
-                                                               )
+                                                                        .setStatusCodeResp(MockStatusCodeResp._200)
+                                                            )
                                                     .start(port),
                         vertxRef.deployVerticle(httpClient)
                        )
