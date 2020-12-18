@@ -18,11 +18,13 @@ import vertx.effect.VertxRef;
 import vertx.effect.exp.Quadruple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.HttpResp;
-import vertx.effect.mock.HttpServerBuilder;
+import vertx.effect.httpserver.HttpServerBuilder;
 import vertx.effect.mock.MockBodyResp;
+import vertx.effect.mock.MockReqHandler;
 import vertx.effect.mock.MockReqResp;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -54,19 +56,19 @@ public class TestFailures {
         Quadruple.sequential(ref.deployVerticle(new RegisterJsValuesCodecs()),
                              ref.deployVerticle(new Module()),
                              ref.deployVerticle(client),
-                             new HttpServerBuilder(vertx)
-                                     .addMock(MockReqResp.when(FIRST_REQ)
-                                                         .setBodyResp(MockBodyResp.consAfter(Duration.of(1,
-                                                                                                           SECONDS
-                                                                                                          ),
-                                                                                               JsObj.empty()
-                                                                                              )
-                                                                       )
-
-                                             )
-                                     .addMock(MockReqResp.when(REQ_LT.apply(1))
-                                                         .setBodyResp(MockBodyResp.cons(JsObj.empty())))
-                                     .start(port)
+                             new HttpServerBuilder(vertx,
+                                                   new MockReqHandler(List.of(MockReqResp.when(FIRST_REQ)
+                                                                                         .setBodyResp(MockBodyResp.consAfter(Duration.of(1,
+                                                                                                                                         SECONDS
+                                                                                                                                        ),
+                                                                                                                             JsObj.empty()
+                                                                                                                            )
+                                                                                                     ),
+                                                                              MockReqResp.when(REQ_LT.apply(1))
+                                                                                         .setBodyResp(MockBodyResp.cons(JsObj.empty()))
+                                                                             )
+                                                   )
+                             ).start(port)
                             )
                  .onComplete(tuple -> {
                      context.completeNow();
@@ -75,16 +77,19 @@ public class TestFailures {
                  .get();
 
         serverCloseConnection =
-                new HttpServerBuilder(vertx).addMock(MockReqResp.when(FIRST_REQ)
-                                                                .setBodyResp(c -> b -> req -> {
-                                                                      req.response()
-                                                                         .close();
-                                                                      return "{}";
-                                                                  })
-                                                    )
-                                            .addMock(MockReqResp.when(MockReqResp.REQ_GT.apply(1))
-                                                                .setBodyResp(MockBodyResp.cons(JsObj.empty()))
-                                                    );
+                new HttpServerBuilder(vertx,
+                                      new MockReqHandler(List.of(MockReqResp.when(FIRST_REQ)
+                                                                            .setBodyResp(c -> b -> req -> {
+                                                                                req.response()
+                                                                                   .close();
+                                                                                return "{}";
+                                                                            }),
+                                                                 MockReqResp.when(MockReqResp.REQ_GT.apply(1))
+                                                                            .setBodyResp(MockBodyResp.cons(JsObj.empty()))
+
+                                                                )
+                                      )
+                );
 
     }
 
@@ -111,7 +116,7 @@ public class TestFailures {
                                                               }
                                                           })
                                                           .get()
-        );
+                                       );
     }
 
 

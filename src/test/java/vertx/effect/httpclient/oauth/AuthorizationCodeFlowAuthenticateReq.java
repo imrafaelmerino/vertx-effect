@@ -13,10 +13,12 @@ import vertx.effect.*;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.PostReq;
-import vertx.effect.mock.MockReqResp;
-import vertx.effect.mock.HttpServerBuilder;
+import vertx.effect.httpserver.HttpServerBuilder;
 import vertx.effect.mock.MockHeadersResp;
+import vertx.effect.mock.MockReqHandler;
+import vertx.effect.mock.MockReqResp;
 
+import java.util.List;
 import java.util.Objects;
 
 import static vertx.effect.mock.MockReqResp.ALWAYS;
@@ -37,14 +39,14 @@ public class AuthorizationCodeFlowAuthenticateReq {
         MockReqResp mockReqResp =
                 MockReqResp.when(ALWAYS)
                            .setBodyResp(n -> body -> req -> JsObj.empty()
-                                                               .set("access_token",
-                                                                    JsStr.of("access_token_value")
-                                                                   )
-                                                               .set("refresh_token",
-                                                                    JsStr.of("refresh_token_value")
-                                                                   )
-                                                               .toPrettyString()
-                                     )
+                                                                 .set("access_token",
+                                                                      JsStr.of("access_token_value")
+                                                                     )
+                                                                 .set("refresh_token",
+                                                                      JsStr.of("refresh_token_value")
+                                                                     )
+                                                                 .toPrettyString()
+                                       )
                            .setHeadersResp(MockHeadersResp.JSON);
 
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
@@ -84,8 +86,10 @@ public class AuthorizationCodeFlowAuthenticateReq {
 
 
         Triple.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                          new HttpServerBuilder(vertx).addMock(mockReqResp)
-                                                      .start(PORT),
+                          new HttpServerBuilder(vertx,
+                                                new MockReqHandler(List.of(mockReqResp))
+                          )
+                                  .start(PORT),
                           vertxRef.deployVerticle(httpClient)
                          )
               .get()

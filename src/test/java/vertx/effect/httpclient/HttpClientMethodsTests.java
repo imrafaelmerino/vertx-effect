@@ -16,9 +16,12 @@ import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
 import vertx.effect.exp.Triple;
-import vertx.effect.mock.MockReqResp;
-import vertx.effect.mock.HttpServerBuilder;
+import vertx.effect.httpserver.HttpServerBuilder;
 import vertx.effect.mock.MockHeadersResp;
+import vertx.effect.mock.MockReqHandler;
+import vertx.effect.mock.MockReqResp;
+
+import java.util.List;
 
 import static vertx.effect.mock.MockReqResp.ALWAYS;
 
@@ -42,21 +45,22 @@ public class HttpClientMethodsTests {
         MockReqResp mockReqResp =
                 MockReqResp.when(ALWAYS)
                            .setBodyResp(n -> body -> req -> JsObj.of("req_method",
-                                                                   JsStr.of(req.method()
-                                                                               .name()
-                                                                           ),
-                                                                   "req_body",
-                                                                   JsStr.of(body.toString()),
-                                                                   "req_uri",
-                                                                   JsStr.of(req.uri())
-                                                                  )
-                                                               .toPrettyString()
-                                     )
+                                                                     JsStr.of(req.method()
+                                                                                 .name()
+                                                                             ),
+                                                                     "req_body",
+                                                                     JsStr.of(body.toString()),
+                                                                     "req_uri",
+                                                                     JsStr.of(req.uri())
+                                                                    )
+                                                                 .toPrettyString()
+                                       )
                            .setHeadersResp(MockHeadersResp.JSON);
 
         Triple.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                          new HttpServerBuilder(vertx).addMock(mockReqResp)
-                                                      .start(PORT),
+                          new HttpServerBuilder(vertx,
+                                                new MockReqHandler(List.of(mockReqResp))
+                          ).start(PORT),
                           vertxRef.deployVerticle(httpClient)
                          )
               .get()

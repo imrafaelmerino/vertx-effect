@@ -13,8 +13,10 @@ import vertx.effect.*;
 import vertx.effect.exp.Pair;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.HttpResp;
+import vertx.effect.httpserver.HttpServerBuilder;
 import vertx.effect.mock.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -79,46 +81,42 @@ public class ClientCredentialsModuleTest {
 
         builder.setAccessTokenReqAttempts(3);
 
-        new HttpServerBuilder(vertx)
-                .addMock(MockReqResp.when(REQ_LET.apply(3))
-                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
-                                                                            FALSE
-                                                                           )
-                                                                  )
-                                                   )
-                                    .setStatusCodeResp(MockStatusCodeResp._401)
-                                    .setHeadersResp(MockHeadersResp.JSON)
-
-                        )
-                .addMock(MockReqResp.when(FORTH_REQ)
-                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
-                                                                              TRUE,
-                                                                              "access_token",
-                                                                              JsStr.of("foooo")
-                                                                             )
-                                                                    )
-                                                   )
-                                    .setStatusCodeResp(MockStatusCodeResp._200)
-                                    .setHeadersResp(MockHeadersResp.JSON)
-
-                        )
-                .addMock(MockReqResp.when(REQ_GT.apply(4))
-                                    .setBodyResp(MockBodyResp.cons(JsObj.of("name",
-                                                                              JsStr.of("Rafael")
-                                                                             ))
-                                                   )
-                                    .setStatusCodeResp(MockStatusCodeResp._200)
-                                    .setHeadersResp(MockHeadersResp.JSON)
-
-                        )
-                .start(port)
-                .get()
-                .onSuccess(server -> {
-                    Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                            .accept(httpClient.getOauth.apply(new GetReq().uri("/name")),
-                                    context
-                                   );
-                });
+        new HttpServerBuilder(vertx,
+                              new MockReqHandler(List.of(MockReqResp.when(REQ_LET.apply(3))
+                                                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
+                                                                                                            FALSE
+                                                                                                           )
+                                                                                                  )
+                                                                                )
+                                                                    .setStatusCodeResp(MockStatusCodeResp._401)
+                                                                    .setHeadersResp(MockHeadersResp.JSON),
+                                                         MockReqResp.when(FORTH_REQ)
+                                                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
+                                                                                                            TRUE,
+                                                                                                            "access_token",
+                                                                                                            JsStr.of("foooo")
+                                                                                                           )
+                                                                                                  )
+                                                                                )
+                                                                    .setStatusCodeResp(MockStatusCodeResp._200)
+                                                                    .setHeadersResp(MockHeadersResp.JSON),
+                                                         MockReqResp.when(REQ_GT.apply(4))
+                                                                    .setBodyResp(MockBodyResp.cons(JsObj.of("name",
+                                                                                                            JsStr.of("Rafael")
+                                                                                                           ))
+                                                                                )
+                                                                    .setStatusCodeResp(MockStatusCodeResp._200)
+                                                                    .setHeadersResp(MockHeadersResp.JSON)
+                                                        )
+                              )
+        ).start(port)
+         .get()
+         .onSuccess(server -> {
+             Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                     .accept(httpClient.getOauth.apply(new GetReq().uri("/name")),
+                             context
+                            );
+         });
 
     }
 
@@ -127,53 +125,50 @@ public class ClientCredentialsModuleTest {
                                                      VertxTestContext context) {
 
 
-        new HttpServerBuilder(vertx)
-                .addMock(MockReqResp.when(REQ_LET.apply(3))
-                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
-                                                                              FALSE
-                                                                             )
-                                                                    )
-                                                   )
-                                    .setStatusCodeResp(MockStatusCodeResp._401)
-                        )
-                .addMock(MockReqResp.when(FORTH_REQ)
-                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
-                                                                              TRUE,
-                                                                              "access_token",
-                                                                              JsStr.of("foooo")
-                                                                             )
-                                                                    )
-                                                   )
-                                    .setStatusCodeResp(MockStatusCodeResp._200)
-                        )
-                .addMock(MockReqResp.when(REQ_LET.apply(7))
-                                    .setBodyResp(c -> body -> req -> {
-                                                        req.response()
-                                                           .close();
-                                                        return "{}";
-                                                    }
-                                                   )
-                                    .setStatusCodeResp(MockStatusCodeResp._200)
-                        )
-                .addMock(MockReqResp.when(REQ_GT.apply(7))
-                                    .setBodyResp(MockBodyResp.cons(JsObj.of("name",
-                                                                              JsStr.of("Rafael")
-                                                                             ))
-                                                   )
-                                    .setStatusCodeResp(MockStatusCodeResp._200)
-                        )
-                .start(port)
-                .get()
-                .onSuccess(server -> {
-                    Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                            .accept(httpClient.getOauth.apply(new GetReq().uri("/name")
-                                                                          .timeout(300,
-                                                                                   TimeUnit.MILLISECONDS
-                                                                                  ))
-                                                       .retry(3),
-                                    context
-                                   );
-                });
+        new HttpServerBuilder(vertx,
+                              new MockReqHandler(List.of(MockReqResp.when(REQ_LET.apply(3))
+                                                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
+                                                                                                            FALSE
+                                                                                                           )
+                                                                                                  )
+                                                                                )
+                                                                    .setStatusCodeResp(MockStatusCodeResp._401),
+                                                         MockReqResp.when(FORTH_REQ)
+                                                                    .setBodyResp(MockBodyResp.cons(JsObj.of("token_found",
+                                                                                                            TRUE,
+                                                                                                            "access_token",
+                                                                                                            JsStr.of("foooo")
+                                                                                                           )
+                                                                                                  )
+                                                                                )
+                                                                    .setStatusCodeResp(MockStatusCodeResp._200),
+                                                         MockReqResp.when(REQ_LET.apply(7))
+                                                                    .setBodyResp(c -> body -> req -> {
+                                                                                     req.response()
+                                                                                        .close();
+                                                                                     return "{}";
+                                                                                 }
+                                                                                )
+                                                                    .setStatusCodeResp(MockStatusCodeResp._200),
+                                                         MockReqResp.when(REQ_GT.apply(7))
+                                                                    .setBodyResp(MockBodyResp.cons(JsObj.of("name",
+                                                                                                            JsStr.of("Rafael")
+                                                                                                           ))
+                                                                                )
+                                                                    .setStatusCodeResp(MockStatusCodeResp._200)
+
+                                                        ))).start(port)
+                                                           .get()
+                                                           .onSuccess(server -> {
+                                                               Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                                                                       .accept(httpClient.getOauth.apply(new GetReq().uri("/name")
+                                                                                                                     .timeout(300,
+                                                                                                                              TimeUnit.MILLISECONDS
+                                                                                                                             ))
+                                                                                                  .retry(3),
+                                                                               context
+                                                                              );
+                                                           });
 
 
     }

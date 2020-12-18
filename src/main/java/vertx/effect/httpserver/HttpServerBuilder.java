@@ -1,40 +1,38 @@
-package vertx.effect.mock;
+package vertx.effect.httpserver;
 
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerRequest;
 import vertx.effect.Val;
 import vertx.effect.exp.Cons;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class HttpServerBuilder {
 
     private final Vertx vertx;
-    private final List<MockReqResp> mockReqResps = new ArrayList<>();
 
     private final HttpServerOptions options;
     private static final String DEFAULT_HOST = "localhost";
+    private final Handler<HttpServerRequest> reqHandler;
 
     public HttpServerBuilder(final Vertx vertx,
-                             final HttpServerOptions options) {
+                             final HttpServerOptions options,
+                             final Handler<HttpServerRequest> reqHandler) {
         this.vertx = Objects.requireNonNull(vertx);
         this.options = Objects.requireNonNull(options);
+        this.reqHandler = Objects.requireNonNull(reqHandler);
     }
 
-    public HttpServerBuilder(final Vertx vertx) {
+    public HttpServerBuilder(final Vertx vertx,
+                             final Handler<HttpServerRequest> reqHandler) {
         this(vertx,
-             new HttpServerOptions().setLogActivity(true)
+             new HttpServerOptions().setLogActivity(true),
+             reqHandler
             );
     }
-
-    public HttpServerBuilder addMock(final MockReqResp mockReqResp) {
-        mockReqResps.add(Objects.requireNonNull(mockReqResp));
-        return this;
-    }
-
 
     public Val<HttpServer> startAtRandom(final int start,
                                          final int end) {
@@ -70,7 +68,7 @@ public class HttpServerBuilder {
     public Val<HttpServer> start(final String host,
                                  final int port) {
         return Cons.of(() -> vertx.createHttpServer(options.setHost(host))
-                                  .requestHandler(new HttpServerHandler(mockReqResps))
+                                  .requestHandler(reqHandler)
                                   .listen(port)
                       );
     }
