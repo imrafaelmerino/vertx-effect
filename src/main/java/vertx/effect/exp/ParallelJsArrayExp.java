@@ -83,6 +83,7 @@ final class ParallelJsArrayExp extends JsArrayExp {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Val<JsValue> head() {
         return (Val<JsValue>) seq.head();
     }
