@@ -8,7 +8,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.9)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.9/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 - [vertx-effect manifesto](#manifesto)
@@ -26,6 +26,7 @@
 - [Reactive OAuth http client](#oauth-httpclient)
     - [Client credentials flow](#clientcredentials)
     - [Authorization flow](#authorizationflow)
+- [JFR support](#jfr)    
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Related projects](#rp)
@@ -1159,6 +1160,31 @@ _Go to vertx.effect.httpclient.oauth.Spotify_ for further details. More implemen
 little by little. As shown in the previous section, you can customize everything: retries under certain 
 errors, number of attempts, function to extract the tokens from the authentication request etc.
 
+### <a name="jfr"><a/> JFR support
+Every http request and verticle call has an associated event that is recorded using Java Flight Recorded
+
+Fields of a verticle message event:
+
+    - address: Address of the Verticle where the message is sent to
+    - result: SUCCESS OR FAILURE, dependening on what the caller receives
+    - failure code: In case the failure is a ReplyException, it's the failure code
+    - failure type: In case the failure is a ReplyException, it's the failure type
+    - failure message: In case the failure is a ReplyException, it's the failure message
+    - exception class: In case the failure is not a ReplyException, it's the exception class name
+    - exception message: In case the failure is not a ReplyException, it's the exception message
+    - duration: time since the message is sent until the response is received
+    
+Fields of a http request event:
+
+    - status code: The http status code response
+    - host: the host of the request
+    - uri: the uri of the request
+    - result: SUCCESS OR FAILURE, depenending on whether or not an http response is received 
+    - method: the method of the request: GET, POST ...
+    - duration: the method since the request is sent until the response is received
+    - exception class: If an exception takes place and no http response is received, the exception class
+    - exception message: If an exception takes place and no http response is received, the exception message
+
 ## <a name="requirements"><a/> Requirements
 Java 11 or greater
 
@@ -1170,7 +1196,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>0.9</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 

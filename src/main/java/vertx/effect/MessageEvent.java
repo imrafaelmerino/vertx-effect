@@ -24,6 +24,9 @@ public class MessageEvent extends Event {
     @Label("failure_code")
     public int failureCode = -1;
 
+    @Label("failure_message")
+    public String failureMessage;
+
     @Label("exception_class")
     public String exceptionClass;
 

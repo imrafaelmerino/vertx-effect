@@ -10,20 +10,14 @@ import jdk.jfr.*;
 @StackTrace(value = false)
 public class ReqEvent extends Event {
 
-    public enum RESULT {SUCCESS, FAILURE}
-
     @Label("method")
     public String method;
 
     @Label("uri")
     public String uri;
 
-    @Label("statusCode")
-
+    @Label("status_code")
     public int statusCode = -1;
-
-    @Label("result")
-    public String result;
 
     @Label("exception_class")
     public String exceptionClass;

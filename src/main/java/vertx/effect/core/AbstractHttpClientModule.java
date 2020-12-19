@@ -234,7 +234,6 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
     private void commitFailure(final ReqEvent reqEvent,
                                final Throwable failure) {
-        reqEvent.result = ReqEvent.RESULT.FAILURE.name();
         reqEvent.exceptionClass = failure.getClass()
                                          .getCanonicalName();
         reqEvent.exceptionMessage = failure.getMessage();
@@ -248,7 +247,6 @@ public abstract class AbstractHttpClientModule extends VertxModule {
         return r -> {
             if (r.succeeded()) {
                 HttpClientResponse resp = r.result();
-                event.result = ReqEvent.RESULT.SUCCESS.name();
                 event.statusCode = resp.statusCode();
                 event.commit();
                 event.end();
@@ -332,17 +330,17 @@ public abstract class AbstractHttpClientModule extends VertxModule {
                     case "ConnectTimeoutException":
                         return new ReplyException(RECIPIENT_FAILURE,
                                                   HTTP_CONNECT_TIMEOUT_CODE,
-                                                  getErrorMessage(exc)
+                                                  exc.getMessage()
                         );
                     case "UnknownHostException":
                         return new ReplyException(RECIPIENT_FAILURE,
                                                   HTTP_UNKNOWN_HOST_CODE,
-                                                  getErrorMessage(exc)
+                                                  exc.getMessage()
                         );
                     case "NoStackTraceTimeoutException":
                         return new ReplyException(RECIPIENT_FAILURE,
                                                   HTTP_REQUEST_TIMEOUT_CODE,
-                                                  getErrorMessage(exc)
+                                                  exc.getMessage()
                         );
                     case "VertxException": {
                         VertxException vertxException = (VertxException) exc;

@@ -45,8 +45,10 @@ public class EventPublisher {
 
             opt.ifPresentOrElse(error -> {
                                     event.result = MessageEvent.Result.FAILURE.name();
-                                    event.failureType = error.failureType().name();
+                                    event.failureType = error.failureType()
+                                                             .name();
                                     event.failureCode = error.failureCode();
+                                    event.failureMessage = error.getMessage();
                                     event.commit();
                                     event.end();
                                     if (enabled) {
@@ -72,7 +74,8 @@ public class EventPublisher {
                                 },
                                 () -> {
                                     event.result = MessageEvent.Result.FAILURE.name();
-                                    event.exceptionClass = exc.getClass().getCanonicalName();
+                                    event.exceptionClass = exc.getClass()
+                                                              .getCanonicalName();
                                     event.exceptionMessage = exc.getMessage();
                                     event.commit();
                                     event.end();
@@ -133,8 +136,10 @@ public class EventPublisher {
                                                         );
                                     }
                                     event.result = MessageEvent.Result.FAILURE.name();
-                                    event.failureType = error.failureType().name();
+                                    event.failureType = error.failureType()
+                                                             .name();
                                     event.failureCode = error.failureCode();
+                                    event.failureMessage = error.getMessage();
                                     event.commit();
                                     event.end();
                                 },
@@ -159,7 +164,8 @@ public class EventPublisher {
                                                         );
                                     }
                                     event.result = MessageEvent.Result.FAILURE.name();
-                                    event.exceptionClass = exc.getClass().getCanonicalName();
+                                    event.exceptionClass = exc.getClass()
+                                                              .getCanonicalName();
                                     event.exceptionMessage = exc.getMessage();
                                     event.commit();
                                     event.end();
