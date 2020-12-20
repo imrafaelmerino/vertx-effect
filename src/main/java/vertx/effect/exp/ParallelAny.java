@@ -50,24 +50,24 @@ final class ParallelAny extends Any {
     }
 
     @Override
-    public Val<Boolean> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts) {
+    public Val<Boolean> retry(final Predicate<Throwable> predicate,
+                              final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if(predicate==null)
             return Cons.failure(new NullPointerException("predicate is null"));
         return new ParallelAny(exps.stream()
-                                   .map(it -> it.retryIf(predicate,
-                                                attempts
-                                               ))
+                                   .map(it -> it.retry(predicate,
+                                                       attempts
+                                                      ))
                                    .collect(Collectors.toList()));
     }
 
 
     @Override
-    public Val<Boolean> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts,
-                                final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<Boolean> retry(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
@@ -75,10 +75,10 @@ final class ParallelAny extends Any {
         if(predicate==null)
             return Cons.failure(new NullPointerException("predicate is null"));
         return new ParallelAny(exps.stream()
-                                   .map(it -> it.retryIf(predicate,
-                                                attempts,
-                                                actionBeforeRetry
-                                               ))
+                                   .map(it -> it.retry(predicate,
+                                                       attempts,
+                                                       actionBeforeRetry
+                                                      ))
                                    .collect(Collectors.toList()));
     }
 

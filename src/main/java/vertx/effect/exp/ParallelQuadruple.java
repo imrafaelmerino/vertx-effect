@@ -64,33 +64,33 @@ class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
     }
 
     @Override
-    public Val<Tuple4<A, B, C, D>> retryIf(final Predicate<Throwable> predicate,
-                                           final int attempts) {
+    public Val<Tuple4<A, B, C, D>> retry(final Predicate<Throwable> predicate,
+                                         final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
-        return new ParallelQuadruple<>(_1.retryIf(predicate,
-                                                  attempts
-                                                 ),
-                                       _2.retryIf(predicate,
-                                                  attempts
-                                                 ),
-                                       _3.retryIf(predicate,
-                                                  attempts
-                                                 ),
-                                       _4.retryIf(predicate,
-                                                  attempts
-                                                 )
+        return new ParallelQuadruple<>(_1.retry(predicate,
+                                                attempts
+                                               ),
+                                       _2.retry(predicate,
+                                                attempts
+                                               ),
+                                       _3.retry(predicate,
+                                                attempts
+                                               ),
+                                       _4.retry(predicate,
+                                                attempts
+                                               )
         );
     }
 
 
     @Override
-    public Val<Tuple4<A, B, C, D>> retryIf(final Predicate<Throwable> predicate,
-                                           final int attempts,
-                                           final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<Tuple4<A, B, C, D>> retry(final Predicate<Throwable> predicate,
+                                         final int attempts,
+                                         final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
@@ -98,22 +98,22 @@ class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelQuadruple<>(_1.retryIf(predicate,
-                                                  attempts,
-                                                  actionBeforeRetry
-                                                 ),
-                                       _2.retryIf(predicate,
-                                                  attempts,
-                                                  actionBeforeRetry
-                                                 ),
-                                       _3.retryIf(predicate,
-                                                  attempts,
-                                                  actionBeforeRetry
-                                                 ),
-                                       _4.retryIf(predicate,
-                                                  attempts,
-                                                  actionBeforeRetry
-                                                 )
+        return new ParallelQuadruple<>(_1.retry(predicate,
+                                                attempts,
+                                                actionBeforeRetry
+                                               ),
+                                       _2.retry(predicate,
+                                                attempts,
+                                                actionBeforeRetry
+                                               ),
+                                       _3.retry(predicate,
+                                                attempts,
+                                                actionBeforeRetry
+                                               ),
+                                       _4.retry(predicate,
+                                                attempts,
+                                                actionBeforeRetry
+                                               )
         );
     }
 

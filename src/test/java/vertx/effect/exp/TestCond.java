@@ -309,10 +309,10 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retryIf(
+            .retry(
                     Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                     ATTEMPTS
-                    )
+                  )
             .onComplete(
                     r -> context.verify(() -> {
                         Assertions.assertTrue(r.failed());
@@ -330,10 +330,10 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retryIf(
+            .retry(
                     e -> e instanceof RuntimeException,
                     ATTEMPTS
-                    )
+                  )
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals("a",
                                         r

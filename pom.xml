@@ -6,7 +6,7 @@
     <groupId>com.github.imrafaelmerino</groupId>
     <artifactId>vertx-effect</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.0-RC1</version>
     <name>vertx-effect</name>
     <description>When actors meet Functional Programming</description>
     <url>https://github.com/imrafaelmerino/vertx-effect</url>
@@ -79,7 +79,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${MAVEN-SUREFIRE-PLUGIN.VERSION}</version>
                 <configuration>
-                    <argLine>-XX:+FlightRecorder -XX:StartFlightRecording=duration=180s,filename=myrecording.jfr</argLine>
+                    <argLine>-XX:+FlightRecorder -XX:StartFlightRecording=duration=180s,filename=vertx-effect-recording.jfr</argLine>
                 </configuration>
             </plugin>
             <plugin>

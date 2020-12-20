@@ -129,9 +129,9 @@ public class TestFailures {
                                                               .port(portServerClosesConnection)
                                                               .uri("/hi")
                                                  )
-                                           .retryIf(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
-                                                    1
-                                                   )
+                                           .retry(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
+                                                  1
+                                                 )
                                            .onComplete(it -> {
                                                if (it.succeeded())
                                                    context.verify(() -> {
@@ -161,9 +161,9 @@ public class TestFailures {
                                                                       )
                                                               .uri("/hi")
                                                  )
-                                           .retryIf(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE),
-                                                    1
-                                                   )
+                                           .retry(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE),
+                                                  1
+                                                 )
                                            .onComplete(it -> {
                                                if (it.succeeded())
                                                    context.failNow(new RuntimeException("abcd is really a host!"));
@@ -191,11 +191,11 @@ public class TestFailures {
                                              )
                                      .uri("/hi")
                         )
-                  .retryIf(Failures.anyOf(HTTP_REQUEST_TIMEOUT_CODE,
-                                          HTTP_CONNECT_TIMEOUT_CODE
-                                         ),
-                           1
-                          )
+                  .retry(Failures.anyOf(HTTP_REQUEST_TIMEOUT_CODE,
+                                        HTTP_CONNECT_TIMEOUT_CODE
+                                       ),
+                         1
+                        )
                   .onComplete(it -> {
                       if (it.succeeded()) context.completeNow();
                       else context.failNow(it.cause());
@@ -209,11 +209,11 @@ public class TestFailures {
 
         Module.sum100.apply(100)
                      .apply(10)
-                     .retryIf(it -> VERTICLE_TIMEOUT_PRISM
+                     .retry(it -> VERTICLE_TIMEOUT_PRISM
                                       .getOptional.apply(it)
                                                   .isPresent(),
-                              2
-                             )
+                            2
+                           )
                      .onComplete(it -> context.verify(() -> {
                          Assertions.assertTrue(it.failed());
                          Assertions.assertEquals(ReplyFailure.TIMEOUT,

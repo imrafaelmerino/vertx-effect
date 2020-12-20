@@ -4,7 +4,6 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.Val;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -42,33 +41,33 @@ class ParallelSeq<O> extends ListExp<O> {
     }
 
     @Override
-    public Val<List<O>> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts) {
+    public Val<List<O>> retry(final Predicate<Throwable> predicate,
+                              final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
 
-        return new ParallelSeq<>(seq.map(it -> it.retryIf(predicate,
-                                                          attempts
-                                                         ))
+        return new ParallelSeq<>(seq.map(it -> it.retry(predicate,
+                                                        attempts
+                                                       ))
         );
     }
 
 
     @Override
-    public Val<List<O>> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts,
-                                final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<List<O>> retry(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelSeq<>(seq.map(it -> it.retryIf(predicate,
-                                                          attempts,
-                                                          actionBeforeRetry
-                                                         )));
+        return new ParallelSeq<>(seq.map(it -> it.retry(predicate,
+                                                        attempts,
+                                                        actionBeforeRetry
+                                                       )));
     }
 
     @Override

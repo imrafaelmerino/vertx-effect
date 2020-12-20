@@ -122,9 +122,9 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertEquals(new Tuple5<>("a",
@@ -156,9 +156,9 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertEquals(new Tuple5<>("a",
@@ -190,9 +190,9 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertTrue(it.failed())
@@ -217,9 +217,9 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertTrue(it.failed())

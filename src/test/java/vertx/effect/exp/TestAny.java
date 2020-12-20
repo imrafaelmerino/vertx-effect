@@ -124,9 +124,9 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertEquals(true,
@@ -145,9 +145,9 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertEquals(true,
@@ -200,9 +200,9 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertTrue(it.failed())
@@ -219,9 +219,9 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertTrue(it.failed())
@@ -242,12 +242,12 @@ public class TestAny {
         Any.parallel(True.get(),
                      True.get()
                     )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                   3,
-                   (e, i) -> vertxRef.delay(100,
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3,
+                  (e, i) -> vertxRef.delay(100,
                                             MILLISECONDS
                                            )
-                  )
+                 )
            .onSuccess(it -> {
               context.verify(() -> {
                   Assertions.assertTrue(it);
@@ -268,12 +268,12 @@ public class TestAny {
         Any.sequential(True.get(),
                        True.get()
                       )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                   3,
-                   (e, i) -> vertxRef.delay(100,
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3,
+                  (e, i) -> vertxRef.delay(100,
                                             MILLISECONDS
                                            )
-                  )
+                 )
            .onSuccess(it -> {
               context.verify(() -> {
                   Assertions.assertTrue(it);

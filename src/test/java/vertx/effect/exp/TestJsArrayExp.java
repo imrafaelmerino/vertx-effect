@@ -148,12 +148,12 @@ public class TestJsArrayExp {
         JsArrayExp.sequential(a.get(),
                               b.get()
                              )
-                  .retryIf(e -> e instanceof RuntimeException,
-                           ATTEMPTS,
-                           (error, n) -> vertxRef.delay(100,
+                  .retry(e -> e instanceof RuntimeException,
+                         ATTEMPTS,
+                         (error, n) -> vertxRef.delay(100,
                                                         MILLISECONDS
                                                        )
-                          )
+                        )
                   .get()
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertEquals(JsArray.of("a",
@@ -220,9 +220,9 @@ public class TestJsArrayExp {
         JsArrayExp.sequential(a.get(),
                               b.get()
                              )
-                  .retryIf(e -> e instanceof RuntimeException,
-                           ATTEMPTS
-                          )
+                  .retry(e -> e instanceof RuntimeException,
+                         ATTEMPTS
+                        )
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertEquals(JsArray.of("a",
                                                          "b"
@@ -284,12 +284,12 @@ public class TestJsArrayExp {
         JsArrayExp.parallel(a.get(),
                             b.get()
                            )
-                  .retryIf(e -> e instanceof RuntimeException,
-                           ATTEMPTS - 1,
-                           (error, n) -> vertxRef.delay(100,
+                  .retry(e -> e instanceof RuntimeException,
+                         ATTEMPTS - 1,
+                         (error, n) -> vertxRef.delay(100,
                                                         MILLISECONDS
                                                        )
-                          )
+                        )
                   .get()
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertTrue(r.cause() instanceof RuntimeException);

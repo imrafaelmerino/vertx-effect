@@ -107,23 +107,23 @@ final class ParallelJsObjExp extends JsObjExp {
     }
 
     @Override
-    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
-                              final int attempts) {
+    public Val<JsObj> retry(final Predicate<Throwable> predicate,
+                            final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelJsObjExp(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                        attempts
-                                                                       )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
+                                                                      attempts
+                                                                     )));
 
     }
 
 
     @Override
-    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
-                              final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<JsObj> retry(final Predicate<Throwable> predicate,
+                            final int attempts,
+                            final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
@@ -131,10 +131,10 @@ final class ParallelJsObjExp extends JsObjExp {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelJsObjExp(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                        attempts,
-                                                                        actionBeforeRetry
-                                                                       )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
+                                                                      attempts,
+                                                                      actionBeforeRetry
+                                                                     )));
     }
 
 }

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -373,8 +372,8 @@ public final class Cond<O> extends AbstractVal<O> {
     }
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts) {
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
@@ -382,14 +381,14 @@ public final class Cond<O> extends AbstractVal<O> {
             return Cons.failure(new NullPointerException("predicate is null"));
 
         return new Cond<>(tests.stream()
-                               .map(it -> it.retryIf(predicate,
-                                                     attempts
-                                                    ))
+                               .map(it -> it.retry(predicate,
+                                                   attempts
+                                                  ))
                                .collect(Collectors.toList()),
                           consequences.stream()
-                                      .map(it -> it.retryIf(predicate,
-                                                            attempts
-                                                           ))
+                                      .map(it -> it.retry(predicate,
+                                                          attempts
+                                                         ))
                                       .collect(Collectors.toList()),
                           otherwise
         );
@@ -397,9 +396,9 @@ public final class Cond<O> extends AbstractVal<O> {
 
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts,
-                          final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts,
+                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
@@ -410,16 +409,16 @@ public final class Cond<O> extends AbstractVal<O> {
             return Cons.failure(new NullPointerException("predicate is null"));
 
         return new Cond<>(tests.stream()
-                               .map(it -> it.retryIf(predicate,
-                                                     attempts,
-                                                     actionBeforeRetry
-                                                    ))
+                               .map(it -> it.retry(predicate,
+                                                   attempts,
+                                                   actionBeforeRetry
+                                                  ))
                                .collect(Collectors.toList()),
                           consequences.stream()
-                                      .map(it -> it.retryIf(predicate,
-                                                            attempts,
-                                                            actionBeforeRetry
-                                                           ))
+                                      .map(it -> it.retry(predicate,
+                                                          attempts,
+                                                          actionBeforeRetry
+                                                         ))
                                       .collect(Collectors.toList()),
                           otherwise
         );

@@ -59,12 +59,12 @@ public class TestPair {
         Pair.parallel(one.get(),
                       one.get()
                      )
-            .retryIf(it -> it instanceof IllegalArgumentException,
-                     ATTEMPTS,
-                     (e, i) -> vertxRef.delay(100,
+            .retry(it -> it instanceof IllegalArgumentException,
+                   ATTEMPTS,
+                   (e, i) -> vertxRef.delay(100,
                                               MILLISECONDS
                                              )
-                    )
+                  )
             .onSuccess(it -> {
                 context.verify(() -> {
                     Assertions.assertEquals(new Tuple2<>(1,
@@ -90,12 +90,12 @@ public class TestPair {
         Pair.sequential(one.get(),
                         one.get()
                        )
-            .retryIf(it -> it instanceof IllegalArgumentException,
-                     ATTEMPTS,
-                     (e, i) -> vertxRef.delay(100,
+            .retry(it -> it instanceof IllegalArgumentException,
+                   ATTEMPTS,
+                   (e, i) -> vertxRef.delay(100,
                                               MILLISECONDS
                                              )
-                    )
+                  )
             .onSuccess(it -> {
                 context.verify(() -> {
                     Assertions.assertEquals(new Tuple2<>(1,
@@ -163,9 +163,9 @@ public class TestPair {
         Pair.parallel(val.get(),
                       val.get()
                      )
-            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                     2
-                    )
+            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   2
+                  )
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
@@ -191,9 +191,9 @@ public class TestPair {
         Pair.sequential(val.get(),
                         val.get()
                        )
-            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                     2
-                    )
+            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   2
+                  )
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
@@ -219,9 +219,9 @@ public class TestPair {
         Pair.parallel(val.get(),
                       val.get()
                      )
-            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                     2
-                    )
+            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   2
+                  )
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertTrue(it.failed())
@@ -243,9 +243,9 @@ public class TestPair {
         Pair.sequential(val.get(),
                         val.get()
                        )
-            .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                     2
-                    )
+            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   2
+                  )
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertTrue(it.failed())

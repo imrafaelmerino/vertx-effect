@@ -82,33 +82,33 @@ final class SequentialJsArray extends JsArrayExp {
     }
 
     @Override
-    public Val<JsArray> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts) {
+    public Val<JsArray> retry(final Predicate<Throwable> predicate,
+                              final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
-        return new SequentialJsArray(seq.map(it -> it.retryIf(predicate,
-                                                              attempts
-                                                             )));
+        return new SequentialJsArray(seq.map(it -> it.retry(predicate,
+                                                            attempts
+                                                           )));
 
     }
 
     @Override
-    public Val<JsArray> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts,
-                                final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<JsArray> retry(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new SequentialJsArray(seq.map(it -> it.retryIf(predicate,
-                                                              attempts,
-                                                              actionBeforeRetry
-                                                             ))
+        return new SequentialJsArray(seq.map(it -> it.retry(predicate,
+                                                            attempts,
+                                                            actionBeforeRetry
+                                                           ))
         );
     }
 

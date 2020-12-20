@@ -94,34 +94,34 @@ final class SequentialJsObj extends JsObjExp {
     }
 
     @Override
-    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
-                              final int attempts) {
+    public Val<JsObj> retry(final Predicate<Throwable> predicate,
+                            final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new SequentialJsObj(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                       attempts
-                                                                      )
+        return new SequentialJsObj(bindings.mapValues(it -> it.retry(predicate,
+                                                                     attempts
+                                                                    )
                                                      ));
 
     }
 
 
     @Override
-    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
-                              final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<JsObj> retry(final Predicate<Throwable> predicate,
+                            final int attempts,
+                            final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new SequentialJsObj(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                       attempts,
-                                                                       actionBeforeRetry
-                                                                      )
+        return new SequentialJsObj(bindings.mapValues(it -> it.retry(predicate,
+                                                                     attempts,
+                                                                     actionBeforeRetry
+                                                                    )
                                                      ));
     }
 

@@ -667,10 +667,10 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retryIf(
+                .retry(
                         Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                         2
-                        )
+                      )
                 .onComplete(
                         r -> context.verify(() -> {
                             Assertions.assertTrue(r.failed());
@@ -689,12 +689,12 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retryIf(e -> e instanceof RuntimeException,
-                         3,
-                         (e, n) -> vertxRef.delay(100,
+                .retry(e -> e instanceof RuntimeException,
+                       3,
+                       (e, n) -> vertxRef.delay(100,
                                                   MILLISECONDS
                                                  )
-                        )
+                      )
                 .onComplete(
                         r -> context.verify(() -> {
                             Assertions.assertTrue(r.succeeded());
@@ -714,10 +714,10 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retryIf(
+                .retry(
                         e -> e instanceof RuntimeException,
                         2
-                        )
+                      )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             r

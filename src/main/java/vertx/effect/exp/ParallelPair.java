@@ -47,27 +47,27 @@ final class ParallelPair<A, B> extends Pair<A, B> {
     }
 
     @Override
-    public Val<Tuple2<A, B>> retryIf(final Predicate<Throwable> predicate,
-                                     final int attempts) {
+    public Val<Tuple2<A, B>> retry(final Predicate<Throwable> predicate,
+                                   final int attempts) {
 
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelPair<>(_1.retryIf(predicate,
-                                             attempts
-                                            ),
-                                  _2.retryIf(predicate,
-                                     attempts
-                                    )
+        return new ParallelPair<>(_1.retry(predicate,
+                                           attempts
+                                          ),
+                                  _2.retry(predicate,
+                                           attempts
+                                          )
         );
     }
 
 
     @Override
-    public Val<Tuple2<A, B>> retryIf(final Predicate<Throwable> predicate,
-                                     final int attempts,
-                                     final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<Tuple2<A, B>> retry(final Predicate<Throwable> predicate,
+                                   final int attempts,
+                                   final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
@@ -75,12 +75,12 @@ final class ParallelPair<A, B> extends Pair<A, B> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelPair<>(_1.retryIf(predicate,
-                                             attempts
-                                            ),
-                                  _2.retryIf(predicate,
-                                     attempts
-                                    )
+        return new ParallelPair<>(_1.retry(predicate,
+                                           attempts
+                                          ),
+                                  _2.retry(predicate,
+                                           attempts
+                                          )
         );
     }
 

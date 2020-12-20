@@ -114,9 +114,9 @@ public class TestTriple {
                                                                   a.get(),
                                                                   a.get()
                                                                  )
-                                                        .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                                                                 2
-                                                                );
+                                                        .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               2
+                                                              );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
                                       "a",
@@ -141,9 +141,9 @@ public class TestTriple {
                                                                     a.get(),
                                                                     a.get()
                                                                    )
-                                                        .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                                                                 2
-                                                                );
+                                                        .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               2
+                                                              );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
                                       "a",
@@ -164,9 +164,9 @@ public class TestTriple {
                                 a.get(),
                                 a.get()
                                )
-                      .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                               2
-                              );
+                      .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             2
+                            );
 
 
         Verifiers.<Tuple3<String, String, String>>verifyFailure()
@@ -185,9 +185,9 @@ public class TestTriple {
                                   a.get(),
                                   a.get()
                                  )
-                      .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                               2
-                              );
+                      .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             2
+                            );
 
 
         Verifiers.<Tuple3<String, String, String>>verifyFailure()

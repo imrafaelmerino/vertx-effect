@@ -157,9 +157,9 @@ public abstract class OauthModule extends HttpClientModule {
                                                      this
                                                     )
                                               .flatMap(readNewAccessTokenAfterRefresh)
-                                              .retryIf(retryAccessTokenReqPredicate,
-                                                       accessTokenReqAttempts
-                                                      )
+                                              .retry(retryAccessTokenReqPredicate,
+                                                     accessTokenReqAttempts
+                                                    )
                                               .onSuccess(newToken -> this.accessToken = newToken)
                                     )
                         //really important: Cons.of instead of Cons.success to capture the state of this.accessToken

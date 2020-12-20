@@ -8,7 +8,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0-RC1)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0-RC1/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 - [vertx-effect manifesto](#manifesto)
@@ -550,9 +550,13 @@ public interface Val<O> extends Supplier<Future<O>> {
   Val<O> retryWhile(Predicate<O> predicate,
                     int attempts);
 
+  Val<O> retryWhile(Predicate<O> predicate,
+                    int attempts,
+                    BiFunction<O, Integer, Val<Void>> actionBeforeRetry);
+
   Val<O> retry(int attempts);
 
-  Val<O> retryIf(Predicate<Throwable> predicate, int attempts);
+  Val<O> retry(Predicate<Throwable> predicate, int attempts);
 
   Val<O> retry(int attempts,
                BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);  
@@ -571,8 +575,8 @@ public interface Val<O> extends Supplier<Future<O>> {
 
 **recover**: returns a constant if the computation fails. 
 
-**retry**: retries the computation. The maximum number of attempts, and an action before any attempt can be specified. 
-You can create any imaginable retry policy, for example: 
+**retry**: retries the computation if a failure happens. The max number of attempts, a predicate to select what failures
+will be retried, and an action before any attempt can be specified. You can create any imaginable retry policy, for example: 
 
 ```java
 // for ever
@@ -586,9 +590,8 @@ retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS)
 
 ```
 
-**retryIf**: retries the computation the specified number of attempts if the error matches the predicate.
-
 **retryWhile**: retries the computation the specified number of attempts if the result matches the predicate.
+ 
 
 ## <a name="modules"><a/> Modules
  
@@ -956,16 +959,16 @@ import static vertx.effect.Failures.TCP_CONNECTION_CLOSED_PRISM;
 BiFunction<Integer, String, Val<JsObj>> search =
       (attempts, term) ->
             httpModule.get.apply(new GetReq().uri("/search?q=" + term))
-                          .retryIf(Failures.or(HTTP_CONNECT_TIMEOUT_PRISM,
-                                               HTTP_REQUEST_TIMEOUT_PRISM,
-                                               TCP_CONNECTION_CLOSED_PRISM 
-                                              ),
-                                   attempts,
-                                   (error, remainingAttempts) ->
+                          .retry(Failures.any(HTTP_CONNECT_TIMEOUT_PRISM,
+                                              HTTP_REQUEST_TIMEOUT_PRISM,
+                                              TCP_CONNECTION_CLOSED_PRISM 
+                                             ),
+                                 attempts,
+                                 (error, remainingAttempts) ->
                                              vertxRef.delay(attempts - remainingAttempts + 1,
                                                             SECONDS
                                                            )
-                                   )
+                                 )
                           .recoverWith(e -> Cons.success(JsObj.EMPTY));
 
 search.apply(3, "vertx").get();
@@ -1196,7 +1199,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.0-RC1</version>
 </dependency>
 ```
 

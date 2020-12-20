@@ -60,7 +60,8 @@ public class HttpClientMethodsTests {
         Triple.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
                           new HttpServerBuilder(vertx,
                                                 new MockReqHandler(List.of(mockReqResp))
-                          ).start(PORT),
+                          ).startAtRandom(PORT,
+                                          PORT + 100),
                           vertxRef.deployVerticle(httpClient)
                          )
               .get()

@@ -209,9 +209,9 @@ public class TestParallelSeq {
         ListExp.parallel(hi.get(),
                          hi.get()
                         )
-               .retryIf(it -> it instanceof IllegalArgumentException,
-                        3
-                       )
+               .retry(it -> it instanceof IllegalArgumentException,
+                      3
+                     )
                .onSuccess(it -> {
                    context.verify(() -> {
                        Assertions.assertEquals(expected,
@@ -235,12 +235,12 @@ public class TestParallelSeq {
         ListExp.parallel(hi.get(),
                          hi.get()
                         )
-               .retryIf(it -> it instanceof IllegalArgumentException,
-                        3,
-                        (e, i) -> vertxRef.delay(100,
+               .retry(it -> it instanceof IllegalArgumentException,
+                      3,
+                      (e, i) -> vertxRef.delay(100,
                                                  MILLISECONDS
                                                 )
-                       )
+                     )
                .onSuccess(it -> {
                    context.verify(() -> {
                        Assertions.assertEquals(expected,

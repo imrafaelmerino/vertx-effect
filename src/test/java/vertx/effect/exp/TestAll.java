@@ -237,9 +237,9 @@ public class TestAll {
         All.parallel(True.get(),
                      True.get()
                     )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                    3
-                   )
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3
+                 )
            .onSuccess(it -> {
                context.verify(() -> {
                    Assertions.assertTrue(it);
@@ -260,9 +260,9 @@ public class TestAll {
         All.sequential(True.get(),
                        True.get()
                       )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                    3
-                   )
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3
+                 )
            .onSuccess(it -> {
                context.verify(() -> {
                    Assertions.assertTrue(it);
@@ -283,12 +283,12 @@ public class TestAll {
         All.parallel(True.get(),
                      True.get()
                     )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                    3,
-                    (e, i) -> vertxRef.delay(100,
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3,
+                  (e, i) -> vertxRef.delay(100,
                                              MILLISECONDS
                                             )
-                   )
+                 )
            .onSuccess(it -> {
                context.verify(() -> {
                    Assertions.assertTrue(it);
@@ -309,12 +309,12 @@ public class TestAll {
         All.sequential(True.get(),
                        True.get()
                       )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                    3,
-                    (e, i) -> vertxRef.delay(100,
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3,
+                  (e, i) -> vertxRef.delay(100,
                                              MILLISECONDS
                                             )
-                   )
+                 )
            .onSuccess(it -> {
                context.verify(() -> {
                    Assertions.assertTrue(it);
@@ -335,9 +335,9 @@ public class TestAll {
         All.sequential(True.get(),
                        True.get()
                       )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                    2
-                   )
+           .retry(it -> it instanceof IllegalArgumentException,
+                  2
+                 )
            .onComplete(it -> {
                context.verify(() -> {
                    Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
@@ -358,9 +358,9 @@ public class TestAll {
         All.parallel(True.get(),
                      True.get()
                     )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                    2
-                   )
+           .retry(it -> it instanceof IllegalArgumentException,
+                  2
+                 )
            .onComplete(it -> {
                context.verify(() -> {
                    Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);

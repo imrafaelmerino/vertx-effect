@@ -72,8 +72,8 @@ public final class Cons<O> extends AbstractVal<O> {
     }
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts) {
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if(predicate==null)
@@ -85,9 +85,9 @@ public final class Cons<O> extends AbstractVal<O> {
     }
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts,
-                          final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts,
+                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
