@@ -5,7 +5,6 @@ import vertx.effect.core.AbstractVal;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
@@ -45,13 +44,6 @@ public final class IfElse<O> extends AbstractVal<O> {
         });
     }
 
-    @Override
-    public <P> Val<P> map(final Function<O, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return new IfElse<P>(predicate).alternative(alternative.map(fn))
-                                       .consequence(consequence.map(fn));
-    }
 
     @Override
     public Val<O> retry(final int attempts) {
@@ -80,45 +72,45 @@ public final class IfElse<O> extends AbstractVal<O> {
     }
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts) {
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new IfElse<O>(this.predicate.retryIf(predicate,
-                                                    attempts
-                                                   ))
-                .consequence(consequence.retryIf(predicate,
-                                                 attempts
-                                                ))
-                .alternative(alternative.retryIf(predicate,
-                                                 attempts
-                                                ));
+        return new IfElse<O>(this.predicate.retry(predicate,
+                                                  attempts
+                                                 ))
+                .consequence(consequence.retry(predicate,
+                                               attempts
+                                              ))
+                .alternative(alternative.retry(predicate,
+                                               attempts
+                                              ));
     }
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts,
-                          final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts,
+                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new IfElse<O>(this.predicate.retryIf(predicate,
-                                                    attempts,
-                                                    actionBeforeRetry
-                                                   ))
-                .consequence(consequence.retryIf(predicate,
-                                                 attempts,
-                                                 actionBeforeRetry
-                                                ))
-                .alternative(alternative.retryIf(predicate,
-                                                 attempts,
-                                                 actionBeforeRetry
-                                                ));
+        return new IfElse<O>(this.predicate.retry(predicate,
+                                                  attempts,
+                                                  actionBeforeRetry
+                                                 ))
+                .consequence(consequence.retry(predicate,
+                                               attempts,
+                                               actionBeforeRetry
+                                              ))
+                .alternative(alternative.retry(predicate,
+                                               attempts,
+                                               actionBeforeRetry
+                                              ));
     }
 
 }

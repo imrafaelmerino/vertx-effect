@@ -11,6 +11,7 @@ import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
@@ -22,17 +23,17 @@ public class TestAny {
     static VertxRef vertxRef;
     static final int ATTEMPTS = 2;
     static final Supplier<Val<Boolean>> TRUE =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter ->
                                      Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                             true
+                                 true
             );
 
 
     static final Supplier<Val<Boolean>> FALSE =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                             false
+                                 false
             );
 
     @BeforeAll
@@ -123,9 +124,9 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertEquals(true,
@@ -144,9 +145,9 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertEquals(true,
@@ -199,9 +200,9 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.REQUEST_TIMEOUT_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertTrue(it.failed())
@@ -218,9 +219,9 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.REQUEST_TIMEOUT_CODE),
-                   2
-                  )
+           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
+                  2
+                 )
            .get()
            .onComplete(it -> {
               context.verify(() -> Assertions.assertTrue(it.failed())
@@ -234,19 +235,19 @@ public class TestAny {
     public void test_parallel_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         Any.parallel(True.get(),
                      True.get()
                     )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                   3,
-                   (e, i) -> vertxRef.delay(100,
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3,
+                  (e, i) -> vertxRef.delay(100,
                                             MILLISECONDS
                                            )
-                  )
+                 )
            .onSuccess(it -> {
               context.verify(() -> {
                   Assertions.assertTrue(it);
@@ -260,19 +261,19 @@ public class TestAny {
     public void test_sequential_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<Boolean> True = new ErrorWhile<>(3,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
                                                     i -> new IllegalArgumentException(),
-                                                    true
+                                                            true
         );
         Any.sequential(True.get(),
                        True.get()
                       )
-           .retryIf(it -> it instanceof IllegalArgumentException,
-                   3,
-                   (e, i) -> vertxRef.delay(100,
+           .retry(it -> it instanceof IllegalArgumentException,
+                  3,
+                  (e, i) -> vertxRef.delay(100,
                                             MILLISECONDS
                                            )
-                  )
+                 )
            .onSuccess(it -> {
               context.verify(() -> {
                   Assertions.assertTrue(it);

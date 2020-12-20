@@ -2,10 +2,15 @@ package vertx.effect;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.eventbus.ReplyException;
 import jsonvalues.JsArray;
 import jsonvalues.JsObj;
+import vertx.effect.core.Functions;
 import vertx.effect.core.JsArrayMessageCodec;
 import vertx.effect.core.JsObjMessageCodec;
+
+import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
+import static vertx.effect.Failures.INTERNAL_ERROR_CODE;
 
 
 /**
@@ -27,10 +32,11 @@ public class RegisterJsValuesCodecs extends AbstractVerticle {
                  .registerDefaultCodec(JsArray.class,
                                        JsArrayMessageCodec.INSTANCE
                                       );
-
             promise.complete();
         } catch (Exception e) {
-           promise.fail(Failures.GET_EXCEPTION_REGISTERING_CODECS.apply(e));
+           promise.fail(new ReplyException(RECIPIENT_FAILURE,
+                                           Failures.EXCEPTION_REGISTERING_CODECS_CODE,
+                                           Functions.getErrorMessage(e)));
         }
 
 

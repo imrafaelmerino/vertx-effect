@@ -8,10 +8,8 @@ import jsonvalues.JsValue;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 
 /**
@@ -21,25 +19,25 @@ import java.util.stream.IntStream;
  a json array.
  */
 
-final class ParallelJsArray extends JsArrayVal {
+final class ParallelJsArrayExp extends JsArrayExp {
 
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     private List<Val<? extends JsValue>> seq = List.empty();
 
-    static final ParallelJsArray EMPTY = new ParallelJsArray();
+    static final ParallelJsArrayExp EMPTY = new ParallelJsArrayExp();
 
-    ParallelJsArray(List<Val<? extends JsValue>> seq) {
+    ParallelJsArrayExp(List<Val<? extends JsValue>> seq) {
         this.seq = seq;
     }
 
-    ParallelJsArray() {
+    ParallelJsArrayExp() {
     }
 
     @SafeVarargs
-    ParallelJsArray(final Val<? extends JsValue> val,
-                    final Val<? extends JsValue>... others
-                   ) {
+    ParallelJsArrayExp(final Val<? extends JsValue> val,
+                       final Val<? extends JsValue>... others
+                      ) {
         seq = seq.append(val);
         for (Val<? extends JsValue> other : others) {
             seq = seq.append(other);
@@ -71,9 +69,10 @@ final class ParallelJsArray extends JsArrayVal {
 
     }
 
-    public ParallelJsArray append(final Val<? extends JsValue> future) {
+    @Override
+    public ParallelJsArrayExp append(final Val<? extends JsValue> future) {
 
-        final ParallelJsArray arrayFuture = new ParallelJsArray();
+        final ParallelJsArrayExp arrayFuture = new ParallelJsArrayExp();
         arrayFuture.seq = this.seq.append(future);
         return arrayFuture;
     }
@@ -84,10 +83,14 @@ final class ParallelJsArray extends JsArrayVal {
     }
 
     @Override
-    public <P> Val<P> map(final Function<JsArray, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
+    @SuppressWarnings("unchecked")
+    public Val<JsValue> head() {
+        return (Val<JsValue>) seq.head();
+    }
+
+    @Override
+    public JsArrayExp tail() {
+        return new ParallelJsArrayExp(seq.tail());
     }
 
 
@@ -97,7 +100,7 @@ final class ParallelJsArray extends JsArrayVal {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new ParallelJsArray(seq.map(it -> it.retry(attempts)));
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(attempts)));
     }
 
 
@@ -108,39 +111,39 @@ final class ParallelJsArray extends JsArrayVal {
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new ParallelJsArray(seq.map(it -> it.retry(attempts,
-                                                          actionBeforeRetry
-                                                         )));
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(attempts,
+                                                             actionBeforeRetry
+                                                            )));
     }
 
     @Override
-    public Val<JsArray> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts) {
+    public Val<JsArray> retry(final Predicate<Throwable> predicate,
+                              final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
-        return new ParallelJsArray(seq.map(it -> it.retryIf(predicate,
-                                                            attempts
-                                                           )));
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(predicate,
+                                                             attempts
+                                                            )));
 
     }
 
     @Override
-    public Val<JsArray> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts,
-                                final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<JsArray> retry(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new ParallelJsArray(seq.map(it -> it.retryIf(predicate,
-                                                            attempts,
-                                                            actionBeforeRetry
-                                                           ))
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(predicate,
+                                                             attempts,
+                                                             actionBeforeRetry
+                                                            ))
         );
     }
 

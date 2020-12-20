@@ -29,4 +29,25 @@ public abstract class Quadruple<A, B, C, D> extends AbstractVal<Tuple4<A, B, C, 
                                          requireNonNull(_4)
         );
     }
+
+    public abstract Val<A> _1();
+
+    public abstract Val<B> _2();
+
+    public abstract Val<C> _3();
+
+    public abstract Val<D> _4();
+
+    public static <O> Val<O> race(final Quadruple<O, O, O, O> quadruple) {
+        if (quadruple == null)
+            return Cons.failure(new IllegalArgumentException("Quadruple.race: pair is null"));
+        return ListExp.parallel(quadruple._1(),
+                                quadruple._2(),
+                                quadruple._3(),
+                                quadruple._4()
+                               )
+                      .race();
+    }
+
+
 }

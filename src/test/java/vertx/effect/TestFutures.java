@@ -10,8 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.exp.Cons;
-import vertx.effect.exp.JsArrayVal;
-import vertx.effect.exp.JsObjVal;
+import vertx.effect.exp.JsArrayExp;
+import vertx.effect.exp.JsObjExp;
 
 import java.util.function.Function;
 
@@ -47,7 +47,7 @@ public class TestFutures extends VertxModule {
     @Test
     public void testJsObjFuture(final VertxTestContext context) {
 
-        JsObjVal.parallel("a",
+        JsObjExp.parallel("a",
                           multiplyBy10.apply(10)
                                 .map(JsInt::of),
                           "b",
@@ -57,12 +57,12 @@ public class TestFutures extends VertxModule {
                           toUpper.apply("abc")
                            .map(JsStr::of),
                           "d",
-                          JsArrayVal.sequential(multiplyBy10.apply(1)
+                          JsArrayExp.sequential(multiplyBy10.apply(1)
                                                             .map(JsInt::of),
                                                 multiplyBy10.apply(5)
                                                             .map(JsInt::of)
                                                )
-                   )
+                         )
                 .get()
                 .onSuccess(o -> {
                     if (o.equals(jsonvalues.JsObj.of("a",

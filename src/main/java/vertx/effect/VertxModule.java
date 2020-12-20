@@ -5,13 +5,18 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import vertx.effect.exp.MapVal;
+import io.vertx.core.eventbus.ReplyException;
+import vertx.effect.core.Functions;
+import vertx.effect.exp.ListExp;
+import vertx.effect.exp.MapExp;
 import vertx.effect.exp.Pair;
-import vertx.effect.exp.SeqVal;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
+import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static java.util.Objects.requireNonNull;
+import static vertx.effect.Failures.EXCEPTION_DEPLOYING_MODULE_CODE;
 
 
 /**
@@ -23,17 +28,17 @@ public abstract class VertxModule extends AbstractVerticle {
 
     private static final DeploymentOptions DEFAULT_DEPLOYMENT_OPTIONS = new DeploymentOptions();
     protected final DeploymentOptions deploymentOptions;
-    private SeqVal<String> idValSeq;
-    private MapVal<VerticleRef<?, ?>> refValMap;
-    private io.vavr.collection.Map<String, VerticleRef<?, ?>> refMap;
+    private ListExp<String> idValSeq;
+    private MapExp<VerticleRef<?, ?>> refValMap;
+    private Map<String, VerticleRef<?, ?>> refMap;
 
 
     @SuppressWarnings({"rawtypes", "unchecked", "squid:S3740"})
-    private VertxModule(final MapVal refExp,
+    private VertxModule(final MapExp refExp,
                         final DeploymentOptions deploymentOptions) {
         this.refValMap = requireNonNull(refExp);
         this.deploymentOptions = requireNonNull(deploymentOptions);
-        idValSeq = SeqVal.sequential();
+        idValSeq = ListExp.sequential();
     }
 
 
@@ -44,10 +49,10 @@ public abstract class VertxModule extends AbstractVerticle {
      */
     @SuppressWarnings("unchecked")
     public VertxModule(final DeploymentOptions options) {
-        this(MapVal.sequential(),
+        this(MapExp.sequential(),
              requireNonNull(options)
             );
-        idValSeq = SeqVal.sequential();
+        idValSeq = ListExp.sequential();
     }
 
     /**
@@ -61,10 +66,10 @@ public abstract class VertxModule extends AbstractVerticle {
      */
     @SuppressWarnings("unchecked")
     public VertxModule() {
-        this(MapVal.sequential(),
+        this(MapExp.sequential(),
              DEFAULT_DEPLOYMENT_OPTIONS
             );
-        idValSeq = SeqVal.sequential();
+        idValSeq = ListExp.sequential();
 
     }
 
@@ -112,54 +117,54 @@ public abstract class VertxModule extends AbstractVerticle {
                             initialize();
                             start.complete();
                         } catch (Exception e) {
-                            start.fail(Failures.GET_EXCEPTION_DEPLOYING_MODULE.apply(e));
+                            start.fail(new ReplyException(RECIPIENT_FAILURE,
+                                                          EXCEPTION_DEPLOYING_MODULE_CODE,
+                                                          Functions.getErrorMessage(e)
+                            ));
                         }
                     }
                 })
                 .get();
 
         } catch (Exception e) {
-            start.fail(Failures.GET_EXCEPTION_DEPLOYING_MODULE.apply(e));
+            start.fail(new ReplyException(RECIPIENT_FAILURE,
+                                          EXCEPTION_DEPLOYING_MODULE_CODE,
+                                          Functions.getErrorMessage(e)
+            ));
         }
     }
 
     @SuppressWarnings({"unchecked"})
     protected <I, O> λ<I, O> ask(final String address) {
-        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))
-                                          .get()).ask();
+        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))).ask();
     }
 
     @SuppressWarnings({"unchecked"})
     protected <I, O> λ<I, O> ask(final String address,
                                  final DeliveryOptions options) {
-        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))
-                                          .get()).ask(options);
+        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))).ask(options);
     }
 
     @SuppressWarnings({"unchecked"})
     protected <I, O> λc<I, O> trace(final String address) {
-        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))
-                                          .get()).trace();
+        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))).trace();
     }
 
     @SuppressWarnings({"unchecked"})
     protected <I, O> λc<I, O> trace(final String address,
                                     final DeliveryOptions options) {
-        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))
-                                          .get()).trace(options);
+        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))).trace(options);
     }
 
     @SuppressWarnings({"unchecked"})
     protected <I, O> Consumer<I> tell(final String address) {
-        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))
-                                          .get()).tell();
+        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))).tell();
     }
 
     @SuppressWarnings({"unchecked"})
     protected <I, O> Consumer<I> tell(final String address,
                                       final DeliveryOptions options) {
-        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))
-                                          .get()).tell(options);
+        return ((VerticleRef<I, O>) refMap.get(requireNonNull(address))).tell(options);
     }
 
     protected void deployVerticle(final AbstractVerticle verticle) {

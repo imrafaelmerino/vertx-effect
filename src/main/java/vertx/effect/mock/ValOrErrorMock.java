@@ -1,13 +1,14 @@
-package vertx.effect.exp;
+package vertx.effect.mock;
 
 import io.vertx.core.Future;
 import vertx.effect.Val;
+import vertx.effect.exp.Cons;
 
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
-public class ErrorWhile<O> implements Supplier<Val<O>> {
+public class ValOrErrorMock<O> implements Supplier<Val<O>> {
 
     private int counter;
     private final IntFunction<Throwable> getError;
@@ -16,16 +17,16 @@ public class ErrorWhile<O> implements Supplier<Val<O>> {
     private final Val<O> val;
 
 
-    public ErrorWhile(final int attempts,
-                      final IntFunction<Throwable> getError,
-                      final O value) {
+    public ValOrErrorMock(final int attempts,
+                          final IntFunction<Throwable> getError,
+                          final O value) {
 
         this(counter -> counter <= attempts, getError,value);
     }
 
-    public ErrorWhile(final IntPredicate testIfError,
-                      final IntFunction<Throwable> getError,
-                      final O value) {
+    public ValOrErrorMock(final IntPredicate testIfError,
+                          final IntFunction<Throwable> getError,
+                          final O value) {
         this.getError = getError;
         this.testIfError = testIfError;
         this.value = value;
@@ -41,8 +42,8 @@ public class ErrorWhile<O> implements Supplier<Val<O>> {
     @Override
     public Val<O> get() {
         //danger zone, counter is mutable, we have to return a brand new instance
-        return new ErrorWhile<>(testIfError,
-                                getError,
-                                value).val;
+        return new ValOrErrorMock<>(testIfError,
+                                    getError,
+                                    value).val;
     }
 }

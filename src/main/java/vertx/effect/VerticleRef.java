@@ -73,6 +73,9 @@ public class VerticleRef<I, O> {
         requireNonNull(options);
         return body -> Cons.of(() -> {
                                    try {
+                                       MessageEvent messageEvent = new MessageEvent();
+                                       messageEvent.address = address;
+                                       messageEvent.begin();
                                        EventPublisher.PUBLISHER.sentMessage(address,
                                                                             body
                                                                            )
@@ -84,13 +87,15 @@ public class VerticleRef<I, O> {
                                                .onComplete(event -> {
                                                    if (event.succeeded()) {
                                                        EventPublisher.PUBLISHER.receivedResp(address,
-                                                                                             EMPTY_HEADERS.get()
+                                                                                             EMPTY_HEADERS.get(),
+                                                                                             messageEvent
                                                                                             )
                                                                                .accept(vertx);
                                                    }
                                                    else {
                                                        EventPublisher.PUBLISHER.receivedError(address,
-                                                                                              event.cause()
+                                                                                              event.cause(),
+                                                                                              messageEvent
                                                                                              )
                                                                                .accept(vertx);
                                                    }
@@ -108,6 +113,9 @@ public class VerticleRef<I, O> {
         requireNonNull(options);
         return (context, body) -> Cons.of(() -> {
                                               try {
+                                                  MessageEvent messageEvent = new MessageEvent();
+                                                  messageEvent.address = address;
+                                                  messageEvent.begin();
                                                   EventPublisher.PUBLISHER.sentMessage(address,
                                                                                        body,
                                                                                        context
@@ -120,14 +128,16 @@ public class VerticleRef<I, O> {
                                                           .onComplete(event -> {
                                                               if (event.succeeded()) {
                                                                   EventPublisher.PUBLISHER.receivedResp(address,
-                                                                                                        context
+                                                                                                        context,
+                                                                                                        messageEvent
                                                                                                        )
                                                                                           .accept(vertx);
                                                               }
                                                               else {
                                                                   EventPublisher.PUBLISHER.receivedError(address,
                                                                                                          event.cause(),
-                                                                                                         context
+                                                                                                         context,
+                                                                                                         messageEvent
                                                                                                         )
                                                                                           .accept(vertx);
                                                               }

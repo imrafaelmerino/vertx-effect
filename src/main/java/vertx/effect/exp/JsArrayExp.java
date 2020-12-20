@@ -7,7 +7,7 @@ import vertx.effect.core.AbstractVal;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class JsArrayVal extends AbstractVal<JsArray> {
+public abstract class JsArrayExp extends AbstractVal<JsArray> {
 
 
     /**
@@ -18,7 +18,7 @@ public abstract class JsArrayVal extends AbstractVal<JsArray> {
      @return a new JsArrayFuture
      */
     @SafeVarargs
-    public static JsArrayVal sequential(final Val<? extends JsValue> head,
+    public static JsArrayExp sequential(final Val<? extends JsValue> head,
                                         final Val<? extends JsValue>... tail
                                        ) {
         return new SequentialJsArray(requireNonNull(head),
@@ -26,7 +26,7 @@ public abstract class JsArrayVal extends AbstractVal<JsArray> {
         );
     }
 
-    public static JsArrayVal sequential() {
+    public static JsArrayExp sequential() {
         return SequentialJsArray.EMPTY;
     }
 
@@ -38,19 +38,25 @@ public abstract class JsArrayVal extends AbstractVal<JsArray> {
      @return a new JsArrayFuture
      */
     @SafeVarargs
-    public static JsArrayVal parallel(final Val<? extends JsValue> head,
+    public static JsArrayExp parallel(final Val<? extends JsValue> head,
                                       final Val<? extends JsValue>... tail
                                      ) {
-        return new ParallelJsArray(requireNonNull(head),
-                                   requireNonNull(tail)
+        return new ParallelJsArrayExp(requireNonNull(head),
+                                      requireNonNull(tail)
         );
     }
 
-    public static JsArrayVal parallel() {
-        return ParallelJsArray.EMPTY;
+    public static JsArrayExp parallel() {
+        return ParallelJsArrayExp.EMPTY;
     }
 
-    public abstract JsArrayVal append(final Val<? extends JsValue> val);
+    public abstract JsArrayExp append(final Val<? extends JsValue> val);
 
     public abstract Val<JsValue> race();
+
+    public abstract Val<JsValue> head();
+
+    public abstract JsArrayExp tail();
+
+
 }

@@ -1,24 +1,23 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.List;
 import io.vertx.core.Future;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import javax.naming.OperationNotSupportedException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-class SequentialSeq<O> extends SeqVal<O> {
+class SequentialSeq<O> extends ListExp<O> {
 
     @SuppressWarnings("rawtypes")
-    protected static final SeqVal EMPTY = new SequentialSeq<>(List.empty());
+    protected static final ListExp EMPTY = new SequentialSeq<>(io.vavr.collection.List.empty());
 
-     SequentialSeq(final List<Val<? extends O>> seq) {
-       super(seq);
+    SequentialSeq(final io.vavr.collection.List<Val<? extends O>> seq) {
+        super(seq);
     }
 
 
@@ -43,68 +42,71 @@ class SequentialSeq<O> extends SeqVal<O> {
     }
 
     @Override
-    public Val<List<O>> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts) {
+    public Val<List<O>> retry(final Predicate<Throwable> predicate,
+                              final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
 
-        return new SequentialSeq<>(seq.map(it -> it.retryIf(predicate,
-                                                            attempts
-                                                           ))
+        return new SequentialSeq<>(seq.map(it -> it.retry(predicate,
+                                                          attempts
+                                                         ))
         );
     }
 
 
     @Override
-    public Val<List<O>> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts,
-                                final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<List<O>> retry(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new SequentialSeq<>(seq.map(it -> it.retryIf(predicate,
-                                                            attempts,
-                                                            actionBeforeRetry
-                                                           )));
+        return new SequentialSeq<>(seq.map(it -> it.retry(predicate,
+                                                          attempts,
+                                                          actionBeforeRetry
+                                                         )));
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Future<List<O>> get() {
-        Future<List<O>> acc = Future.succeededFuture(List.empty());
+        Future<List<O>> acc = Future.succeededFuture(new ArrayList<>());
 
         for (final Val<? extends O> val : seq)
             acc = acc.flatMap(l -> val.get()
-                                      .map(l::append));
+                                      .map(it -> {
+                                          l.add(it);
+                                          return l;
+                                      }));
 
         return acc;
 
     }
 
-    public SeqVal<O> append(final Val<? extends O> exp) {
+    @Override
+    public ListExp<O> append(final Val<? extends O> exp) {
         return new SequentialSeq<>(seq.append(requireNonNull(exp)));
     }
 
-    public SeqVal<O> prepend(final Val<? extends O> exp) {
+    @Override
+    public ListExp<O> prepend(final Val<? extends O> exp) {
         return new SequentialSeq<>(seq.prepend(requireNonNull(exp)));
     }
 
     @Override
     public Val<O> race() {
         return Cons.failure(new OperationNotSupportedException("race doesn't make any sense in a sequential execution"));
-
     }
 
-    public SeqVal<O> tail() {
+
+    @Override
+    public ListExp<O> tail() {
         return new SequentialSeq<>(seq.tail());
     }
-
-
-
 
 
 }

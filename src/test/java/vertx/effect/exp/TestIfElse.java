@@ -10,10 +10,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
+import vertx.effect.mock.ValMock;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.exp.Cons.FALSE;
 import static vertx.effect.exp.Cons.TRUE;
 
@@ -21,9 +24,9 @@ import static vertx.effect.exp.Cons.TRUE;
 public class TestIfElse {
 
     static final Supplier<Val<Boolean>> trueVal =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter:+" + counter),
-                             true
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                 counter -> new RuntimeException("counter:+" + counter),
+                                 true
             );
 
     private static VertxRef vertxRef;
@@ -67,16 +70,16 @@ public class TestIfElse {
     @Test
     public void testRetryPredicateWhenBadMessage(final VertxTestContext context) {
         final Supplier<Val<Boolean>> trueVal =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
-                                 true
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
+                                     true
                 );
         IfElse.predicate(trueVal.get())
               .consequence(Cons.success("consequence"))
               .alternative(Cons.success("alternative"))
-              .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                       2
-                      )
+              .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                     2
+                    )
               .onComplete(r -> {
                   if (r.succeeded()) {
                       context.verify(() -> {
@@ -94,18 +97,18 @@ public class TestIfElse {
     @Test
     public void testRetryIfIfElseConsequence(final VertxTestContext context) {
         final Supplier<Val<String>> consequence =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
-                                 "consequence"
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
+                                     "consequence"
                 );
 
 
         IfElse.<String>predicate(Cons.TRUE)
                 .consequence(consequence.get())
                 .alternative(Cons.success("alternative"))
-                .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                         2
-                        )
+                .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                       2
+                      )
                 .onComplete(r -> {
                     if (r.succeeded()) {
                         context.verify(() -> {
@@ -124,18 +127,18 @@ public class TestIfElse {
     public void testRetryIfIfElseAlternative(final VertxTestContext context) {
 
         final Supplier<Val<String>> alternative =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
-                                 "alternative"
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
+                                     "alternative"
                 );
 
 
         IfElse.<String>predicate(Cons.success(false))
                 .consequence(Cons.success("consequence"))
                 .alternative(alternative.get())
-                .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                         2
-                        )
+                .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                       2
+                      )
                 .onComplete(r -> {
                     if (r.succeeded()) {
                         context.verify(() -> {
@@ -154,9 +157,9 @@ public class TestIfElse {
     @Test
     public void testRetryIfElseConsequence(final VertxTestContext context) {
         final Supplier<Val<String>> consequence =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter: " + counter),
-                                 "consequence"
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> new RuntimeException("counter: " + counter),
+                                     "consequence"
                 );
 
 
@@ -182,9 +185,9 @@ public class TestIfElse {
     public void testRetryIfElseAlternative(final VertxTestContext context) {
 
         final Supplier<Val<String>> alternative =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter: " + counter),
-                                 "alternative"
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> new RuntimeException("counter: " + counter),
+                                     "alternative"
                 );
 
 
@@ -225,7 +228,7 @@ public class TestIfElse {
                                                         .alternative(c);
 
 
-        JsObjVal of = JsObjVal.sequential("a",
+        JsObjExp of = JsObjExp.sequential("a",
                                           a.map(JsBool::of),
                                           "b",
                                           b.map(JsInt::of),
@@ -389,9 +392,9 @@ public class TestIfElse {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<Boolean> True = new ErrorWhile<>(ATTEMPTS,
-                                                    counter -> new RuntimeException("counter: " + counter),
-                                                    true
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(ATTEMPTS,
+                                                            counter -> new RuntimeException("counter: " + counter),
+                                                            true
         );
 
         IfElse.predicate(True.get())
@@ -419,23 +422,24 @@ public class TestIfElse {
     public void test_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<String> str = new ErrorWhile<>(3,
-                                                  i -> new IllegalArgumentException(),
-                                                  "hi"
+        ValOrErrorMock<String> str = new ValOrErrorMock<>(3,
+                                                          i -> new IllegalArgumentException(),
+                                                          "hi"
         );
         IfElse.<String>predicate(TRUE)
                 .consequence(str.get())
                 .alternative(Cons.success("bye"))
-                .retryIf(it -> it instanceof IllegalArgumentException,
-                         3,
-                         (e, i) -> vertxRef.delay(100,
-                                                  MILLISECONDS
-                                                 )
-                        )
+                .retry(it -> it instanceof IllegalArgumentException,
+                       3,
+                       (e, i) -> vertxRef.delay(100,
+                                                MILLISECONDS
+                                               )
+                      )
                 .onSuccess(it -> {
                     context.verify(() -> {
                         Assertions.assertEquals("hi",
-                                                it);
+                                                it
+                                               );
                         context.completeNow();
                     });
                 })
@@ -446,19 +450,19 @@ public class TestIfElse {
     public void test_retry_if_failure_with_delay(final VertxTestContext context) {
 
 
-        ErrorWhile<String> str = new ErrorWhile<>(3,
-                                                  i -> new IllegalArgumentException(),
-                                                  "hi"
+        ValOrErrorMock<String> str = new ValOrErrorMock<>(3,
+                                                          i -> new IllegalArgumentException(),
+                                                          "hi"
         );
         IfElse.<String>predicate(TRUE)
                 .consequence(str.get())
                 .alternative(Cons.success("bye"))
-                .retryIf(it -> it instanceof IllegalArgumentException,
-                         2,
-                         (e, i) -> vertxRef.delay(100,
-                                                  MILLISECONDS
-                                                 )
-                        )
+                .retry(it -> it instanceof IllegalArgumentException,
+                       2,
+                       (e, i) -> vertxRef.delay(100,
+                                                MILLISECONDS
+                                               )
+                      )
                 .onComplete(it -> {
                     context.verify(() -> {
                         Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
@@ -466,5 +470,79 @@ public class TestIfElse {
                     });
                 })
                 .get();
+    }
+
+    @Test
+    public void test_retry_while(final VertxTestContext context,
+                                 final Vertx vertx) {
+        int              expectedVal = 5;
+        ValMock<Integer> mock        = new ValMock<>(i -> i);
+
+        mock.get()
+            .retryWhile(i -> i != expectedVal,
+                        expectedVal - 1
+                       )
+            .onSuccess(val -> {
+                           context.verify(() -> Assertions.assertEquals(expectedVal,
+                                                                        val
+                                                                       )
+                                         );
+                           context.completeNow();
+                       }
+
+                      )
+            .get();
+
+    }
+
+    @Test
+    public void test_retry_while_with_delay(final VertxTestContext context,
+                                            final Vertx vertx) {
+        int expectedVal = 5;
+        ValMock<Integer> mock = new ValMock<>(i -> i);
+
+        mock.get()
+            .retryWhile(i -> i != expectedVal,
+                        expectedVal - 1,
+                        (a,b) -> vertxRef.delay(10,MILLISECONDS),
+                        (a,b) -> vertxRef.delay(10,MILLISECONDS)
+                       )
+            .onSuccess(val -> {
+                           context.verify(() -> Assertions.assertEquals(expectedVal,
+                                                                        val
+                                                                       )
+                                         );
+                           context.completeNow();
+                       }
+
+                      )
+            .get();
+
+    }
+
+    @Test
+    public void test_retry_while_errors(final VertxTestContext context,
+                                        final Vertx vertx) {
+        int expectedVal = 5;
+        ValOrErrorMock<Integer> mock = new ValOrErrorMock<>(3,
+                                                            n -> new RuntimeException(),
+                                                            expectedVal
+        );
+
+        mock.get()
+            .retryWhile(i -> i != expectedVal,
+                        3
+                       )
+            .onSuccess(val -> {
+                           context.verify(() -> Assertions.assertEquals(expectedVal,
+                                                                        val
+                                                                       )
+                                         );
+                           context.completeNow();
+                       }
+
+                      )
+            .get();
+
     }
 }

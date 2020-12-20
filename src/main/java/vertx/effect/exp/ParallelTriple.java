@@ -4,12 +4,9 @@ import io.vavr.Tuple3;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.Val;
-
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.util.Objects.requireNonNull;
 
 
 public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
@@ -26,14 +23,6 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
         this._2 = _2;
         this._3 = _3;
     }
-
-    @Override
-    public <P> Val<P> map(final Function<Tuple3<A, B, C>, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
 
     @Override
     public Val<Tuple3<A, B, C>> retry(final int attempts) {
@@ -67,29 +56,29 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
     }
 
     @Override
-    public Val<Tuple3<A, B, C>> retryIf(final Predicate<Throwable> predicate,
-                                        final int attempts) {
+    public Val<Tuple3<A, B, C>> retry(final Predicate<Throwable> predicate,
+                                      final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelTriple<>(_1.retryIf(predicate,
-                                               attempts
-                                              ),
-                                    _2.retryIf(predicate,
-                                               attempts
-                                              ),
-                                    _3.retryIf(predicate,
-                                               attempts
-                                              )
+        return new ParallelTriple<>(_1.retry(predicate,
+                                             attempts
+                                            ),
+                                    _2.retry(predicate,
+                                             attempts
+                                            ),
+                                    _3.retry(predicate,
+                                             attempts
+                                            )
         );
     }
 
 
     @Override
-    public Val<Tuple3<A, B, C>> retryIf(final Predicate<Throwable> predicate,
-                                        final int attempts,
-                                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<Tuple3<A, B, C>> retry(final Predicate<Throwable> predicate,
+                                      final int attempts,
+                                      final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
@@ -97,18 +86,18 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelTriple<>(_1.retryIf(predicate,
-                                               attempts,
-                                               actionBeforeRetry
-                                              ),
-                                    _2.retryIf(predicate,
-                                               attempts,
-                                               actionBeforeRetry
-                                              ),
-                                    _3.retryIf(predicate,
-                                               attempts,
-                                               actionBeforeRetry
-                                              )
+        return new ParallelTriple<>(_1.retry(predicate,
+                                             attempts,
+                                             actionBeforeRetry
+                                            ),
+                                    _2.retry(predicate,
+                                             attempts,
+                                             actionBeforeRetry
+                                            ),
+                                    _3.retry(predicate,
+                                             attempts,
+                                             actionBeforeRetry
+                                            )
         );
     }
 
@@ -124,5 +113,19 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
                               ));
     }
 
+    @Override
+    public Val<A> _1() {
+        return _1;
+    }
+
+    @Override
+    public Val<B> _2() {
+        return _2;
+    }
+
+    @Override
+    public Val<C> _3() {
+        return _3;
+    }
 
 }

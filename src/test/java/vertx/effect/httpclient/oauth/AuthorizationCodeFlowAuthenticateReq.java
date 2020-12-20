@@ -10,19 +10,23 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
-import vertx.effect.httpclient.MyHttpServer;
 import vertx.effect.httpclient.PostReq;
+import vertx.effect.httpserver.HttpServerBuilder;
+import vertx.effect.mock.MockHeadersResp;
+import vertx.effect.mock.MockReqHandler;
+import vertx.effect.mock.MockReqResp;
 
+import java.util.List;
 import java.util.Objects;
+
+import static vertx.effect.mock.MockReqResp.ALWAYS;
 
 @ExtendWith(VertxExtension.class)
 public class AuthorizationCodeFlowAuthenticateReq {
 
     static AuthorizationCodeModule httpClient;
-    static MyHttpServer server;
     static final int PORT = Port.number.incrementAndGet();
 
 
@@ -31,19 +35,19 @@ public class AuthorizationCodeFlowAuthenticateReq {
                                final VertxTestContext context
                               ) {
 
-
-        server = new MyHttpServer(vertx,
-                                  PORT,
-                                  counter -> req -> body -> JsObj.empty()
+        VertxRef vertxRef = new VertxRef(vertx);
+        MockReqResp mockReqResp =
+                MockReqResp.when(ALWAYS)
+                           .setBodyResp(n -> body -> req -> JsObj.empty()
                                                                  .set("access_token",
                                                                       JsStr.of("access_token_value")
                                                                      )
                                                                  .set("refresh_token",
                                                                       JsStr.of("refresh_token_value")
-                                                                     ),
-                                  counter -> req -> body -> 200
-        );
-        VertxRef vertxRef = new VertxRef(vertx);
+                                                                     )
+                                                                 .toPrettyString()
+                                       )
+                           .setHeadersResp(MockHeadersResp.JSON);
 
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
@@ -62,13 +66,13 @@ public class AuthorizationCodeFlowAuthenticateReq {
                 ).setReqAttempts(4)
                  .setRetryReqPredicate(Failures.REPLY_EXCEPTION_PRISM
                                                .exists
-                                               .apply(exc -> Objects.equals(Failures.UNKNOWN_HOST_CODE,
+                                               .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
                                                                             exc.failureCode()
                                                                            ) ||
-                                                       Objects.equals(Failures.CONNECT_TIMEOUT_CODE,
+                                                       Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
                                                                       exc.failureCode()
                                                                      )
-                                                       || Objects.equals(Failures.REQUEST_TIMEOUT_CODE,
+                                                       || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
                                                                          exc.failureCode()
                                                                         )
                                                      ))
@@ -80,12 +84,16 @@ public class AuthorizationCodeFlowAuthenticateReq {
                                                                              .getBytes()).uri("/authenticate"))
                                    );
 
-        Triple.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                        Cons.of(() -> server.start()),
-                        vertxRef.deployVerticle(httpClient)
-                       )
-              .onComplete(Verifiers.pipeTo(context))
-              .get();
+
+        Triple.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                          new HttpServerBuilder(vertx,
+                                                new MockReqHandler(List.of(mockReqResp))
+                          )
+                                  .start(PORT),
+                          vertxRef.deployVerticle(httpClient)
+                         )
+              .get()
+              .onComplete(Verifiers.pipeTo(context));
 
 
     }

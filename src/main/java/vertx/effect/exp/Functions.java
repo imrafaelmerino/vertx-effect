@@ -13,7 +13,7 @@ class Functions {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static <O> Val<O> race(List<Val<? extends O>> seq) {
+    static <O> Val<O> race(List<Val<? extends O>> seq) {
         return Cons.of(() ->
                        {
                            java.util.List futures = seq.map(Supplier::get)
@@ -31,4 +31,5 @@ class Functions {
                                                      );
                        });
     }
+
 }

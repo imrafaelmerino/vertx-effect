@@ -1,13 +1,13 @@
 package vertx.effect.exp;
 
 import io.vavr.Tuple2;
-import io.vavr.collection.LinkedHashMap;
 import io.vavr.collection.List;
-import io.vavr.collection.Map;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.Val;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -19,16 +19,16 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class ParallelMapVal<O> extends MapVal<O> {
+final class ParallelMapExp<O> extends MapExp<O> {
 
     @SuppressWarnings({"rawtypes"})
-    public static final ParallelMapVal EMPTY = new ParallelMapVal<>();
+    public static final ParallelMapExp EMPTY = new ParallelMapExp<>();
 
 
-    ParallelMapVal() {
+    ParallelMapExp() {
     }
 
-    ParallelMapVal(final Map<String, Val<? extends O>> bindings) {
+    ParallelMapExp(final io.vavr.collection.Map<String, Val<? extends O>> bindings) {
         this.bindings = requireNonNull(bindings);
     }
 
@@ -40,10 +40,11 @@ final class ParallelMapVal<O> extends MapVal<O> {
      @param exp the given future
      @return a new JsObjFuture
      */
-    public ParallelMapVal<O> set(final String key,
+    @Override
+    public ParallelMapExp<O> set(final String key,
                                  final Val<? extends O> exp
                                 ) {
-        return new ParallelMapVal<>(bindings.put(requireNonNull(key),
+        return new ParallelMapExp<>(bindings.put(requireNonNull(key),
                                                  requireNonNull(exp)
                                                 ));
     }
@@ -52,7 +53,7 @@ final class ParallelMapVal<O> extends MapVal<O> {
     public Val<Map<String, O>> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retry(attempts)));
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(attempts)));
     }
 
 
@@ -62,33 +63,33 @@ final class ParallelMapVal<O> extends MapVal<O> {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retry(attempts,
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(attempts,
                                                                       actionBeforeRetry
                                                                      )
                                                       ));
     }
 
     @Override
-    public Val<Map<String, O>> retryIf(final Predicate<Throwable> predicate,
-                                       final int attempts) {
+    public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
+                                     final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
 
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                        attempts
-                                                                       ))
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(predicate,
+                                                                      attempts
+                                                                     ))
         );
 
     }
 
 
     @Override
-    public Val<Map<String, O>> retryIf(final Predicate<Throwable> predicate,
-                                       final int attempts,
-                                       final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
+                                     final int attempts,
+                                     final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
 
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
@@ -97,10 +98,10 @@ final class ParallelMapVal<O> extends MapVal<O> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                        attempts,
-                                                                        actionBeforeRetry
-                                                                       )));
+        return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(predicate,
+                                                                      attempts,
+                                                                      actionBeforeRetry
+                                                                     )));
     }
 
 
@@ -110,22 +111,21 @@ final class ParallelMapVal<O> extends MapVal<O> {
         List<String> keys = bindings.keysIterator()
                                     .toList();
         @SuppressWarnings({"rawtypes"})
-        Map<String, Future> futures = bindings.map((k, v) -> new Tuple2<>(k,
-                                                                          v.get()
-                                                   )
-                                                  );
+        io.vavr.collection.Map<String, Future> futures = bindings.map((k, v) -> new Tuple2<>(k,
+                                                                                             v.get()
+                                                                      )
+                                                                     );
         return CompositeFuture.all(futures.values()
                                           .toJavaList()
                                   )
                               .map(r -> {
-                                  Map<String, O> result = LinkedHashMap.empty();
+                                  Map<String, O> result = new LinkedHashMap<>();
                                   java.util.List<O> list = r.result()
                                                             .list();
                                   for (int i = 0; i < list.size(); i++) {
-                                      result = result.put(new Tuple2<>(keys.get(i),
-                                                                       list.get(i)
-                                                          )
-                                                         );
+                                      result.put(keys.get(i),
+                                                 list.get(i)
+                                                );
 
                                   }
 

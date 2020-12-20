@@ -19,4 +19,19 @@ public abstract class Pair<A, B> extends AbstractVal<Tuple2<A, B>> {
                                   _2
         );
     }
+
+    public abstract Val<A> _1();
+
+    public abstract Val<B> _2();
+
+    public static <O> Val<O> race(final Pair<O, O> pair) {
+        if (pair == null)
+            return Cons.failure(new IllegalArgumentException("Pair.race: pair is null"));
+        return ListExp.parallel(pair._1(),
+                                pair._2()
+                               )
+                      .race();
+    }
+
+
 }

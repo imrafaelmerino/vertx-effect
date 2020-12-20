@@ -8,7 +8,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/0.9)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/0.9/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0-RC1)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0-RC1/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 - [vertx-effect manifesto](#manifesto)
@@ -26,6 +26,7 @@
 - [Reactive OAuth http client](#oauth-httpclient)
     - [Client credentials flow](#clientcredentials)
     - [Authorization flow](#authorizationflow)
+- [JFR support](#jfr)    
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Related projects](#rp)
@@ -93,8 +94,8 @@ import static jsonvalues.spec.JsSpecs.*;
 import vertx.effect.Validators;
 import vertx.effect.VertxModule;
 import vertx.effect.exp.Cons;
-import vertx.effect.exp.JsArrayVal;
-import vertx.effect.exp.JsObjVal;
+import vertx.effect.exp.JsArrayExp;
+import vertx.effect.exp.JsObjExp;
 import vertx.effect.λ;
 
 public class MyModule extends VertxModule {
@@ -115,8 +116,8 @@ public class MyModule extends VertxModule {
     this.deploy("validate", Validators.validateJsObj(spec));
 
     λ<JsObj, JsObj> map = obj-> 
-          JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
-                            "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+          JsObjExp.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
+                            "b", JsArrayExp.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
                                                                 .map(JsStr::of),
                                                      toUpperCase.apply(obj.getStr(path("/b/1")))
                                                                 .map(JsStr::of)
@@ -142,12 +143,12 @@ public class MyModule extends VertxModule {
 **A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them**. 
 A lambda is just a function that takes an input and produces an output. In the above example, _MyModule_ deploys 
 five verticles. It's worth mentioning how the verticle _ValidateAndMap_ is defined using composition and the expressions 
-_JsObjVal_ and _JsArrayVal_. It shows the essence and the goal of vertx-effect. Later on, we'll see more expressions like 
+_JsObjExp_ and _JsArrayExp_. It shows the essence and the goal of vertx-effect. Later on, we'll see more expressions like 
 **Cons**, **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, etc.
 
 _ValidateAndMap_ sends a message to _validate_. If the message matches the given spec, _ValidateAndMap_ computes the output 
 sending messages to the verticles _inc_, _toLowerCase_, and _toUpperCase_ and composing a Json from their responses in parallel. 
-You can operate sequentially instead of in parallel using the constructors _JsObjVal.sequential_ and _JsArrayVal.sequential_. 
+You can operate sequentially instead of in parallel using the constructors _JsObjExp.sequential_ and _JsArrayExp.sequential_. 
 Thanks to the _retry_ function, if _any_ verticle failed to compute their value, it would retry the computation up to two times.
 
 It's important to notice that you can still send messages to the module verticles using the Vertx API, but one of the 
@@ -231,8 +232,8 @@ public class TestMyModule {
  λ<JsObj, JsObj> validate = Validators.validateJsObj(spec);
  
  λ<JsObj, JsObj> map = obj-> 
-          JsObjVal.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
-                            "b", JsArrayVal.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+          JsObjExp.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
+                            "b", JsArrayExp.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
                                                                 .map(JsStr::of),
                                                      toUpperCase.apply(obj.getStr(path("/b/1")))
                                                                 .map(JsStr::of)
@@ -481,8 +482,8 @@ Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>, Val<B>, Val<C>);
 
 ```
  
-- **JsObjVal** and **JsArrayVal**. 
-_JsObjVal_ and _JsArrayVal_ are data structures that look like raw Json. You can compute all the values either in parallel
+- **JsObjExp** and **JsArrayExp**. 
+_JsObjExp_ and _JsArrayExp_ are data structures that look like raw Json. You can compute all the values either in parallel
 or sequentially. You can mix all the expressions we've seen so far and nest them, going as deeper as necessary,
 like in the following example:
 
@@ -493,7 +494,7 @@ IfElse<JsStr> a = IfElse.<JsStr>predicate(Val<Boolean>)
                         .consequence(Val<JsStr>)
                         .alternative(Val<JsStr>); 
 
-JsArrayVal b = JsArrayVal.sequential(new Case<Integer,JsValue>(n).of(1, Val<JsValue>,
+JsArrayExp b = JsArrayExp.sequential(new Case<Integer,JsValue>(n).of(1, Val<JsValue>,
                                                                      2, Val<JsValue>,
                                                                      Val<JsValue> 
                                                                     ),
@@ -503,14 +504,14 @@ JsArrayVal b = JsArrayVal.sequential(new Case<Integer,JsValue>(n).of(1, Val<JsVa
                                             )
                                      );
 
-JsObjVal c = JsObjVal.parallel("d", Any.sequential(Val<Boolean>, Val<Boolean>).map(JsBool::of),
+JsObjExp c = JsObjExp.parallel("d", Any.sequential(Val<Boolean>, Val<Boolean>).map(JsBool::of),
                                "e", All.parallel(Val<Boolean>, Val<Boolean>).map(JsBool::of),
-                               "f", JsArrayVal.parallel(Val<JsValue>,
+                               "f", JsArrayExp.parallel(Val<JsValue>,
                                                         Val<JsValue> 
                                                        ) 
                               )
 
-JsObjVal obj = JsObjVal.parallel("a",a,
+JsObjExp obj = JsObjExp.parallel("a",a,
                                  "b",b,
                                  "c",c 
                                 );
@@ -519,26 +520,26 @@ JsObjVal obj = JsObjVal.parallel("a",a,
 It's important to notice that any value of the above expressions can be computed by a different cluster machine's verticle. 
 Imagine ten machines collaborating to compute a JsObj. Is not this amazing?
 
-- **SeqVal and MapVal**
+- **ListExp and MapExp**
 
-They represent sequences and maps. **Modules use them internally**. For example, the deploy method uses a MapVal to put the 
-deployed verticles using their addresses as keys. They also use a SeqVal when more than a verticle instance is deployed. 
+They represent sequences and maps. **Modules use them internally**. For example, the deploy method uses a MapExp to put the 
+deployed verticles using their addresses as keys. They also use a ListExp when more than a verticle instance is deployed. 
 As with the other expressions, you can compute their values either in parallel or sequentially.
 
 ```
 
-MapVal<String> map = MapVal.parallel("a",Val<String>,
+MapExp<String> map = MapExp.parallel("a",Val<String>,
                                      "b",Val<String>,
                                      "c",Val<String>
                                      );
 
-SeqVal<Integer> seq = SeqVal.parallel(Val<Integer>,Val<Integer>);
+ListExp<Integer> seq = ListExp.parallel(Val<Integer>,Val<Integer>);
 
 Val<Integer> firstFinishing = seq.race();
 
 ```
 
-The _race_ function returns the value that finishes first. You can race a _JsArrayVal_ as well.
+The _race_ function returns the value that finishes first. You can race a _JsArrayExp_ as well.
 
 ## <a name="reactive"><a/> Being reactive 
 
@@ -546,15 +547,21 @@ Find below some of the most critical operations defined in the _Val_ interface t
 
 ```java
 public interface Val<O> extends Supplier<Future<O>> {
+  Val<O> retryWhile(Predicate<O> predicate,
+                    int attempts);
+
+  Val<O> retryWhile(Predicate<O> predicate,
+                    int attempts,
+                    BiFunction<O, Integer, Val<Void>> actionBeforeRetry);
 
   Val<O> retry(int attempts);
 
-  Val<O> retryIf(Predicate<Throwable> predicate, int attempts);
+  Val<O> retry(Predicate<Throwable> predicate, int attempts);
 
   Val<O> retry(int attempts,
                BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);  
 
-  Val<O> recoverWith(final λ<Throwable, O> fn);
+  Val<O> recoverWith(λ<Throwable, O> fn);
 
   Val<O> fallbackTo(λ<Throwable, O> fn);
 
@@ -568,8 +575,8 @@ public interface Val<O> extends Supplier<Future<O>> {
 
 **recover**: returns a constant if the computation fails. 
 
-**retry**: retries the computation. The maximum number of attempts, and an action before any attempt can be specified. 
-You can create any imaginable retry policy, for example: 
+**retry**: retries the computation if a failure happens. The max number of attempts, a predicate to select what failures
+will be retried, and an action before any attempt can be specified. You can create any imaginable retry policy, for example: 
 
 ```java
 // for ever
@@ -583,8 +590,8 @@ retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS)
 
 ```
 
-**retryIf**: retries the computation the specified number of attempts if the error matches the predicate.
-
+**retryWhile**: retries the computation the specified number of attempts if the result matches the predicate.
+ 
 
 ## <a name="modules"><a/> Modules
  
@@ -952,16 +959,16 @@ import static vertx.effect.Failures.TCP_CONNECTION_CLOSED_PRISM;
 BiFunction<Integer, String, Val<JsObj>> search =
       (attempts, term) ->
             httpModule.get.apply(new GetReq().uri("/search?q=" + term))
-                          .retryIf(Failures.or(HTTP_CONNECT_TIMEOUT_PRISM,
-                                               HTTP_REQUEST_TIMEOUT_PRISM,
-                                               TCP_CONNECTION_CLOSED_PRISM 
-                                              ),
-                                   attempts,
-                                   (error, remainingAttempts) ->
+                          .retry(Failures.any(HTTP_CONNECT_TIMEOUT_PRISM,
+                                              HTTP_REQUEST_TIMEOUT_PRISM,
+                                              TCP_CONNECTION_CLOSED_PRISM 
+                                             ),
+                                 attempts,
+                                 (error, remainingAttempts) ->
                                              vertxRef.delay(attempts - remainingAttempts + 1,
                                                             SECONDS
                                                            )
-                                   )
+                                 )
                           .recoverWith(e -> Cons.success(JsObj.EMPTY));
 
 search.apply(3, "vertx").get();
@@ -1156,6 +1163,31 @@ _Go to vertx.effect.httpclient.oauth.Spotify_ for further details. More implemen
 little by little. As shown in the previous section, you can customize everything: retries under certain 
 errors, number of attempts, function to extract the tokens from the authentication request etc.
 
+### <a name="jfr"><a/> JFR support
+Every http request and verticle call has an associated event that is recorded using Java Flight Recorded
+
+Fields of a verticle message event:
+
+    - address: Address of the Verticle where the message is sent to
+    - result: SUCCESS OR FAILURE, dependening on what the caller receives
+    - failure code: In case the failure is a ReplyException, it's the failure code
+    - failure type: In case the failure is a ReplyException, it's the failure type
+    - failure message: In case the failure is a ReplyException, it's the failure message
+    - exception class: In case the failure is not a ReplyException, it's the exception class name
+    - exception message: In case the failure is not a ReplyException, it's the exception message
+    - duration: time since the message is sent until the response is received
+    
+Fields of a http request event:
+
+    - status code: The http status code response
+    - host: the host of the request
+    - uri: the uri of the request
+    - result: SUCCESS OR FAILURE, depenending on whether or not an http response is received 
+    - method: the method of the request: GET, POST ...
+    - duration: the method since the request is sent until the response is received
+    - exception class: If an exception takes place and no http response is received, the exception class
+    - exception message: If an exception takes place and no http response is received, the exception message
+
 ## <a name="requirements"><a/> Requirements
 Java 11 or greater
 
@@ -1167,7 +1199,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>0.9</version>
+  <version>1.0.0-RC1</version>
 </dependency>
 ```
 

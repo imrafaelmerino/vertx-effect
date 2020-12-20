@@ -10,7 +10,6 @@ import jsonvalues.JsValue;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -22,15 +21,15 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class ParallelJsObj extends JsObjVal {
+final class ParallelJsObjExp extends JsObjExp {
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
 
-    ParallelJsObj() {
+    ParallelJsObjExp() {
     }
 
-    ParallelJsObj(final Map<String, Val<? extends JsValue>> bindings) {
+    ParallelJsObjExp(final Map<String, Val<? extends JsValue>> bindings) {
         this.bindings = bindings;
     }
 
@@ -42,13 +41,13 @@ final class ParallelJsObj extends JsObjVal {
      @return a new JsObjFuture
      */
     @Override
-    public ParallelJsObj set(final String key,
-                             final Val<? extends JsValue> future
-                            ) {
+    public ParallelJsObjExp set(final String key,
+                                final Val<? extends JsValue> future
+                               ) {
         final Map<String, Val<? extends JsValue>> a = bindings.put(requireNonNull(key),
                                                                    requireNonNull(future)
                                                                   );
-        return new ParallelJsObj(a);
+        return new ParallelJsObjExp(a);
     }
 
 
@@ -84,21 +83,12 @@ final class ParallelJsObj extends JsObjVal {
                               });
     }
 
-
-    @Override
-    public <P> Val<P> map(final Function<JsObj, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
-
     @Override
     public Val<JsObj> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new ParallelJsObj(bindings.mapValues(it -> it.retry(attempts)));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(attempts)));
     }
 
 
@@ -111,29 +101,29 @@ final class ParallelJsObj extends JsObjVal {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelJsObj(bindings.mapValues(it -> it.retry(attempts,
-                                                                   actionBeforeRetry
-                                                                  )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(attempts,
+                                                                      actionBeforeRetry
+                                                                     )));
     }
 
     @Override
-    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
-                              final int attempts) {
+    public Val<JsObj> retry(final Predicate<Throwable> predicate,
+                            final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelJsObj(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                     attempts
-                                                                    )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
+                                                                      attempts
+                                                                     )));
 
     }
 
 
     @Override
-    public Val<JsObj> retryIf(final Predicate<Throwable> predicate,
-                              final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<JsObj> retry(final Predicate<Throwable> predicate,
+                            final int attempts,
+                            final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
@@ -141,10 +131,10 @@ final class ParallelJsObj extends JsObjVal {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new ParallelJsObj(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                     attempts,
-                                                                     actionBeforeRetry
-                                                                    )));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
+                                                                      attempts,
+                                                                      actionBeforeRetry
+                                                                     )));
     }
 
 }

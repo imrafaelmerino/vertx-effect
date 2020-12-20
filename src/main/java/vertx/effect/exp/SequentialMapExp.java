@@ -1,12 +1,12 @@
 package vertx.effect.exp;
 
-import io.vavr.collection.LinkedHashMap;
 import io.vavr.collection.List;
-import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
 import io.vertx.core.Future;
 import vertx.effect.Val;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -18,16 +18,16 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class SequentialMapVal<O> extends MapVal<O> {
+final class SequentialMapExp<O> extends MapExp<O> {
 
     @SuppressWarnings({"rawtypes"})
-    public static final SequentialMapVal EMPTY = new SequentialMapVal<>();
+    public static final SequentialMapExp EMPTY = new SequentialMapExp<>();
 
 
-    SequentialMapVal() {
+    SequentialMapExp() {
     }
 
-    SequentialMapVal(final Map<String, Val<? extends O>> bindings) {
+    SequentialMapExp(final io.vavr.collection.Map<String, Val<? extends O>> bindings) {
         this.bindings = requireNonNull(bindings);
     }
 
@@ -39,10 +39,11 @@ final class SequentialMapVal<O> extends MapVal<O> {
      @param exp the given future
      @return a new JsObjFuture
      */
-    public MapVal<O> set(final String key,
+    @Override
+    public MapExp<O> set(final String key,
                          final Val<? extends O> exp
                         ) {
-        return new SequentialMapVal<>(bindings.put(requireNonNull(key),
+        return new SequentialMapExp<>(bindings.put(requireNonNull(key),
                                                    requireNonNull(exp)
                                                   ));
     }
@@ -52,7 +53,7 @@ final class SequentialMapVal<O> extends MapVal<O> {
     public Val<Map<String, O>> retry(final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retry(attempts)));
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(attempts)));
     }
 
 
@@ -62,33 +63,33 @@ final class SequentialMapVal<O> extends MapVal<O> {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retry(attempts,
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(attempts,
                                                                         actionBeforeRetry
                                                                        )
                                                         ));
     }
 
     @Override
-    public Val<Map<String, O>> retryIf(final Predicate<Throwable> predicate,
-                                       final int attempts) {
+    public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
+                                     final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
 
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                          attempts
-                                                                         ))
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(predicate,
+                                                                        attempts
+                                                                       ))
         );
 
     }
 
 
     @Override
-    public Val<Map<String, O>> retryIf(final Predicate<Throwable> predicate,
-                                       final int attempts,
-                                       final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
+                                     final int attempts,
+                                     final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
 
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
@@ -97,10 +98,10 @@ final class SequentialMapVal<O> extends MapVal<O> {
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
 
-        return new SequentialMapVal<>(bindings.mapValues(it -> it.retryIf(predicate,
-                                                                          attempts,
-                                                                          actionBeforeRetry
-                                                                         )));
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(predicate,
+                                                                        attempts,
+                                                                        actionBeforeRetry
+                                                                       )));
     }
 
 
@@ -111,22 +112,23 @@ final class SequentialMapVal<O> extends MapVal<O> {
                                     .toList();
         Seq<Val<? extends O>> values = bindings.values();
 
-        Future<Map<String, O>> acc = Future.succeededFuture(LinkedHashMap.empty());
+        Future<Map<String, O>> acc = Future.succeededFuture(new LinkedHashMap<>());
 
         for (int i = 0; i < keys.size(); i++) {
             String           k   = keys.get(i);
             Val<? extends O> val = values.get(i);
             acc = acc.flatMap(m -> val.get()
-                                      .map(fut -> m.put(k,
-                                                        fut
-                                                       )
+                                      .map(fut -> {
+                                               m.put(k,
+                                                     fut
+                                                    );
+                                               return m;
+                                           }
                                           )
                              );
         }
 
-
         return acc;
-
     }
 
 }

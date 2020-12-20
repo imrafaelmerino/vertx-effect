@@ -37,12 +37,12 @@ public class VertxRefTests {
 
     @Test
     public void test_number_of_instances(VertxTestContext context) {
-        int i = 100000;
+        int i = 10;
 
         final Checkpoint checkpoint = context.checkpoint(i);
 
         for (int i1 = 0; i1 < i; i1++) {
-            vertxRef.deploy("id",
+            vertxRef.deploy("id"+i,
                             λ.<JsObj>identity(),
                             new DeploymentOptions().setWorker(true)
                            )

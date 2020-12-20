@@ -6,7 +6,6 @@ import vertx.effect.core.AbstractVal;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public final class Case<I, O> extends AbstractVal<O> {
@@ -617,11 +616,6 @@ public final class Case<I, O> extends AbstractVal<O> {
         return this;
     }
 
-    @Override
-    public <P> Val<P> map(final Function<O, P> fn) {
-        return cond.map(fn);
-    }
-
 
     @Override
     public Val<O> retry(final int attempts) {
@@ -637,22 +631,22 @@ public final class Case<I, O> extends AbstractVal<O> {
     }
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts) {
-        return cond.retryIf(predicate,
-                            attempts
-                           );
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts) {
+        return cond.retry(predicate,
+                          attempts
+                         );
     }
 
     @Override
-    public Val<O> retryIf(final Predicate<Throwable> predicate,
-                          final int attempts,
-                          final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final int attempts,
+                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
 
-        return cond.retryIf(predicate,
-                            attempts,
-                            actionBeforeRetry
-                           );
+        return cond.retry(predicate,
+                          attempts,
+                          actionBeforeRetry
+                         );
     }
 
     @Override

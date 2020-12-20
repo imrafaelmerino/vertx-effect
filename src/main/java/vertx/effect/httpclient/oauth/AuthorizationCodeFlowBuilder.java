@@ -6,7 +6,6 @@ import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import jsonvalues.JsPath;
 import vertx.effect.core.OauthBuilder;
-import vertx.effect.Failures;
 import vertx.effect.exp.Cons;
 import vertx.effect.Val;
 import vertx.effect.λ;
@@ -18,6 +17,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
+import static vertx.effect.httpclient.oauth.OauthFailures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION;
+import static vertx.effect.httpclient.oauth.OauthFailures.GET_REFRESH_TOKEN_NOT_FOUND_EXCEPTION;
 
 
 public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCodeFlowBuilder> {
@@ -93,16 +94,16 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
                     JsObj  jsonResp    = HttpResp.mapBody2Json.apply(resp);
                     String accessToken = jsonResp.getStr(ACCESS_TOKEN);
                     if (accessToken == null || accessToken.isEmpty())
-                        return Cons.failure(Failures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                        return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                     String refreshToken = jsonResp.getStr(REFRESH_TOKEN);
                     if (refreshToken == null || refreshToken.isEmpty())
-                        return Cons.failure(Failures.GET_REFRESH_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                        return Cons.failure(GET_REFRESH_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                     return Cons.success(new Tuple2<>(accessToken,
                                                      refreshToken
                                                     )
                                        );
                 } catch (Exception e) {
-                    return Cons.failure(Failures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                    return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                 }
             };
 

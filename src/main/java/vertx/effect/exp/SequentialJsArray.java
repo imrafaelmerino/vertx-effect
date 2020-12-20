@@ -8,7 +8,6 @@ import vertx.effect.Val;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 
@@ -19,7 +18,7 @@ import java.util.function.Predicate;
  a json array.
  */
 
-final class SequentialJsArray extends JsArrayVal {
+final class SequentialJsArray extends JsArrayExp {
     private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     private List<Val<? extends JsValue>> seq = List.empty();
@@ -60,15 +59,6 @@ final class SequentialJsArray extends JsArrayVal {
         return result;
     }
 
-
-    @Override
-    public <P> Val<P> map(final Function<JsArray, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
-
-
     @Override
     public Val<JsArray> retry(final int attempts) {
 
@@ -92,37 +82,38 @@ final class SequentialJsArray extends JsArrayVal {
     }
 
     @Override
-    public Val<JsArray> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts) {
+    public Val<JsArray> retry(final Predicate<Throwable> predicate,
+                              final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
 
-        return new SequentialJsArray(seq.map(it -> it.retryIf(predicate,
-                                                              attempts
-                                                             )));
+        return new SequentialJsArray(seq.map(it -> it.retry(predicate,
+                                                            attempts
+                                                           )));
 
     }
 
     @Override
-    public Val<JsArray> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts,
-                                final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<JsArray> retry(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
             return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
-        return new SequentialJsArray(seq.map(it -> it.retryIf(predicate,
-                                                              attempts,
-                                                              actionBeforeRetry
-                                                             ))
+        return new SequentialJsArray(seq.map(it -> it.retry(predicate,
+                                                            attempts,
+                                                            actionBeforeRetry
+                                                           ))
         );
     }
 
-    public JsArrayVal append(final Val<? extends JsValue> future) {
+    @Override
+    public JsArrayExp append(final Val<? extends JsValue> future) {
 
         final SequentialJsArray arrayFuture = new SequentialJsArray();
         arrayFuture.seq = this.seq.append(future);
@@ -132,6 +123,17 @@ final class SequentialJsArray extends JsArrayVal {
     @Override
     public Val<JsValue> race() {
         return Cons.failure(new OperationNotSupportedException("race doesn't make any sense in a sequential execution"));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Val<JsValue> head() {
+        return (Val<JsValue>) seq.head();
+    }
+
+    @Override
+    public JsArrayExp tail() {
+        return new SequentialJsArray(seq.tail());
     }
 
 }

@@ -1,7 +1,6 @@
 package vertx.effect.httpclient;
 
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpHeaders;
@@ -16,6 +15,15 @@ import vertx.effect.Port;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Verifiers;
 import vertx.effect.VertxRef;
+import vertx.effect.exp.Triple;
+import vertx.effect.httpserver.HttpServerBuilder;
+import vertx.effect.mock.MockHeadersResp;
+import vertx.effect.mock.MockReqHandler;
+import vertx.effect.mock.MockReqResp;
+
+import java.util.List;
+
+import static vertx.effect.mock.MockReqResp.ALWAYS;
 
 
 @ExtendWith(VertxExtension.class)
@@ -34,22 +42,30 @@ public class HttpClientMethodsTests {
                                  );
         httpClient = new HttpExampleModule(new HttpClientOptions());
 
-        CompositeFuture.all(vertx.deployVerticle(new RegisterJsValuesCodecs()),
-                            new MyHttpServer(vertx,
-                                             PORT,
-                                             counter -> req -> body -> JsObj.of("req_method",
-                                                                                JsStr.of(req.method()
-                                                                                            .name()),
-                                                                                "req_body",
-                                                                                JsStr.of(body),
-                                                                                "req_uri",
-                                                                                JsStr.of(req.uri())
-                                                                               ),
-                                             counter -> req -> body -> 200
-                            ).start(),
-                            vertx.deployVerticle(httpClient)
-                           )
-                       .onComplete(Verifiers.pipeTo(context));
+        MockReqResp mockReqResp =
+                MockReqResp.when(ALWAYS)
+                           .setBodyResp(n -> body -> req -> JsObj.of("req_method",
+                                                                     JsStr.of(req.method()
+                                                                                 .name()
+                                                                             ),
+                                                                     "req_body",
+                                                                     JsStr.of(body.toString()),
+                                                                     "req_uri",
+                                                                     JsStr.of(req.uri())
+                                                                    )
+                                                                 .toPrettyString()
+                                       )
+                           .setHeadersResp(MockHeadersResp.JSON);
+
+        Triple.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                          new HttpServerBuilder(vertx,
+                                                new MockReqHandler(List.of(mockReqResp))
+                          ).startAtRandom(PORT,
+                                          PORT + 100),
+                          vertxRef.deployVerticle(httpClient)
+                         )
+              .get()
+              .onComplete(Verifiers.pipeTo(context));
 
 
     }
@@ -70,7 +86,9 @@ public class HttpClientMethodsTests {
         })
                 .accept(httpClient.get.apply(HttpHeaders.headers()
                                                         .set("method",
-                                                             "get"),new GetReq().port(PORT)
+                                                             "get"
+                                                            ),
+                                             new GetReq().port(PORT)
                                                          .uri("example")
                                             ),
                         context
@@ -93,9 +111,12 @@ public class HttpClientMethodsTests {
         })
                 .accept(httpClient.post.apply(HttpHeaders.headers()
                                                          .set("method",
-                                                              "post"),new PostReq("hi".getBytes())
+                                                              "post"
+                                                             ),
+                                              new PostReq("hi".getBytes())
                                                       .port(PORT)
-                                                      .uri("example")),
+                                                      .uri("example")
+                                             ),
                         context
                        );
     }
@@ -115,9 +136,12 @@ public class HttpClientMethodsTests {
         })
                 .accept(httpClient.put.apply(HttpHeaders.headers()
                                                         .set("method",
-                                                             "put"),new PutReq("hi".getBytes())
+                                                             "put"
+                                                            ),
+                                             new PutReq("hi".getBytes())
                                                      .port(PORT)
-                                                     .uri("example")),
+                                                     .uri("example")
+                                            ),
                         context
                        );
     }
@@ -137,9 +161,12 @@ public class HttpClientMethodsTests {
         })
                 .accept(httpClient.patch.apply(HttpHeaders.headers()
                                                           .set("method",
-                                                               "patch"),new PatchReq("hi".getBytes())
+                                                               "patch"
+                                                              ),
+                                               new PatchReq("hi".getBytes())
                                                        .port(PORT)
-                                                       .uri("example")),
+                                                       .uri("example")
+                                              ),
                         context
                        );
     }
@@ -217,17 +244,16 @@ public class HttpClientMethodsTests {
                     && bodyJsObj.get("req_uri")
                                 .equals(JsStr.of("example")) && status == 200;
 
-        })
-                .accept(httpClient.options.apply(HttpHeaders.headers()
-                                                            .set("method",
-                                                                 "options"
-                                                                ),
-                                                 new OptionsReq()
-                                                         .port(PORT)
-                                                         .uri("example")
-                                                ),
-                        context
-                       );
+        }).accept(httpClient.options.apply(HttpHeaders.headers()
+                                                      .set("method",
+                                                           "options"
+                                                          ),
+                                           new OptionsReq()
+                                                   .port(PORT)
+                                                   .uri("example")
+                                          ),
+                  context
+                 );
     }
 
     @Test

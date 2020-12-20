@@ -5,7 +5,6 @@ import vertx.effect.Val;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -21,13 +20,6 @@ final class SequentialAll extends All {
 
     private final List<Val<Boolean>> exps;
 
-
-    @Override
-    public <P> Val<P> map(final Function<Boolean, P> fn) {
-        if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get().map(fn));
-    }
 
     @Override
     public Val<Boolean> retry(final int attempts) {
@@ -58,34 +50,34 @@ final class SequentialAll extends All {
     }
 
     @Override
-    public Val<Boolean> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts) {
+    public Val<Boolean> retry(final Predicate<Throwable> predicate,
+                              final int attempts) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
         return new SequentialAll(exps.stream()
-                                     .map(it -> it.retryIf(predicate,
-                                                           attempts
-                                                          ))
+                                     .map(it -> it.retry(predicate,
+                                                         attempts
+                                                        ))
                                      .collect(Collectors.toList()));
     }
 
 
     @Override
-    public Val<Boolean> retryIf(final Predicate<Throwable> predicate,
-                                final int attempts,
-                                final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+    public Val<Boolean> retry(final Predicate<Throwable> predicate,
+                              final int attempts,
+                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
         return new SequentialAll(exps.stream()
-                                     .map(it -> it.retryIf(predicate,
-                                                           attempts,
-                                                           actionBeforeRetry
-                                                          ))
+                                     .map(it -> it.retry(predicate,
+                                                         attempts,
+                                                         actionBeforeRetry
+                                                        ))
                                      .collect(Collectors.toList()));
     }
 

@@ -11,6 +11,7 @@ import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.VertxRef;
 import vertx.effect.Val;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -26,14 +27,14 @@ public class TestCond {
     private static BiFunction<Throwable, Integer, Val<Void>> delay;
     private static final int ATTEMPTS = 2;
     private static Supplier<Val<String>> a =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> new RuntimeException("counter:+" + counter),
-                             "a"
+                                 "a"
             );
     private static Supplier<Val<String>> b =
-            new ErrorWhile<>(ATTEMPTS,
+            new ValOrErrorMock<>(ATTEMPTS,
                              counter -> new RuntimeException("counter:+" + counter),
-                             "b"
+                                 "b"
             );
 
 
@@ -95,9 +96,9 @@ public class TestCond {
     @Test
     public void test_cond_exp_returns_the_first_branch_with_retries(VertxTestContext context) {
         Supplier<Val<Boolean>> valSupplier =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 true
+                                     true
                 );
         Cond.of(valSupplier.get(),
                 Cons.success("hi"),
@@ -118,9 +119,9 @@ public class TestCond {
     @Test
     public void test_cond_exp_returns_the_first_branch_with_retries_otherwise(VertxTestContext context) {
         Supplier<Val<Boolean>> valSupplier =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 false
+                                     false
                 );
         Cond.of(valSupplier.get(),
                 Cons.success("hi"),
@@ -178,14 +179,14 @@ public class TestCond {
     @Test
     public void test_cond_exp_returns_the_second_branch_with_retries(VertxTestContext context) {
         Supplier<Val<Boolean>> falseSupplier =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 false
+                                     false
                 );
         Supplier<Val<Boolean>> trueSupplier =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter:+" + counter),
-                                 false
+                                     false
                 );
 
         Cond.of(falseSupplier.get(),
@@ -308,10 +309,10 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retryIf(
+            .retry(
                     Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                     ATTEMPTS
-                    )
+                  )
             .onComplete(
                     r -> context.verify(() -> {
                         Assertions.assertTrue(r.failed());
@@ -329,10 +330,10 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retryIf(
+            .retry(
                     e -> e instanceof RuntimeException,
                     ATTEMPTS
-                    )
+                  )
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals("a",
                                         r
@@ -462,9 +463,9 @@ public class TestCond {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        ErrorWhile<Boolean> True = new ErrorWhile<>(counter -> counter <= ATTEMPTS,
+        ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
                                                     counter -> new RuntimeException("counter: " + counter),
-                                                    true
+                                                            true
         );
 
         Cond.of(True.get(),

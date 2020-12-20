@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -17,20 +18,20 @@ import static java.util.concurrent.TimeUnit.*;
 @ExtendWith(VertxExtension.class)
 public class TestTriple {
     final Supplier<Val<String>> a =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                              counter -> new RuntimeException("counter: " + counter),
-                             "a"
+                                 "a"
             );
 
     final Supplier<Val<String>> b =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                              counter -> new RuntimeException("counter: " + counter),
-                             "b"
+                                 "b"
             );
     final Supplier<Val<Boolean>> True =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                              counter -> new RuntimeException("counter: " + counter),
-                             true
+                                 true
             );
 
 
@@ -104,18 +105,18 @@ public class TestTriple {
     public void test_parallel_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> a =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Val<Tuple3<String, String, String>> val = Triple.parallel(a.get(),
                                                                   a.get(),
                                                                   a.get()
                                                                  )
-                                                        .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                                                                 2
-                                                                );
+                                                        .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               2
+                                                              );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
                                       "a",
@@ -131,18 +132,18 @@ public class TestTriple {
     public void test_sequential_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> a =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Val<Tuple3<String, String, String>> val = Triple.sequential(a.get(),
                                                                     a.get(),
                                                                     a.get()
                                                                    )
-                                                        .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                                                                 2
-                                                                );
+                                                        .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               2
+                                                              );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
                                       "a",
@@ -163,9 +164,9 @@ public class TestTriple {
                                 a.get(),
                                 a.get()
                                )
-                      .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                               2
-                              );
+                      .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             2
+                            );
 
 
         Verifiers.<Tuple3<String, String, String>>verifyFailure()
@@ -184,9 +185,9 @@ public class TestTriple {
                                   a.get(),
                                   a.get()
                                  )
-                      .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                               2
-                              );
+                      .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             2
+                            );
 
 
         Verifiers.<Tuple3<String, String, String>>verifyFailure()

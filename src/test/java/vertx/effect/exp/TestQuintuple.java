@@ -12,6 +12,7 @@ import vertx.effect.Failures;
 import vertx.effect.RegisterJsValuesCodecs;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
+import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
@@ -20,9 +21,9 @@ import static java.util.concurrent.TimeUnit.*;
 @ExtendWith(VertxExtension.class)
 public class TestQuintuple {
     final Supplier<Val<String>> a =
-            new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+            new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                              counter -> new RuntimeException("counter: " + counter),
-                             "a"
+                                 "a"
             );
 
 
@@ -46,9 +47,9 @@ public class TestQuintuple {
     public void test_parallel_retries(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter: " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quintuple.parallel(val.get(),
@@ -78,9 +79,9 @@ public class TestQuintuple {
     public void test_sequential_retries(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter: " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quintuple.sequential(val.get(),
@@ -110,9 +111,9 @@ public class TestQuintuple {
     public void test_parallel_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quintuple.parallel(val.get(),
@@ -121,9 +122,9 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertEquals(new Tuple5<>("a",
@@ -144,9 +145,9 @@ public class TestQuintuple {
     public void test_sequential_retries_if_Success(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quintuple.sequential(val.get(),
@@ -155,9 +156,9 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertEquals(new Tuple5<>("a",
@@ -178,9 +179,9 @@ public class TestQuintuple {
     public void test_parallel_retries_if_failure(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quintuple.parallel(val.get(),
@@ -189,9 +190,9 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertTrue(it.failed())
@@ -205,9 +206,9 @@ public class TestQuintuple {
     public void test_sequential_retries_if_failure(VertxTestContext context) {
 
         final Supplier<Val<String>> val =
-                new ErrorWhile<>(counter -> counter == 1 || counter == 2,
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                  counter -> new RuntimeException("counter " + counter),
-                                 "a"
+                                     "a"
                 );
 
         Quintuple.sequential(val.get(),
@@ -216,9 +217,9 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                          2
-                         )
+                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        2
+                       )
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> Assertions.assertTrue(it.failed())

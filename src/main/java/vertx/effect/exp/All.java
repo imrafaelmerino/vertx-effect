@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 public abstract class All extends AbstractVal<Boolean> {
 
     @SafeVarargs
-    public static All parallel(final Val<Boolean> a,
+    public static Val<Boolean> parallel(final Val<Boolean> a,
                                final Val<Boolean>... others) {
         List<Val<Boolean>> exps = new ArrayList<>();
         exps.add(requireNonNull(a));
@@ -22,7 +22,7 @@ public abstract class All extends AbstractVal<Boolean> {
     }
 
     @SafeVarargs
-    public static All sequential(final Val<Boolean> a,
+    public static Val<Boolean> sequential(final Val<Boolean> a,
                                  final Val<Boolean>... others) {
         List<Val<Boolean>> exps = new ArrayList<>();
         exps.add(requireNonNull(a));
