@@ -298,7 +298,7 @@ public class VertxRef {
                                  final λc<I, O> lambda) {
         return spawn(address,
                      lambda,
-                     DEFAULT_OPTIONS
+                     deploymentOptions
                     );
     }
 
@@ -490,7 +490,8 @@ public class VertxRef {
                                                                   .accept(vertx);
                                           message.reply(new ReplyException(RECIPIENT_FAILURE,
                                                                            INTERNAL_ERROR_CODE,
-                                                                           Functions.getErrorMessage(exc)));
+                                                                           Functions.getErrorMessage(exc)
+                                          ));
                                       }
                                   }
                                  );
@@ -505,7 +506,8 @@ public class VertxRef {
                                        } catch (Exception exc) {
                                            message.reply(new ReplyException(RECIPIENT_FAILURE,
                                                                             INTERNAL_ERROR_CODE,
-                                                                            Functions.getErrorMessage(exc)));
+                                                                            Functions.getErrorMessage(exc)
+                                           ));
                                        }
                                    }
                                   );
@@ -566,7 +568,8 @@ public class VertxRef {
                               .getOptional.apply(event.cause())
                                           .orElse(new ReplyException(RECIPIENT_FAILURE,
                                                                      UNKNOWN_ERROR_CODE,
-                                                                     Functions.getErrorMessage(event.cause())));
+                                                                     Functions.getErrorMessage(event.cause())
+                                          ));
                       message.reply(error,
                                     deliveryOpt.apply(headers)
                                    );
@@ -583,7 +586,8 @@ public class VertxRef {
         } catch (Exception exc) {
             message.reply(new ReplyException(RECIPIENT_FAILURE,
                                              INTERNAL_ERROR_CODE,
-                                             Functions.getErrorMessage(exc)),
+                                             Functions.getErrorMessage(exc)
+                          ),
                           deliveryOpt.apply(headers)
                          );
             EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_PROCESSING_MESSAGE,
@@ -626,7 +630,8 @@ public class VertxRef {
                               .getOptional.apply(event.cause())
                                           .orElse(new ReplyException(RECIPIENT_FAILURE,
                                                                      UNKNOWN_ERROR_CODE,
-                                                                     Functions.getErrorMessage(event.cause())));
+                                                                     Functions.getErrorMessage(event.cause())
+                                          ));
                       message.reply(error,
                                     deliveryOpt.apply(headers)
                                    );
@@ -644,7 +649,8 @@ public class VertxRef {
         } catch (Exception exc) {
             message.reply(new ReplyException(RECIPIENT_FAILURE,
                                              INTERNAL_ERROR_CODE,
-                                             Functions.getErrorMessage(exc)),
+                                             Functions.getErrorMessage(exc)
+                          ),
                           deliveryOpt.apply(headers)
                          );
             EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_PROCESSING_MESSAGE,
