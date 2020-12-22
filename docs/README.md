@@ -4,12 +4,12 @@
 [![CircleCI](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master.svg)](https://circleci.com/gh/imrafaelmerino/vertx-effect/tree/master)
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=alert_status)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
-
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0-RC2)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0-RC2/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
+
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
+
 
 - [vertx-effect manifesto](#manifesto)
 - [How persistent data structures makes a difference working with actors](#persistendata)
@@ -26,7 +26,7 @@
 - [Reactive OAuth http client](#oauth-httpclient)
     - [Client credentials flow](#clientcredentials)
     - [Authorization flow](#authorizationflow)
-- [JFR support](#jfr)    
+- [Java Flight Recorder support](#jfr)    
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Related projects](#rp)
@@ -1182,7 +1182,6 @@ Fields of a http request event:
     - status code: The http status code response
     - host: the host of the request
     - uri: the uri of the request
-    - result: SUCCESS OR FAILURE, depenending on whether or not an http response is received 
     - method: the method of the request: GET, POST ...
     - duration: the method since the request is sent until the response is received
     - exception class: If an exception takes place and no http response is received, the exception class
