@@ -1,6 +1,7 @@
 package vertx.effect.exp;
 
 import io.vertx.core.Future;
+import vertx.effect.RetryPolicy;
 import vertx.effect.core.AbstractVal;
 import vertx.effect.Val;
 
@@ -87,7 +88,7 @@ public final class Cons<O> extends AbstractVal<O> {
     @Override
     public Val<O> retry(final Predicate<Throwable> predicate,
                         final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                        final RetryPolicy<Throwable> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (actionBeforeRetry == null)
@@ -140,7 +141,7 @@ public final class Cons<O> extends AbstractVal<O> {
     private Val<O> retry(final Cons<O> exp,
                          final int attempts,
                          final Predicate<Throwable> predicate,
-                         final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                         final RetryPolicy<Throwable> actionBeforeRetry) {
 
         if (attempts == 0) return exp;
         return Cons.of(() -> exp.get()

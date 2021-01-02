@@ -1,6 +1,7 @@
 package vertx.effect.exp;
 
 import io.vertx.core.Future;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
 
@@ -641,7 +642,7 @@ public final class Case<I, O> extends AbstractVal<O> {
     @Override
     public Val<O> retry(final Predicate<Throwable> predicate,
                         final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                        final RetryPolicy<Throwable> actionBeforeRetry) {
 
         return cond.retry(predicate,
                           attempts,

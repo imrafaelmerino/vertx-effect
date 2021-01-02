@@ -3,6 +3,7 @@ package vertx.effect.exp;
 import io.vavr.Tuple4;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -90,7 +91,7 @@ class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
     @Override
     public Val<Tuple4<A, B, C, D>> retry(final Predicate<Throwable> predicate,
                                          final int attempts,
-                                         final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                                         final RetryPolicy<Throwable> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)

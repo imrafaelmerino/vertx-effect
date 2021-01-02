@@ -7,6 +7,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import jsonvalues.JsObj;
 import jsonvalues.JsValue;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
@@ -123,7 +124,7 @@ final class ParallelJsObjExp extends JsObjExp {
     @Override
     public Val<JsObj> retry(final Predicate<Throwable> predicate,
                             final int attempts,
-                            final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                            final RetryPolicy<Throwable> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)

@@ -80,7 +80,7 @@ public interface Val<O> extends Supplier<Future<O>> {
      */
     Val<O> retry(final Predicate<Throwable> predicate,
                  final int attempts,
-                 final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);
+                 final RetryPolicy<Throwable> actionBeforeRetry);
 
 
     /**
@@ -155,6 +155,6 @@ public interface Val<O> extends Supplier<Future<O>> {
      */
     Val<O> retryWhile(final Predicate<O> predicate,
                       final int attempts,
-                      final BiFunction<O, Integer, Val<Void>> notExpectedValAction,
-                      final BiFunction<Throwable, Integer, Val<Void>> failureAction);
+                      final RetryPolicy<O> notExpectedValAction,
+                      final RetryPolicy<Throwable> failureAction);
 }

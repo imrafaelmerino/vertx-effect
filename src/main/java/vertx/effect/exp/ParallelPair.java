@@ -3,6 +3,7 @@ package vertx.effect.exp;
 import io.vavr.Tuple2;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -67,7 +68,7 @@ final class ParallelPair<A, B> extends Pair<A, B> {
     @Override
     public Val<Tuple2<A, B>> retry(final Predicate<Throwable> predicate,
                                    final int attempts,
-                                   final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                                   final RetryPolicy<Throwable> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)

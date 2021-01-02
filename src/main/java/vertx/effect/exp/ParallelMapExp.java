@@ -4,6 +4,7 @@ import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
 import java.util.LinkedHashMap;
@@ -89,7 +90,7 @@ final class ParallelMapExp<O> extends MapExp<O> {
     @Override
     public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
                                      final int attempts,
-                                     final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                                     final RetryPolicy<Throwable> actionBeforeRetry) {
 
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));

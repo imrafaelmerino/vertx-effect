@@ -2,6 +2,7 @@ package vertx.effect.exp;
 
 import io.vavr.Tuple3;
 import io.vertx.core.Future;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
@@ -79,7 +80,7 @@ public final class SequentialTriple<A, B, C> extends Triple<A, B, C> {
     @Override
     public Val<Tuple3<A, B, C>> retry(final Predicate<Throwable> predicate,
                                       final int attempts,
-                                      final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                                      final RetryPolicy<Throwable> actionBeforeRetry) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
