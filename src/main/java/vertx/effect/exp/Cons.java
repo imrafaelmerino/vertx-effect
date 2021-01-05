@@ -59,16 +59,16 @@ public final class Cons<O> extends AbstractVal<O> {
 
     @Override
     public Val<O> retry(final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                        final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
 
         return retry(this,
                      attempts,
-                     requireNonNull(actionBeforeRetry)
+                     requireNonNull(retryPolicy)
                     );
     }
 
@@ -88,17 +88,17 @@ public final class Cons<O> extends AbstractVal<O> {
     @Override
     public Val<O> retry(final Predicate<Throwable> predicate,
                         final int attempts,
-                        final RetryPolicy<Throwable> actionBeforeRetry) {
+                        final RetryPolicy<Throwable> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
         if(predicate==null)
             return Cons.failure(new NullPointerException("predicate is null"));
         return retry(this,
                      attempts,
                      requireNonNull(predicate),
-                     requireNonNull(actionBeforeRetry)
+                     requireNonNull(retryPolicy)
                     );
     }
 
@@ -119,17 +119,17 @@ public final class Cons<O> extends AbstractVal<O> {
 
     private Val<O> retry(final Cons<O> exp,
                          final int attempts,
-                         final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry
+                         final BiFunction<Throwable, Integer, Val<Void>> retryPolicy
                         ) {
         if (attempts == 0) return exp;
         return Cons.of(() -> exp.get()
                                 .compose(Future::succeededFuture,
-                                         e -> actionBeforeRetry.apply(e,
+                                         e -> retryPolicy.apply(e,
                                                                       attempts
                                                                      )
                                                                .flatMap(id -> retry(exp,
                                                                                     attempts - 1,
-                                                                                    actionBeforeRetry
+                                                                                    retryPolicy
                                                                                    )
                                                                        )
                                                                .get()
@@ -141,19 +141,19 @@ public final class Cons<O> extends AbstractVal<O> {
     private Val<O> retry(final Cons<O> exp,
                          final int attempts,
                          final Predicate<Throwable> predicate,
-                         final RetryPolicy<Throwable> actionBeforeRetry) {
+                         final RetryPolicy<Throwable> retryPolicy) {
 
         if (attempts == 0) return exp;
         return Cons.of(() -> exp.get()
                                 .compose(Future::succeededFuture,
                                          e -> (predicate.test(e)) ?
-                                              actionBeforeRetry.apply(e,
+                                              retryPolicy.apply(e,
                                                                       attempts
                                                                      )
                                                                .flatMap(id -> retry(exp,
                                                                                     attempts - 1,
                                                                                     predicate,
-                                                                                    actionBeforeRetry
+                                                                                    retryPolicy
                                                                                    )
                                                                        )
                                                                .get() :

@@ -60,12 +60,12 @@ final class ParallelMapExp<O> extends MapExp<O> {
 
     @Override
     public Val<Map<String, O>> retry(final int attempts,
-                                     final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                                     final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
         return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(attempts,
-                                                                      actionBeforeRetry
+                                                                      retryPolicy
                                                                      )
                                                       ));
     }
@@ -90,18 +90,18 @@ final class ParallelMapExp<O> extends MapExp<O> {
     @Override
     public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
                                      final int attempts,
-                                     final RetryPolicy<Throwable> actionBeforeRetry) {
+                                     final RetryPolicy<Throwable> retryPolicy) {
 
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
 
         return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(predicate,
                                                                       attempts,
-                                                                      actionBeforeRetry
+                                                                      retryPolicy
                                                                      )));
     }
 

@@ -41,8 +41,8 @@ public class BankAccountModule extends VertxModule {
 
 
     /**
-     TransactionBeforeRetry -> Code
-     Performs a transactionBeforeRetry between two accounts. The transactionBeforeRetry contains the accounts and the amount of money
+     TransretryPolicy -> Code
+     Performs a transretryPolicy between two accounts. The transretryPolicy contains the accounts and the amount of money
      to move
      */
     public BiFunction<λ<JsObj, Integer>, λ<JsObj, Integer>, λ<Integer, Integer>> makeTx =

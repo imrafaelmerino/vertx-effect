@@ -41,25 +41,25 @@ class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
 
     @Override
     public Val<Tuple4<A, B, C, D>> retry(final int attempts,
-                                         final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                                         final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
 
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
 
 
         return new ParallelQuadruple<>(_1.retry(attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                ),
                                        _2.retry(attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                ),
                                        _3.retry(attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                ),
                                        _4.retry(attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                )
         );
     }
@@ -91,29 +91,29 @@ class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
     @Override
     public Val<Tuple4<A, B, C, D>> retry(final Predicate<Throwable> predicate,
                                          final int attempts,
-                                         final RetryPolicy<Throwable> actionBeforeRetry) {
+                                         final RetryPolicy<Throwable> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
 
         return new ParallelQuadruple<>(_1.retry(predicate,
                                                 attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                ),
                                        _2.retry(predicate,
                                                 attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                ),
                                        _3.retry(predicate,
                                                 attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                ),
                                        _4.retry(predicate,
                                                 attempts,
-                                                actionBeforeRetry
+                                                retryPolicy
                                                )
         );
     }

@@ -35,16 +35,16 @@ final class ParallelAll extends All {
 
     @Override
     public Val<Boolean> retry(final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                              final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
 
         return new ParallelAll(exps.stream()
                                    .map(it -> it.retry(attempts,
-                                               actionBeforeRetry
+                                               retryPolicy
                                               ))
                                    .collect(Collectors.toList())
         );
@@ -69,7 +69,7 @@ final class ParallelAll extends All {
     @Override
     public Val<Boolean> retry(final Predicate<Throwable> predicate,
                               final int attempts,
-                              final RetryPolicy<Throwable> actionBeforeRetry) {
+                              final RetryPolicy<Throwable> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
@@ -77,7 +77,7 @@ final class ParallelAll extends All {
         return new ParallelAll(exps.stream()
                                    .map(it -> it.retry(predicate,
                                                        attempts,
-                                                       actionBeforeRetry
+                                                       retryPolicy
                                                       ))
                                    .collect(Collectors.toList()));
     }

@@ -625,9 +625,9 @@ public final class Case<I, O> extends AbstractVal<O> {
 
     @Override
     public Val<O> retry(final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                        final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
         return cond.retry(attempts,
-                          actionBeforeRetry
+                          retryPolicy
                          );
     }
 
@@ -642,11 +642,11 @@ public final class Case<I, O> extends AbstractVal<O> {
     @Override
     public Val<O> retry(final Predicate<Throwable> predicate,
                         final int attempts,
-                        final RetryPolicy<Throwable> actionBeforeRetry) {
+                        final RetryPolicy<Throwable> retryPolicy) {
 
         return cond.retry(predicate,
                           attempts,
-                          actionBeforeRetry
+                          retryPolicy
                          );
     }
 
