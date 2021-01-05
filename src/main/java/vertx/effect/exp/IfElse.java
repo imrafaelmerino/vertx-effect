@@ -21,6 +21,10 @@ public final class IfElse<O> extends AbstractVal<O> {
         return new IfElse<>(requireNonNull(predicate));
     }
 
+    public static <O> IfElse<O> predicate(boolean bool) {
+        return new IfElse<>(requireNonNull(Cons.success(bool)));
+    }
+
     IfElse(final Val<Boolean> predicate) {
         this.predicate = requireNonNull(predicate);
     }
