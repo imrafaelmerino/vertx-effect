@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0-RC2)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0-RC2/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0-RC3)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0-RC3/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
@@ -552,14 +552,14 @@ public interface Val<O> extends Supplier<Future<O>> {
 
   Val<O> retryWhile(Predicate<O> predicate,
                     int attempts,
-                    BiFunction<O, Integer, Val<Void>> actionBeforeRetry);
+                    BiFunction<O, Integer, Val<Void>> retryPolicy);
 
   Val<O> retry(int attempts);
 
   Val<O> retry(Predicate<Throwable> predicate, int attempts);
 
   Val<O> retry(int attempts,
-               BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);  
+               BiFunction<Throwable, Integer, Val<Void>> retryPolicy);  
 
   Val<O> recoverWith(λ<Throwable, O> fn);
 
@@ -1198,7 +1198,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>1.0.0-RC2</version>
+  <version>1.0.0-RC3</version>
 </dependency>
 ```
 

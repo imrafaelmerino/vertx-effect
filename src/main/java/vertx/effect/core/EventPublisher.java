@@ -42,7 +42,6 @@ public class EventPublisher {
             Optional<ReplyException> opt = REPLY_EXCEPTION_PRISM
                     .getOptional.apply(exc);
 
-
             opt.ifPresentOrElse(error -> {
                                     event.result = MessageEvent.Result.FAILURE.name();
                                     event.failureType = error.failureType()

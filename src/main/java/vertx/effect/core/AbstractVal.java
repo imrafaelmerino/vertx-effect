@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 import vertx.effect.Failures;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 import vertx.effect.exp.Cons;
 import vertx.effect.λ;
@@ -152,8 +153,8 @@ public abstract class AbstractVal<O> implements Val<O> {
     @Override
     public Val<O> retryWhile(final Predicate<O> predicate,
                              final int attempts,
-                             final BiFunction<O, Integer, Val<Void>> notExpectedValAction,
-                             final BiFunction<Throwable, Integer, Val<Void>> failureAction) {
+                             final RetryPolicy<O> notExpectedValAction,
+                             final RetryPolicy<Throwable> failureAction) {
         if (attempts < 0) return Cons.failure(RETRIES_EXHAUSTED);
         return flatMap(output -> {
                            if (!predicate.test(output)) return Cons.success(output);

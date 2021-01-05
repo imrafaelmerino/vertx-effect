@@ -51,11 +51,11 @@ public interface Val<O> extends Supplier<Future<O>> {
      returns a new value tha will retry its execution after the an action.
 
      @param attempts          the number of attempts before returning an error
-     @param actionBeforeRetry the function that produces the action to be executed before the retry
+     @param retryPolicy the function that produces the action to be executed before the retry
      @return a new value
      */
     Val<O> retry(final int attempts,
-                 final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);
+                 final BiFunction<Throwable, Integer, Val<Void>> retryPolicy);
 
     /**
      returns a new value tha will retry its execution if it fails with an error that
@@ -75,12 +75,12 @@ public interface Val<O> extends Supplier<Future<O>> {
 
      @param predicate         the predicate against which the returned error will be tested on
      @param attempts          the number of attempts before returning an error
-     @param actionBeforeRetry the function that produces the action to be executed before the retry
+     @param retryPolicy the function that produces the action to be executed before the retry
      @return a new value
      */
     Val<O> retry(final Predicate<Throwable> predicate,
                  final int attempts,
-                 final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry);
+                 final RetryPolicy<Throwable> retryPolicy);
 
 
     /**
@@ -155,6 +155,6 @@ public interface Val<O> extends Supplier<Future<O>> {
      */
     Val<O> retryWhile(final Predicate<O> predicate,
                       final int attempts,
-                      final BiFunction<O, Integer, Val<Void>> notExpectedValAction,
-                      final BiFunction<Throwable, Integer, Val<Void>> failureAction);
+                      final RetryPolicy<O> notExpectedValAction,
+                      final RetryPolicy<Throwable> failureAction);
 }

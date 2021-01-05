@@ -11,7 +11,6 @@ public abstract class BodyHttpReq<T extends BodyHttpReq<T>> extends HttpReq<T> {
 
     private final byte[] body;
 
-
     @Override
     public JsObj createHttpReq() {
         return BYTES_BODY_LENS.set.apply(body)

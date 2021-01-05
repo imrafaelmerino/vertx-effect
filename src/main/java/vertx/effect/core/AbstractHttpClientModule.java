@@ -293,13 +293,13 @@ public abstract class AbstractHttpClientModule extends VertxModule {
     }
 
     @Override
-    protected void initialize() {
+    protected final void initialize() {
         this.httpClient = trace(httpClientAddress);
     }
 
 
     @Override
-    protected void deploy() {
+    protected final void deploy() {
         this.deployConsumer(httpClientAddress,
                             consumer(vertx.createHttpClient(httpOptions))
                            );

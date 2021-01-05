@@ -7,6 +7,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import jsonvalues.JsObj;
 import jsonvalues.JsValue;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
 import java.util.function.BiFunction;
@@ -94,15 +95,15 @@ final class ParallelJsObjExp extends JsObjExp {
 
     @Override
     public Val<JsObj> retry(final int attempts,
-                            final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                            final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
 
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
 
         return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(attempts,
-                                                                      actionBeforeRetry
+                                                                      retryPolicy
                                                                      )));
     }
 
@@ -123,17 +124,17 @@ final class ParallelJsObjExp extends JsObjExp {
     @Override
     public Val<JsObj> retry(final Predicate<Throwable> predicate,
                             final int attempts,
-                            final BiFunction<Throwable, Integer, Val<Void>> actionBeforeRetry) {
+                            final RetryPolicy<Throwable> retryPolicy) {
         if (attempts < 1)
             return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
         if (predicate == null)
             return Cons.failure(new NullPointerException("predicate is null"));
-        if (actionBeforeRetry == null)
-            return Cons.failure(new NullPointerException("actionBeforeRetry is null"));
+        if (retryPolicy == null)
+            return Cons.failure(new NullPointerException("retryPolicy is null"));
 
         return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
                                                                       attempts,
-                                                                      actionBeforeRetry
+                                                                      retryPolicy
                                                                      )));
     }
 
