@@ -3,13 +3,26 @@ package vertx.effect;
 import io.vertx.core.MultiMap;
 import vertx.effect.exp.Cons;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
 public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
 
     MultiMap empty = MultiMap.caseInsensitiveMultiMap();
+
+    static <I> λc<I, I> identity() {
+        return (context,val)->Cons.success(val);
+    }
+
+    static <I, O> λc<I, O> fail(final Supplier<Exception> supplier) {
+        Objects.requireNonNull(supplier);
+        return (context,val) ->
+                Cons.failure(supplier.get());
+    }
+
 
     default λ<I, O> apply(final MultiMap context) {
         requireNonNull(context);

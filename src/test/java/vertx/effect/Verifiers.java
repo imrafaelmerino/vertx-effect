@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Assertions;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
+import static java.util.Objects.requireNonNull;
+
 public final class Verifiers {
 
     private Verifiers() {
@@ -15,14 +17,15 @@ public final class Verifiers {
 
 
     public static <T> Handler<AsyncResult<T>> pipeTo(final VertxTestContext context) {
-        return it -> {
-            if (it.succeeded()) {
+        requireNonNull(context);
+        return result -> {
+            if (result == null) context.failNow(new NullPointerException("result is null"));
+            if (result.succeeded()) {
                 context.completeNow();
             }
             else {
-                context.failNow(it.cause());
+                context.failNow(result.cause());
             }
-
         };
     }
 
@@ -30,52 +33,61 @@ public final class Verifiers {
         return verifySuccess(it -> true);
     }
 
-    public static <T> BiConsumer<Val<T>, VertxTestContext> verifySuccess(Predicate<T> predicate) {
-        return verifySuccess(predicate,
+    public static <T> BiConsumer<Val<T>, VertxTestContext> verifySuccess(final Predicate<T> predicate) {
+        return verifySuccess(requireNonNull(predicate),
                              ""
                             );
     }
 
-
-    public static <T> BiConsumer<Val<T>, VertxTestContext> verifySuccess(Predicate<T> predicate,
-                                                                         String errorMessage) {
-        return (val, context) -> val.onComplete(r -> {
-            if (r.failed()) {
-                context.failNow(r.cause());
-            }
-            else {
-                context.verify(() -> Assertions.assertTrue(predicate.test(r.result()),
-                                                           errorMessage
-                                                          ));
-                context.completeNow();
-            }
-        })
-                                    .get();
+    public static <T> BiConsumer<Val<T>, VertxTestContext> verifySuccess(final Predicate<T> predicate,
+                                                                         final String errorMessage) {
+        requireNonNull(predicate);
+        requireNonNull(errorMessage);
+        return (val, context) -> {
+            if (val == null) context.failNow(new NullPointerException("val is null"));
+            val.onComplete(r -> {
+                if (r.failed()) {
+                    context.failNow(r.cause());
+                }
+                else {
+                    context.verify(() -> Assertions.assertTrue(predicate.test(r.result()),
+                                                               errorMessage
+                                                              ));
+                    context.completeNow();
+                }
+            })
+               .get();
+        };
     }
 
-
-    public static <T> BiConsumer<Val<T>, VertxTestContext> verifyFailure(Predicate<Throwable> predicate,
-                                                                         String errorMessage) {
-        return (val, context) -> val.onComplete(r -> {
-            if (r.succeeded()) {
-                context.failNow(new RuntimeException(String.format("The val was supposed to fail, and it succeeded returning %s",
-                                                                   r.result()
-                                                                  )
-                                )
-                               );
-            }
-            else {
-                context.verify(() -> Assertions.assertTrue(predicate.test(r.cause()),
-                                                           errorMessage
-                                                          )
-                              );
-                context.completeNow();
-            }
-        })
-                                    .get();
+    public static <T> BiConsumer<Val<T>, VertxTestContext> verifyFailure(final Predicate<Throwable> predicate,
+                                                                         final String errorMessage) {
+        requireNonNull(predicate);
+        requireNonNull(errorMessage);
+        return (val, context) -> {
+            if (val == null) context.failNow(new NullPointerException("val is null"));
+            val.onComplete(r -> {
+                if (r.succeeded()) {
+                    context.failNow(new RuntimeException(String.format("The val was supposed to fail, and it succeeded returning %s",
+                                                                       r.result()
+                                                                      )
+                                    )
+                                   );
+                }
+                else {
+                    context.verify(() -> Assertions.assertTrue(predicate.test(r.cause()),
+                                                               errorMessage
+                                                              )
+                                  );
+                    context.completeNow();
+                }
+            })
+               .get();
+        };
     }
 
-    public static <T> BiConsumer<Val<T>, VertxTestContext> verifyFailure(Predicate<Throwable> predicate) {
+    public static <T> BiConsumer<Val<T>, VertxTestContext> verifyFailure(final Predicate<Throwable> predicate) {
+        requireNonNull(predicate);
         return verifyFailure(predicate,
                              ""
                             );
