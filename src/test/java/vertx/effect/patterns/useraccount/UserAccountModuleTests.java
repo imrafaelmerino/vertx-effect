@@ -31,9 +31,9 @@ public class UserAccountModuleTests {
                                   System.out::println
                                  );
         Verifiers.<Tuple2<String, String>>verifySuccess()
-                .accept(Pair.parallel(vertxRef.deployVerticle(new UserAccountModule()),
-                                      vertxRef.deployVerticle(new RegisterJsValuesCodecs())
-                                     ),
+                .accept(Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                                        vertxRef.deployVerticle(new UserAccountModule())
+                                       ),
                         context
                        );
 

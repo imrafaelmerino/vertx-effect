@@ -51,9 +51,9 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                      vertxRef.deployVerticle(module)
-                     )
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(module)
+                       )
             .onSuccess(pair -> module.authenticate(JsObj.of("code",
                                                             JsStr.of(CODE),
                                                             "redirect_uri",
@@ -107,9 +107,9 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                      vertxRef.deployVerticle(module)
-                     )
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(module)
+                       )
             .onSuccess(pair ->
                                Verifiers.<JsObj>verifySuccess(resp -> 200 == HttpResp.STATUS_CODE_LENS.get.apply(resp))
                                        .accept(module.getOauth.apply(new GetReq().uri("/v1/users/rmerinogarcia/playlists")),
@@ -144,9 +144,9 @@ public class SpotifyOauthTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                      vertxRef.deployVerticle(module)
-                     )
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(module)
+                       )
             .onSuccess(pair ->
                                Verifiers.<JsObj>verifySuccess(resp -> 200 == HttpResp.STATUS_CODE_LENS.get.apply(resp))
                                        .accept(module.getOauth.apply(new GetReq().uri("/v1/users/rmerinogarcia/playlists")),

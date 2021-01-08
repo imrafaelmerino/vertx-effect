@@ -26,9 +26,9 @@ public class TestBankAccount {
         module = new BankAccountModule();
 
         Verifiers.<Tuple2<String, String>>verifySuccess()
-                .accept(Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                                      vertxRef.deployVerticle(module)
-                                     ),
+                .accept(Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                                        vertxRef.deployVerticle(module)
+                                       ),
                         context
                        );
     }
