@@ -1,7 +1,6 @@
 package vertx.effect;
 
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.exp.Cons;
+import vertx.effect.exp.Pair;
 
 import java.util.function.Consumer;
 
@@ -45,13 +45,11 @@ public class VertxModuleTest extends VertxModule {
                                  );
 
 
-        CompositeFuture.all(vertx.deployVerticle(module),
-                            vertx.deployVerticle(new RegisterJsValuesCodecs())
-                           )
-                       .onComplete(event -> {
-                           if (event.failed()) testContext.failNow(event.cause());
-                           else testContext.completeNow();
-                       });
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(module)
+                       )
+            .onComplete(Verifiers.pipeTo(testContext)).get();
+
 
     }
 
@@ -112,10 +110,10 @@ public class VertxModuleTest extends VertxModule {
         incCounter = this.ask("incCounter");
         getCounter = this.<Integer, Integer>ask("getCounter").apply(null);
         mulBy1000 = vertxRef.spawn("mulBy1000",
-                                  n -> Cons.success(1000 * n)
+                                   n -> Cons.success(1000 * n)
                                   );
         mulBy10000 = vertxRef.spawn("mulBy10000",
-                                   n -> Cons.success(10000 * n),
+                                    n -> Cons.success(10000 * n),
                                     new DeploymentOptions().setWorker(true)
                                    );
 

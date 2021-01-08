@@ -42,9 +42,9 @@ public class HttpExampleModuleTest {
                                             );
 
         Verifiers.<Tuple2<String, String>>verifySuccess()
-                .accept(Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                                      vertxRef.deployVerticle(httpModule)
-                                     ),
+                .accept(Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                                        vertxRef.deployVerticle(httpModule)
+                                       ),
                         context
                        );
 

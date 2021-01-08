@@ -65,9 +65,9 @@ public class ClientCredentialsModuleTest {
                                   System.out::println
                                  );
 
-        Pair.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                      vertxRef.deployVerticle(httpClient)
-                     )
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(httpClient)
+                       )
             .onComplete(Verifiers.pipeTo(context))
             .get();
 
@@ -157,18 +157,19 @@ public class ClientCredentialsModuleTest {
                                                                                 )
                                                                     .setStatusCodeResp(MockStatusCodeResp._200)
 
-                                                        ))).start(port)
-                                                           .get()
-                                                           .onSuccess(server -> {
-                                                               Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                                                                       .accept(httpClient.getOauth.apply(new GetReq().uri("/name")
-                                                                                                                     .timeout(300,
-                                                                                                                              TimeUnit.MILLISECONDS
-                                                                                                                             ))
-                                                                                                  .retry(3),
-                                                                               context
-                                                                              );
-                                                           });
+                                                        ))
+        ).start(port)
+         .get()
+         .onSuccess(server -> {
+             Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                     .accept(httpClient.getOauth.apply(new GetReq().uri("/name")
+                                                                   .timeout(300,
+                                                                            TimeUnit.MILLISECONDS
+                                                                           ))
+                                                .retry(3),
+                             context
+                            );
+         });
 
 
     }

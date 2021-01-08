@@ -5,6 +5,8 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
+import io.vertx.ext.shell.ShellService;
+import io.vertx.ext.shell.ShellServiceOptions;
 import vertx.effect.core.EventPublisher;
 import vertx.effect.core.Functions;
 import vertx.effect.core.MyVerticle;
@@ -150,6 +152,7 @@ public class VertxRef {
                       deploymentOptions
                      );
     }
+
 
 
     /**
@@ -662,4 +665,20 @@ public class VertxRef {
                                     .accept(vertx);
         }
     }
+
+    public Val<ShellService> startShellService(final ShellServiceOptions options) {
+        requireNonNull(options);
+        return Cons.of(() -> {
+            ShellService service = ShellService.create(vertx,
+                                                       options
+                                                      );
+
+            return service.start()
+                          .map(it -> service);
+
+        });
+    }
+
+
+
 }
