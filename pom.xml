@@ -80,7 +80,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${MAVEN-SUREFIRE-PLUGIN.VERSION}</version>
                 <configuration>
-                    <argLine>-XX:+FlightRecorder -XX:StartFlightRecording=duration=180s,filename=vertx-effect-recording.jfr</argLine>
+                    <argLine>-XX:+FlightRecorder
+                        -XX:StartFlightRecording=duration=180s,filename=vertx-effect-recording.jfr
+                    </argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -126,6 +128,11 @@
             <artifactId>vertx-core</artifactId>
             <version>${VERTX-VERSION}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-shell</artifactId>
+            <version>${VERTX-VERSION}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
