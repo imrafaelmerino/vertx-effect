@@ -30,6 +30,7 @@ public class VertxRef {
     public static final String EVENTS_ADDRESS = "vertx-values-events";
     private static final DeploymentOptions DEFAULT_OPTIONS = new DeploymentOptions();
     private static final AtomicLong processSeq = new AtomicLong(0);
+    private static final AtomicLong anonymousVerticleSeq = new AtomicLong(0);
     private final Vertx vertx;
     private final DeploymentOptions deploymentOptions;
     private static final Function<MultiMap, DeliveryOptions> deliveryOpt = multimap -> new DeliveryOptions().setHeaders(multimap);
@@ -71,7 +72,7 @@ public class VertxRef {
      @param consumer the consumer that will process the messages sent to the verticle
      @param <I>      the type of the message sent to the verticle
      @param <O>      the type of the reply
-     @return an VerticleRef wrapped in a future
+     @return an VerticleRef wrapped in a val
      */
     public <I, O> Val<VerticleRef<I, O>> deployConsumer(final String address,
                                                         final Consumer<Message<I>> consumer
@@ -91,7 +92,7 @@ public class VertxRef {
      @param options  options for configuring the verticle deployment
      @param <I>      the type of the message sent to the verticle
      @param <O>      the type of the reply
-     @return an VerticleRef wrapped in a future
+     @return an VerticleRef wrapped in a val
      */
     public <I, O> Val<VerticleRef<I, O>> deployConsumer(final String address,
                                                         final Consumer<Message<I>> consumer,
@@ -140,7 +141,7 @@ public class VertxRef {
      @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
-     @return an VerticleRef wrapped in a future
+     @return an VerticleRef wrapped in a val
      */
     public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
                                                 final λ<I, O> lambda
