@@ -1,5 +1,5 @@
 # VERTX-EFFECT
-## v1.0.0-RC5  ( Fri Jan 08 2021 20:26:45 GMT+0100 (Central European Standard Time) )
+## v1.0.0  ( Fri Jan 08 2021 20:26:45 GMT+0100 (Central European Standard Time) )
 
 ## Features
   - 🎸 compose method in Lambda
