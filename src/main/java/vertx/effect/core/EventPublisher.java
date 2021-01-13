@@ -254,7 +254,29 @@ public class EventPublisher {
                             );
         };
     }
+    public Consumer<Vertx> internalError(final String event,
+                                         final Throwable exception) {
+        return vertx -> {
+            if (enabled) vertx
+                    .eventBus()
+                    .publish(VertxRef.EVENTS_ADDRESS,
+                             eventLens.set.apply(event)
+                                          .andThen(Event.exceptionOpt.set.apply(exception.getClass()
+                                                                                         .getCanonicalName()))
+                                          .andThen(exceptionMessageOpt.set.apply(exception.getMessage()))
+                                          .andThen(exceptionStackOpt.set.apply(Arrays.toString(exception.getStackTrace())))
+                                          .andThen(Event.instantLens.set.apply(Instant.now()
+                                                                              )
+                                                  )
+                                          .andThen(Event.threadLens.set.apply(Thread.currentThread()
+                                                                                    .getName()
+                                                                             )
+                                                  )
+                                          .apply(JsObj.empty())
 
+                            );
+        };
+    }
     public Consumer<Vertx> receivedMessage(final String address,
                                            final MultiMap headers) {
         return vertx -> {
@@ -412,6 +434,21 @@ public class EventPublisher {
                                           .andThen(addressOpt.set.apply(address))
                                           .andThen(instantLens.set.apply(Instant.now()))
                                           .andThen(Event.idOption.set.apply(id))
+                                          .andThen(threadLens.set.apply(Thread.currentThread()
+                                                                              .getName())
+                                                  )
+                                          .apply(JsObj.empty())
+                            );
+        };
+    }
+
+    public Consumer<Vertx> startedShell() {
+        return vertx -> {
+            if (enabled) vertx
+                    .eventBus()
+                    .publish(VertxRef.EVENTS_ADDRESS,
+                             eventLens.set.apply(STARTED_SHELL_SERVICE)
+                                          .andThen(instantLens.set.apply(Instant.now()))
                                           .andThen(threadLens.set.apply(Thread.currentThread()
                                                                               .getName())
                                                   )

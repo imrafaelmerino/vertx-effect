@@ -27,12 +27,14 @@ public final class Event {
     public static final String SENT_MESSAGE_EVENT = "SENT_MESSAGE";
     public static final String RECEIVED_MESSAGE_EVENT = "RECEIVED_MESSAGE";
     public static final String DEPLOYED_VERTICLE = "DEPLOYED_VERTICLE";
+    public static final String STARTED_SHELL_SERVICE = "STARTED_SHELL_SERVICE";
     public static final String UNDEPLOYED_VERTICLE = "UNDEPLOYED_VERTICLE";
     public static final String REPLIED_RESP_EVENT = "REPLIED_RESP";
     public static final String REPLIED_FAILURE_EVENT = "REPLIED_FAILURE";
     public static final String RECEIVED_RESP_EVENT = "RECEIVED_RESP";
     public static final String RECEIVED_FAILURE_EVENT = "RECEIVED_FAILURE";
     public static final String INTERNAL_ERROR_STARTING_VERTICLE = "INTERNAL_ERROR_STARTING_VERTICLE";
+    public static final String INTERNAL_ERROR_STARTING_SHELL_SERVICE = "INTERNAL_ERROR_STARTING_SHELL_SERVICE";
     public static final String INTERNAL_ERROR_PROCESSING_MESSAGE = "INTERNAL_ERROR_PROCESSING_MESSAGE";
     public static final String INTERNAL_ERROR_UNDEPLOYING_VERTICLE = "INTERNAL_ERROR_UNDEPLOYING_VERTICLE";
     public static final String INTERNAL_ERROR_DEPLOYING_VERTICLE = "INTERNAL_ERROR_DEPLOYING_VERTICLE";

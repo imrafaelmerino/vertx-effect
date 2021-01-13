@@ -32,7 +32,8 @@ public class VertxRef {
     private static final AtomicLong processSeq = new AtomicLong(0);
     private final Vertx vertx;
     private final DeploymentOptions deploymentOptions;
-    private static final Function<MultiMap, DeliveryOptions> deliveryOpt = multimap -> new DeliveryOptions().setHeaders(multimap);
+    private static final Function<MultiMap, DeliveryOptions> deliveryOpt =
+            multimap -> new DeliveryOptions().setHeaders(multimap);
     private static final String ADDRESS_IS_NULL = "address is null";
     private static final String CONSUMER_IS_NULL = "consumer is null";
     private static final String OPTIONS_IS_NULL = "options is null";
@@ -71,7 +72,7 @@ public class VertxRef {
      @param consumer the consumer that will process the messages sent to the verticle
      @param <I>      the type of the message sent to the verticle
      @param <O>      the type of the reply
-     @return an VerticleRel wrapped in a future
+     @return an VerticleRef wrapped in a val
      */
     public <I, O> Val<VerticleRef<I, O>> deployConsumer(final String address,
                                                         final Consumer<Message<I>> consumer
@@ -91,7 +92,7 @@ public class VertxRef {
      @param options  options for configuring the verticle deployment
      @param <I>      the type of the message sent to the verticle
      @param <O>      the type of the reply
-     @return an VerticleRel wrapped in a future
+     @return an VerticleRef wrapped in a val
      */
     public <I, O> Val<VerticleRef<I, O>> deployConsumer(final String address,
                                                         final Consumer<Message<I>> consumer,
@@ -140,7 +141,7 @@ public class VertxRef {
      @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
-     @return an VerticleRel wrapped in a future
+     @return an VerticleRef wrapped in a val
      */
     public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
                                                 final λ<I, O> lambda
@@ -153,15 +154,13 @@ public class VertxRef {
                      );
     }
 
-
-
     /**
      @param address the address of the verticle
      @param lambda  the function that takes a message of type I and produces an output of type O
      @param options options for configuring the verticle deployment
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
-     @return an VerticleRel wrapped in a Val
+     @return an VerticleRef wrapped in a Val
      */
     public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
                                                 final λ<I, O> lambda,
@@ -210,7 +209,7 @@ public class VertxRef {
      @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
-     @return an VerticleRel wrapped in a Val
+     @return an VerticleRef wrapped in a Val
      */
     public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
                                                 final λc<I, O> lambda
@@ -229,7 +228,7 @@ public class VertxRef {
      @param options options for configuring the verticle deployment
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
-     @return an VerticleRel wrapped in a Val
+     @return an VerticleRef wrapped in a Val
      */
     public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
                                                 final λc<I, O> lambda,
@@ -280,7 +279,7 @@ public class VertxRef {
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
      @param address the prefix of the auto generated address
-     @return an VerticleRel wrapped in a Val
+     @return an VerticleRef wrapped in a Val
      */
     public <I, O> λ<I, O> spawn(final String address,
                                 final λ<I, O> lambda) {
@@ -290,12 +289,13 @@ public class VertxRef {
                     );
     }
 
+
     /**
      @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
      @param address the prefix of the auto generated address
-     @return an VerticleRel wrapped in a Val
+     @return an VerticleRef wrapped in a Val
      */
     public <I, O> λc<I, O> spawn(final String address,
                                  final λc<I, O> lambda) {
@@ -305,13 +305,14 @@ public class VertxRef {
                     );
     }
 
+
     /**
      @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
      @param <O>     the type of the reply
      @param address the prefix of the auto generated address
      @param options the deployment options
-     @return an VerticleRel wrapped in a Val
+     @return an VerticleRef wrapped in a Val
      */
     public <I, O> λc<I, O> spawn(final String address,
                                  final λc<I, O> lambda,
@@ -363,7 +364,7 @@ public class VertxRef {
      @param <O>     the type of the reply
      @param address the prefix of the auto generated address
      @param options the deployment options
-     @return an VerticleRel wrapped in a Val
+     @return an VerticleRef wrapped in a Val
      */
     public <I, O> λ<I, O> spawn(final String address,
                                 final λ<I, O> lambda,
@@ -544,6 +545,7 @@ public class VertxRef {
                             );
     }
 
+
     private <I, O> void wrapLambda(final String address,
                                    final Message<I> message,
                                    final λ<I, O> fn) {
@@ -672,13 +674,23 @@ public class VertxRef {
             ShellService service = ShellService.create(vertx,
                                                        options
                                                       );
-
             return service.start()
-                          .map(it -> service);
+                          .map(it -> service)
+                          .onComplete(event -> {
+                              if (event.succeeded()) {
+                                  EventPublisher.PUBLISHER.startedShell()
+                                                          .accept(vertx);
+                              }
+                              else {
+                                  EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_STARTING_SHELL_SERVICE,
+                                                                         event.cause()
+                                                                        )
+                                                          .accept(vertx);
+                              }
+                          });
 
         });
     }
-
 
 
 }
