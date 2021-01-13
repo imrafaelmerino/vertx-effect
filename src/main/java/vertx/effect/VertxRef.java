@@ -30,10 +30,10 @@ public class VertxRef {
     public static final String EVENTS_ADDRESS = "vertx-values-events";
     private static final DeploymentOptions DEFAULT_OPTIONS = new DeploymentOptions();
     private static final AtomicLong processSeq = new AtomicLong(0);
-    private static final AtomicLong anonymousVerticleSeq = new AtomicLong(0);
     private final Vertx vertx;
     private final DeploymentOptions deploymentOptions;
-    private static final Function<MultiMap, DeliveryOptions> deliveryOpt = multimap -> new DeliveryOptions().setHeaders(multimap);
+    private static final Function<MultiMap, DeliveryOptions> deliveryOpt =
+            multimap -> new DeliveryOptions().setHeaders(multimap);
     private static final String ADDRESS_IS_NULL = "address is null";
     private static final String CONSUMER_IS_NULL = "consumer is null";
     private static final String OPTIONS_IS_NULL = "options is null";
@@ -153,8 +153,6 @@ public class VertxRef {
                       deploymentOptions
                      );
     }
-
-
 
     /**
      @param address the address of the verticle
@@ -291,6 +289,7 @@ public class VertxRef {
                     );
     }
 
+
     /**
      @param lambda  the function that takes a message of type I and produces an output of type O
      @param <I>     the type of the message sent to the verticle
@@ -305,6 +304,7 @@ public class VertxRef {
                      deploymentOptions
                     );
     }
+
 
     /**
      @param lambda  the function that takes a message of type I and produces an output of type O
@@ -545,6 +545,7 @@ public class VertxRef {
                             );
     }
 
+
     private <I, O> void wrapLambda(final String address,
                                    final Message<I> message,
                                    final λ<I, O> fn) {
@@ -673,13 +674,23 @@ public class VertxRef {
             ShellService service = ShellService.create(vertx,
                                                        options
                                                       );
-
             return service.start()
-                          .map(it -> service);
+                          .map(it -> service)
+                          .onComplete(event -> {
+                              if (event.succeeded()) {
+                                  EventPublisher.PUBLISHER.startedShell()
+                                                          .accept(vertx);
+                              }
+                              else {
+                                  EventPublisher.PUBLISHER.internalError(Event.INTERNAL_ERROR_STARTING_SHELL_SERVICE,
+                                                                         event.cause()
+                                                                        )
+                                                          .accept(vertx);
+                              }
+                          });
 
         });
     }
-
 
 
 }
