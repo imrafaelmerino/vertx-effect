@@ -130,7 +130,7 @@ public abstract class OauthModule extends HttpClientModule {
                                                                        .alternative(Cons.failure(e))
                                                       )
                                           .flatMap(resp ->
-                                                           IfElse.<JsObj>predicate(Cons.success(refreshTokenPredicate.test(resp)))
+                                                           IfElse.<JsObj>predicate(refreshTokenPredicate.test(resp))
                                                                    .consequence(this.oauth(req,
                                                                                            reqAttempts - 1,
                                                                                            true
