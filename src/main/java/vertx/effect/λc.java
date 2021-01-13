@@ -14,12 +14,12 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
     MultiMap empty = MultiMap.caseInsensitiveMultiMap();
 
     static <I> λc<I, I> identity() {
-        return (context,val)->Cons.success(val);
+        return (context, val) -> Cons.success(val);
     }
 
     static <I, O> λc<I, O> fail(final Supplier<Exception> supplier) {
         Objects.requireNonNull(supplier);
-        return (context,val) ->
+        return (context, val) ->
                 Cons.failure(supplier.get());
     }
 
@@ -43,21 +43,33 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
                          );
     }
 
+    default <Q> λc<Q, O> compose(final λc<Q, I> other) {
+        requireNonNull(other);
+        return (context, input) -> {
+            if (input == null)
+                return Cons.failure(new IllegalArgumentException("input is null"));
+            return other.apply(context,
+                               input
+                              )
+                        .flatMap(i -> this.apply(context,
+                                                 i
+                                                )
+                                );
+        };
+    }
+
     default <Q> λc<I, Q> andThen(final λc<O, Q> other) {
         requireNonNull(other);
         return (context, input) -> {
             if (input == null)
                 return Cons.failure(new IllegalArgumentException("input is null"));
-            return Cons.of(() -> this.apply(context,
-                                            input
-                                           )
-                                     .get()
-                                     .flatMap(it -> other.apply(context,
-                                                                it
-                                                               )
-                                                         .get()
-                                             )
-                          );
+            return this.apply(context,
+                              input
+                             )
+                       .flatMap(it -> other.apply(context,
+                                                  it
+                                                 )
+                               );
         };
     }
 
