@@ -1624,8 +1624,8 @@ public class TestJsObjExp {
                           "b",
                           Cons.success(JsStr.of("b"))
                          )
-                .map(obj -> obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                 .apply(p.value)
+                .map(obj -> obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                 .apply(value)
                                          )
                     )
                 .onSuccess(r -> context.verify(() -> {
@@ -1650,8 +1650,8 @@ public class TestJsObjExp {
                             "b",
                             Cons.success(JsStr.of("b"))
                            )
-                .map(obj -> obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                 .apply(p.value)
+                .map(obj -> obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                 .apply(value)
                                          )
                     )
                 .onSuccess(r -> context.verify(() -> {
@@ -1676,8 +1676,8 @@ public class TestJsObjExp {
                           "b",
                           Cons.success(JsStr.of("b"))
                          )
-                .flatMap(obj -> Cons.success(obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                                  .apply(p.value)
+                .flatMap(obj -> Cons.success(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                                  .apply(value)
                                                           ))
                         )
                 .onSuccess(r -> context.verify(() -> {
@@ -1703,8 +1703,8 @@ public class TestJsObjExp {
                             "b",
                             Cons.success(JsStr.of("b"))
                            )
-                .flatMap(obj -> Cons.success(obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                                  .apply(p.value)
+                .flatMap(obj -> Cons.success(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                                  .apply(value)
                                                           ))
                         )
                 .onSuccess(r -> context.verify(() -> {

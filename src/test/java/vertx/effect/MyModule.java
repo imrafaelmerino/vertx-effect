@@ -15,14 +15,14 @@ public class MyModule extends VertxModule {
     @Override
     public void deploy() {
         λ<JsObj, JsObj> removeNull = o ->
-                Cons.success(o.filterAllValues(pair -> pair.value.isNotNull()));
+                Cons.success(o.filterAllValues(value -> value.isNotNull()));
         this.deploy(REMOVE_NULL_ADDRESS,
                     removeNull
                    );
 
         λ<JsObj, JsObj> trim = o ->
-                Cons.success(o.mapAllValues(pair -> JsStr.prism.modify.apply(String::trim)
-                                                                      .apply(pair.value)
+                Cons.success(o.mapAllValues(value -> JsStr.prism.modify.apply(String::trim)
+                                                                      .apply(value)
                                            )
                             );
         this.deploy(TRIM_ADDRESS,

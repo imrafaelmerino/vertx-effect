@@ -42,8 +42,8 @@ public class TestJsArrayExp {
         JsArrayExp.parallel(Cons.success(JsStr.of("a")),
                             Cons.success(JsStr.of("b"))
                            )
-                  .map(arr -> arr.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                   .apply(p.value))
+                  .map(arr -> arr.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                   .apply(value))
                       )
                   .onSuccess(r -> context.verify(() -> {
                       Assertions.assertEquals(JsArray.of("A",
@@ -64,8 +64,8 @@ public class TestJsArrayExp {
         JsArrayExp.sequential(Cons.success(JsStr.of("a")),
                               Cons.success(JsStr.of("b"))
                              )
-                  .flatMap(obj -> Cons.success(obj.mapValues(p -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                                    .apply(p.value)
+                  .flatMap(obj -> Cons.success(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                                    .apply(value)
                                                             ))
                           )
                   .onSuccess(r -> context.verify(() -> {
