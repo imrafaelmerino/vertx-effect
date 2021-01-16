@@ -1203,7 +1203,7 @@ Vertx version 4.0.0.CR1
 ```
 
 ## <a name="rp"><a/> Related projects
-
+I've developed some real examples with vertx-effect in [vertx-effect-examples](https://github.com/imrafaelmerino/vertx-effect-examples).
 vertx-effect uses the persistent Json from [json-values](https://github.com/imrafaelmerino/json-scala-values).
 [vertx-mongodb-effect](https://github.com/imrafaelmerino/vertx-mongodb-effect) uses vertx-effect to work with 
 MongoDB using lambdas.
