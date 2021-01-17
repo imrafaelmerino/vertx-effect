@@ -484,7 +484,7 @@ Val<Tuple3<A,B,C> triple = Triple.sequential(Val<A>, Val<B>, Val<C>);
  
 - **JsObjExp** and **JsArrayExp**. 
 _JsObjExp_ and _JsArrayExp_ are data structures that look like raw Json. You can compute all the values either in parallel
-or sequentially. You can mix all the expressions we've seen so far and nest them, going as deeper as necessary,
+or sequentially. You can mix all the expressions we've seen so far and nest them, going as deep as necessary,
 like in the following example:
 
 
