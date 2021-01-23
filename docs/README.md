@@ -579,7 +579,7 @@ public interface Val<O> extends Supplier<Future<O>> {
 will be retried, and an action before any attempt can be specified. You can create any imaginable retry policy, for example: 
 
 ```java
-// for ever
+// forever
 retry(Integer.MAX_VALUE)
 
 // constant delay n seconds
