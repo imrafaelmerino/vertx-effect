@@ -7,8 +7,7 @@ import vertx.effect.Val;
 import javax.naming.OperationNotSupportedException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
+
 
 import static java.util.Objects.requireNonNull;
 
@@ -23,59 +22,15 @@ class SequentialSeq<O> extends ListExp<O> {
 
 
     @Override
-    public Val<List<O>> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new SequentialSeq<>(seq.map(it -> it.retry(attempts)));
-    }
-
-
-    @Override
-    public Val<List<O>> retry(final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        return new SequentialSeq<>(seq.map(it -> it.retry(attempts,
-                                                          retryPolicy
-                                                         )));
-    }
-
-    @Override
-    public Val<List<O>> retry(final Predicate<Throwable> predicate,
-                              final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
-
-        return new SequentialSeq<>(seq.map(it -> it.retry(predicate,
-                                                          attempts
-                                                         ))
-        );
-    }
-
-
-    @Override
-    public Val<List<O>> retry(final Predicate<Throwable> predicate,
-                              final int attempts,
-                              final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new SequentialSeq<>(seq.map(it -> it.retry(predicate,
-                                                          attempts,
-                                                          retryPolicy
-                                                         )));
+    public Val<List<O>> retry(final RetryPolicy policy) {
+        return new SequentialSeq<>(seq.map(it -> it.retry(policy)));
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Future<List<O>> get() {
         Future<List<O>> acc = Future.succeededFuture(new ArrayList<>());
+
 
         for (final Val<? extends O> val : seq)
             acc = acc.flatMap(l -> val.get()

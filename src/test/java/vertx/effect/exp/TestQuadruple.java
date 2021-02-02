@@ -14,6 +14,7 @@ import vertx.effect.mock.ValOrErrorMock;
 import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.*;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestQuadruple {
@@ -61,7 +62,7 @@ public class TestQuadruple {
                                    a.get(),
                                    a.get()
                                   )
-                         .retry(2);
+                         .retry(limitRetries(2));
 
         Verifiers.<Tuple4<String, String, String, String>>verifySuccess(tuple -> tuple.equals(new Tuple4<>("a",
                                                                                                            "a",
@@ -87,7 +88,7 @@ public class TestQuadruple {
                                      a.get(),
                                      a.get()
                                     )
-                         .retry(2);
+                         .retry(limitRetries(2));
 
         Verifiers.<Tuple4<String, String, String, String>>verifySuccess(tuple -> tuple.equals(new Tuple4<>("a",
                                                                                                            "a",
@@ -114,8 +115,9 @@ public class TestQuadruple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -146,8 +148,9 @@ public class TestQuadruple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -178,8 +181,9 @@ public class TestQuadruple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -204,8 +208,9 @@ public class TestQuadruple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -453,7 +458,7 @@ public class TestQuadruple {
                            b.get(),
                            a.get()
                           )
-                 .retry(2)
+                 .retry(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("a",
@@ -475,7 +480,7 @@ public class TestQuadruple {
                              b.get(),
                              a.get()
                             )
-                 .retry(2)
+                 .retry(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("a",
@@ -504,10 +509,10 @@ public class TestQuadruple {
                            a.get(),
                            a.get()
                           )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retry(limitRetries(ATTEMPTS)
+                                    .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                     MILLISECONDS
+                                                                                    )))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {
@@ -539,10 +544,10 @@ public class TestQuadruple {
                              a.get(),
                              a.get()
                             )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retry(limitRetries(ATTEMPTS)
+                                .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                 MILLISECONDS
+                                                                                )))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {

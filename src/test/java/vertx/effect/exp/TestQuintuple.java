@@ -8,15 +8,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Val;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.*;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestQuintuple {
@@ -58,7 +56,7 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retry(2)
+                 .retry(limitRetries(2))
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> it.result()
@@ -90,7 +88,7 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retry(2)
+                 .retry(limitRetries(2))
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> it.result()
@@ -122,8 +120,9 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -156,8 +155,9 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -190,8 +190,9 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -217,8 +218,9 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retry(limitRetries(2)
+                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                     )
                        )
                  .get()
                  .onComplete(it -> {
@@ -489,7 +491,7 @@ public class TestQuintuple {
                            a.get(),
                            a.get()
                           )
-                 .retry(2)
+                 .retry(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>("a",
@@ -513,7 +515,7 @@ public class TestQuintuple {
                              a.get(),
                              a.get()
                             )
-                 .retry(2)
+                 .retry(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>("a",
@@ -541,10 +543,10 @@ public class TestQuintuple {
                            a.get(),
                            a.get()
                           )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retry(limitRetries(ATTEMPTS)
+                                .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                 MILLISECONDS
+                                                                                )))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {
@@ -575,10 +577,10 @@ public class TestQuintuple {
                              a.get(),
                              a.get()
                             )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retry(limitRetries(ATTEMPTS)
+                                .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                 MILLISECONDS
+                                                                                )))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {

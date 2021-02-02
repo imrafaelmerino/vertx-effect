@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
+
+import vertx.effect.RetryPolicies;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestParallelMap {
@@ -1022,7 +1025,7 @@ public class TestParallelMap {
                         "b",
                         one.get()
                        )
-              .retry(2)
+              .retry(limitRetries(2))
               .onComplete(map ->
                                   context.verify(() -> {
                                       Assertions.assertEquals(expected,
@@ -1084,7 +1087,8 @@ public class TestParallelMap {
                         "b",
                         b.get()
                        )
-              .retry(ATTEMPTS)
+              .retry(limitRetries(ATTEMPTS)
+                             )
               .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
               .onSuccess(map -> context.verify(() -> {
                   Assertions.assertEquals(expected,
@@ -1112,10 +1116,10 @@ public class TestParallelMap {
                         "b",
                         b.get()
                        )
-              .retry(ATTEMPTS,
-                     (error, n) -> vertxRef.delay(100,
-                                                  MILLISECONDS
-                                                 )
+              .retry(limitRetries(ATTEMPTS)
+                             .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                              MILLISECONDS
+                                                                             )))
                     )
               .get()
               .onComplete(r -> context.verify(() -> {

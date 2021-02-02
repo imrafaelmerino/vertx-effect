@@ -518,11 +518,9 @@ public class VertxRef {
     }
 
 
-    public Val<Void> delay(final int time,
-                           final TimeUnit unit) {
-        if (time < 0) return Cons.failure(new IllegalArgumentException("time < 0"));
-        if (unit == null) return Cons.failure(new NullPointerException("unit is null"));
-        return Cons.of(() -> {
+    public Delay delay(final int time,
+                       final TimeUnit unit) {
+        return new Delay(Cons.of(() -> {
             EventPublisher.PUBLISHER.timer(Event.TIMER_STARTS_EVENT)
                                     .accept(vertx);
             Promise<Void> promise = Promise.promise();
@@ -534,7 +532,7 @@ public class VertxRef {
                            }
                           );
             return promise.future();
-        });
+        }));
     }
 
 

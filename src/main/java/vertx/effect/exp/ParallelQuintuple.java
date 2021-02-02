@@ -32,103 +32,13 @@ final class ParallelQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> {
     }
 
     @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new ParallelQuintuple<>(_1.retry(attempts),
-                                       _2.retry(attempts),
-                                       _3.retry(attempts),
-                                       _4.retry(attempts),
-                                       _5.retry(attempts)
-        );
-    }
+    public Val<Tuple5<A, B, C, D, E>> retry(final RetryPolicy policy) {
 
-
-    @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final int attempts,
-                                            final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new ParallelQuintuple<>(_1.retry(attempts,
-                                                retryPolicy
-                                               ),
-                                       _2.retry(attempts,
-                                                retryPolicy
-                                               ),
-                                       _3.retry(attempts,
-                                                retryPolicy
-                                               ),
-                                       _4.retry(attempts,
-                                                retryPolicy
-                                               ),
-                                       _5.retry(attempts,
-                                                retryPolicy
-                                               )
-        );
-    }
-
-    @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final Predicate<Throwable> predicate,
-                                            final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
-
-        return new ParallelQuintuple<>(_1.retry(predicate,
-                                                attempts
-                                               ),
-                                       _2.retry(predicate,
-                                                attempts
-                                               ),
-                                       _3.retry(predicate,
-                                                attempts
-                                               ),
-                                       _4.retry(predicate,
-                                                attempts
-                                               ),
-                                       _5.retry(predicate,
-                                                attempts
-                                               )
-        );
-    }
-
-
-    @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final Predicate<Throwable> predicate,
-                                            final int attempts,
-                                            final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new ParallelQuintuple<>(_1.retry(predicate,
-                                                attempts,
-                                                retryPolicy
-                                               ),
-                                       _2.retry(predicate,
-                                                attempts,
-                                                retryPolicy
-                                               ),
-                                       _3.retry(predicate,
-                                                attempts,
-                                                retryPolicy
-                                               ),
-                                       _4.retry(predicate,
-                                                attempts,
-                                                retryPolicy
-                                               ),
-                                       _5.retry(predicate,
-                                                attempts,
-                                                retryPolicy
-                                               )
+        return new ParallelQuintuple<>(_1.retry(policy),
+                                       _2.retry(policy),
+                                       _3.retry(policy),
+                                       _4.retry(policy),
+                                       _5.retry(policy)
         );
     }
 

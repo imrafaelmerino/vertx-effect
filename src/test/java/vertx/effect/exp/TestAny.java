@@ -7,16 +7,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Val;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
+import static vertx.effect.RetryPolicies.retryIf;
 
 @ExtendWith(VertxExtension.class)
 public class TestAny {
@@ -24,15 +23,15 @@ public class TestAny {
     static final int ATTEMPTS = 2;
     static final Supplier<Val<Boolean>> TRUE =
             new ValOrErrorMock<>(ATTEMPTS,
-                             counter ->
-                                     Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                 counter ->
+                                         Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                  true
             );
 
 
     static final Supplier<Val<Boolean>> FALSE =
             new ValOrErrorMock<>(ATTEMPTS,
-                             counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                  false
             );
 
@@ -57,14 +56,14 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      TRUE.get()
                     )
-           .retry(2)
+           .retry(limitRetries(2))
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertEquals(true,
-                                                           it.result()
-                                                          ));
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertEquals(true,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
     }
 
     @Test
@@ -73,14 +72,14 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        TRUE.get()
                       )
-           .retry(2)
+           .retry(limitRetries(2))
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertEquals(true,
-                                                           it.result()
-                                                          ));
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertEquals(true,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
     }
 
     @Test
@@ -90,14 +89,14 @@ public class TestAny {
         Any.parallel(FALSE.get(),
                      FALSE.get()
                     )
-           .retry(2)
+           .retry(limitRetries(2))
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertEquals(false,
-                                                           it.result()
-                                                          ));
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertEquals(false,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
     }
 
     @Test
@@ -107,14 +106,14 @@ public class TestAny {
         Any.sequential(FALSE.get(),
                        FALSE.get()
                       )
-           .retry(2)
+           .retry(limitRetries(2))
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertEquals(false,
-                                                           it.result()
-                                                          ));
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertEquals(false,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
     }
 
     @Test
@@ -124,17 +123,17 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                  2
+           .retry(limitRetries(2)
+                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE)))
                  )
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertEquals(true,
-                                                           it.result()
-                                                          )
-                            );
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertEquals(true,
+                                                            it.result()
+                                                           )
+                             );
+               context.completeNow();
+           });
 
     }
 
@@ -145,17 +144,17 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                  2
+           .retry(limitRetries(2)
+                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE)))
                  )
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertEquals(true,
-                                                           it.result()
-                                                          )
-                            );
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertEquals(true,
+                                                            it.result()
+                                                           )
+                             );
+               context.completeNow();
+           });
 
     }
 
@@ -168,11 +167,11 @@ public class TestAny {
                     )
            .map(it -> !it)
            .onSuccess(result -> {
-              context.verify(() -> {
-                  Assertions.assertFalse(result);
-                  context.completeNow();
-              });
-          })
+               context.verify(() -> {
+                   Assertions.assertFalse(result);
+                   context.completeNow();
+               });
+           })
            .get();
     }
 
@@ -185,11 +184,11 @@ public class TestAny {
                       )
            .map(it -> !it)
            .onSuccess(result -> {
-              context.verify(() -> {
-                  Assertions.assertFalse(result);
-                  context.completeNow();
-              });
-          })
+               context.verify(() -> {
+                   Assertions.assertFalse(result);
+                   context.completeNow();
+               });
+           })
            .get();
     }
 
@@ -200,15 +199,15 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
-                  2
+           .retry(limitRetries(2)
+                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE)))
                  )
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertTrue(it.failed())
-                            );
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertTrue(it.failed())
+                             );
+               context.completeNow();
+           });
 
     }
 
@@ -219,15 +218,15 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
-                  2
+           .retry(limitRetries(2)
+                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE)))
                  )
            .get()
            .onComplete(it -> {
-              context.verify(() -> Assertions.assertTrue(it.failed())
-                            );
-              context.completeNow();
-          });
+               context.verify(() -> Assertions.assertTrue(it.failed())
+                             );
+               context.completeNow();
+           });
 
     }
 
@@ -236,24 +235,24 @@ public class TestAny {
 
 
         ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
-                                                    i -> new IllegalArgumentException(),
+                                                            i -> new IllegalArgumentException(),
                                                             true
         );
         Any.parallel(True.get(),
                      True.get()
                     )
-           .retry(it -> it instanceof IllegalArgumentException,
-                  3,
-                  (e, i) -> vertxRef.delay(100,
-                                            MILLISECONDS
-                                           )
+           .retry(limitRetries(3)
+                          .join(retryIf(it -> it instanceof IllegalArgumentException)
+                                       .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                        MILLISECONDS
+                                                                                       ))))
                  )
            .onSuccess(it -> {
-              context.verify(() -> {
-                  Assertions.assertTrue(it);
-                  context.completeNow();
-              });
-          })
+               context.verify(() -> {
+                   Assertions.assertTrue(it);
+                   context.completeNow();
+               });
+           })
            .get();
     }
 
@@ -262,24 +261,24 @@ public class TestAny {
 
 
         ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(3,
-                                                    i -> new IllegalArgumentException(),
+                                                            i -> new IllegalArgumentException(),
                                                             true
         );
         Any.sequential(True.get(),
                        True.get()
                       )
-           .retry(it -> it instanceof IllegalArgumentException,
-                  3,
-                  (e, i) -> vertxRef.delay(100,
-                                            MILLISECONDS
-                                           )
+           .retry(limitRetries(3)
+                          .join(retryIf(it -> it instanceof IllegalArgumentException)
+                                       .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                        MILLISECONDS
+                                                                                       ))))
                  )
            .onSuccess(it -> {
-              context.verify(() -> {
-                  Assertions.assertTrue(it);
-                  context.completeNow();
-              });
-          })
+               context.verify(() -> {
+                   Assertions.assertTrue(it);
+                   context.completeNow();
+               });
+           })
            .get();
     }
 
@@ -289,19 +288,19 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retry(ATTEMPTS,
-                 (error, n) -> vertxRef.delay(100,
-                                              MILLISECONDS
-                                             )
-                )
+           .retry(limitRetries(ATTEMPTS)
+                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                           MILLISECONDS
+                                                                          )))
+                 )
            .get()
            .onComplete(r -> context.verify(() -> {
-              Assertions.assertTrue(r.result());
-              long seconds = NANOSECONDS.toMillis(System.nanoTime() - start);
-              Assertions.assertTrue(seconds >= ATTEMPTS);
-              context.completeNow();
+               Assertions.assertTrue(r.result());
+               long seconds = NANOSECONDS.toMillis(System.nanoTime() - start);
+               Assertions.assertTrue(seconds >= ATTEMPTS);
+               context.completeNow();
 
-          }));
+           }));
 
     }
 
@@ -311,19 +310,19 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retry(ATTEMPTS,
-                 (error, n) -> vertxRef.delay(100,
-                                              MILLISECONDS
-                                             )
-                )
+           .retry(limitRetries(ATTEMPTS)
+                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                           MILLISECONDS
+                                                                          )))
+                 )
            .get()
            .onComplete(r -> context.verify(() -> {
-                          Assertions.assertTrue(r.result());
-                          long seconds = NANOSECONDS.toMillis(System.nanoTime() - start);
-                          Assertions.assertTrue(seconds >= ATTEMPTS);
-                          context.completeNow();
-                      })
-                     );
+                           Assertions.assertTrue(r.result());
+                           long seconds = NANOSECONDS.toMillis(System.nanoTime() - start);
+                           Assertions.assertTrue(seconds >= ATTEMPTS);
+                           context.completeNow();
+                       })
+                      );
 
     }
 
@@ -334,11 +333,11 @@ public class TestAny {
                true
               )
            .onSuccess(it -> {
-              context.verify(() -> {
-                  Assertions.assertTrue(it);
-                  context.completeNow();
-              });
-          })
+               context.verify(() -> {
+                   Assertions.assertTrue(it);
+                   context.completeNow();
+               });
+           })
            .get();
     }
 }

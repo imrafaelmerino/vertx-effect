@@ -124,7 +124,7 @@ public class MyModule extends VertxModule {
                                                                 .map(JsStr::of)
                                                      )
                             )
-                  .retry(2);   
+                  .retry(RetryPolicies.limitRetries(2));   
     this.deploy("validateAnMap",(JsObj obj) -> validate.apply(obj).flatMap(map));
 
   }

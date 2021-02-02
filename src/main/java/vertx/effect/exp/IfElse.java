@@ -5,15 +5,13 @@ import vertx.effect.RetryPolicy;
 import vertx.effect.core.AbstractVal;
 import vertx.effect.Val;
 
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
+
 
 import static java.util.Objects.requireNonNull;
 
 public final class IfElse<O> extends AbstractVal<O> {
 
     private final Val<Boolean> predicate;
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
     private Val<O> consequence;
     private Val<O> alternative;
 
@@ -51,72 +49,11 @@ public final class IfElse<O> extends AbstractVal<O> {
 
 
     @Override
-    public Val<O> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new IfElse<O>(predicate.retry(attempts))
-                .consequence(consequence.retry(attempts))
-                .alternative(alternative.retry(attempts));
-    }
+    public Val<O> retry(final RetryPolicy policy) {
 
-
-    @Override
-    public Val<O> retry(final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new IfElse<O>(predicate.retry(attempts,
-                                             retryPolicy
-                                            ))
-                .consequence(consequence.retry(attempts,
-                                               retryPolicy
-                                              ))
-                .alternative(alternative.retry(attempts,
-                                               retryPolicy
-                                              ));
-    }
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new IfElse<O>(this.predicate.retry(predicate,
-                                                  attempts
-                                                 ))
-                .consequence(consequence.retry(predicate,
-                                               attempts
-                                              ))
-                .alternative(alternative.retry(predicate,
-                                               attempts
-                                              ));
-    }
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts,
-                        final RetryPolicy<Throwable> retryPolicy) {
-
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        return new IfElse<O>(this.predicate.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ))
-                .consequence(consequence.retry(predicate,
-                                               attempts,
-                                               retryPolicy
-                                              ))
-                .alternative(alternative.retry(predicate,
-                                               attempts,
-                                               retryPolicy
-                                              ));
+        return new IfElse<O>(predicate.retry(policy))
+                .consequence(consequence.retry(policy))
+                .alternative(alternative.retry(policy));
     }
 
 }

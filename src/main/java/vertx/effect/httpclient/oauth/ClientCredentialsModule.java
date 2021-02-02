@@ -3,6 +3,7 @@ package vertx.effect.httpclient.oauth;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
+import vertx.effect.RetryPolicy;
 import vertx.effect.core.OauthModule;
 import vertx.effect.Val;
 import vertx.effect.λ;
@@ -21,10 +22,8 @@ public class ClientCredentialsModule extends OauthModule {
                             final Function<String, String> authorizationHeaderValue,
                             final λ<JsObj, String> readNewAccessTokenAfterRefresh,
                             final Predicate<JsObj> refreshTokenPredicate,
-                            final Predicate<Throwable> retryAccessTokenPredicate,
-                            final Predicate<Throwable> retryReqPredicate,
-                            final int accessTokenAttempts,
-                            final int reqAttempts
+                            final RetryPolicy accessTokenReqRetryPolicy,
+                            final RetryPolicy reqRetryPolicy
                            ) {
         super(options,
               address,
@@ -32,10 +31,8 @@ public class ClientCredentialsModule extends OauthModule {
               authorizationHeaderValue,
               readNewAccessTokenAfterRefresh,
               refreshTokenPredicate,
-              retryAccessTokenPredicate,
-              retryReqPredicate,
-              accessTokenAttempts,
-              reqAttempts
+              accessTokenReqRetryPolicy,
+              reqRetryPolicy
              );
         this.accessTokenReq = accessTokenReq;
 

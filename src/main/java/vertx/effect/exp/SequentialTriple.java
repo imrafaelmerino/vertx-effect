@@ -5,10 +5,6 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-
-
 
 public final class SequentialTriple<A, B, C> extends Triple<A, B, C> {
 
@@ -27,93 +23,26 @@ public final class SequentialTriple<A, B, C> extends Triple<A, B, C> {
 
 
     @Override
-    public Val<Tuple3<A, B, C>> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        return new SequentialTriple<>(_1.retry(attempts),
-                                      _2.retry(attempts),
-                                      _3.retry(attempts)
+    public Val<Tuple3<A, B, C>> retry(final RetryPolicy policy) {
+        return new SequentialTriple<>(_1.retry(policy),
+                                      _2.retry(policy),
+                                      _3.retry(policy)
         );
     }
 
-
-    @Override
-    public Val<Tuple3<A, B, C>> retry(final int attempts,
-                                      final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        return new SequentialTriple<>(_1.retry(attempts,
-                                               retryPolicy
-                                              ),
-                                      _2.retry(attempts,
-                                               retryPolicy
-                                              ),
-                                      _3.retry(attempts,
-                                               retryPolicy
-                                              )
-        );
-    }
-
-    @Override
-    public Val<Tuple3<A, B, C>> retry(final Predicate<Throwable> predicate,
-                                      final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new SequentialTriple<>(_1.retry(predicate,
-                                               attempts
-                                              ),
-                                      _2.retry(predicate,
-                                               attempts
-                                              ),
-                                      _3.retry(predicate,
-                                               attempts
-                                              )
-        );
-    }
-
-
-    @Override
-    public Val<Tuple3<A, B, C>> retry(final Predicate<Throwable> predicate,
-                                      final int attempts,
-                                      final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new SequentialTriple<>(_1.retry(predicate,
-                                               attempts,
-                                               retryPolicy
-                                              ),
-                                      _2.retry(predicate,
-                                               attempts,
-                                               retryPolicy
-                                              ),
-                                      _3.retry(predicate,
-                                               attempts,
-                                               retryPolicy
-                                              )
-        );
-    }
 
     @Override
     public Future<Tuple3<A, B, C>> get() {
-        return _1.get()
-                 .flatMap(first -> _2.get()
-                                     .flatMap(sec -> _3.get()
-                                                       .map(third -> new Tuple3<>(first,
-                                                                                  sec,
-                                                                                  third)
-                                                           )
-                                             )
-                         );
+        return _1.flatMap(first -> _2
+                                 .flatMap(sec -> _3
+                                                  .map(third -> new Tuple3<>(first,
+                                                                             sec,
+                                                                             third
+                                                       )
+                                                      )
+                                         )
+                        )
+                .get();
     }
 
 

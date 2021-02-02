@@ -4,14 +4,12 @@ package vertx.effect.exp;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
-import vertx.effect.core.AbstractVal;
 import vertx.effect.Val;
+import vertx.effect.core.AbstractVal;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -154,8 +152,8 @@ public final class Cond<O> extends AbstractVal<O> {
                                  final Val<Boolean> test4,
                                  final Val<O> consequent4) {
 
-        List<Val<Boolean>> tests = new ArrayList<>();
-        List<Val<O>> consequents = new ArrayList<>();
+        List<Val<Boolean>> tests       = new ArrayList<>();
+        List<Val<O>>       consequents = new ArrayList<>();
         tests.add(requireNonNull(test1));
         tests.add(requireNonNull(test2));
         tests.add(requireNonNull(test3));
@@ -330,97 +328,16 @@ public final class Cond<O> extends AbstractVal<O> {
     }
 
 
-
     @Override
-    public Val<O> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
+    public Val<O> retry(final RetryPolicy policy) {
 
         return new Cond<>(tests.stream()
-                               .map(it -> it.retry(attempts))
+                               .map(it -> it.retry(policy))
                                .collect(Collectors.toList()),
                           consequences.stream()
-                                      .map(it -> it.retry(attempts))
+                                      .map(it -> it.retry(policy))
                                       .collect(Collectors.toList()
                                               ),
-                          otherwise
-        );
-    }
-
-
-    @Override
-    public Val<O> retry(final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-
-        return new Cond<>(tests.stream()
-                               .map(it -> it.retry(attempts,
-                                                   retryPolicy
-                                                  ))
-                               .collect(Collectors.toList()),
-                          consequences.stream()
-                                      .map(it -> it.retry(attempts,
-                                                          retryPolicy
-                                                         ))
-                                      .collect(Collectors.toList()),
-                          otherwise
-        );
-    }
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
-        return new Cond<>(tests.stream()
-                               .map(it -> it.retry(predicate,
-                                                   attempts
-                                                  ))
-                               .collect(Collectors.toList()),
-                          consequences.stream()
-                                      .map(it -> it.retry(predicate,
-                                                          attempts
-                                                         ))
-                                      .collect(Collectors.toList()),
-                          otherwise
-        );
-    }
-
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts,
-                        final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
-        return new Cond<>(tests.stream()
-                               .map(it -> it.retry(predicate,
-                                                   attempts,
-                                                   retryPolicy
-                                                  ))
-                               .collect(Collectors.toList()),
-                          consequences.stream()
-                                      .map(it -> it.retry(predicate,
-                                                          attempts,
-                                                          retryPolicy
-                                                         ))
-                                      .collect(Collectors.toList()),
                           otherwise
         );
     }

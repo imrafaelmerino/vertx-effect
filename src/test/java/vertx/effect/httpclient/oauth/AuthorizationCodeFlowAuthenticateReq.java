@@ -63,19 +63,20 @@ public class AuthorizationCodeFlowAuthenticateReq {
                                                  )
 
 
-                ).setReqAttempts(4)
-                 .setRetryReqPredicate(Failures.REPLY_EXCEPTION_PRISM
-                                               .exists
-                                               .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
-                                                                            exc.failureCode()
-                                                                           ) ||
-                                                       Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
-                                                                      exc.failureCode()
-                                                                     )
-                                                       || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
-                                                                         exc.failureCode()
-                                                                        )
-                                                     ))
+                ).setReqRetryPolicy(
+                        RetryPolicies.limitRetries(4)
+                                     .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM
+                                                                        .exists
+                                                                        .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
+                                                                                                     exc.failureCode()
+                                                                                                    ) ||
+                                                                                Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
+                                                                                               exc.failureCode()
+                                                                                              )
+                                                                                || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
+                                                                                                  exc.failureCode()
+                                                                                                 )
+                                                                              ))))
                  .createFromAuthReq((mod, input) ->
                                             mod.post.apply(new PostReq(String.format("code=%s&redirect_uri=%s",
                                                                                      input.getStr("code"),

@@ -7,34 +7,31 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
-import vertx.effect.Val;
+import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.Arrays;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.constantDelay;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestCase {
     private static VertxRef vertxRef;
 
-    private static BiFunction<Throwable, Integer, Val<Void>> action;
-
     private static int ATTEMPTS = 2;
 
     private static Supplier<Val<String>> a =
             new ValOrErrorMock<>(ATTEMPTS,
-                             counter -> new RuntimeException("counter:+" + counter),
+                                 counter -> new RuntimeException("counter:+" + counter),
                                  "a"
             );
     private static Supplier<Val<String>> b =
             new ValOrErrorMock<>(ATTEMPTS,
-                             counter -> new RuntimeException("counter:+" + counter),
+                                 counter -> new RuntimeException("counter:+" + counter),
                                  "b"
             );
 
@@ -45,9 +42,6 @@ public class TestCase {
                               ) {
         vertxRef = new VertxRef(vertx);
 
-        action = (error, n) -> vertxRef.delay(100,
-                                              MILLISECONDS
-                                             );
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
@@ -647,7 +641,7 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(2)
+                .retry(limitRetries(2))
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             r
@@ -667,9 +661,10 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(
-                        Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                .retry(limitRetries(2)
+                               .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                    )
+
                       )
                 .onComplete(
                         r -> context.verify(() -> {
@@ -689,11 +684,8 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(e -> e instanceof RuntimeException,
-                       3,
-                       (e, n) -> vertxRef.delay(100,
-                                                  MILLISECONDS
-                                                 )
+                .retry(limitRetries(3)
+                               .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException))
                       )
                 .onComplete(
                         r -> context.verify(() -> {
@@ -715,8 +707,8 @@ public class TestCase {
                     b.get()
                    )
                 .retry(
-                        e -> e instanceof RuntimeException,
-                        2
+                        limitRetries(2)
+                                .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException))
                       )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
@@ -739,8 +731,10 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(attempts,
-                       action
+                .retry(limitRetries(ATTEMPTS)
+                               .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                MILLISECONDS
+                                                                               )))
                       )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
@@ -821,7 +815,7 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(2)
+                .retry(limitRetries(2))
                 .recoverWith(e -> e instanceof RuntimeException ? Cons.success("hi!") : Cons.success("bye!"))
                 .onSuccess(str -> context.verify(() -> {
                     Assertions.assertEquals("a",
@@ -880,7 +874,7 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(2)
+                .retry(limitRetries(2))
                 .fallbackTo(e -> e instanceof RuntimeException ?
                                  Cons.success("hi!") :
                                  Cons.success("bye!"))
@@ -904,10 +898,10 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(ATTEMPTS,
-                       (error, n) -> vertxRef.delay(100,
-                                                    MILLISECONDS
-                                                   )
+                .retry(limitRetries(ATTEMPTS)
+                               .join(constantDelay(vertxRef.delay(100,
+                                                                  MILLISECONDS
+                                                                 )))
                       )
                 .get()
                 .onComplete(r -> context.verify(() -> {

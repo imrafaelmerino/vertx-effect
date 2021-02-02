@@ -7,21 +7,18 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Val;
-import vertx.effect.Verifiers;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestSequentialSeq {
@@ -92,23 +89,25 @@ public class TestSequentialSeq {
 
         Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      "a"
                 );
 
         Supplier<Val<String>> b =
                 new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      "b"
                 );
 
         Val<List<String>> val = ListExp.<String>sequential()
                 .append(b.get())
                 .prepend(a.get())
-                .retry(ATTEMPTS);
+                .retry(limitRetries(ATTEMPTS));
 
 
-        Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list, expected))
+        Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
+                                                                     expected
+                                                                    ))
                 .accept(val,
                         context
                        );
@@ -121,14 +120,15 @@ public class TestSequentialSeq {
         expected.add("hi");
         expected.add("hi");
         ValOrErrorMock<String> hi = new ValOrErrorMock<>(3,
-                                                 i -> new IllegalArgumentException(),
+                                                         i -> new IllegalArgumentException(),
                                                          "hi"
         );
         ListExp.sequential(hi.get(),
                            hi.get()
                           )
-               .retry(it -> it instanceof IllegalArgumentException,
-                      3
+               .retry(limitRetries(3)
+                              .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
+                                   )
                      )
                .onSuccess(it -> {
                    context.verify(() -> {
@@ -174,17 +174,18 @@ public class TestSequentialSeq {
         expected.add("hi");
         expected.add("hi");
         ValOrErrorMock<String> hi = new ValOrErrorMock<>(3,
-                                                 i -> new IllegalArgumentException(),
+                                                         i -> new IllegalArgumentException(),
                                                          "hi"
         );
         ListExp.sequential(hi.get(),
                            hi.get()
                           )
-               .retry(it -> it instanceof IllegalArgumentException,
-                      3,
-                      (e, i) -> vertxRef.delay(100,
-                                                 MILLISECONDS
-                                                )
+               .retry(limitRetries(3)
+                              .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
+                                   )
+                              .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                               MILLISECONDS
+                                                                              )))
                      )
                .onSuccess(it -> {
                    context.verify(() -> {
@@ -205,27 +206,26 @@ public class TestSequentialSeq {
         int ATTEMPTS = 3;
         Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      "a"
                 );
 
         Supplier<Val<String>> b =
                 new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      "b"
                 );
 
 
         long start = System.nanoTime();
-        BiFunction<Throwable, Integer, Val<Void>> oneSecDelay =
-                (error, n) -> vertxRef.delay(100,
-                                             MILLISECONDS
-                                            );
+
         Val<List<String>> val = ListExp.<String>sequential()
                 .append(b.get())
                 .prepend(a.get())
-                .retry(ATTEMPTS,
-                       oneSecDelay
+                .retry(limitRetries(ATTEMPTS)
+                               .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                                MILLISECONDS
+                                                                               )))
                       );
 
 
@@ -292,7 +292,8 @@ public class TestSequentialSeq {
                                                   .collect(Collectors.toList())));
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
-                                                                     expected))
+                                                                     expected
+                                                                    ))
                 .accept(val,
                         context
                        );

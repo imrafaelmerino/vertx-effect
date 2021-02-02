@@ -8,15 +8,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Val;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestPair {
@@ -24,11 +23,10 @@ public class TestPair {
 
     private static final Supplier<Val<String>> a =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "a"
             );
     static VertxRef vertxRef;
-    private static Val<Void> oneSec;
 
     @BeforeAll
     public static void prepare(final Vertx vertx,
@@ -36,9 +34,7 @@ public class TestPair {
                               ) {
 
         vertxRef = new VertxRef(vertx);
-        oneSec = vertxRef.delay(100,
-                                MILLISECONDS
-                               );
+
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
@@ -53,17 +49,18 @@ public class TestPair {
 
         int ATTEMPTS = 3;
         ValOrErrorMock<Integer> one = new ValOrErrorMock<>(ATTEMPTS,
-                                                   i -> new IllegalArgumentException(),
+                                                           i -> new IllegalArgumentException(),
                                                            1
         );
         Pair.parallel(one.get(),
                       one.get()
                      )
-            .retry(it -> it instanceof IllegalArgumentException,
-                   ATTEMPTS,
-                   (e, i) -> vertxRef.delay(100,
-                                              MILLISECONDS
-                                             )
+            .retry(limitRetries(ATTEMPTS)
+                           .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
+                                )
+                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                            MILLISECONDS
+                                                                           )))
                   )
             .onSuccess(it -> {
                 context.verify(() -> {
@@ -84,17 +81,18 @@ public class TestPair {
 
         int ATTEMPTS = 3;
         ValOrErrorMock<Integer> one = new ValOrErrorMock<>(ATTEMPTS,
-                                                   i -> new IllegalArgumentException(),
+                                                           i -> new IllegalArgumentException(),
                                                            1
         );
         Pair.sequential(one.get(),
                         one.get()
                        )
-            .retry(it -> it instanceof IllegalArgumentException,
-                   ATTEMPTS,
-                   (e, i) -> vertxRef.delay(100,
-                                              MILLISECONDS
-                                             )
+            .retry(limitRetries(ATTEMPTS)
+                           .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
+                                )
+                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                            MILLISECONDS
+                                                                           )))
                   )
             .onSuccess(it -> {
                 context.verify(() -> {
@@ -115,7 +113,7 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .retry(2)
+            .retry(limitRetries(2))
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
@@ -136,7 +134,7 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .retry(2)
+            .retry(limitRetries(2))
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
@@ -156,15 +154,16 @@ public class TestPair {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
         Pair.parallel(val.get(),
                       val.get()
                      )
-            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
+            .retry(limitRetries(2)
+                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                )
                   )
             .get()
             .onComplete(it -> {
@@ -184,15 +183,16 @@ public class TestPair {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
         Pair.sequential(val.get(),
                         val.get()
                        )
-            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
+            .retry(limitRetries(2)
+                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                )
                   )
             .get()
             .onComplete(it -> {
@@ -212,15 +212,16 @@ public class TestPair {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter " + counter),
+                                     counter -> new RuntimeException("counter " + counter),
                                      "a"
                 );
 
         Pair.parallel(val.get(),
                       val.get()
                      )
-            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
+            .retry(limitRetries(2)
+                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                )
                   )
             .get()
             .onComplete(it -> {
@@ -236,15 +237,16 @@ public class TestPair {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter " + counter),
+                                     counter -> new RuntimeException("counter " + counter),
                                      "a"
                 );
 
         Pair.sequential(val.get(),
                         val.get()
                        )
-            .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                   2
+            .retry(limitRetries(2)
+                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
+                                )
                   )
             .get()
             .onComplete(it -> {
@@ -264,10 +266,10 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.delay(100,
-                                                MILLISECONDS
-                                               )
+            .retry(limitRetries(ATTEMPTS)
+                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                            MILLISECONDS
+                                                                           )))
                   )
             .get()
             .onComplete(r -> context.verify(() -> {
@@ -292,10 +294,10 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.delay(100,
-                                                MILLISECONDS
-                                               )
+            .retry(limitRetries(ATTEMPTS)
+                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
+                                                                            MILLISECONDS
+                                                                           )))
                   )
             .get()
             .onComplete(r -> context.verify(() -> {
@@ -504,7 +506,7 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .retry(2)
+            .retry(limitRetries(2))
             .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("a",
@@ -522,7 +524,7 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .retry(2)
+            .retry(limitRetries(2))
             .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("a",

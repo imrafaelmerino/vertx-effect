@@ -9,9 +9,6 @@ import jsonvalues.JsObj;
 import jsonvalues.JsValue;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -23,7 +20,6 @@ import static java.util.Objects.requireNonNull;
  a json object.
  */
 final class ParallelJsObjExp extends JsObjExp {
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
 
@@ -85,57 +81,8 @@ final class ParallelJsObjExp extends JsObjExp {
     }
 
     @Override
-    public Val<JsObj> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(attempts)));
-    }
-
-
-    @Override
-    public Val<JsObj> retry(final int attempts,
-                            final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(attempts,
-                                                                      retryPolicy
-                                                                     )));
-    }
-
-    @Override
-    public Val<JsObj> retry(final Predicate<Throwable> predicate,
-                            final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
-                                                                      attempts
-                                                                     )));
-
-    }
-
-
-    @Override
-    public Val<JsObj> retry(final Predicate<Throwable> predicate,
-                            final int attempts,
-                            final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
-                                                                      attempts,
-                                                                      retryPolicy
-                                                                     )));
+    public Val<JsObj> retry(final RetryPolicy retryPolicy) {
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(retryPolicy)));
     }
 
 }

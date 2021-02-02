@@ -6,13 +6,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 import vertx.effect.Failures;
-import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 
 public abstract class AbstractVal<O> implements Val<O> {
@@ -126,60 +124,6 @@ public abstract class AbstractVal<O> implements Val<O> {
 
     }
 
-    @Override
-    public Val<O> retryWhile(final Predicate<O> predicate,
-                             final int attempts) {
-        if (attempts < 0) return Cons.failure(RETRIES_EXHAUSTED);
 
-        return flatMap(output -> {
-                           if (!predicate.test(output)) return Cons.success(output);
-                           return retryWhile(predicate,
-                                             attempts - 1
-                                            );
-                       },
-                       failure -> {
-                           if (Failures.REPLY_EXCEPTION_PRISM.isEmpty.negate()
-                                                                     .test(failure))
-                               return Cons.failure(failure);
-                           return attempts > 0 ? retryWhile(predicate,
-                                                            attempts - 1
-                                                           ) : Cons.failure(RETRIES_EXHAUSTED);
-                       }
-                      );
-    }
-
-    @Override
-    public Val<O> retryWhile(final Predicate<O> predicate,
-                             final int attempts,
-                             final RetryPolicy<O> notExpectedValAction,
-                             final RetryPolicy<Throwable> failureAction) {
-        if (attempts < 0) return Cons.failure(RETRIES_EXHAUSTED);
-        return flatMap(output -> {
-                           if (!predicate.test(output)) return Cons.success(output);
-                           return notExpectedValAction.apply(output,
-                                                             attempts
-                                                            )
-                                                      .flatMap(__ -> retryWhile(predicate,
-                                                                                attempts - 1,
-                                                                                notExpectedValAction,
-                                                                                failureAction
-                                                                               ));
-                       },
-                       failure -> {
-                           if (Failures.REPLY_EXCEPTION_PRISM.isEmpty.negate()
-                                                                     .test(failure))
-                               return Cons.failure(failure);
-                           return attempts > 0 ? failureAction.apply(failure,
-                                                                     attempts
-                                                                    )
-                                                              .flatMap(__ -> retryWhile(predicate,
-                                                                                        attempts - 1,
-                                                                                        notExpectedValAction,
-                                                                                        failureAction
-                                                                                       )
-                                                                      ) : Cons.failure(RETRIES_EXHAUSTED);
-                       }
-                      );
-    }
 
 }

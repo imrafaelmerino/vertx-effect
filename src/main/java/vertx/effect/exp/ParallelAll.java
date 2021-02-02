@@ -5,8 +5,6 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -23,66 +21,11 @@ final class ParallelAll extends All {
     private final List<Val<Boolean>> exps;
 
     @Override
-    public Val<Boolean> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
+    public Val<Boolean> retry(final RetryPolicy policy) {
         return new ParallelAll(exps.stream()
-                                   .map(it -> it.retry(attempts))
+                                   .map(it -> it.retry(policy))
                                    .collect(Collectors.toList()));
     }
-
-
-    @Override
-    public Val<Boolean> retry(final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new ParallelAll(exps.stream()
-                                   .map(it -> it.retry(attempts,
-                                               retryPolicy
-                                              ))
-                                   .collect(Collectors.toList())
-        );
-    }
-
-    @Override
-    public Val<Boolean> retry(final Predicate<Throwable> predicate,
-                              final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelAll(exps.stream()
-                                   .map(it -> it.retry(predicate,
-                                                       attempts
-                                                      ))
-                                   .collect(Collectors.toList()));
-    }
-
-
-    @Override
-    public Val<Boolean> retry(final Predicate<Throwable> predicate,
-                              final int attempts,
-                              final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelAll(exps.stream()
-                                   .map(it -> it.retry(predicate,
-                                                       attempts,
-                                                       retryPolicy
-                                                      ))
-                                   .collect(Collectors.toList()));
-    }
-
-
 
     @Override
     public Future<Boolean> get() {

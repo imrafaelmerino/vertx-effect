@@ -22,54 +22,11 @@ class ParallelSeq<O> extends ListExp<O> {
     }
 
     @Override
-    public Val<List<O>> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new ParallelSeq<>(seq.map(it -> it.retry(attempts)));
+    public Val<List<O>> retry(final RetryPolicy policy) {
+
+        return new ParallelSeq<>(seq.map(it -> it.retry(policy)));
     }
 
-
-    @Override
-    public Val<List<O>> retry(final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        return new ParallelSeq<>(seq.map(it -> it.retry(attempts,
-                                                        retryPolicy
-                                                       )));
-    }
-
-    @Override
-    public Val<List<O>> retry(final Predicate<Throwable> predicate,
-                              final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
-
-        return new ParallelSeq<>(seq.map(it -> it.retry(predicate,
-                                                        attempts
-                                                       ))
-        );
-    }
-
-
-    @Override
-    public Val<List<O>> retry(final Predicate<Throwable> predicate,
-                              final int attempts,
-                              final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new ParallelSeq<>(seq.map(it -> it.retry(predicate,
-                                                        attempts,
-                                                        retryPolicy
-                                                       )));
-    }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})

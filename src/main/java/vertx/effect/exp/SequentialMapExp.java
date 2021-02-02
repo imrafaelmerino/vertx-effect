@@ -51,60 +51,9 @@ final class SequentialMapExp<O> extends MapExp<O> {
 
 
     @Override
-    public Val<Map<String, O>> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(attempts)));
+    public Val<Map<String, O>> retry(final RetryPolicy policy) {
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(policy)));
     }
-
-
-    @Override
-    public Val<Map<String, O>> retry(final int attempts,
-                                     final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(attempts,
-                                                                        retryPolicy
-                                                                       )
-                                                        ));
-    }
-
-    @Override
-    public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
-                                     final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
-
-        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(predicate,
-                                                                        attempts
-                                                                       ))
-        );
-
-    }
-
-
-    @Override
-    public Val<Map<String, O>> retry(final Predicate<Throwable> predicate,
-                                     final int attempts,
-                                     final RetryPolicy<Throwable> retryPolicy) {
-
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(predicate,
-                                                                        attempts,
-                                                                        retryPolicy
-                                                                       )));
-    }
-
 
     @Override
     public Future<Map<String, O>> get() {
