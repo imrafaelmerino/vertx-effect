@@ -547,26 +547,22 @@ The _race_ function returns the value that finishes first. You can race a _JsArr
 Find below some of the most critical operations defined in the _Val_ interface that will help us make our code more resilient:
 
 ```java
+import vertx.effect.RetryPolicy;
+
 public interface Val<O> extends Supplier<Future<O>> {
-  Val<O> retryWhile(Predicate<O> predicate,
-                    int attempts);
+    Val<O> retry(RetryPolicy policy);
 
-  Val<O> retryWhile(Predicate<O> predicate,
-                    int attempts,
-                    BiFunction<O, Integer, Val<Void>> retryPolicy);
+    Val<O> retry(Predicate<Throwable>,
+                 RetryPolicy policy);
 
-  Val<O> retry(int attempts);
+    Val<O> retryOnFailure(Predicate<O> predicate,
+                          RetryPolicy policy);
 
-  Val<O> retry(Predicate<Throwable> predicate, int attempts);
+    Val<O> recoverWith(λ<Throwable, O> fn);
 
-  Val<O> retry(int attempts,
-               BiFunction<Throwable, Integer, Val<Void>> retryPolicy);  
+    Val<O> fallbackTo(λ<Throwable, O> fn);
 
-  Val<O> recoverWith(λ<Throwable, O> fn);
-
-  Val<O> fallbackTo(λ<Throwable, O> fn);
-
-  Val<O> recoverWith(λ<Throwable, O> fn);
+    Val<O> recoverWith(λ<Throwable, O> fn);
 }
  ``` 
 
@@ -576,23 +572,30 @@ public interface Val<O> extends Supplier<Future<O>> {
 
 **recover**: returns a constant if the computation fails. 
 
-**retry**: retries the computation if a failure happens. The max number of attempts, a predicate to select what failures
-will be retried, and an action before any attempt can be specified. You can create any imaginable retry policy, for example: 
+**retry**: retries the computation if an error happens. You can define a predicate to retry only the specified errors.
+Retry policies are created in a very declarative and composable way, for example: 
 
 ```java
-// forever
-retry(Integer.MAX_VALUE)
+import static vertx.effect.RetryPolicies.*
 
-// constant delay n seconds
-retry(attemps, e -> remaining -> vertxRef.delay(n,SECONDS))
+Delay oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
+Delay oneSec = vertxRef.sleep(Duration.ofSeconds(1));
 
-// incremental delay: waiting one sec before first attempt, two secs before second attempt and so on
-retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS))
+constantDelay(delay).append(limitRetries(5))
+
+//during 3 seconds up to 10 times     
+limitRetries(10).limitRetriesByCumulativeDelay(Duration.ofSeconds(3))    
+
+//5 times without delay and then, it it keep failing, an incremental delay from 100 millis up to 1 second
+limiteRetries(5).followedBy(incrementalDelay(delay).capDelay(oneSec))
 
 ```
 
-**retryWhile**: retries the computation the specified number of attempts if the result matches the predicate.
- 
+There are very interesting policies implemented based on [this article](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/):
+exponential backoff, full jitter, equal jitter, decorrelated jitter etc
+
+**retryOnFailure**: A failure is a not expected value. The specified predicate catches the failures. You can define any
+imaginable policy as well.
 
 ## <a name="modules"><a/> Modules
  

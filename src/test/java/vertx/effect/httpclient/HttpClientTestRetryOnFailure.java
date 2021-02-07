@@ -104,16 +104,15 @@ public class HttpClientTestRetryOnFailure {
             System.out.println(elapsed);
             return status == 200 && elapsed >= 300;
 
-        })
-                .accept(httpClient.get.apply(new GetReq().port(PORT)
-                                                         .uri("example")
-                                            )
-                                      .retryOnFailure(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
-                                                      limitRetries(3)
-                                                              .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
-                                                     ),
-                        context
-                       );
+        }).accept(httpClient.get.apply(new GetReq().port(PORT)
+                                                   .uri("example")
+                                      )
+                                .retryOnFailure(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
+                                                limitRetries(3)
+                                                        .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                                               ),
+                  context
+                 );
 
     }
 
