@@ -581,13 +581,14 @@ import static vertx.effect.RetryPolicies.*
 Delay oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
 Delay oneSec = vertxRef.sleep(Duration.ofSeconds(1));
 
-constantDelay(delay).append(limitRetries(5))
+// up to five retries waiting 100 ms 
+constantDelay(oneHundredMillis).append(limitRetries(5))
 
 //during 3 seconds up to 10 times     
 limitRetries(10).limitRetriesByCumulativeDelay(Duration.ofSeconds(3))    
 
-//5 times without delay and then, it it keep failing, an incremental delay from 100 millis up to 1 second
-limiteRetries(5).followedBy(incrementalDelay(delay).capDelay(oneSec))
+//5 times without delay and then, if it keeps failing, an incremental delay from 100 ms up to 1 second
+limiteRetries(5).followedBy(incrementalDelay(oneHundredMillis).capDelay(oneSec))
 
 ```
 
@@ -596,6 +597,21 @@ exponential backoff, full jitter, equal jitter, decorrelated jitter etc
 
 **retryOnFailure**: A failure is a not expected value. The specified predicate catches the failures. You can define any
 imaginable policy as well.
+
+For expressions like **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, you can apply
+the retry policy to each value of the expression instead of the overall result with the methods:
+
+```java
+    Val<O> retryEach(RetryPolicy policy);
+
+    Val<O> retryEach(Predicate<Throwable>,
+                 RetryPolicy policy);
+
+    Val<O> retryEachOnFailure(Predicate<O> predicate,
+                              RetryPolicy policy);
+```
+
+
 
 ## <a name="modules"><a/> Modules
  
