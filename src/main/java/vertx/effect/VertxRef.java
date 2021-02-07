@@ -594,8 +594,9 @@ public class VertxRef {
     }
 
     /**
-     @param duration
-     @return
+     returns a Delay, which a lazy value that when executed, will wait asynchronously for the specified amount of time
+     @param duration the amount of time
+     @return a Delay
      */
     public Delay sleep(Duration duration) {
         return new Delay(duration,
@@ -747,8 +748,9 @@ public class VertxRef {
     }
 
     /**
-     @param options
-     @return
+     returns a val what when executed will start a ShellService
+     @param options the shell service options
+     @return a val of a ShellService
      */
     public Val<ShellService> startShellService(final ShellServiceOptions options) {
         requireNonNull(options);

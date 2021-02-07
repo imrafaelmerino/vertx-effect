@@ -144,10 +144,10 @@ public class RetryPolicies {
     /**
      temp = min(cap,base * 2 ^ attempt)
      delay = temp/2 + random_between(0,temp/2)
-     @param base
-     @param cap
-     @param fn
-     @return
+     @param base the base
+     @param cap the cap
+     @param fn function to generates delays from durations
+     @return a retry policy
      @see VertxRef#sleep(Duration) to create delays
 
      */
@@ -172,10 +172,10 @@ public class RetryPolicies {
 
     /**
      delay = min(cap,random_between(base, delay * 3))
-     @param base
-     @param cap
-     @param fn
-     @return
+     @param base the base
+     @param cap the cap
+     @param fn function to generates delays from durations
+     @return a retry policy
      */
     public static RetryPolicy decorrelatedJitter(final Duration base,
                                                  final Duration cap,
