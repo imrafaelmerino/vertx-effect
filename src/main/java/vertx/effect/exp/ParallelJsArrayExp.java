@@ -8,7 +8,6 @@ import jsonvalues.JsValue;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -21,8 +20,6 @@ import java.util.function.Supplier;
  */
 
 final class ParallelJsArrayExp extends JsArrayExp {
-
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     private List<Val<? extends JsValue>> seq = List.empty();
 
@@ -96,56 +93,17 @@ final class ParallelJsArrayExp extends JsArrayExp {
 
 
     @Override
-    public Val<JsArray> retry(final int attempts) {
-
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        return new ParallelJsArrayExp(seq.map(it -> it.retry(attempts)));
-    }
-
-
-    @Override
-    public Val<JsArray> retry(final int attempts,
-                              final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        return new ParallelJsArrayExp(seq.map(it -> it.retry(attempts,
-                                                             retryPolicy
-                                                            )));
+    public Val<JsArray> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,policy);
     }
 
     @Override
-    public Val<JsArray> retry(final Predicate<Throwable> predicate,
-                              final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
+    public Val<JsArray> retryEach(final Predicate<Throwable> predicate,
+                              final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate== null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(predicate,policy)));
 
-        return new ParallelJsArrayExp(seq.map(it -> it.retry(predicate,
-                                                             attempts
-                                                            )));
-
-    }
-
-    @Override
-    public Val<JsArray> retry(final Predicate<Throwable> predicate,
-                              final int attempts,
-                              final RetryPolicy<Throwable> retryPolicy) {
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        return new ParallelJsArrayExp(seq.map(it -> it.retry(predicate,
-                                                             attempts,
-                                                             retryPolicy
-                                                            ))
-        );
     }
 
 

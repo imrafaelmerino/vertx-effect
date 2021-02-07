@@ -4,8 +4,8 @@ import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-import vertx.effect.exp.All;
 import vertx.effect.exp.Cons;
 import vertx.effect.exp.IfElse;
 import vertx.effect.httpclient.*;
@@ -18,17 +18,14 @@ import java.util.function.Predicate;
 
 public abstract class OauthModule extends HttpClientModule {
 
+    private final RetryPolicy accessTokenReqRetryPolicy;
     protected String accessToken;
 
     protected BiFunction<MultiMap, HttpClientModule, Val<JsObj>> accessTokenReq;
     protected final λ<JsObj, String> readNewAccessTokenAfterRefresh;
-    protected final int accessTokenReqAttempts;
     protected final String authorizationHeaderName;
     protected final Function<String, String> authorizationHeaderValue;
-
     protected final Predicate<JsObj> refreshTokenPredicate;
-    protected final Predicate<Throwable> retryAccessTokenReqPredicate;
-    protected final Predicate<Throwable> retryReqPredicate;
 
     public OauthModule(final HttpClientOptions options,
                        final String address,
@@ -36,10 +33,7 @@ public abstract class OauthModule extends HttpClientModule {
                        final Function<String, String> authorizationHeaderValue,
                        final λ<JsObj, String> readNewAccessTokenAfterRefresh,
                        final Predicate<JsObj> refreshTokenPredicate,
-                       final Predicate<Throwable> retryAccessTokenReqPredicate,
-                       final Predicate<Throwable> retryReqPredicate,
-                       final int accessTokenReqAttempts,
-                       final int reqAttempts
+                       final RetryPolicy accessTokenReqRetryPolicy
                       ) {
 
         super(options,
@@ -50,51 +44,40 @@ public abstract class OauthModule extends HttpClientModule {
         this.authorizationHeaderName = authorizationHeaderName;
         this.authorizationHeaderValue = authorizationHeaderValue;
         this.refreshTokenPredicate = refreshTokenPredicate;
-        this.retryAccessTokenReqPredicate = retryAccessTokenReqPredicate;
-        this.retryReqPredicate = retryReqPredicate;
-        this.accessTokenReqAttempts = accessTokenReqAttempts;
+        this.accessTokenReqRetryPolicy = accessTokenReqRetryPolicy;
         this.getOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                              reqAttempts,
                               false
                              );
 
         this.postOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                               reqAttempts,
                                false
                               );
 
         this.putOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                              reqAttempts,
                               false
                              );
 
         this.deleteOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                                 reqAttempts,
                                  false
                                 );
 
         this.patchOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                                reqAttempts,
                                 false
                                );
 
         this.headOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                               reqAttempts,
                                false
                               );
 
         this.connectOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                                  reqAttempts,
                                   false
                                  );
 
         this.optionsOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                                  reqAttempts,
                                   false
                                  );
 
         this.traceOauth = oauth((context, reqParams) -> httpClient.apply(reqParams.createHttpReq()),
-                                reqAttempts,
                                 false
                                );
     }
@@ -110,29 +93,15 @@ public abstract class OauthModule extends HttpClientModule {
     public final λc<OptionsReq, JsObj> optionsOauth;
     public final λc<TraceReq, JsObj> traceOauth;
 
-    protected <I extends HttpReq<I>> λc<I, JsObj> resilientReq(final λc<I, JsObj> req,
-                                                               final int reqAttempts
+    protected <I extends HttpReq<I>> λc<I, JsObj> resilientReq(final λc<I, JsObj> req
                                                               ) {
 
         return (context, reqParams) -> req.apply(context,
                                                  reqParams
                                                 )
-                                          .recoverWith(e ->
-                                                               IfElse.<JsObj>predicate(All.of(retryReqPredicate.test(e),
-                                                                                              reqAttempts > 0
-                                                                                             )
-                                                                                      )
-                                                                       .consequence(this.resilientReq(req,
-                                                                                                      reqAttempts - 1
-                                                                                                     )
-                                                                                        .apply(reqParams)
-                                                                                   )
-                                                                       .alternative(Cons.failure(e))
-                                                      )
                                           .flatMap(resp ->
                                                            IfElse.<JsObj>predicate(refreshTokenPredicate.test(resp))
                                                                    .consequence(this.oauth(req,
-                                                                                           reqAttempts - 1,
                                                                                            true
                                                                                           )
                                                                                     .apply(reqParams)
@@ -144,35 +113,30 @@ public abstract class OauthModule extends HttpClientModule {
 
 
     }
-
+    //todo poner predicate en retry en builder que reintente todo
     protected <I extends HttpReq<I>> λc<I, JsObj> oauth(final λc<I, JsObj> req,
-                                                        final int reqAttempts,
                                                         final boolean refreshToken
                                                        ) {
         return (context, reqParams) ->
                 //really important: Cons.of instead of Cons.success to capture the state of this.accessToken
-                IfElse.<String>predicate(Cons.of(()->Future.succeededFuture(refreshToken || accessToken == null)))
+                IfElse.<String>predicate(Cons.of(() -> Future.succeededFuture(refreshToken || accessToken == null)))
                         .consequence(
                                 accessTokenReq.apply(context,
                                                      this
                                                     )
                                               .flatMap(readNewAccessTokenAfterRefresh)
-                                              .retry(retryAccessTokenReqPredicate,
-                                                     accessTokenReqAttempts
-                                                    )
+                                              .retry(accessTokenReqRetryPolicy)
                                               .onSuccess(newToken -> this.accessToken = newToken)
                                     )
                         //really important: Cons.of instead of Cons.success to capture the state of this.accessToken
-                        .alternative(Cons.of(()-> Future.succeededFuture(this.accessToken)))
-                        .flatMap(token -> resilientReq(req,
-                                                       reqAttempts
+                        .alternative(Cons.of(() -> Future.succeededFuture(this.accessToken)))
+                        .flatMap(token -> resilientReq(req
                                                       ).apply(reqParams.setHeader(authorizationHeaderName,
                                                                                   authorizationHeaderValue.apply(token)
                                                                                  )
                                                              )
                                 );
     }
-
 
 
 }

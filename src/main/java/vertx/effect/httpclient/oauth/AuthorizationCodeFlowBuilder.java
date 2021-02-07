@@ -5,12 +5,12 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import jsonvalues.JsPath;
+import vertx.effect.Val;
 import vertx.effect.core.OauthBuilder;
 import vertx.effect.exp.Cons;
-import vertx.effect.Val;
-import vertx.effect.λ;
 import vertx.effect.httpclient.HttpClientModule;
 import vertx.effect.httpclient.HttpResp;
+import vertx.effect.λ;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -32,7 +32,7 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
         this.accessTokenReq = requireNonNull(refreshAccessTokenReq);
     }
 
-    public AuthorizationCodeFlowBuilder setReadTokensAfterAuthentication(final λ<JsObj, Tuple2<String, String>> readTokensAfterAuthentication) {
+    public AuthorizationCodeFlowBuilder readTokensAfterAuthentication(final λ<JsObj, Tuple2<String, String>> readTokensAfterAuthentication) {
         this.readTokensAfterAuthentication = Objects.requireNonNull(readTokensAfterAuthentication);
         return this;
     }
@@ -45,10 +45,7 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
                                            authorizationHeaderValue,
                                            readNewAccessTokenAfterRefresh,
                                            refreshTokenPredicate,
-                                           retryAccessTokenPredicate,
-                                           retryReqPredicate,
-                                           accessTokenReqAttempts,
-                                           reqAttempts,
+                                           accessTokenRetryPolicy,
                                            refreshToken
         );
     }
@@ -72,10 +69,7 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
                                            authorizationHeaderValue,
                                            readNewAccessTokenAfterRefresh,
                                            refreshTokenPredicate,
-                                           retryAccessTokenPredicate,
-                                           retryReqPredicate,
-                                           accessTokenReqAttempts,
-                                           reqAttempts
+                                           accessTokenRetryPolicy
         );
     }
 
@@ -100,7 +94,7 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
                         return Cons.failure(GET_REFRESH_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                     return Cons.success(new Tuple2<>(accessToken,
                                                      refreshToken
-                                                    )
+                                        )
                                        );
                 } catch (Exception e) {
                     return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));

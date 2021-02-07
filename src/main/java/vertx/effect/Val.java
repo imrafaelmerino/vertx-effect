@@ -4,7 +4,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  A Val is just an alias for a lazy Vertx future. Laziness makes your code more functional and pure.
@@ -41,47 +44,18 @@ public interface Val<O> extends Supplier<Future<O>> {
     /**
      returns a new value tha will retry its execution if it fails
 
-     @param attempts the number of attempts before returning an error
+     @param retryPolicy the policy to retry
      @return a new value
      */
-    Val<O> retry(final int attempts);
+    Val<O> retry(RetryPolicy retryPolicy);
 
 
-    /**
-     returns a new value tha will retry its execution after the an action.
-
-     @param attempts          the number of attempts before returning an error
-     @param retryPolicy the function that produces the action to be executed before the retry
-     @return a new value
-     */
-    Val<O> retry(final int attempts,
-                 final BiFunction<Throwable, Integer, Val<Void>> retryPolicy);
-
-    /**
-     returns a new value tha will retry its execution if it fails with an error that
-     satisfies the given predicate.
-
-     @param predicate the predicate against which the returned error will be tested on
-     @param attempts  the number of attempts before returning an error
-     @return a new value
-     */
     Val<O> retry(final Predicate<Throwable> predicate,
-                 final int attempts
-                );
+                 final RetryPolicy policy);
 
-    /**
-     returns a new value tha will retry its execution after an action if it fails with an
-     error that satisfies the given predicate.
 
-     @param predicate         the predicate against which the returned error will be tested on
-     @param attempts          the number of attempts before returning an error
-     @param retryPolicy the function that produces the action to be executed before the retry
-     @return a new value
-     */
-    Val<O> retry(final Predicate<Throwable> predicate,
-                 final int attempts,
-                 final RetryPolicy<Throwable> retryPolicy);
-
+    Val<O> retryOnFailure(final Predicate<O> predicate,
+                          final RetryPolicy policy);
 
     /**
      Creates a new value that will handle any matching throwable that this value might contain.
@@ -132,29 +106,5 @@ public interface Val<O> extends Supplier<Future<O>> {
      */
     Val<O> onComplete(final Handler<AsyncResult<O>> handler);
 
-
-    /**
-     returns a new value tha will retry its execution if the result satisfies the given predicate
-
-     @param predicate the given predicate
-     @param attempts the max number of retries
-     @return a new value
-     */
-    Val<O> retryWhile(final Predicate<O> predicate,
-                      final int attempts);
-
-    /**
-     returns a new value tha will retry its execution after an action if the result satisfies the given predicate
-
-     @param predicate         the predicate against which the returned error will be tested on
-     @param attempts          the number of attempts before returning an error
-     @param notExpectedValAction the function that produces the action to be executed before the retry, when the returned value doesn't satify the predicate
-     @param failureAction the function that produces the action to be executed before the retry, when an error happens
-
-     @return a new value
-     */
-    Val<O> retryWhile(final Predicate<O> predicate,
-                      final int attempts,
-                      final RetryPolicy<O> notExpectedValAction,
-                      final RetryPolicy<Throwable> failureAction);
+    
 }

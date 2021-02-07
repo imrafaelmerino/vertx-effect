@@ -20,9 +20,16 @@ import static vertx.effect.Failures.EXCEPTION_DEPLOYING_MODULE_CODE;
 
 
 /**
- A module it's a Verticle that when deployed exposes a set of functions that represents other Verticles. Verticles are deployed in the
- {@link VertxModule#deploy()} method and then the module functions are initialized in the
- {@link VertxModule#initialize()} method.
+ A module is a verticle that deploys other verticles and exposes a set of lambdas to communicate with them.
+ The most important methods are:
+ <ul>
+ <li> {@link VertxModule#deploy()}, where the verticles must be deployed using the
+ deploy methods, like {@link #deploy(String, λ, DeploymentOptions)}, {@link #deploy(String, λc, DeploymentOptions)}</li>
+ <li> {@link VertxModule#initialize()}, where the public module fields are initialized with lambdas using the functions
+ {@link #ask(String, DeliveryOptions)} and {@link #tell(String, DeliveryOptions)}
+ </li>
+ </ul>
+
  */
 public abstract class VertxModule extends AbstractVerticle {
 
@@ -57,12 +64,6 @@ public abstract class VertxModule extends AbstractVerticle {
 
     /**
      Creates an instance of this module.
-     <pre>{@code
-    public class MyModule extends VertxModule{...}
-    MyModule module = new MyModule();
-    vertx.deployVerticle(module);
-    }
-     </pre>
      */
     @SuppressWarnings("unchecked")
     public VertxModule() {

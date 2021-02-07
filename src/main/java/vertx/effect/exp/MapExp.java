@@ -9,7 +9,7 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 
-public abstract class MapExp<O> extends AbstractVal<Map<String, O>> {
+public abstract class MapExp<O> extends AbstractVal<Map<String, O>> implements Exp<Map<String,O>>{
 
     protected static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 

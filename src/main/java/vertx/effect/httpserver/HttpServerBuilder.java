@@ -10,6 +10,11 @@ import vertx.effect.exp.Cons;
 
 import java.util.Objects;
 
+/**
+ Provides a constructor to create http servers, and different methods to wrapped their deployment into
+ a {@link Val}. It allows to define some interesting methods like {@link #startAtRandom(int, int)}, that
+ deploys the server on the first free port it finds.
+ */
 public class HttpServerBuilder {
 
     private final Vertx vertx;

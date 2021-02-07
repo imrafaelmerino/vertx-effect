@@ -9,14 +9,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.RetryPolicies;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.*;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestJsObjExp {
@@ -1534,29 +1537,27 @@ public class TestJsObjExp {
                                                                )
                                              )
                          )
-                .retry(2)
-                .onComplete(it -> {
-                    context.verify(() -> {
-                                       Assertions.assertEquals(it.result(),
-                                                               JsObj.of("a",
-                                                                        a,
-                                                                        "b",
-                                                                        a,
-                                                                        "c",
-                                                                        a,
-                                                                        "d",
-                                                                        JsArray.of(a,
-                                                                                   a,
-                                                                                   JsObj.of("a",
-                                                                                            a
-                                                                                           )
-                                                                                  )
-                                                                       )
-                                                              );
-                                       context.completeNow();
-                                   }
-                                  );
-                })
+                .retryEach(limitRetries(2))
+                .onComplete(it -> context.verify(() -> {
+                                   Assertions.assertEquals(it.result(),
+                                                           JsObj.of("a",
+                                                                    a,
+                                                                    "b",
+                                                                    a,
+                                                                    "c",
+                                                                    a,
+                                                                    "d",
+                                                                    JsArray.of(a,
+                                                                               a,
+                                                                               JsObj.of("a",
+                                                                                        a
+                                                                                       )
+                                                                              )
+                                                                   )
+                                                          );
+                                   context.completeNow();
+                               }
+                                            ))
                 .get();
 
 
@@ -1588,29 +1589,27 @@ public class TestJsObjExp {
                                                                  )
                                                )
                            )
-                .retry(2)
-                .onComplete(it -> {
-                    context.verify(() -> {
-                                       Assertions.assertEquals(it.result(),
-                                                               JsObj.of("a",
-                                                                        a,
-                                                                        "b",
-                                                                        a,
-                                                                        "c",
-                                                                        a,
-                                                                        "d",
-                                                                        JsArray.of(a,
-                                                                                   a,
-                                                                                   JsObj.of("a",
-                                                                                            a
-                                                                                           )
-                                                                                  )
-                                                                       )
-                                                              );
-                                       context.completeNow();
-                                   }
-                                  );
-                })
+                .retryEach(limitRetries(2))
+                .onComplete(it -> context.verify(() -> {
+                                   Assertions.assertEquals(it.result(),
+                                                           JsObj.of("a",
+                                                                    a,
+                                                                    "b",
+                                                                    a,
+                                                                    "c",
+                                                                    a,
+                                                                    "d",
+                                                                    JsArray.of(a,
+                                                                               a,
+                                                                               JsObj.of("a",
+                                                                                        a
+                                                                                       )
+                                                                              )
+                                                                   )
+                                                          );
+                                   context.completeNow();
+                               }
+                                            ))
                 .get();
 
 
@@ -1781,10 +1780,8 @@ public class TestJsObjExp {
                           b.get()
                            .map(JsStr::of)
                          )
-                .retry(ATTEMPTS,
-                       (error, n) -> vertxRef.delay(100,
-                                                    MILLISECONDS
-                                                   )
+                .retryEach(limitRetries(ATTEMPTS)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                       )
                 .get()
                 .onComplete(r -> context.verify(() -> {
@@ -1823,10 +1820,8 @@ public class TestJsObjExp {
                             b.get()
                              .map(JsStr::of)
                            )
-                .retry(ATTEMPTS,
-                       (error, n) -> vertxRef.delay(100,
-                                                    MILLISECONDS
-                                                   )
+                .retryEach(limitRetries(ATTEMPTS)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                       )
                 .get()
                 .onComplete(r -> context.verify(() -> {

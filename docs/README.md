@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/1.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/1.0.0/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/2.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/2.0.0/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
@@ -124,7 +124,7 @@ public class MyModule extends VertxModule {
                                                                 .map(JsStr::of)
                                                      )
                             )
-                  .retry(2);   
+                  .retry(RetryPolicies.limitRetries(2));   
     this.deploy("validateAnMap",(JsObj obj) -> validate.apply(obj).flatMap(map));
 
   }
@@ -547,26 +547,22 @@ The _race_ function returns the value that finishes first. You can race a _JsArr
 Find below some of the most critical operations defined in the _Val_ interface that will help us make our code more resilient:
 
 ```java
+import vertx.effect.RetryPolicy;
+
 public interface Val<O> extends Supplier<Future<O>> {
-  Val<O> retryWhile(Predicate<O> predicate,
-                    int attempts);
+    Val<O> retry(RetryPolicy policy);
 
-  Val<O> retryWhile(Predicate<O> predicate,
-                    int attempts,
-                    BiFunction<O, Integer, Val<Void>> retryPolicy);
+    Val<O> retry(Predicate<Throwable>,
+                 RetryPolicy policy);
 
-  Val<O> retry(int attempts);
+    Val<O> retryOnFailure(Predicate<O> predicate,
+                          RetryPolicy policy);
 
-  Val<O> retry(Predicate<Throwable> predicate, int attempts);
+    Val<O> recoverWith(λ<Throwable, O> fn);
 
-  Val<O> retry(int attempts,
-               BiFunction<Throwable, Integer, Val<Void>> retryPolicy);  
+    Val<O> fallbackTo(λ<Throwable, O> fn);
 
-  Val<O> recoverWith(λ<Throwable, O> fn);
-
-  Val<O> fallbackTo(λ<Throwable, O> fn);
-
-  Val<O> recoverWith(λ<Throwable, O> fn);
+    Val<O> recoverWith(λ<Throwable, O> fn);
 }
  ``` 
 
@@ -576,23 +572,30 @@ public interface Val<O> extends Supplier<Future<O>> {
 
 **recover**: returns a constant if the computation fails. 
 
-**retry**: retries the computation if a failure happens. The max number of attempts, a predicate to select what failures
-will be retried, and an action before any attempt can be specified. You can create any imaginable retry policy, for example: 
+**retry**: retries the computation if an error happens. You can define a predicate to retry only the specified errors.
+Retry policies are created in a very declarative and composable way, for example: 
 
 ```java
-// forever
-retry(Integer.MAX_VALUE)
+import static vertx.effect.RetryPolicies.*
 
-// constant delay n seconds
-retry(attemps, e -> remaining -> vertxRef.delay(n,SECONDS))
+Delay oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
+Delay oneSec = vertxRef.sleep(Duration.ofSeconds(1));
 
-// incremental delay: waiting one sec before first attempt, two secs before second attempt and so on
-retry(attemps, e -> remaining -> vertxRef.delay(attemps - remaining + 1,SECONDS))
+constantDelay(delay).append(limitRetries(5))
+
+//during 3 seconds up to 10 times     
+limitRetries(10).limitRetriesByCumulativeDelay(Duration.ofSeconds(3))    
+
+//5 times without delay and then, it it keep failing, an incremental delay from 100 millis up to 1 second
+limiteRetries(5).followedBy(incrementalDelay(delay).capDelay(oneSec))
 
 ```
 
-**retryWhile**: retries the computation the specified number of attempts if the result matches the predicate.
- 
+There are very interesting policies implemented based on [this article](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/):
+exponential backoff, full jitter, equal jitter, decorrelated jitter etc
+
+**retryOnFailure**: A failure is a not expected value. The specified predicate catches the failures. You can define any
+imaginable policy as well.
 
 ## <a name="modules"><a/> Modules
  
@@ -715,7 +718,7 @@ to use because there isn't a standard solution. Each library uses its own. I did
 time, I wanted to provide a simple and decouple solution to know what is going on in any system using vertx-effect. 
 That's why I decided to publish remarkable events in a specific address. If you want to use your favorite slf4j implementation,
  just implement it in a consumer. On the other hand, consuming all those events during testing will give you instant feedback 
- on your system and agility spotting bugs. You can disable this future with the Java system property **-Dpublish.events=false**.
+ on your system and agility spotting bugs. You can disable this future with the Java system property **-D"vertx.effect.enable.log.events"=false**.
 
 ### <a name="events"><a/> Publishing events 
 **vertx-effect** publishes events to the address **vertx-effect-events**. Find below some of the most important predefined
@@ -1041,18 +1044,18 @@ You can customize anything using the builder:
 ```java
 
 // by default Authorization
-builder.setAuthorizationHeaderName(String authorizationHeaderName) 
+builder.authorizationHeaderName(String authorizationHeaderName) 
 
 // by default token -> "Bearer "+token
-builder.setAuthorizationHeaderValue(Function<String, String> authorizationHeaderValue) 
+builder.authorizationHeaderValue(Function<String, String> authorizationHeaderValue) 
 
 // predicate to check if we need to refresh the token
 // by default resp -> resp.getInt("status_code") == 401
-builder.setRefreshTokenPredicate(Predicate<JsObj> refreshTokenPredicate) 
+builder.refreshTokenPredicate(Predicate<JsObj> refreshTokenPredicate) 
 
 // lambda to get the access token from the resp
 // by default parse the body into a Json a get the access_token field 
-builder.setReadNewAccessTokenAfterRefresh(λ<JsObj, String> readNewAccessTokenAfterRefresh) 
+builder.readAccessTokenAfterRefresh(λ<JsObj, String> readNewAccessTokenAfterRefresh) 
 
 // predicate to check if retrying in case of an error making the request to get the token
 // by default connection timeout, unknown host or access_token is not found in the response
@@ -1199,7 +1202,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.0</version>
 </dependency>
 ```
 

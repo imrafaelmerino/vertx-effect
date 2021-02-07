@@ -9,17 +9,19 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.RetryPolicies;
 import vertx.effect.Val;
 import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestSequentialMapExp {
@@ -1023,7 +1025,7 @@ public class TestSequentialMapExp {
                           "b",
                           one.get()
                          )
-              .retry(2)
+              .retryEach(RetryPolicies.limitRetries(2))
               .onComplete(map ->
                                   context.verify(() -> {
                                       Assertions.assertEquals(expected,
@@ -1085,7 +1087,7 @@ public class TestSequentialMapExp {
                           "b",
                           b.get()
                          )
-              .retry(ATTEMPTS)
+              .retryEach(RetryPolicies.limitRetries(ATTEMPTS))
               .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
               .onSuccess(map -> context.verify(() -> {
                   Assertions.assertEquals(expected,
@@ -1113,10 +1115,8 @@ public class TestSequentialMapExp {
                           "b",
                           b.get()
                          )
-              .retry(ATTEMPTS,
-                     (error, n) -> vertxRef.delay(100,
-                                                  MILLISECONDS
-                                                 )
+              .retryEach(limitRetries(ATTEMPTS)
+                             .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                     )
               .get()
               .onComplete(r -> context.verify(() -> {

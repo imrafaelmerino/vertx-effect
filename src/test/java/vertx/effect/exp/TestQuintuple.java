@@ -8,21 +8,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.Val;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestQuintuple {
     final Supplier<Val<String>> a =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "a"
             );
 
@@ -48,7 +47,7 @@ public class TestQuintuple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter: " + counter),
+                                     counter -> new RuntimeException("counter: " + counter),
                                      "a"
                 );
 
@@ -58,7 +57,7 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retry(2)
+                 .retryEach(limitRetries(2))
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> it.result()
@@ -80,7 +79,7 @@ public class TestQuintuple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter: " + counter),
+                                     counter -> new RuntimeException("counter: " + counter),
                                      "a"
                 );
 
@@ -90,7 +89,7 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retry(2)
+                 .retryEach(limitRetries(2))
                  .get()
                  .onComplete(it -> {
                      context.verify(() -> it.result()
@@ -112,7 +111,7 @@ public class TestQuintuple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -122,8 +121,8 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -146,7 +145,7 @@ public class TestQuintuple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -156,8 +155,8 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -180,7 +179,7 @@ public class TestQuintuple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter " + counter),
+                                     counter -> new RuntimeException("counter " + counter),
                                      "a"
                 );
 
@@ -190,8 +189,8 @@ public class TestQuintuple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -207,7 +206,7 @@ public class TestQuintuple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter " + counter),
+                                     counter -> new RuntimeException("counter " + counter),
                                      "a"
                 );
 
@@ -217,8 +216,8 @@ public class TestQuintuple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -489,7 +488,7 @@ public class TestQuintuple {
                            a.get(),
                            a.get()
                           )
-                 .retry(2)
+                 .retryEach(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>("a",
@@ -513,7 +512,7 @@ public class TestQuintuple {
                              a.get(),
                              a.get()
                             )
-                 .retry(2)
+                 .retryEach(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>("a",
@@ -541,10 +540,8 @@ public class TestQuintuple {
                            a.get(),
                            a.get()
                           )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retryEach(limitRetries(ATTEMPTS)
+                                .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {
@@ -575,10 +572,8 @@ public class TestQuintuple {
                              a.get(),
                              a.get()
                             )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retryEach(limitRetries(ATTEMPTS)
+                                .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {

@@ -42,19 +42,7 @@ public class ClientCredentialsModuleTest {
                                                    "my-httpclient",
                                                    new GetAccessTokenRequest("",
                                                                              ""
-                                                   )
-        ).setRetryReqPredicate(Failures.REPLY_EXCEPTION_PRISM
-                                       .exists
-                                       .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
-                                                                    exc.failureCode()
-                                                                   ) ||
-                                               Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
-                                                              exc.failureCode()
-                                                             )
-                                               || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
-                                                                 exc.failureCode()
-                                                                )
-                                             ));
+                                                   ));
 
         httpClient = builder.createModule();
 
@@ -79,7 +67,7 @@ public class ClientCredentialsModuleTest {
                                                                    VertxTestContext context) {
 
 
-        builder.setAccessTokenReqAttempts(3);
+        builder.accessTokenReqRetryPolicy(RetryPolicies.limitRetries(3));
 
         new HttpServerBuilder(vertx,
                               new MockReqHandler(List.of(MockReqResp.when(REQ_LET.apply(3))
@@ -111,12 +99,10 @@ public class ClientCredentialsModuleTest {
                               )
         ).start(port)
          .get()
-         .onSuccess(server -> {
-             Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                     .accept(httpClient.getOauth.apply(new GetReq().uri("/name")),
-                             context
-                            );
-         });
+         .onSuccess(server -> Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                 .accept(httpClient.getOauth.apply(new GetReq().uri("/name")),
+                         context
+                        ));
 
     }
 
@@ -160,16 +146,14 @@ public class ClientCredentialsModuleTest {
                                                         ))
         ).start(port)
          .get()
-         .onSuccess(server -> {
-             Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                     .accept(httpClient.getOauth.apply(new GetReq().uri("/name")
-                                                                   .timeout(300,
-                                                                            TimeUnit.MILLISECONDS
-                                                                           ))
-                                                .retry(3),
-                             context
-                            );
-         });
+         .onSuccess(server -> Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                 .accept(httpClient.getOauth.apply(new GetReq().uri("/name")
+                                                               .timeout(300,
+                                                                        TimeUnit.MILLISECONDS
+                                                                       ))
+                                            .retry(RetryPolicies.limitRetries(3)),
+                         context
+                        ));
 
 
     }

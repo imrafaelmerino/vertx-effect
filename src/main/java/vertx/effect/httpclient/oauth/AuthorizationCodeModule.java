@@ -4,10 +4,11 @@ import io.vavr.Tuple2;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
-import vertx.effect.core.OauthModule;
+import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-import vertx.effect.λ;
+import vertx.effect.core.OauthModule;
 import vertx.effect.httpclient.HttpClientModule;
+import vertx.effect.λ;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -28,10 +29,7 @@ public class AuthorizationCodeModule extends OauthModule {
                             final Function<String, String> authorizationHeaderValue,
                             final λ<JsObj, String> readNewAccessTokenAfterRefresh,
                             final Predicate<JsObj> refreshTokenPredicate,
-                            final Predicate<Throwable> retryAccessTokenReqPredicate,
-                            final Predicate<Throwable> retryReqPredicate,
-                            final int accessTokenReqAttempts,
-                            final int reqAttempts,
+                            final RetryPolicy accessTokenReqRetryPolicy,
                             final String refreshToken
                            ) {
 
@@ -41,10 +39,7 @@ public class AuthorizationCodeModule extends OauthModule {
               authorizationHeaderValue,
               readNewAccessTokenAfterRefresh,
               refreshTokenPredicate,
-              retryAccessTokenReqPredicate,
-              retryReqPredicate,
-              accessTokenReqAttempts,
-              reqAttempts
+              accessTokenReqRetryPolicy
              );
         this.accessTokenReq = accessTokenReq.apply(refreshToken);
         this.refreshToken = refreshToken;
@@ -60,10 +55,7 @@ public class AuthorizationCodeModule extends OauthModule {
                             final Function<String, String> authorizationHeaderValue,
                             final λ<JsObj, String> readNewAccessTokenAfterRefresh,
                             final Predicate<JsObj> refreshTokenPredicate,
-                            final Predicate<Throwable> retryAccessTokenReqPredicate,
-                            final Predicate<Throwable> retryReqPredicate,
-                            final int accessTokenReqAttempts,
-                            final int reqAttempts
+                            final RetryPolicy accessTokenReqRetryPolicy
                            ) {
 
         super(options,
@@ -72,10 +64,7 @@ public class AuthorizationCodeModule extends OauthModule {
               authorizationHeaderValue,
               readNewAccessTokenAfterRefresh,
               refreshTokenPredicate,
-              retryAccessTokenReqPredicate,
-              retryReqPredicate,
-              accessTokenReqAttempts,
-              reqAttempts
+              accessTokenReqRetryPolicy
              );
         this.accessTokenReq = accessTokenReq.apply(refreshToken);
         this.authenticateReq = authenticateReq;

@@ -5,11 +5,10 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 
-class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
+class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> implements Exp<Tuple4<A, B, C, D>> {
 
     private final Val<A> _1;
     private final Val<B> _2;
@@ -29,112 +28,45 @@ class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
 
 
     @Override
-    public Val<Tuple4<A, B, C, D>> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
+    public Val<Tuple4<A, B, C, D>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
 
-        return new SequentialQuadruple<>(_1.retry(attempts),
-                                         _2.retry(attempts),
-                                         _3.retry(attempts),
-                                         _4.retry(attempts)
-        );
-    }
-
-
-    @Override
-    public Val<Tuple4<A, B, C, D>> retry(final int attempts,
-                                         final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-
-        return new SequentialQuadruple<>(_1.retry(attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _2.retry(attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _3.retry(attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _4.retry(attempts,
-                                                  retryPolicy
-                                                 )
-        );
     }
 
     @Override
-    public Val<Tuple4<A, B, C, D>> retry(final Predicate<Throwable> predicate,
-                                         final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
+    public Val<Tuple4<A, B, C, D>> retryEach(final Predicate<Throwable> predicate,
+                                             final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new SequentialQuadruple<>(_1.retry(predicate,
-                                                  attempts
-                                                 ),
+                                                  policy),
                                          _2.retry(predicate,
-                                                  attempts
-                                                 ),
+                                                  policy),
                                          _3.retry(predicate,
-                                                  attempts
-                                                 ),
+                                                  policy),
                                          _4.retry(predicate,
-                                                  attempts
-                                                 )
+                                                  policy)
         );
     }
 
-
-    @Override
-    public Val<Tuple4<A, B, C, D>> retry(final Predicate<Throwable> predicate,
-                                         final int attempts,
-                                         final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new SequentialQuadruple<>(_1.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _2.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _3.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _4.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 )
-        );
-    }
 
     @Override
     public Future<Tuple4<A, B, C, D>> get() {
-        return _1.get()
-                 .flatMap(first -> _2.get()
-                                     .flatMap(sec -> _3.get()
-                                                       .flatMap(third -> _4.get()
-                                                                           .map(fourth -> new Tuple4<>(first,
-                                                                                                       sec,
-                                                                                                       third,
-                                                                                                       fourth
-                                                                                )
-                                                                               )
-                                                               )
-                                             )
-                         );
+        return _1
+                .flatMap(first -> _2
+                                 .flatMap(sec -> _3
+                                                  .flatMap(third -> _4
+                                                                   .map(fourth -> new Tuple4<>(first,
+                                                                                               sec,
+                                                                                               third,
+                                                                                               fourth
+                                                                        )
+                                                                       )
+                                                          )
+                                         )
+                        )
+                .get();
     }
 
     @Override

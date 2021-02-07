@@ -11,10 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.Port;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.exp.Quadruple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.HttpResp;
@@ -130,7 +127,7 @@ public class TestFailures {
                                                               .uri("/hi")
                                                  )
                                            .retry(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
-                                                  1
+                                                  RetryPolicies.limitRetries(1)
                                                  )
                                            .onComplete(it -> {
                                                if (it.succeeded())
@@ -156,13 +153,10 @@ public class TestFailures {
                              .onSuccess(server -> {
                                  client.get.apply(new GetReq().host("abcd")
                                                               .port(portServerClosesConnection)
-                                                              .timeout(900,
-                                                                       TimeUnit.MILLISECONDS
-                                                                      )
                                                               .uri("/hi")
                                                  )
-                                           .retry(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE),
-                                                  1
+                                           .retry(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
+                                                  RetryPolicies.limitRetries(1)
                                                  )
                                            .onComplete(it -> {
                                                if (it.succeeded())
@@ -194,7 +188,8 @@ public class TestFailures {
                   .retry(Failures.anyOf(HTTP_REQUEST_TIMEOUT_CODE,
                                         HTTP_CONNECT_TIMEOUT_CODE
                                        ),
-                         1
+                         RetryPolicies.limitRetries(1)
+
                         )
                   .onComplete(it -> {
                       if (it.succeeded()) context.completeNow();
@@ -209,10 +204,9 @@ public class TestFailures {
 
         Module.sum100.apply(100)
                      .apply(10)
-                     .retry(it -> VERTICLE_TIMEOUT_PRISM
-                                      .getOptional.apply(it)
-                                                  .isPresent(),
-                            2
+                     .retry(it -> VERTICLE_TIMEOUT_PRISM.getOptional.apply(it)
+                                                                    .isPresent(),
+                            RetryPolicies.limitRetries(2)
                            )
                      .onComplete(it -> context.verify(() -> {
                          Assertions.assertTrue(it.failed());

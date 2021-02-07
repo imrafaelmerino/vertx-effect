@@ -11,22 +11,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestQuadruple {
 
     final Supplier<Val<String>> a =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "a"
             );
 
     final Supplier<Val<String>> b =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "b"
             );
 
@@ -51,7 +53,7 @@ public class TestQuadruple {
 
         final Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter: " + counter),
+                                     counter -> new RuntimeException("counter: " + counter),
                                      "a"
                 );
 
@@ -61,7 +63,7 @@ public class TestQuadruple {
                                    a.get(),
                                    a.get()
                                   )
-                         .retry(2);
+                         .retryEach(limitRetries(2));
 
         Verifiers.<Tuple4<String, String, String, String>>verifySuccess(tuple -> tuple.equals(new Tuple4<>("a",
                                                                                                            "a",
@@ -77,7 +79,7 @@ public class TestQuadruple {
 
         final Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter: " + counter),
+                                     counter -> new RuntimeException("counter: " + counter),
                                      "a"
                 );
 
@@ -87,7 +89,7 @@ public class TestQuadruple {
                                      a.get(),
                                      a.get()
                                     )
-                         .retry(2);
+                         .retryEach(limitRetries(2));
 
         Verifiers.<Tuple4<String, String, String, String>>verifySuccess(tuple -> tuple.equals(new Tuple4<>("a",
                                                                                                            "a",
@@ -105,7 +107,7 @@ public class TestQuadruple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -114,8 +116,8 @@ public class TestQuadruple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -137,7 +139,7 @@ public class TestQuadruple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -146,8 +148,8 @@ public class TestQuadruple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -169,7 +171,7 @@ public class TestQuadruple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter " + counter),
+                                     counter -> new RuntimeException("counter " + counter),
                                      "a"
                 );
 
@@ -178,8 +180,8 @@ public class TestQuadruple {
                            val.get(),
                            val.get()
                           )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -195,7 +197,7 @@ public class TestQuadruple {
 
         final Supplier<Val<String>> val =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter " + counter),
+                                     counter -> new RuntimeException("counter " + counter),
                                      "a"
                 );
 
@@ -204,8 +206,8 @@ public class TestQuadruple {
                              val.get(),
                              val.get()
                             )
-                 .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                        2
+                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                        limitRetries(2)
                        )
                  .get()
                  .onComplete(it -> {
@@ -453,7 +455,7 @@ public class TestQuadruple {
                            b.get(),
                            a.get()
                           )
-                 .retry(2)
+                 .retryEach(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("a",
@@ -475,7 +477,7 @@ public class TestQuadruple {
                              b.get(),
                              a.get()
                             )
-                 .retry(2)
+                 .retryEach(limitRetries(2))
                  .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("a",
@@ -496,7 +498,7 @@ public class TestQuadruple {
 
         long start = System.nanoTime();
         ValOrErrorMock<String> a = new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
-                                                counter -> new RuntimeException("counter: " + counter),
+                                                        counter -> new RuntimeException("counter: " + counter),
                                                         "a"
         );
         Quadruple.parallel(a.get(),
@@ -504,10 +506,8 @@ public class TestQuadruple {
                            a.get(),
                            a.get()
                           )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retryEach(limitRetries(ATTEMPTS)
+                                .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {
@@ -531,7 +531,7 @@ public class TestQuadruple {
 
         long start = System.nanoTime();
         ValOrErrorMock<String> a = new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
-                                                counter -> new RuntimeException("counter: " + counter),
+                                                        counter -> new RuntimeException("counter: " + counter),
                                                         "a"
         );
         Quadruple.sequential(a.get(),
@@ -539,10 +539,8 @@ public class TestQuadruple {
                              a.get(),
                              a.get()
                             )
-                 .retry(ATTEMPTS,
-                        (error, n) -> vertxRef.delay(100,
-                                                     MILLISECONDS
-                                                    )
+                 .retryEach(limitRetries(ATTEMPTS)
+                                .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                        )
                  .get()
                  .onComplete(r -> context.verify(() -> {

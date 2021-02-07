@@ -4,6 +4,8 @@ import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import jsonvalues.JsPath;
 import vertx.effect.Failures;
+import vertx.effect.RetryPolicies;
+import vertx.effect.RetryPolicy;
 import vertx.effect.exp.Cons;
 import vertx.effect.httpclient.HttpResp;
 import vertx.effect.λ;
@@ -22,9 +24,10 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     protected final String address;
 
     protected String authorizationHeaderName = "Authorization";
-    protected Function<String, String> authorizationHeaderValue = token -> String.format("Bearer %s",
-                                                                                         token
-                                                                                        );
+    protected Function<String, String> authorizationHeaderValue =
+            token -> String.format("Bearer %s",
+                                   token
+                                  );
 
     protected λ<JsObj, String> readNewAccessTokenAfterRefresh =
             resp -> {
@@ -45,10 +48,11 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
         Integer statusCode = HttpResp.STATUS_CODE_LENS.get.apply(resp);
         return 401 == statusCode;
     };
-    protected Predicate<Throwable> retryAccessTokenPredicate = RETRY_ACCESS_TOKEN_REQ_PREDICATE;
-    protected Predicate<Throwable> retryReqPredicate = RETRY_REQ_PREDICATE;
-    protected int accessTokenReqAttempts = 3;
-    protected int reqAttempts = 3;
+
+
+
+    protected RetryPolicy accessTokenRetryPolicy = RetryPolicies.limitRetries(3);
+
 
     public OauthBuilder(final HttpClientOptions options,
                         final String address) {
@@ -57,60 +61,33 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     }
 
 
-    public T setAuthorizationHeaderName(final String authorizationHeaderName) {
+    public T authorizationHeaderName(final String authorizationHeaderName) {
         this.authorizationHeaderName = requireNonNull(authorizationHeaderName);
         return ((T) this);
     }
 
-    public T setAuthorizationHeaderValue(final Function<String, String> authorizationHeaderValue) {
+    public T authorizationHeaderValue(final Function<String, String> authorizationHeaderValue) {
         this.authorizationHeaderValue = requireNonNull(authorizationHeaderValue);
         return ((T) this);
     }
 
-    public T setRefreshTokenPredicate(final Predicate<JsObj> refreshTokenPredicate) {
+    public T refreshTokenPredicate(final Predicate<JsObj> refreshTokenPredicate) {
         this.refreshTokenPredicate = requireNonNull(refreshTokenPredicate);
         return ((T) this);
     }
 
 
-    public T setReadNewAccessTokenAfterRefresh(final λ<JsObj, String> readNewAccessTokenAfterRefresh) {
+    public T readAccessTokenAfterRefresh(final λ<JsObj, String> readNewAccessTokenAfterRefresh) {
         this.readNewAccessTokenAfterRefresh = requireNonNull(readNewAccessTokenAfterRefresh);
         return (T) this;
     }
 
 
-    public T setRetryAccessTokenReqPredicate(final Predicate<Throwable> retryGetTokenPredicate) {
-        this.retryAccessTokenPredicate = requireNonNull(retryGetTokenPredicate);
+
+    public T accessTokenReqRetryPolicy(final RetryPolicy retryPolicy) {
+        this.accessTokenRetryPolicy = requireNonNull(retryPolicy);
         return ((T) this);
     }
 
-    public T setRetryReqPredicate(final Predicate<Throwable> retryReqPredicate) {
-        this.retryReqPredicate = requireNonNull(retryReqPredicate);
-        return ((T) this);
-    }
-
-    public T setAccessTokenReqAttempts(final int accessTokenReqAttempts) {
-        if (accessTokenReqAttempts < 1) throw new IllegalArgumentException("accessTokenReqAttempts < 1");
-        this.accessTokenReqAttempts = accessTokenReqAttempts;
-        return ((T) this);
-    }
-
-    public T setReqAttempts(final int reqAttempts) {
-        if (accessTokenReqAttempts < 1) throw new IllegalArgumentException("reqAttempts < 1");
-        this.reqAttempts = reqAttempts;
-        return ((T) this);
-    }
-
-    private static final Predicate<Throwable> RETRY_ACCESS_TOKEN_REQ_PREDICATE =
-            Failures.anyOf(HTTP_UNKNOWN_HOST_CODE,
-                           HTTP_CONNECT_TIMEOUT_CODE,
-                           HTTP_ACCESS_TOKEN_NOT_FOUND_CODE
-                          );
-
-
-    private static final Predicate<Throwable> RETRY_REQ_PREDICATE =
-            Failures.anyOf(HTTP_UNKNOWN_HOST_CODE,
-                           HTTP_CONNECT_TIMEOUT_CODE
-                          );
 
 }

@@ -19,9 +19,10 @@ import static java.util.Objects.requireNonNull;
 
 
 /**
- It represents a reference to a Verticle, the unit of computation. It allows to send messages
- to the Verticle with the method {@link #tell(DeliveryOptions)}, or establish conversations with the
- method {@link #ask(DeliveryOptions)}.
+ It represents a reference to a Verticle, the unit of computation. It allows to interact with the verticle it
+ represent using just functions. the method {@link #tell(DeliveryOptions)} returns a consumer to establish an
+ unidirectional conversation (a replay is not expected or it's ignored), and the {@link #tell(DeliveryOptions)}
+ method returns a function to establish a bidirectional conversation.
 
  @param <I> the type of the input message sent to this verticle
  @param <O> the type of the output message returned by this verticle */
@@ -61,12 +62,10 @@ public class VerticleRef<I, O> {
     }
 
     /**
-     Method to establish a conversation with this verticle: a message is sent and then a message is
-     received.
+     returns a lambda to establish a bidirectional conversation with this verticle
 
      @param options the delivery options
-     @return a function that takes an object of type I and returns an object of type O wrapped in a
-     future
+     @return a lambda
      */
 
     public λ<I, O> ask(final DeliveryOptions options) {
@@ -109,6 +108,14 @@ public class VerticleRef<I, O> {
                               );
     }
 
+    /**
+     returns a lambda with context to establish a bidirectional conversation with this verticle.
+     A lambda with context takes two parameters, the message to be sent and and the context,
+     which is represented with message headers {@link Message#headers()}
+
+     @param options the delivery options
+     @return a lambda with context
+     */
     public λc<I, O> trace(final DeliveryOptions options) {
         requireNonNull(options);
         return (context, body) -> Cons.of(() -> {
@@ -152,24 +159,30 @@ public class VerticleRef<I, O> {
     }
 
     /**
-     Method to establish a conversation with this verticle: a message is sent and then a message is
-     received.
+     returns a lambda to establish a bidirectional conversation with this verticle
 
-     @return a function that takes an object of type I and returns an object of type O wrapped in a
-     future
+     @return a lambda
      */
+
     public λ<I, O> ask() {
         return ask(DEFAULT);
     }
 
+    /**
+     returns a lambda with context to establish a bidirectional conversation with this verticle.
+     A lambda with context takes two parameters, the message to be sent and and the context,
+     which is represented with message headers {@link Message#headers()}
 
+     @return a lambda with context
+     */
     public λc<I, O> trace() {
         return trace(DEFAULT);
     }
 
 
     /**
-     Method to send a message to this verticle.
+     returns a consumer to send messages to this verticle. Since a consumer is returned, the response
+     is ignored
 
      @param options the delivery options
      @return a consumer that takes an object of type I
@@ -184,7 +197,8 @@ public class VerticleRef<I, O> {
     }
 
     /**
-     Method to send a message to this verticle.
+     returns a consumer to send messages to this verticle. Since a consumer is returned, the response
+     is ignored
 
      @return a consumer that takes an object of type I
      */

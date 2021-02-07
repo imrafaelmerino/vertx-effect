@@ -2,18 +2,16 @@ package vertx.effect.exp;
 
 import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
-import vertx.effect.core.AbstractVal;
 import vertx.effect.Val;
+import vertx.effect.core.AbstractVal;
 
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-public final class IfElse<O> extends AbstractVal<O> {
+public final class IfElse<O> extends AbstractVal<O> implements Exp<O> {
 
     private final Val<Boolean> predicate;
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
     private Val<O> consequence;
     private Val<O> alternative;
 
@@ -51,71 +49,24 @@ public final class IfElse<O> extends AbstractVal<O> {
 
 
     @Override
-    public Val<O> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new IfElse<O>(predicate.retry(attempts))
-                .consequence(consequence.retry(attempts))
-                .alternative(alternative.retry(attempts));
+    public Val<O> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
     }
 
-
     @Override
-    public Val<O> retry(final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new IfElse<O>(predicate.retry(attempts,
-                                             retryPolicy
+    public Val<O> retryEach(final Predicate<Throwable> retryPredicate,
+                            final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new IfElse<O>(predicate.retry(retryPredicate,
+                                             policy
                                             ))
-                .consequence(consequence.retry(attempts,
-                                               retryPolicy
+                .consequence(consequence.retry(retryPredicate,
+                                               policy
                                               ))
-                .alternative(alternative.retry(attempts,
-                                               retryPolicy
-                                              ));
-    }
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return new IfElse<O>(this.predicate.retry(predicate,
-                                                  attempts
-                                                 ))
-                .consequence(consequence.retry(predicate,
-                                               attempts
-                                              ))
-                .alternative(alternative.retry(predicate,
-                                               attempts
-                                              ));
-    }
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts,
-                        final RetryPolicy<Throwable> retryPolicy) {
-
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        return new IfElse<O>(this.predicate.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ))
-                .consequence(consequence.retry(predicate,
-                                               attempts,
-                                               retryPolicy
-                                              ))
-                .alternative(alternative.retry(predicate,
-                                               attempts,
-                                               retryPolicy
+                .alternative(alternative.retry(retryPredicate,
+                                               policy
                                               ));
     }
 

@@ -6,10 +6,10 @@ import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-public final class Case<I, O> extends AbstractVal<O> {
+
+public final class Case<I, O> extends AbstractVal<O> implements Exp<O> {
 
     private final Val<I> keyVal;
     private Cond<O> cond;
@@ -89,6 +89,7 @@ public final class Case<I, O> extends AbstractVal<O> {
 
         return this;
     }
+
     public Case<I, O> of(final List<I> keyList1,
                          final Val<O> consequent1,
                          final List<I> keyList2,
@@ -619,43 +620,26 @@ public final class Case<I, O> extends AbstractVal<O> {
 
 
     @Override
-    public Val<O> retry(final int attempts) {
-        return cond.retry(attempts);
+    public Val<O> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
     }
 
     @Override
-    public Val<O> retry(final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        return cond.retry(attempts,
-                          retryPolicy
-                         );
+    public Val<O> retryEach(final Predicate<Throwable> predicate,
+                            final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return cond.retryEach(predicate,
+                              policy);
     }
 
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts) {
-        return cond.retry(predicate,
-                          attempts
-                         );
-    }
 
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts,
-                        final RetryPolicy<Throwable> retryPolicy) {
-
-        return cond.retry(predicate,
-                          attempts,
-                          retryPolicy
-                         );
-    }
 
     @Override
     public Future<O> get() {
         return cond.get();
     }
-
-
 
 
 }

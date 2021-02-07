@@ -6,7 +6,7 @@ import vertx.effect.core.AbstractVal;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class Quintuple<A, B, C, D, E> extends AbstractVal<Tuple5<A, B, C, D, E>> {
+public abstract class Quintuple<A, B, C, D, E> extends AbstractVal<Tuple5<A, B, C, D, E>> implements Exp<Tuple5<A, B, C, D, E>> {
 
     public static <A, B, C, D, E> Quintuple<A, B, C, D, E> parallel(final Val<A> _1,
                                                                     final Val<B> _2,

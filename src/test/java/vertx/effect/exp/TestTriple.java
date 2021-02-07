@@ -13,24 +13,24 @@ import vertx.effect.mock.ValOrErrorMock;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
 public class TestTriple {
     final Supplier<Val<String>> a =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "a"
             );
 
     final Supplier<Val<String>> b =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "b"
             );
     final Supplier<Val<Boolean>> True =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  true
             );
 
@@ -59,7 +59,7 @@ public class TestTriple {
                                                                   a.get(),
                                                                   a.get()
                                                                  )
-                                                        .retry(2);
+                                                        .retryEach(limitRetries(2));
 
 
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
@@ -84,7 +84,7 @@ public class TestTriple {
                                                                     a.get(),
                                                                     a.get()
                                                                    )
-                                                        .retry(2);
+                                                        .retryEach(limitRetries(2));
 
 
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
@@ -106,7 +106,7 @@ public class TestTriple {
 
         final Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -114,8 +114,8 @@ public class TestTriple {
                                                                   a.get(),
                                                                   a.get()
                                                                  )
-                                                        .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                                                               2
+                                                        .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               limitRetries(2)
                                                               );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
@@ -133,7 +133,7 @@ public class TestTriple {
 
         final Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -141,8 +141,8 @@ public class TestTriple {
                                                                     a.get(),
                                                                     a.get()
                                                                    )
-                                                        .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                                                               2
+                                                        .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               limitRetries(2)
                                                               );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
@@ -164,8 +164,8 @@ public class TestTriple {
                                 a.get(),
                                 a.get()
                                )
-                      .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                             2
+                      .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             limitRetries(2)
                             );
 
 
@@ -185,8 +185,8 @@ public class TestTriple {
                                   a.get(),
                                   a.get()
                                  )
-                      .retry(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                             2
+                      .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             limitRetries(2)
                             );
 
 
@@ -439,7 +439,7 @@ public class TestTriple {
                                 True.get(),
                                 b.get()
                                )
-                      .retry(2)
+                      .retryEach(limitRetries(2))
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
@@ -463,7 +463,7 @@ public class TestTriple {
                                   True.get(),
                                   b.get()
                                  )
-                      .retry(2)
+                      .retryEach(limitRetries(2))
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
@@ -480,66 +480,5 @@ public class TestTriple {
 
     }
 
-    @Test
-    public void test_parallel_retry_with_delay(VertxTestContext context) {
-        int ATTEMPTS = 2;
-
-        long start = System.nanoTime();
-
-        Val<Tuple3<String, String, String>> val =
-                Triple.parallel(a.get(),
-                                a.get(),
-                                a.get()
-                               )
-                      .retry(ATTEMPTS,
-                             (error, n) -> vertxRef.delay(100,
-                                                          MILLISECONDS
-                                                         )
-                            );
-        Verifiers.<Tuple3<String, String, String>>verifySuccess(
-                tuple -> Objects.equals(tuple,
-                                        new Tuple3<>("a",
-                                                     "a",
-                                                     "a"
-                                        )
-                                       )
-                        && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
-                .accept(val,
-                        context
-                       );
-
-
-    }
-
-    @Test
-    public void test_sequential_retry_with_delay(VertxTestContext context) {
-        int ATTEMPTS = 2;
-
-        long start = System.nanoTime();
-
-        Val<Tuple3<String, String, String>> val =
-                Triple.sequential(a.get(),
-                                  a.get(),
-                                  a.get()
-                                 )
-                      .retry(ATTEMPTS,
-                             (error, n) -> vertxRef.delay(100,
-                                                          MILLISECONDS
-                                                         )
-                            );
-        Verifiers.<Tuple3<String, String, String>>verifySuccess(
-                tuple -> Objects.equals(tuple,
-                                        new Tuple3<>("a",
-                                                     "a",
-                                                     "a"
-                                        )
-                                       )
-                        && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
-                .accept(val,
-                        context
-                       );
-
-
-    }
 
 }

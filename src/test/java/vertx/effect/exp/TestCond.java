@@ -7,16 +7,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Failures;
-import vertx.effect.RegisterJsValuesCodecs;
-import vertx.effect.VertxRef;
-import vertx.effect.Val;
+import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.limitRetries;
 import static vertx.effect.exp.Cons.FALSE;
 import static vertx.effect.exp.Cons.TRUE;
 
@@ -28,12 +27,12 @@ public class TestCond {
     private static final int ATTEMPTS = 2;
     private static Supplier<Val<String>> a =
             new ValOrErrorMock<>(ATTEMPTS,
-                             counter -> new RuntimeException("counter:+" + counter),
+                                 counter -> new RuntimeException("counter:+" + counter),
                                  "a"
             );
     private static Supplier<Val<String>> b =
             new ValOrErrorMock<>(ATTEMPTS,
-                             counter -> new RuntimeException("counter:+" + counter),
+                                 counter -> new RuntimeException("counter:+" + counter),
                                  "b"
             );
 
@@ -44,12 +43,9 @@ public class TestCond {
                               ) {
         vertxRef = new VertxRef(vertx);
 
-        delay = (error, n) -> vertxRef.delay(100,
-                                             MILLISECONDS
-                                            );
-
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
-                                  System.out::println);
+                                  System.out::println
+                                 );
         vertxRef.deployVerticle(new RegisterJsValuesCodecs())
                 .onComplete(event -> testContext.completeNow())
                 .get();
@@ -94,10 +90,10 @@ public class TestCond {
     }
 
     @Test
-    public void test_cond_exp_returns_the_first_branch_with_retries(VertxTestContext context) {
+    public void test_cond_exp_returns_the_first_branch_with_retryEach(VertxTestContext context) {
         Supplier<Val<Boolean>> valSupplier =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      true
                 );
         Cond.of(valSupplier.get(),
@@ -105,7 +101,30 @@ public class TestCond {
                 FALSE,
                 Cons.success("bye")
                )
-            .retry(2)
+            .retryEach(limitRetries(2))
+            .onSuccess(it -> context.verify(() -> {
+                Assertions.assertEquals("hi",
+                                        it
+                                       );
+                context.completeNow();
+            }))
+            .get();
+
+    }
+
+    @Test
+    public void test_cond_exp_returns_the_first_branch_with_retry(VertxTestContext context) {
+        Supplier<Val<Boolean>> valSupplier =
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     true
+                );
+        Cond.of(valSupplier.get(),
+                Cons.success("hi"),
+                FALSE,
+                Cons.success("bye")
+               )
+            .retry(limitRetries(4))
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("hi",
                                         it
@@ -120,7 +139,7 @@ public class TestCond {
     public void test_cond_exp_returns_the_first_branch_with_retries_otherwise(VertxTestContext context) {
         Supplier<Val<Boolean>> valSupplier =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      false
                 );
         Cond.of(valSupplier.get(),
@@ -129,7 +148,7 @@ public class TestCond {
                 Cons.success("bye"),
                 Cons.success("otherwise")
                )
-            .retry(2)
+            .retryEach(limitRetries(2))
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("otherwise",
                                         it
@@ -176,16 +195,17 @@ public class TestCond {
             .get();
 
     }
+
     @Test
     public void test_cond_exp_returns_the_second_branch_with_retries(VertxTestContext context) {
         Supplier<Val<Boolean>> falseSupplier =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      false
                 );
         Supplier<Val<Boolean>> trueSupplier =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> new RuntimeException("counter:+" + counter),
+                                     counter -> new RuntimeException("counter:+" + counter),
                                      false
                 );
 
@@ -195,7 +215,7 @@ public class TestCond {
                 Cons.success("bye"),
                 Cons.success("otherwise")
                )
-            .retry(2)
+            .retryEach(limitRetries(2))
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("otherwise",
                                         it
@@ -309,9 +329,8 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retry(
-                    Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
-                    ATTEMPTS
+            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   limitRetries(ATTEMPTS)
                   )
             .onComplete(
                     r -> context.verify(() -> {
@@ -330,9 +349,8 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retry(
-                    e -> e instanceof RuntimeException,
-                    ATTEMPTS
+            .retryEach(e -> e instanceof RuntimeException,
+                   limitRetries(ATTEMPTS)
                   )
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals("a",
@@ -347,14 +365,14 @@ public class TestCond {
     @Test
     public void test_cond_exp_succeeds_after_two_retries_waiting_1sec_before_retries(VertxTestContext context) {
 
-        long start    = System.nanoTime();
+        long start = System.nanoTime();
         Cond.of(TRUE,
                 a.get(),
                 FALSE,
                 b.get()
                )
-            .retry(ATTEMPTS,
-                   delay
+            .retryEach(limitRetries(ATTEMPTS)
+                           .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals("a",
@@ -464,7 +482,7 @@ public class TestCond {
 
         long start = System.nanoTime();
         ValOrErrorMock<Boolean> True = new ValOrErrorMock<>(counter -> counter <= ATTEMPTS,
-                                                    counter -> new RuntimeException("counter: " + counter),
+                                                            counter -> new RuntimeException("counter: " + counter),
                                                             true
         );
 
@@ -473,10 +491,8 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retry(ATTEMPTS,
-                   (error, n) -> vertxRef.delay(100,
-                                                MILLISECONDS
-                                               )
+            .retryEach(limitRetries(ATTEMPTS)
+                           .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .get()
             .onComplete(r -> context.verify(() -> {

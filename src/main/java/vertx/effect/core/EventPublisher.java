@@ -22,7 +22,7 @@ import static vertx.effect.core.Functions.headers2JsObj;
 
 public class EventPublisher {
     public static final EventPublisher PUBLISHER =
-            new EventPublisher(Boolean.parseBoolean(System.getProperty("publish.events",
+            new EventPublisher(Boolean.parseBoolean(System.getProperty("vertx.effect.enable.log.events",
                                                                        "true"
                                                                       )
                                                    )
@@ -254,6 +254,7 @@ public class EventPublisher {
                             );
         };
     }
+
     public Consumer<Vertx> internalError(final String event,
                                          final Throwable exception) {
         return vertx -> {
@@ -277,6 +278,7 @@ public class EventPublisher {
                             );
         };
     }
+
     public Consumer<Vertx> receivedMessage(final String address,
                                            final MultiMap headers) {
         return vertx -> {

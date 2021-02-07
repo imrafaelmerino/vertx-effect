@@ -3,13 +3,10 @@ package vertx.effect.core;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.ReplyException;
-import io.vertx.core.eventbus.ReplyFailure;
-import vertx.effect.Failures;
-import vertx.effect.RetryPolicy;
-import vertx.effect.Val;
+import vertx.effect.*;
 import vertx.effect.exp.Cons;
-import vertx.effect.λ;
+
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,11 +14,6 @@ import java.util.function.Predicate;
 
 public abstract class AbstractVal<O> implements Val<O> {
 
-    private static final ReplyException RETRIES_EXHAUSTED =
-            new ReplyException(ReplyFailure.RECIPIENT_FAILURE,
-                               Failures.RETRIES_EXHAUSTED_CODE,
-                               "retryUntil didn't get the expected result after attempts."
-            );
     private static final String LAMBDA_IS_NULL = "λ is null";
     private static final String SUCCESS_CONSUMER_IS_NULL = "successConsumer is null";
 
@@ -127,59 +119,107 @@ public abstract class AbstractVal<O> implements Val<O> {
     }
 
     @Override
-    public Val<O> retryWhile(final Predicate<O> predicate,
-                             final int attempts) {
-        if (attempts < 0) return Cons.failure(RETRIES_EXHAUSTED);
+    public Val<O> retryOnFailure(final Predicate<O> predicate,
+                                 final RetryPolicy policy) {
+        return retryOnFailure(this,
+                              policy,
+                              new RetryStatus(0,
+                                              0,
+                                              0
+                              ),
+                              predicate
+                             );
+    }
 
-        return flatMap(output -> {
-                           if (!predicate.test(output)) return Cons.success(output);
-                           return retryWhile(predicate,
-                                             attempts - 1
-                                            );
-                       },
-                       failure -> {
-                           if (Failures.REPLY_EXCEPTION_PRISM.isEmpty.negate()
-                                                                     .test(failure))
-                               return Cons.failure(failure);
-                           return attempts > 0 ? retryWhile(predicate,
-                                                            attempts - 1
-                                                           ) : Cons.failure(RETRIES_EXHAUSTED);
-                       }
-                      );
+    private Val<O> retryOnFailure(Val<O> exp,
+                                  Function<RetryStatus, Optional<Delay>> policy,
+                                  RetryStatus rs,
+                                  Predicate<O> predicate) {
+
+        return exp.flatMap(o -> {
+                               if (predicate.test(o)) {
+                                   Optional<Delay> delayOpt = policy.apply(rs);
+                                   if (delayOpt.isEmpty()) return Cons.success(o);
+                                   Delay delay = delayOpt.get();
+                                   return delay.val.flatMap(nill -> {
+                                                                long delayDuration = delay.duration.toMillis();
+                                                                return retryOnFailure(exp,
+                                                                                      policy,
+                                                                                      new RetryStatus(rs.rsIterNumber + 1,
+                                                                                                      rs.rsCumulativeDelay + delayDuration,
+                                                                                                      delayDuration
+                                                                                      ),
+                                                                                      predicate
+                                                                                     );
+                                                            }
+                                                           );
+                               }
+                               else return Cons.success(o);
+                           }
+                          );
+
     }
 
     @Override
-    public Val<O> retryWhile(final Predicate<O> predicate,
-                             final int attempts,
-                             final RetryPolicy<O> notExpectedValAction,
-                             final RetryPolicy<Throwable> failureAction) {
-        if (attempts < 0) return Cons.failure(RETRIES_EXHAUSTED);
-        return flatMap(output -> {
-                           if (!predicate.test(output)) return Cons.success(output);
-                           return notExpectedValAction.apply(output,
-                                                             attempts
-                                                            )
-                                                      .flatMap(__ -> retryWhile(predicate,
-                                                                                attempts - 1,
-                                                                                notExpectedValAction,
-                                                                                failureAction
-                                                                               ));
-                       },
-                       failure -> {
-                           if (Failures.REPLY_EXCEPTION_PRISM.isEmpty.negate()
-                                                                     .test(failure))
-                               return Cons.failure(failure);
-                           return attempts > 0 ? failureAction.apply(failure,
-                                                                     attempts
-                                                                    )
-                                                              .flatMap(__ -> retryWhile(predicate,
-                                                                                        attempts - 1,
-                                                                                        notExpectedValAction,
-                                                                                        failureAction
-                                                                                       )
-                                                                      ) : Cons.failure(RETRIES_EXHAUSTED);
-                       }
-                      );
+    public Val<O> retry(final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+
+        return retry(this,
+                     policy,
+                     new RetryStatus(0,
+                                     0,
+                                     0
+                     ),
+                     e -> true
+                    );
+    }
+
+
+    @Override
+    public Val<O> retry(final Predicate<Throwable> predicate,
+                        final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return retry(this,
+                     policy,
+                     new RetryStatus(0,
+                                     0,
+                                     -1
+                     ),
+                     predicate
+                    );
+    }
+
+
+    private Val<O> retry(Val<O> exp,
+                         Function<RetryStatus, Optional<Delay>> policy,
+                         RetryStatus rs,
+                         Predicate<Throwable> predicate) {
+
+        return exp.flatMap(o -> {
+                               return Cons.success(o);
+                           },
+                           exc -> {
+                               if (predicate.test(exc)) {
+                                   Optional<Delay> delayOpt = policy.apply(rs);
+                                   if (delayOpt.isEmpty()) return Cons.failure(exc);
+                                   Delay delay = delayOpt.get();
+                                   return delay.val.flatMap(nill -> {
+                                                                long delayDuration = delay.duration.toMillis();
+                                                                return retry(exp,
+                                                                             policy,
+                                                                             new RetryStatus(rs.rsIterNumber + 1,
+                                                                                             rs.rsCumulativeDelay + delayDuration,
+                                                                                             delayDuration
+                                                                             ),
+                                                                             predicate
+                                                                            );
+                                                            }
+                                                           );
+                               }
+                               else return Cons.failure(exc);
+                           }
+                          );
     }
 
 }

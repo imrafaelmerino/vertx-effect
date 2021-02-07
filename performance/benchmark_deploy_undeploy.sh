@@ -16,7 +16,7 @@ clean package
 #mkdir -p results/"$DIR"
 
 java -Xms256m -jar \
--Dpublish.events=false \
+-D"vertx.effect.enable.log.events"=false \
 -Dtimes=${TIMES} \
 -Ddelay=${DELAY} \
 -Dinstances=${INSTANCES} \

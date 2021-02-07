@@ -10,7 +10,6 @@ import vertx.effect.core.JsArrayMessageCodec;
 import vertx.effect.core.JsObjMessageCodec;
 
 import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
-import static vertx.effect.Failures.INTERNAL_ERROR_CODE;
 
 
 /**

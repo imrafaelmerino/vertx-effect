@@ -8,10 +8,10 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class Any extends AbstractVal<Boolean> {
+public abstract class Any extends AbstractVal<Boolean> implements Exp<Boolean> {
 
     @SafeVarargs
-    public static Val<Boolean> parallel(final Val<Boolean> a,
+    public static Any parallel(final Val<Boolean> a,
                                final Val<Boolean>... others) {
         List<Val<Boolean>> exps = new ArrayList<>();
         exps.add(requireNonNull(a));
@@ -22,7 +22,7 @@ public abstract class Any extends AbstractVal<Boolean> {
     }
 
     @SafeVarargs
-    public static Val<Boolean> sequential(final Val<Boolean> a,
+    public static Any sequential(final Val<Boolean> a,
                                  final Val<Boolean>... others) {
         List<Val<Boolean>> exps = new ArrayList<>();
         exps.add(requireNonNull(a));

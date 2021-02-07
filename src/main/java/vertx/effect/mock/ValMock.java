@@ -8,6 +8,10 @@ import java.util.Objects;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+/**
+ It's a mock of a {@link Val}. It keeps a call counter. You can define what val is returned on each call.
+ @param <O> the type of the value
+ */
 public class ValMock<O> implements Supplier<Val<O>> {
 
     private int counter;
@@ -15,6 +19,10 @@ public class ValMock<O> implements Supplier<Val<O>> {
     private final Val<O> val;
 
 
+    /**
+
+     @param getValue function to define what value is returned on each call, being the first call n=1
+     */
     public ValMock(final IntFunction<O> getValue) {
 
         this.getValue = Objects.requireNonNull(getValue);
@@ -26,6 +34,9 @@ public class ValMock<O> implements Supplier<Val<O>> {
     }
 
 
+    /**
+     @return a brand new mock
+     */
     @Override
     public Val<O> get() {
         //danger zone, counter is mutable, we have to return a brand new instance

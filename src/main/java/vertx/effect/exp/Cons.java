@@ -1,11 +1,13 @@
 package vertx.effect.exp;
 
 import io.vertx.core.Future;
+import vertx.effect.Delay;
 import vertx.effect.RetryPolicy;
-import vertx.effect.core.AbstractVal;
+import vertx.effect.RetryStatus;
 import vertx.effect.Val;
+import vertx.effect.core.AbstractVal;
 
-import java.util.function.BiFunction;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -16,7 +18,6 @@ public final class Cons<O> extends AbstractVal<O> {
     public static final Val<Void> NULL = Cons.success(null);
     public static final Val<Boolean> TRUE = Cons.success(true);
     public static final Val<Boolean> FALSE = Cons.success(false);
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
     private final Supplier<Future<O>> futureSupplier;
 
     Cons(final Supplier<Future<O>> futureSupplier) {
@@ -45,138 +46,6 @@ public final class Cons<O> extends AbstractVal<O> {
         return futureSupplier.get();
     }
 
-
-
-    @Override
-    public Val<O> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return retry(this,
-                     attempts
-                    );
-    }
-
-
-    @Override
-    public Val<O> retry(final int attempts,
-                        final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return retry(this,
-                     attempts,
-                     requireNonNull(retryPolicy)
-                    );
-    }
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if(predicate==null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return retry(this,
-                     attempts,
-                     predicate
-                    );
-    }
-
-    @Override
-    public Val<O> retry(final Predicate<Throwable> predicate,
-                        final int attempts,
-                        final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-        if(predicate==null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        return retry(this,
-                     attempts,
-                     requireNonNull(predicate),
-                     requireNonNull(retryPolicy)
-                    );
-    }
-
-
-
-    private Val<O> retry(final Cons<O> exp,
-                         final int attempts) {
-        if (attempts == 0) return exp;
-        return Cons.of(() -> exp.get()
-                                .compose(Future::succeededFuture,
-                                         e -> retry(exp,
-                                                    attempts - 1
-                                                   ).get()
-                                        )
-                      );
-    }
-
-
-    private Val<O> retry(final Cons<O> exp,
-                         final int attempts,
-                         final BiFunction<Throwable, Integer, Val<Void>> retryPolicy
-                        ) {
-        if (attempts == 0) return exp;
-        return Cons.of(() -> exp.get()
-                                .compose(Future::succeededFuture,
-                                         e -> retryPolicy.apply(e,
-                                                                      attempts
-                                                                     )
-                                                               .flatMap(id -> retry(exp,
-                                                                                    attempts - 1,
-                                                                                    retryPolicy
-                                                                                   )
-                                                                       )
-                                                               .get()
-                                        )
-                      );
-    }
-
-
-    private Val<O> retry(final Cons<O> exp,
-                         final int attempts,
-                         final Predicate<Throwable> predicate,
-                         final RetryPolicy<Throwable> retryPolicy) {
-
-        if (attempts == 0) return exp;
-        return Cons.of(() -> exp.get()
-                                .compose(Future::succeededFuture,
-                                         e -> (predicate.test(e)) ?
-                                              retryPolicy.apply(e,
-                                                                      attempts
-                                                                     )
-                                                               .flatMap(id -> retry(exp,
-                                                                                    attempts - 1,
-                                                                                    predicate,
-                                                                                    retryPolicy
-                                                                                   )
-                                                                       )
-                                                               .get() :
-                                              Future.failedFuture(e)
-                                        )
-                      );
-    }
-
-    private Val<O> retry(final Cons<O> exp,
-                         final int attempts,
-                         final Predicate<Throwable> predicate) {
-        if (attempts == 0) return exp;
-        return Cons.of(() -> exp.get()
-                                .compose(Future::succeededFuture,
-                                         e -> (predicate.test(e)) ?
-                                              retry(exp,
-                                                    attempts - 1,
-                                                    predicate
-                                                   ).get() :
-                                              Future.failedFuture(e)
-                                        )
-                      );
-    }
 
 
 }

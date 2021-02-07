@@ -5,18 +5,16 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 
-final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> {
+final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> implements Exp<Tuple5<A, B, C, D, E>> {
 
     private final Val<A> _1;
     private final Val<B> _2;
     private final Val<C> _3;
     private final Val<D> _4;
     private final Val<E> _5;
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
 
     SequentialQuintuple(final Val<A> _1,
@@ -32,124 +30,48 @@ final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> 
     }
 
     @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        return new SequentialQuintuple<>(_1.retry(attempts),
-                                         _2.retry(attempts),
-                                         _3.retry(attempts),
-                                         _4.retry(attempts),
-                                         _5.retry(attempts)
-        );
-    }
-
-
-    @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final int attempts,
-                                            final BiFunction<Throwable, Integer, Val<Void>> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new SequentialQuintuple<>(_1.retry(attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _2.retry(attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _3.retry(attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _4.retry(attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _5.retry(attempts,
-                                                  retryPolicy
-                                                 )
-        );
+    public Val<Tuple5<A, B, C, D, E>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
     }
 
     @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final Predicate<Throwable> predicate,
-                                            final int attempts) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-
-
+    public Val<Tuple5<A, B, C, D, E>> retryEach(final Predicate<Throwable> predicate,
+                                                final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new SequentialQuintuple<>(_1.retry(predicate,
-                                                  attempts
-                                                 ),
+                                                  policy),
                                          _2.retry(predicate,
-                                                  attempts
-                                                 ),
+                                                  policy),
                                          _3.retry(predicate,
-                                                  attempts
-                                                 ),
+                                                  policy),
                                          _4.retry(predicate,
-                                                  attempts
-                                                 ),
+                                                  policy),
                                          _5.retry(predicate,
-                                                  attempts
-                                                 )
-        );
-    }
-
-
-    @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final Predicate<Throwable> predicate,
-                                            final int attempts,
-                                            final RetryPolicy<Throwable> retryPolicy) {
-        if (attempts < 1)
-            return Cons.failure(new IllegalArgumentException(ATTEMPTS_LOWER_THAN_ONE_ERROR));
-        if (predicate == null)
-            return Cons.failure(new NullPointerException("predicate is null"));
-        if (retryPolicy == null)
-            return Cons.failure(new NullPointerException("retryPolicy is null"));
-
-        return new SequentialQuintuple<>(_1.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _2.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _3.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _4.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 ),
-                                         _5.retry(predicate,
-                                                  attempts,
-                                                  retryPolicy
-                                                 )
+                                                  policy)
         );
     }
 
 
     @Override
     public Future<Tuple5<A, B, C, D, E>> get() {
-        return _1.get()
-                 .flatMap(first -> _2.get()
-                                     .flatMap(sec -> _3.get()
-                                                       .flatMap(third -> _4.get()
-                                                                           .flatMap(fourth -> _5.get()
-                                                                                                .map(fifth -> new Tuple5<>(first,
-                                                                                                                           sec,
-                                                                                                                           third,
-                                                                                                                           fourth,
-                                                                                                                           fifth
-                                                                                                ))
-                                                                                   )
-                                                               )
-                                             )
-                         );
+        return _1
+                .flatMap(first -> _2
+                                 .flatMap(sec -> _3
+                                                  .flatMap(third -> _4
+                                                                   .flatMap(fourth -> _5
+                                                                                    .map(fifth -> new Tuple5<>(first,
+                                                                                                               sec,
+                                                                                                               third,
+                                                                                                               fourth,
+                                                                                                               fifth
+                                                                                    ))
+                                                                           )
+                                                          )
+                                         )
+                        )
+                .get();
     }
 
     @Override

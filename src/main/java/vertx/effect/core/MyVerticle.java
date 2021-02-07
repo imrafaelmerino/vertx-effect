@@ -95,7 +95,7 @@ public class MyVerticle<I> extends AbstractVerticle {
             else promise.complete();
         } catch (Exception e) {
             promise.fail(new ReplyException(RECIPIENT_FAILURE,
-                                            EXCEPTION_STOPPING_VERTICLE_CODE,
+                                            EXCEPTION_UNDEPLOYING_VERTICLE_CODE,
                                             Functions.getErrorMessage(e)));
 
         }
