@@ -9,7 +9,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
- It's a mock of a {@Val}. It keeps a call counter. You can define what val is returned on each call.
+ It's a mock of a {@link Val}. It keeps a call counter. You can define what val is returned on each call.
  @param <O> the type of the value
  */
 public class ValMock<O> implements Supplier<Val<O>> {
