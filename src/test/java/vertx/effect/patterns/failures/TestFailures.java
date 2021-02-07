@@ -153,9 +153,6 @@ public class TestFailures {
                              .onSuccess(server -> {
                                  client.get.apply(new GetReq().host("abcd")
                                                               .port(portServerClosesConnection)
-                                                              .timeout(900,
-                                                                       TimeUnit.MILLISECONDS
-                                                                      )
                                                               .uri("/hi")
                                                  )
                                            .retry(Failures.anyOf(HTTP_CONNECTION_WAS_CLOSED_CODE),
