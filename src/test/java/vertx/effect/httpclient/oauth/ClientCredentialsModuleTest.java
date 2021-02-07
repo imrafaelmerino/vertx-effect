@@ -42,19 +42,7 @@ public class ClientCredentialsModuleTest {
                                                    "my-httpclient",
                                                    new GetAccessTokenRequest("",
                                                                              ""
-                                                   )
-        ).setReqRetryPolicy(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM
-                                                          .exists
-                                                          .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
-                                                                                       exc.failureCode()
-                                                                                      ) ||
-                                                                  Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
-                                                                                 exc.failureCode()
-                                                                                )
-                                                                  || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
-                                                                                    exc.failureCode()
-                                                                                   )
-                                                                )));
+                                                   ));
 
         httpClient = builder.createModule();
 
@@ -79,7 +67,7 @@ public class ClientCredentialsModuleTest {
                                                                    VertxTestContext context) {
 
 
-        builder.setAccessTokenReqRetryPolicy(RetryPolicies.limitRetries(3));
+        builder.accessTokenReqRetryPolicy(RetryPolicies.limitRetries(3));
 
         new HttpServerBuilder(vertx,
                               new MockReqHandler(List.of(MockReqResp.when(REQ_LET.apply(3))

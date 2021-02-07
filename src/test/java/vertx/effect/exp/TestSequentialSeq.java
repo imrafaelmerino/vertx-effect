@@ -10,13 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
 
@@ -102,7 +102,7 @@ public class TestSequentialSeq {
         Val<List<String>> val = ListExp.<String>sequential()
                 .append(b.get())
                 .prepend(a.get())
-                .retry(limitRetries(ATTEMPTS));
+                .retryEach(limitRetries(ATTEMPTS));
 
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
@@ -126,18 +126,15 @@ public class TestSequentialSeq {
         ListExp.sequential(hi.get(),
                            hi.get()
                           )
-               .retry(limitRetries(3)
-                              .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
-                                   )
-                     )
-               .onSuccess(it -> {
-                   context.verify(() -> {
-                       Assertions.assertEquals(expected,
-                                               it
-                                              );
-                       context.completeNow();
-                   });
-               })
+               .retryEach(e -> e instanceof IllegalArgumentException,
+                          limitRetries(3)
+                         )
+               .onSuccess(it -> context.verify(() -> {
+                   Assertions.assertEquals(expected,
+                                           it
+                                          );
+                   context.completeNow();
+               }))
                .get();
     }
 
@@ -180,21 +177,16 @@ public class TestSequentialSeq {
         ListExp.sequential(hi.get(),
                            hi.get()
                           )
-               .retry(limitRetries(3)
-                              .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
-                                   )
-                              .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                               MILLISECONDS
-                                                                              )))
+               .retryEach(it -> it instanceof IllegalArgumentException,
+                      limitRetries(3)
+                              .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                      )
-               .onSuccess(it -> {
-                   context.verify(() -> {
-                       Assertions.assertEquals(expected,
-                                               it
-                                              );
-                       context.completeNow();
-                   });
-               })
+               .onSuccess(it -> context.verify(() -> {
+                   Assertions.assertEquals(expected,
+                                           it
+                                          );
+                   context.completeNow();
+               }))
                .get();
     }
 
@@ -222,10 +214,8 @@ public class TestSequentialSeq {
         Val<List<String>> val = ListExp.<String>sequential()
                 .append(b.get())
                 .prepend(a.get())
-                .retry(limitRetries(ATTEMPTS)
-                               .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                MILLISECONDS
-                                                                               )))
+                .retryEach(limitRetries(ATTEMPTS)
+                               .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                       );
 
 

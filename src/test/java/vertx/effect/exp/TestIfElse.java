@@ -12,10 +12,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.constantDelay;
 import static vertx.effect.RetryPolicies.limitRetries;
 import static vertx.effect.exp.Cons.FALSE;
 import static vertx.effect.exp.Cons.TRUE;
@@ -52,7 +53,7 @@ public class TestIfElse {
         IfElse.predicate(trueVal.get())
               .consequence(Cons.success("consequence"))
               .alternative(Cons.success("alternative"))
-              .retry(limitRetries(2))
+              .retryEach(limitRetries(2))
               .onComplete(r -> {
                   if (r.succeeded()) {
                       context.verify(() -> {
@@ -77,9 +78,8 @@ public class TestIfElse {
         IfElse.predicate(trueVal.get())
               .consequence(Cons.success("consequence"))
               .alternative(Cons.success("alternative"))
-              .retry(limitRetries(2)
-                             .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                  )
+              .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                     limitRetries(2)
                     )
               .onComplete(r -> {
                   if (r.succeeded()) {
@@ -96,7 +96,7 @@ public class TestIfElse {
     }
 
     @Test
-    public void testRetryIfIfElseConsequence(final VertxTestContext context) {
+    public void testRetryEachIfIfElseConsequence(final VertxTestContext context) {
         final Supplier<Val<String>> consequence =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                      counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
@@ -107,10 +107,8 @@ public class TestIfElse {
         IfElse.<String>predicate(Cons.TRUE)
                 .consequence(consequence.get())
                 .alternative(Cons.success("alternative"))
-                .retry(
-                        limitRetries(2)
-                                .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                     )
+                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                       limitRetries(2)
                       )
                 .onComplete(r -> {
                     if (r.succeeded()) {
@@ -127,6 +125,34 @@ public class TestIfElse {
     }
 
     @Test
+    public void testRetryIfIfElseConsequence(final VertxTestContext context) {
+        final Supplier<Val<String>> consequence =
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message"),
+                                     "consequence"
+                );
+
+
+        IfElse.<String>predicate(Cons.TRUE)
+                .consequence(consequence.get())
+                .alternative(Cons.success("alternative"))
+                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                           limitRetries(4)
+                          )
+                .onComplete(r -> {
+                    if (r.succeeded()) {
+                        context.verify(() -> {
+                            Assertions.assertEquals("consequence",
+                                                    r.result()
+                                                   );
+                            context.completeNow();
+
+                        });
+                    }
+                })
+                .get();
+    }
+    @Test
     public void testRetryIfIfElseAlternative(final VertxTestContext context) {
 
         final Supplier<Val<String>> alternative =
@@ -139,9 +165,8 @@ public class TestIfElse {
         IfElse.<String>predicate(Cons.success(false))
                 .consequence(Cons.success("consequence"))
                 .alternative(alternative.get())
-                .retry(limitRetries(2)
-                               .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                    )
+                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                       limitRetries(2)
                       )
                 .onComplete(r -> {
                     if (r.succeeded()) {
@@ -170,7 +195,7 @@ public class TestIfElse {
         IfElse.<String>predicate(Cons.success(true))
                 .consequence(consequence.get())
                 .alternative(Cons.success("alternative"))
-                .retry(limitRetries(2))
+                .retryEach(limitRetries(2))
                 .onComplete(r -> {
                     if (r.succeeded()) {
                         context.verify(() -> {
@@ -198,7 +223,7 @@ public class TestIfElse {
         IfElse.<String>predicate(Cons.success(false))
                 .consequence(Cons.success("consequence"))
                 .alternative(alternative.get())
-                .retry(limitRetries(2))
+                .retryEach(limitRetries(2))
                 .onComplete(r -> {
                     if (r.succeeded()) {
                         context.verify(() -> {
@@ -380,7 +405,7 @@ public class TestIfElse {
         IfElse.predicate(trueVal.get())
               .consequence(Cons.success("b"))
               .alternative(Cons.success("a"))
-              .retry(limitRetries(2))
+              .retryEach(limitRetries(2))
               .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
               .onSuccess(it -> context.verify(() -> {
                   Assertions.assertEquals("b",
@@ -404,10 +429,8 @@ public class TestIfElse {
         IfElse.predicate(True.get())
               .consequence(Cons.success("b"))
               .alternative(Cons.success("a"))
-              .retry(limitRetries(ATTEMPTS)
-                             .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                              MILLISECONDS
-                                                                             )))
+              .retryEach(limitRetries(ATTEMPTS)
+                             .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                     )
               .get()
               .onComplete(r -> context.verify(() -> {
@@ -433,20 +456,16 @@ public class TestIfElse {
         IfElse.<String>predicate(TRUE)
                 .consequence(str.get())
                 .alternative(Cons.success("bye"))
-                .retry(limitRetries(3)
-                               .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
-                                    )
-                               .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                MILLISECONDS
-                                                                               ))))
-                .onSuccess(it -> {
-                    context.verify(() -> {
-                        Assertions.assertEquals("hi",
-                                                it
-                                               );
-                        context.completeNow();
-                    });
-                })
+                .retryEach(e -> e instanceof IllegalArgumentException,
+                       limitRetries(3)
+                               .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                      )
+                .onSuccess(it -> context.verify(() -> {
+                    Assertions.assertEquals("hi",
+                                            it
+                                           );
+                    context.completeNow();
+                }))
                 .get();
     }
 
@@ -461,19 +480,13 @@ public class TestIfElse {
         IfElse.<String>predicate(TRUE)
                 .consequence(str.get())
                 .alternative(Cons.success("bye"))
-                .retry(
+                .retryEach(e -> e instanceof IllegalArgumentException,
                         limitRetries(2)
-                                .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
-                                     )
-                                .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                 MILLISECONDS
-                                                                                ))))
-                .onComplete(it -> {
-                    context.verify(() -> {
-                        Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
-                        context.completeNow();
-                    });
-                })
+                                .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100)))))
+                .onComplete(it -> context.verify(() -> {
+                    Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
+                    context.completeNow();
+                }))
                 .get();
     }
 

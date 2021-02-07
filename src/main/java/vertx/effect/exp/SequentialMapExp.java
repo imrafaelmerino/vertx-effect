@@ -8,7 +8,6 @@ import vertx.effect.Val;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
@@ -19,7 +18,7 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class SequentialMapExp<O> extends MapExp<O> {
+final class SequentialMapExp<O> extends MapExp<O>  {
 
     @SuppressWarnings({"rawtypes"})
     public static final SequentialMapExp EMPTY = new SequentialMapExp<>();
@@ -51,8 +50,19 @@ final class SequentialMapExp<O> extends MapExp<O> {
 
 
     @Override
-    public Val<Map<String, O>> retry(final RetryPolicy policy) {
-        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(policy)));
+    public Val<Map<String, O>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+
+    }
+
+    @Override
+    public Val<Map<String, O>> retryEach(final Predicate<Throwable> predicate,
+                                         final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new SequentialMapExp<>(bindings.mapValues(it -> it.retry(predicate,
+                                                                        policy)));
     }
 
     @Override

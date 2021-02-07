@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
+import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,9 +22,20 @@ final class ParallelPair<A, B> extends Pair<A, B> {
     }
 
     @Override
-    public Val<Tuple2<A, B>> retry(final RetryPolicy policy) {
-        return new ParallelPair<>(_1.retry(policy),
-                                  _2.retry(policy)
+    public Val<Tuple2<A, B>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+    }
+
+    @Override
+    public Val<Tuple2<A, B>> retryEach(final Predicate<Throwable> predicate,
+                                       final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new ParallelPair<>(_1.retry(predicate,
+                                           policy),
+                                  _2.retry(predicate,
+                                           policy)
         );
     }
 
@@ -33,7 +45,8 @@ final class ParallelPair<A, B> extends Pair<A, B> {
                                    _2.get()
                                   )
                               .map(it -> new Tuple2<>(it.resultAt(0),
-                                                      it.resultAt(1))
+                                                      it.resultAt(1)
+                                   )
                                   );
     }
 

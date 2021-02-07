@@ -49,18 +49,9 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
         return 401 == statusCode;
     };
 
-    protected RetryPolicy reqRetryPolicy =
-            RetryPolicies.limitRetries(3)
-                         .join(RetryPolicies.retryIf(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE,
-                                                                    HTTP_CONNECT_TIMEOUT_CODE,
-                                                                    HTTP_ACCESS_TOKEN_NOT_FOUND_CODE
-                                                                   )));
-    protected RetryPolicy accessTokenRetryPolicy =
-            RetryPolicies.limitRetries(3)
-                         .join(RetryPolicies.retryIf(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE,
-                                                                    HTTP_CONNECT_TIMEOUT_CODE,
-                                                                    HTTP_ACCESS_TOKEN_NOT_FOUND_CODE
-                                                                   )));
+
+
+    protected RetryPolicy accessTokenRetryPolicy = RetryPolicies.limitRetries(3);
 
 
     public OauthBuilder(final HttpClientOptions options,
@@ -70,34 +61,30 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     }
 
 
-    public T setAuthorizationHeaderName(final String authorizationHeaderName) {
+    public T authorizationHeaderName(final String authorizationHeaderName) {
         this.authorizationHeaderName = requireNonNull(authorizationHeaderName);
         return ((T) this);
     }
 
-    public T setAuthorizationHeaderValue(final Function<String, String> authorizationHeaderValue) {
+    public T authorizationHeaderValue(final Function<String, String> authorizationHeaderValue) {
         this.authorizationHeaderValue = requireNonNull(authorizationHeaderValue);
         return ((T) this);
     }
 
-    public T setRefreshTokenPredicate(final Predicate<JsObj> refreshTokenPredicate) {
+    public T refreshTokenPredicate(final Predicate<JsObj> refreshTokenPredicate) {
         this.refreshTokenPredicate = requireNonNull(refreshTokenPredicate);
         return ((T) this);
     }
 
 
-    public T setReadNewAccessTokenAfterRefresh(final λ<JsObj, String> readNewAccessTokenAfterRefresh) {
+    public T readAccessTokenAfterRefresh(final λ<JsObj, String> readNewAccessTokenAfterRefresh) {
         this.readNewAccessTokenAfterRefresh = requireNonNull(readNewAccessTokenAfterRefresh);
         return (T) this;
     }
 
 
-    public T setReqRetryPolicy(final RetryPolicy retryPolicy) {
-        this.reqRetryPolicy = requireNonNull(retryPolicy);
-        return ((T) this);
-    }
 
-    public T setAccessTokenReqRetryPolicy(final RetryPolicy retryPolicy) {
+    public T accessTokenReqRetryPolicy(final RetryPolicy retryPolicy) {
         this.accessTokenRetryPolicy = requireNonNull(retryPolicy);
         return ((T) this);
     }

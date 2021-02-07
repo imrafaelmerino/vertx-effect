@@ -4,7 +4,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  A Val is just an alias for a lazy Vertx future. Laziness makes your code more functional and pure.
@@ -47,6 +50,12 @@ public interface Val<O> extends Supplier<Future<O>> {
     Val<O> retry(RetryPolicy retryPolicy);
 
 
+    Val<O> retry(final Predicate<Throwable> predicate,
+                 final RetryPolicy policy);
+
+
+    Val<O> retryOnFailure(final Predicate<O> predicate,
+                          final RetryPolicy policy);
 
     /**
      Creates a new value that will handle any matching throwable that this value might contain.
@@ -97,4 +106,5 @@ public interface Val<O> extends Supplier<Future<O>> {
      */
     Val<O> onComplete(final Handler<AsyncResult<O>> handler);
 
+    
 }

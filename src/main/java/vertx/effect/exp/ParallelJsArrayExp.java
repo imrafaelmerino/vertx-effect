@@ -7,6 +7,8 @@ import jsonvalues.JsArray;
 import jsonvalues.JsValue;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
+
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 
@@ -91,11 +93,18 @@ final class ParallelJsArrayExp extends JsArrayExp {
 
 
     @Override
-    public Val<JsArray> retry(final RetryPolicy policy) {
-
-        return new ParallelJsArrayExp(seq.map(it -> it.retry(policy)));
+    public Val<JsArray> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,policy);
     }
 
+    @Override
+    public Val<JsArray> retryEach(final Predicate<Throwable> predicate,
+                              final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate== null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new ParallelJsArrayExp(seq.map(it -> it.retry(predicate,policy)));
+
+    }
 
 
 }

@@ -9,6 +9,8 @@ import jsonvalues.JsObj;
 import jsonvalues.JsValue;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
+
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -19,7 +21,7 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-final class ParallelJsObjExp extends JsObjExp {
+final class ParallelJsObjExp extends JsObjExp  {
 
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
 
@@ -81,8 +83,19 @@ final class ParallelJsObjExp extends JsObjExp {
     }
 
     @Override
-    public Val<JsObj> retry(final RetryPolicy retryPolicy) {
-        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(retryPolicy)));
+    public Val<JsObj> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+    }
+
+    @Override
+    public Val<JsObj> retryEach(final Predicate<Throwable> predicate,
+                                final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new ParallelJsObjExp(bindings.mapValues(it -> it.retry(predicate,
+                                                                      policy)));
+
     }
 
 }

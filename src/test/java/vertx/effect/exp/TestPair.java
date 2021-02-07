@@ -8,13 +8,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.*;
+import vertx.effect.Failures;
+import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.Val;
+import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.constantDelay;
 import static vertx.effect.RetryPolicies.limitRetries;
 
 @ExtendWith(VertxExtension.class)
@@ -55,12 +59,9 @@ public class TestPair {
         Pair.parallel(one.get(),
                       one.get()
                      )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
-                                )
-                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                            MILLISECONDS
-                                                                           )))
+            .retryEach(e -> e instanceof IllegalArgumentException,
+                   limitRetries(ATTEMPTS)
+                           .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .onSuccess(it -> {
                 context.verify(() -> {
@@ -87,12 +88,9 @@ public class TestPair {
         Pair.sequential(one.get(),
                         one.get()
                        )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.retryIf(e -> e instanceof IllegalArgumentException)
-                                )
-                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                            MILLISECONDS
-                                                                           )))
+            .retryEach(e -> e instanceof IllegalArgumentException,
+                   limitRetries(ATTEMPTS)
+                           .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .onSuccess(it -> {
                 context.verify(() -> {
@@ -113,7 +111,7 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .retry(limitRetries(2))
+            .retryEach(limitRetries(2))
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
@@ -134,7 +132,7 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .retry(limitRetries(2))
+            .retryEach(limitRetries(2))
             .get()
             .onComplete(it -> {
                 context.verify(() -> Assertions.assertEquals(new Tuple2<>("a",
@@ -161,9 +159,8 @@ public class TestPair {
         Pair.parallel(val.get(),
                       val.get()
                      )
-            .retry(limitRetries(2)
-                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                )
+            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   limitRetries(2)
                   )
             .get()
             .onComplete(it -> {
@@ -190,9 +187,8 @@ public class TestPair {
         Pair.sequential(val.get(),
                         val.get()
                        )
-            .retry(limitRetries(2)
-                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                )
+            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   limitRetries(2)
                   )
             .get()
             .onComplete(it -> {
@@ -219,9 +215,8 @@ public class TestPair {
         Pair.parallel(val.get(),
                       val.get()
                      )
-            .retry(limitRetries(2)
-                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                )
+            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   limitRetries(2)
                   )
             .get()
             .onComplete(it -> {
@@ -244,9 +239,8 @@ public class TestPair {
         Pair.sequential(val.get(),
                         val.get()
                        )
-            .retry(limitRetries(2)
-                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                )
+            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   limitRetries(2)
                   )
             .get()
             .onComplete(it -> {
@@ -266,10 +260,8 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                            MILLISECONDS
-                                                                           )))
+            .retryEach(limitRetries(ATTEMPTS)
+                           .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .get()
             .onComplete(r -> context.verify(() -> {
@@ -294,10 +286,8 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                            MILLISECONDS
-                                                                           )))
+            .retryEach(limitRetries(ATTEMPTS)
+                           .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .get()
             .onComplete(r -> context.verify(() -> {
@@ -506,7 +496,7 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .retry(limitRetries(2))
+            .retryEach(limitRetries(2))
             .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("a",
@@ -524,7 +514,7 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .retry(limitRetries(2))
+            .retryEach(limitRetries(2))
             .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("a",

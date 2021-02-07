@@ -10,10 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.constantDelay;
 import static vertx.effect.RetryPolicies.limitRetries;
@@ -641,7 +641,7 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(limitRetries(2))
+                .retryEach(limitRetries(2))
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             r
@@ -661,11 +661,9 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(limitRetries(2)
-                               .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                    )
-
-                      )
+                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                           limitRetries(2)
+                          )
                 .onComplete(
                         r -> context.verify(() -> {
                             Assertions.assertTrue(r.failed());
@@ -684,9 +682,9 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(limitRetries(3)
-                               .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException))
-                      )
+                .retryEach(e -> e instanceof RuntimeException,
+                           limitRetries(3)
+                          )
                 .onComplete(
                         r -> context.verify(() -> {
                             Assertions.assertTrue(r.succeeded());
@@ -706,10 +704,9 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(
-                        limitRetries(2)
-                                .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException))
-                      )
+                .retryEach(e -> e instanceof RuntimeException,
+                           limitRetries(2)
+                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             r
@@ -731,11 +728,9 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(limitRetries(ATTEMPTS)
-                               .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                MILLISECONDS
-                                                                               )))
-                      )
+                .retryEach(limitRetries(ATTEMPTS)
+                               .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             r
@@ -815,7 +810,7 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(limitRetries(2))
+                .retryEach(limitRetries(2))
                 .recoverWith(e -> e instanceof RuntimeException ? Cons.success("hi!") : Cons.success("bye!"))
                 .onSuccess(str -> context.verify(() -> {
                     Assertions.assertEquals("a",
@@ -874,7 +869,7 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(limitRetries(2))
+                .retryEach(limitRetries(2))
                 .fallbackTo(e -> e instanceof RuntimeException ?
                                  Cons.success("hi!") :
                                  Cons.success("bye!"))
@@ -898,11 +893,9 @@ public class TestCase {
                     "c",
                     b.get()
                    )
-                .retry(limitRetries(ATTEMPTS)
-                               .join(constantDelay(vertxRef.delay(100,
-                                                                  MILLISECONDS
-                                                                 )))
-                      )
+                .retryEach(limitRetries(ATTEMPTS)
+                               .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                          )
                 .get()
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertEquals("a",

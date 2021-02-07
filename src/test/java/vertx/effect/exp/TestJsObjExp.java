@@ -14,6 +14,7 @@ import vertx.effect.Val;
 import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Supplier;
 
@@ -1536,7 +1537,7 @@ public class TestJsObjExp {
                                                                )
                                              )
                          )
-                .retry(limitRetries(2))
+                .retryEach(limitRetries(2))
                 .onComplete(it -> context.verify(() -> {
                                    Assertions.assertEquals(it.result(),
                                                            JsObj.of("a",
@@ -1588,29 +1589,27 @@ public class TestJsObjExp {
                                                                  )
                                                )
                            )
-                .retry(limitRetries(2))
-                .onComplete(it -> {
-                    context.verify(() -> {
-                                       Assertions.assertEquals(it.result(),
-                                                               JsObj.of("a",
-                                                                        a,
-                                                                        "b",
-                                                                        a,
-                                                                        "c",
-                                                                        a,
-                                                                        "d",
-                                                                        JsArray.of(a,
-                                                                                   a,
-                                                                                   JsObj.of("a",
-                                                                                            a
-                                                                                           )
-                                                                                  )
-                                                                       )
-                                                              );
-                                       context.completeNow();
-                                   }
-                                  );
-                })
+                .retryEach(limitRetries(2))
+                .onComplete(it -> context.verify(() -> {
+                                   Assertions.assertEquals(it.result(),
+                                                           JsObj.of("a",
+                                                                    a,
+                                                                    "b",
+                                                                    a,
+                                                                    "c",
+                                                                    a,
+                                                                    "d",
+                                                                    JsArray.of(a,
+                                                                               a,
+                                                                               JsObj.of("a",
+                                                                                        a
+                                                                                       )
+                                                                              )
+                                                                   )
+                                                          );
+                                   context.completeNow();
+                               }
+                                            ))
                 .get();
 
 
@@ -1781,10 +1780,8 @@ public class TestJsObjExp {
                           b.get()
                            .map(JsStr::of)
                          )
-                .retry(limitRetries(ATTEMPTS)
-                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                           MILLISECONDS
-                                                                          )))
+                .retryEach(limitRetries(ATTEMPTS)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                       )
                 .get()
                 .onComplete(r -> context.verify(() -> {
@@ -1823,10 +1820,8 @@ public class TestJsObjExp {
                             b.get()
                              .map(JsStr::of)
                            )
-                .retry(limitRetries(ATTEMPTS)
-                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                           MILLISECONDS
-                                                                          )))
+                .retryEach(limitRetries(ATTEMPTS)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                       )
                 .get()
                 .onComplete(r -> context.verify(() -> {

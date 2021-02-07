@@ -6,7 +6,7 @@ import vertx.effect.core.AbstractVal;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class Triple<A, B, C> extends AbstractVal<Tuple3<A, B, C>> {
+public abstract class Triple<A, B, C> extends AbstractVal<Tuple3<A, B, C>> implements Exp<Tuple3<A, B, C>> {
 
     public static <A, B, C> Triple<A, B, C> parallel(final Val<A> _1,
                                                      final Val<B> _2,

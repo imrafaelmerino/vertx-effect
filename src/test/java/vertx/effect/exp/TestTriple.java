@@ -19,18 +19,18 @@ import static vertx.effect.RetryPolicies.limitRetries;
 public class TestTriple {
     final Supplier<Val<String>> a =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "a"
             );
 
     final Supplier<Val<String>> b =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  "b"
             );
     final Supplier<Val<Boolean>> True =
             new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                             counter -> new RuntimeException("counter: " + counter),
+                                 counter -> new RuntimeException("counter: " + counter),
                                  true
             );
 
@@ -59,7 +59,7 @@ public class TestTriple {
                                                                   a.get(),
                                                                   a.get()
                                                                  )
-                                                        .retry(limitRetries(2));
+                                                        .retryEach(limitRetries(2));
 
 
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
@@ -84,7 +84,7 @@ public class TestTriple {
                                                                     a.get(),
                                                                     a.get()
                                                                    )
-                                                        .retry(limitRetries(2));
+                                                        .retryEach(limitRetries(2));
 
 
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
@@ -106,7 +106,7 @@ public class TestTriple {
 
         final Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -114,9 +114,8 @@ public class TestTriple {
                                                                   a.get(),
                                                                   a.get()
                                                                  )
-                                                        .retry(limitRetries(2)
-                                                                       .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                                                            )
+                                                        .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               limitRetries(2)
                                                               );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
@@ -134,7 +133,7 @@ public class TestTriple {
 
         final Supplier<Val<String>> a =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
-                                 counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
+                                     counter -> Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter),
                                      "a"
                 );
 
@@ -142,9 +141,8 @@ public class TestTriple {
                                                                     a.get(),
                                                                     a.get()
                                                                    )
-                                                        .retry(limitRetries(2)
-                                                                       .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                                                            )
+                                                        .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                                                               limitRetries(2)
                                                               );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(
                 tuple -> new Tuple3<>("a",
@@ -166,9 +164,8 @@ public class TestTriple {
                                 a.get(),
                                 a.get()
                                )
-                      .retry(limitRetries(2)
-                                     .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                          )
+                      .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             limitRetries(2)
                             );
 
 
@@ -188,9 +185,8 @@ public class TestTriple {
                                   a.get(),
                                   a.get()
                                  )
-                      .retry(limitRetries(2)
-                                     .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                          )
+                      .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                             limitRetries(2)
                             );
 
 
@@ -443,7 +439,7 @@ public class TestTriple {
                                 True.get(),
                                 b.get()
                                )
-                      .retry(limitRetries(2))
+                      .retryEach(limitRetries(2))
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
@@ -467,7 +463,7 @@ public class TestTriple {
                                   True.get(),
                                   b.get()
                                  )
-                      .retry(limitRetries(2))
+                      .retryEach(limitRetries(2))
                       .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
@@ -483,7 +479,6 @@ public class TestTriple {
                        );
 
     }
-
 
 
 }

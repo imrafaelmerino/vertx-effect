@@ -7,7 +7,7 @@ import vertx.effect.core.AbstractVal;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class JsArrayExp extends AbstractVal<JsArray> {
+public abstract class JsArrayExp extends AbstractVal<JsArray> implements Exp<JsArray> {
 
 
     /**

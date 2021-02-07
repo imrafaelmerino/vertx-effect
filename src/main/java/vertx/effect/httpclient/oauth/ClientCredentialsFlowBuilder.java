@@ -33,8 +33,7 @@ public class ClientCredentialsFlowBuilder extends OauthBuilder<ClientCredentials
                                            authorizationHeaderValue,
                                            readNewAccessTokenAfterRefresh,
                                            refreshTokenPredicate,
-                                           accessTokenRetryPolicy,
-                                           reqRetryPolicy
+                                           accessTokenRetryPolicy
         );
     }
 

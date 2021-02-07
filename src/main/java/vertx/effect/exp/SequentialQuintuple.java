@@ -5,8 +5,10 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
+import java.util.function.Predicate;
 
-final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> {
+
+final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> implements Exp<Tuple5<A, B, C, D, E>> {
 
     private final Val<A> _1;
     private final Val<B> _2;
@@ -28,12 +30,26 @@ final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> 
     }
 
     @Override
-    public Val<Tuple5<A, B, C, D, E>> retry(final RetryPolicy policy) {
-        return new SequentialQuintuple<>(_1.retry(policy),
-                                         _2.retry(policy),
-                                         _3.retry(policy),
-                                         _4.retry(policy),
-                                         _5.retry(policy)
+    public Val<Tuple5<A, B, C, D, E>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+    }
+
+    @Override
+    public Val<Tuple5<A, B, C, D, E>> retryEach(final Predicate<Throwable> predicate,
+                                                final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new SequentialQuintuple<>(_1.retry(predicate,
+                                                  policy),
+                                         _2.retry(predicate,
+                                                  policy),
+                                         _3.retry(predicate,
+                                                  policy),
+                                         _4.retry(predicate,
+                                                  policy),
+                                         _5.retry(predicate,
+                                                  policy)
         );
     }
 

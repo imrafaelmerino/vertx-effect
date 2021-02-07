@@ -5,11 +5,10 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 
-class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
+class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> implements Exp<Tuple4<A, B, C, D>> {
 
     private final Val<A> _1;
     private final Val<B> _2;
@@ -29,11 +28,25 @@ class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
 
 
     @Override
-    public Val<Tuple4<A, B, C, D>> retry(final RetryPolicy policy) {
-        return new SequentialQuadruple<>(_1.retry(policy),
-                                         _2.retry(policy),
-                                         _3.retry(policy),
-                                         _4.retry(policy)
+    public Val<Tuple4<A, B, C, D>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+
+    }
+
+    @Override
+    public Val<Tuple4<A, B, C, D>> retryEach(final Predicate<Throwable> predicate,
+                                             final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new SequentialQuadruple<>(_1.retry(predicate,
+                                                  policy),
+                                         _2.retry(predicate,
+                                                  policy),
+                                         _3.retry(predicate,
+                                                  policy),
+                                         _4.retry(predicate,
+                                                  policy)
         );
     }
 
@@ -41,18 +54,19 @@ class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
     @Override
     public Future<Tuple4<A, B, C, D>> get() {
         return _1
-                 .flatMap(first -> _2
-                                     .flatMap(sec -> _3
-                                                       .flatMap(third -> _4
-                                                                           .map(fourth -> new Tuple4<>(first,
-                                                                                                       sec,
-                                                                                                       third,
-                                                                                                       fourth
-                                                                                )
-                                                                               )
-                                                               )
-                                             )
-                         ).get();
+                .flatMap(first -> _2
+                                 .flatMap(sec -> _3
+                                                  .flatMap(third -> _4
+                                                                   .map(fourth -> new Tuple4<>(first,
+                                                                                               sec,
+                                                                                               third,
+                                                                                               fourth
+                                                                        )
+                                                                       )
+                                                          )
+                                         )
+                        )
+                .get();
     }
 
     @Override

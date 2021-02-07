@@ -15,6 +15,10 @@ import jsonvalues.JsArray;
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
 import vertx.effect.VertxModule;
+import vertx.effect.core.EventPublisher;
+import vertx.effect.core.Functions;
+import vertx.effect.core.HttpReq;
+import vertx.effect.core.ReqEvent;
 import vertx.effect.λc;
 
 import java.util.List;

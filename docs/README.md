@@ -715,7 +715,7 @@ to use because there isn't a standard solution. Each library uses its own. I did
 time, I wanted to provide a simple and decouple solution to know what is going on in any system using vertx-effect. 
 That's why I decided to publish remarkable events in a specific address. If you want to use your favorite slf4j implementation,
  just implement it in a consumer. On the other hand, consuming all those events during testing will give you instant feedback 
- on your system and agility spotting bugs. You can disable this future with the Java system property **-Dpublish.events=false**.
+ on your system and agility spotting bugs. You can disable this future with the Java system property **-D"vertx.effect.enable.log.events"=false**.
 
 ### <a name="events"><a/> Publishing events 
 **vertx-effect** publishes events to the address **vertx-effect-events**. Find below some of the most important predefined
@@ -1041,18 +1041,18 @@ You can customize anything using the builder:
 ```java
 
 // by default Authorization
-builder.setAuthorizationHeaderName(String authorizationHeaderName) 
+builder.authorizationHeaderName(String authorizationHeaderName) 
 
 // by default token -> "Bearer "+token
-builder.setAuthorizationHeaderValue(Function<String, String> authorizationHeaderValue) 
+builder.authorizationHeaderValue(Function<String, String> authorizationHeaderValue) 
 
 // predicate to check if we need to refresh the token
 // by default resp -> resp.getInt("status_code") == 401
-builder.setRefreshTokenPredicate(Predicate<JsObj> refreshTokenPredicate) 
+builder.refreshTokenPredicate(Predicate<JsObj> refreshTokenPredicate) 
 
 // lambda to get the access token from the resp
 // by default parse the body into a Json a get the access_token field 
-builder.setReadNewAccessTokenAfterRefresh(λ<JsObj, String> readNewAccessTokenAfterRefresh) 
+builder.readAccessTokenAfterRefresh(λ<JsObj, String> readNewAccessTokenAfterRefresh) 
 
 // predicate to check if retrying in case of an error making the request to get the token
 // by default connection timeout, unknown host or access_token is not found in the response

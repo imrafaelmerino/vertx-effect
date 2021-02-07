@@ -6,8 +6,10 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
+import java.util.function.Predicate;
 
-class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
+
+class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D>  {
 
     private final Val<A> _1;
     private final Val<B> _2;
@@ -25,11 +27,24 @@ class ParallelQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> {
     }
 
     @Override
-    public Val<Tuple4<A, B, C, D>> retry(final RetryPolicy policy) {
-        return new ParallelQuadruple<>(_1.retry(policy),
-                                       _2.retry(policy),
-                                       _3.retry(policy),
-                                       _4.retry(policy)
+    public Val<Tuple4<A, B, C, D>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+    }
+
+    @Override
+    public Val<Tuple4<A, B, C, D>> retryEach(final Predicate<Throwable> predicate,
+                                             final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new ParallelQuadruple<>(_1.retry(predicate,
+                                                policy),
+                                       _2.retry(predicate,
+                                                policy),
+                                       _3.retry(predicate,
+                                                policy),
+                                       _4.retry(predicate,
+                                                policy)
         );
     }
 

@@ -1,11 +1,15 @@
 package vertx.effect.exp;
 
 import io.vertx.core.Future;
+import vertx.effect.Delay;
 import vertx.effect.RetryPolicy;
+import vertx.effect.RetryStatus;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
 
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -42,21 +46,6 @@ public final class Cons<O> extends AbstractVal<O> {
         return futureSupplier.get();
     }
 
-    @Override
-    public Val<O> retry(final RetryPolicy retryPolicy) {
-        return retry(this,
-                     retryPolicy.get()
-                    );
-    }
 
-    private Val<O> retry(final Cons<O> exp,
-                         final Function<Throwable, Val<Boolean>> policy) {
-        return exp.flatMap(Cons::success,
-                           e -> policy.apply(e)
-                                      .flatMap(bool -> bool ? retry(exp,
-                                                                    policy
-                                                                   ) : Cons.failure(e))
-                          );
-    }
 
 }

@@ -5,6 +5,7 @@ import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -18,9 +19,17 @@ final class SequentialAny extends Any {
     final List<Val<Boolean>> exps;
 
     @Override
-    public Val<Boolean> retry(final RetryPolicy policy) {
+    public Val<Boolean> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,policy);
+    }
+
+    @Override
+    public Val<Boolean> retryEach(final Predicate<Throwable> predicate,
+                              final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate== null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new SequentialAny(exps.stream()
-                                     .map(it -> it.retry(policy))
+                                     .map(it -> it.retry(predicate,policy))
                                      .collect(Collectors.toList()));
     }
 

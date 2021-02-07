@@ -14,12 +14,12 @@ import vertx.effect.Val;
 import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
 
@@ -1025,7 +1025,7 @@ public class TestSequentialMapExp {
                           "b",
                           one.get()
                          )
-              .retry(RetryPolicies.limitRetries(2))
+              .retryEach(RetryPolicies.limitRetries(2))
               .onComplete(map ->
                                   context.verify(() -> {
                                       Assertions.assertEquals(expected,
@@ -1087,7 +1087,7 @@ public class TestSequentialMapExp {
                           "b",
                           b.get()
                          )
-              .retry(RetryPolicies.limitRetries(ATTEMPTS))
+              .retryEach(RetryPolicies.limitRetries(ATTEMPTS))
               .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
               .onSuccess(map -> context.verify(() -> {
                   Assertions.assertEquals(expected,
@@ -1115,10 +1115,8 @@ public class TestSequentialMapExp {
                           "b",
                           b.get()
                          )
-              .retry(limitRetries(ATTEMPTS)
-                             .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                              MILLISECONDS
-                                                                             )))
+              .retryEach(limitRetries(ATTEMPTS)
+                             .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                     )
               .get()
               .onComplete(r -> context.verify(() -> {

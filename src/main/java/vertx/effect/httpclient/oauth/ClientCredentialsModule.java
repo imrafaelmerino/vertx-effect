@@ -22,8 +22,7 @@ public class ClientCredentialsModule extends OauthModule {
                             final Function<String, String> authorizationHeaderValue,
                             final λ<JsObj, String> readNewAccessTokenAfterRefresh,
                             final Predicate<JsObj> refreshTokenPredicate,
-                            final RetryPolicy accessTokenReqRetryPolicy,
-                            final RetryPolicy reqRetryPolicy
+                            final RetryPolicy accessTokenReqRetryPolicy
                            ) {
         super(options,
               address,
@@ -31,8 +30,7 @@ public class ClientCredentialsModule extends OauthModule {
               authorizationHeaderValue,
               readNewAccessTokenAfterRefresh,
               refreshTokenPredicate,
-              accessTokenReqRetryPolicy,
-              reqRetryPolicy
+              accessTokenReqRetryPolicy
              );
         this.accessTokenReq = accessTokenReq;
 

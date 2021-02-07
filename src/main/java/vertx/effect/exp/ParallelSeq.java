@@ -6,13 +6,12 @@ import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
-class ParallelSeq<O> extends ListExp<O> {
+class ParallelSeq<O> extends ListExp<O>  {
 
     @SuppressWarnings("rawtypes")
     protected static final ListExp EMPTY = new ParallelSeq<>(io.vavr.collection.List.empty());
@@ -22,9 +21,19 @@ class ParallelSeq<O> extends ListExp<O> {
     }
 
     @Override
-    public Val<List<O>> retry(final RetryPolicy policy) {
+    public Val<List<O>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
 
-        return new ParallelSeq<>(seq.map(it -> it.retry(policy)));
+    }
+
+    @Override
+    public Val<List<O>> retryEach(final Predicate<Throwable> predicate,
+                                  final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new ParallelSeq<>(seq.map(it -> it.retry(predicate,
+                                                        policy)));
     }
 
 

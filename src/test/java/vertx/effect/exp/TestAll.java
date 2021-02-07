@@ -13,12 +13,11 @@ import vertx.effect.Val;
 import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
-import static vertx.effect.RetryPolicies.retryIf;
 
 @ExtendWith(VertxExtension.class)
 public class TestAll {
@@ -39,7 +38,7 @@ public class TestAll {
     }
 
     @Test
-    public void test_sequential_retry_returns_true(VertxTestContext context) {
+    public void test_sequential_retryEach_returns_true(VertxTestContext context) {
         int attempts = 2;
 
         Supplier<Val<Boolean>> trueVal =
@@ -51,7 +50,7 @@ public class TestAll {
         All.sequential(trueVal.get(),
                        trueVal.get()
                       )
-           .retry(limitRetries(attempts))
+           .retryEach(limitRetries(attempts))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(true,
@@ -62,7 +61,29 @@ public class TestAll {
     }
 
     @Test
-    public void test_parallel_retry_returns_true(VertxTestContext context) {
+    public void test_sequential_retry_returns_true(VertxTestContext context) {
+
+        Supplier<Val<Boolean>> trueVal =
+                new ValOrErrorMock<>(2,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     true
+                );
+
+        All.sequential(trueVal.get(),
+                       trueVal.get()
+                      )
+           .retry(limitRetries(4))
+           .get()
+           .onComplete(it -> {
+               context.verify(() -> Assertions.assertEquals(true,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
+    }
+
+    @Test
+    public void test_parallel_retryEach_returns_true(VertxTestContext context) {
         int attempts = 2;
 
         Supplier<Val<Boolean>> trueVal =
@@ -74,7 +95,7 @@ public class TestAll {
         All.parallel(trueVal.get(),
                      trueVal.get()
                     )
-           .retry(limitRetries(attempts))
+           .retryEach(limitRetries(attempts))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(true,
@@ -85,7 +106,28 @@ public class TestAll {
     }
 
     @Test
-    public void test_parallel_retry_returns_false(VertxTestContext context) {
+    public void test_parallel_retry_returns_true(VertxTestContext context) {
+
+        Supplier<Val<Boolean>> trueVal =
+                new ValOrErrorMock<>(2,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     true
+                );
+
+        All.parallel(trueVal.get(),
+                     trueVal.get()
+                    )
+           .retryEach(limitRetries(4))
+           .get()
+           .onComplete(it -> {
+               context.verify(() -> Assertions.assertEquals(true,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
+    }
+    @Test
+    public void test_parallel_retryEach_returns_false(VertxTestContext context) {
 
         int attempts = 2;
         Supplier<Val<Boolean>> falseVal =
@@ -98,7 +140,7 @@ public class TestAll {
         All.parallel(falseVal.get(),
                      falseVal.get()
                     )
-           .retry(limitRetries(attempts))
+           .retryEach(limitRetries(attempts))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(false,
@@ -107,9 +149,30 @@ public class TestAll {
                context.completeNow();
            });
     }
-
     @Test
-    public void test_sequential_retry_returns_false(VertxTestContext context) {
+    public void test_parallel_retry_returns_false(VertxTestContext context) {
+
+        Supplier<Val<Boolean>> falseVal =
+                new ValOrErrorMock<>(2,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     false
+                );
+
+
+        All.parallel(falseVal.get(),
+                     falseVal.get()
+                    )
+           .retry(limitRetries(4))
+           .get()
+           .onComplete(it -> {
+               context.verify(() -> Assertions.assertEquals(false,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
+    }
+    @Test
+    public void test_sequential_retryEach_returns_false(VertxTestContext context) {
 
         int attempts = 2;
         Supplier<Val<Boolean>> falseVal =
@@ -122,7 +185,7 @@ public class TestAll {
         All.sequential(falseVal.get(),
                        falseVal.get()
                       )
-           .retry(limitRetries(attempts))
+           .retryEach(limitRetries(attempts))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(false,
@@ -133,7 +196,29 @@ public class TestAll {
     }
 
     @Test
-    public void test_parallel_retry_with_delay(VertxTestContext context) {
+    public void test_sequential_retry_returns_false(VertxTestContext context) {
+
+        Supplier<Val<Boolean>> falseVal =
+                new ValOrErrorMock<>(2,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     false
+                );
+
+
+        All.sequential(falseVal.get(),
+                       falseVal.get()
+                      )
+           .retryEach(limitRetries(4))
+           .get()
+           .onComplete(it -> {
+               context.verify(() -> Assertions.assertEquals(false,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
+    }
+    @Test
+    public void test_parallel_retryEach_with_delay(VertxTestContext context) {
         int attempts = 3;
         Supplier<Val<Boolean>> trueVal =
                 new ValOrErrorMock<>(attempts,
@@ -150,10 +235,8 @@ public class TestAll {
         All.parallel(trueVal.get(),
                      falseVal.get()
                     )
-           .retry(limitRetries(attempts)
-                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                           MILLISECONDS
-                                                                          )))
+           .retryEach(limitRetries(attempts)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
            .get()
            .onComplete(r -> context.verify(() -> {
@@ -165,7 +248,36 @@ public class TestAll {
     }
 
     @Test
-    public void test_sequential_retry_with_delay(VertxTestContext context) {
+    public void test_parallel_retry_with_delay(VertxTestContext context) {
+        Supplier<Val<Boolean>> trueVal =
+                new ValOrErrorMock<>(3,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     true
+                );
+
+        Supplier<Val<Boolean>> falseVal =
+                new ValOrErrorMock<>(3,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     false
+                );
+        long start = System.nanoTime();
+        All.parallel(trueVal.get(),
+                     falseVal.get()
+                    )
+           .retry(limitRetries(6)
+                              .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                     )
+           .get()
+           .onComplete(r -> context.verify(() -> {
+               Assertions.assertFalse(r.result());
+               Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= 6);
+               context.completeNow();
+           }));
+
+    }
+
+    @Test
+    public void test_sequential_retryEach_with_delay(VertxTestContext context) {
         int attempts = 3;
         Supplier<Val<Boolean>> trueVal =
                 new ValOrErrorMock<>(attempts,
@@ -182,10 +294,8 @@ public class TestAll {
         All.sequential(trueVal.get(),
                        falseVal.get()
                       )
-           .retry(limitRetries(attempts)
-                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                           MILLISECONDS
-                                                                          )))
+           .retryEach(limitRetries(attempts)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
            .get()
            .onComplete(r -> context.verify(() -> {
@@ -195,38 +305,60 @@ public class TestAll {
            }));
 
     }
+    @Test
+    public void test_sequential_retry_with_delay(VertxTestContext context) {
+        Supplier<Val<Boolean>> trueVal =
+                new ValOrErrorMock<>(3,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     true
+                );
+
+        Supplier<Val<Boolean>> falseVal =
+                new ValOrErrorMock<>(3,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     false
+                );
+        long start = System.nanoTime();
+        All.sequential(trueVal.get(),
+                       falseVal.get()
+                      )
+           .retry(limitRetries(6)
+                              .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                     )
+           .get()
+           .onComplete(r -> context.verify(() -> {
+               Assertions.assertFalse(r.result());
+               Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= 6);
+               context.completeNow();
+           }));
+
+    }
 
     @Test
-    public void test_sequential_map(final VertxTestContext context,
-                                    final Vertx vertx) {
+    public void test_sequential_map(final VertxTestContext context) {
 
         All.sequential(Cons.success(true),
                        Cons.success(true)
                       )
            .map(it -> !it)
-           .onSuccess(result -> {
-               context.verify(() -> {
-                   Assertions.assertFalse(result);
-                   context.completeNow();
-               });
-           })
+           .onSuccess(result -> context.verify(() -> {
+               Assertions.assertFalse(result);
+               context.completeNow();
+           }))
            .get();
     }
 
     @Test
-    public void test_parallel_map(final VertxTestContext context,
-                                  final Vertx vertx) {
+    public void test_parallel_map(final VertxTestContext context) {
 
         All.parallel(Cons.success(true),
                      Cons.success(true)
                     )
            .map(it -> !it)
-           .onSuccess(result -> {
-               context.verify(() -> {
-                   Assertions.assertFalse(result);
-                   context.completeNow();
-               });
-           })
+           .onSuccess(result -> context.verify(() -> {
+               Assertions.assertFalse(result);
+               context.completeNow();
+           }))
            .get();
     }
 
@@ -241,14 +373,13 @@ public class TestAll {
         All.parallel(True.get(),
                      True.get()
                     )
-           .retry(limitRetries(3)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException)))
-           .onSuccess(it -> {
-               context.verify(() -> {
-                   Assertions.assertTrue(it);
-                   context.completeNow();
-               });
-           })
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(3)
+                 )
+           .onSuccess(it -> context.verify(() -> {
+               Assertions.assertTrue(it);
+               context.completeNow();
+           }))
            .get();
     }
 
@@ -263,15 +394,13 @@ public class TestAll {
         All.sequential(True.get(),
                        True.get()
                       )
-           .retry(limitRetries(3)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException))
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(3)
                  )
-           .onSuccess(it -> {
-               context.verify(() -> {
-                   Assertions.assertTrue(it);
-                   context.completeNow();
-               });
-           })
+           .onSuccess(it -> context.verify(() -> {
+               Assertions.assertTrue(it);
+               context.completeNow();
+           }))
            .get();
     }
 
@@ -286,18 +415,14 @@ public class TestAll {
         All.parallel(True.get(),
                      True.get()
                     )
-           .retry(limitRetries(3)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException)
-                                       .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                        MILLISECONDS
-                                                                                       ))))
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(3)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
-           .onSuccess(it -> {
-               context.verify(() -> {
-                   Assertions.assertTrue(it);
-                   context.completeNow();
-               });
-           })
+           .onSuccess(it -> context.verify(() -> {
+               Assertions.assertTrue(it);
+               context.completeNow();
+           }))
            .get();
     }
 
@@ -312,18 +437,14 @@ public class TestAll {
         All.sequential(True.get(),
                        True.get()
                       )
-           .retry(limitRetries(3)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException)
-                                       .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                        MILLISECONDS
-                                                                                       ))))
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(3)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
-           .onSuccess(it -> {
-               context.verify(() -> {
-                   Assertions.assertTrue(it);
-                   context.completeNow();
-               });
-           })
+           .onSuccess(it -> context.verify(() -> {
+               Assertions.assertTrue(it);
+               context.completeNow();
+           }))
            .get();
     }
 
@@ -338,16 +459,13 @@ public class TestAll {
         All.sequential(True.get(),
                        True.get()
                       )
-           .retry(limitRetries(2)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException)
-                               )
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(2)
                  )
-           .onComplete(it -> {
-               context.verify(() -> {
-                   Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
-                   context.completeNow();
-               });
-           })
+           .onComplete(it -> context.verify(() -> {
+               Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
+               context.completeNow();
+           }))
            .get();
     }
 
@@ -362,15 +480,13 @@ public class TestAll {
         All.parallel(True.get(),
                      True.get()
                     )
-           .retry(limitRetries(2)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException))
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(2)
                  )
-           .onComplete(it -> {
-               context.verify(() -> {
-                   Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
-                   context.completeNow();
-               });
-           })
+           .onComplete(it -> context.verify(() -> {
+               Assertions.assertTrue(it.cause() instanceof IllegalArgumentException);
+               context.completeNow();
+           }))
            .get();
     }
 }

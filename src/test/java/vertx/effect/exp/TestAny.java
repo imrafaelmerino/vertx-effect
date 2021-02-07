@@ -10,12 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
-import static vertx.effect.RetryPolicies.retryIf;
 
 @ExtendWith(VertxExtension.class)
 public class TestAny {
@@ -51,12 +50,28 @@ public class TestAny {
 
 
     @Test
+    public void test_parallel_retriesEach_two_times_returns_true(VertxTestContext context) {
+
+        Any.parallel(TRUE.get(),
+                     TRUE.get()
+                    )
+           .retryEach(limitRetries(2))
+           .get()
+           .onComplete(it -> {
+               context.verify(() -> Assertions.assertEquals(true,
+                                                            it.result()
+                                                           ));
+               context.completeNow();
+           });
+    }
+
+    @Test
     public void test_parallel_retries_two_times_returns_true(VertxTestContext context) {
 
         Any.parallel(TRUE.get(),
                      TRUE.get()
                     )
-           .retry(limitRetries(2))
+           .retry(limitRetries(4))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(true,
@@ -72,7 +87,7 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        TRUE.get()
                       )
-           .retry(limitRetries(2))
+           .retryEach(limitRetries(2))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(true,
@@ -89,7 +104,7 @@ public class TestAny {
         Any.parallel(FALSE.get(),
                      FALSE.get()
                     )
-           .retry(limitRetries(2))
+           .retryEach(limitRetries(2))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(false,
@@ -106,7 +121,7 @@ public class TestAny {
         Any.sequential(FALSE.get(),
                        FALSE.get()
                       )
-           .retry(limitRetries(2))
+           .retryEach(limitRetries(2))
            .get()
            .onComplete(it -> {
                context.verify(() -> Assertions.assertEquals(false,
@@ -123,8 +138,8 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retry(limitRetries(2)
-                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE)))
+           .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                  limitRetries(2)
                  )
            .get()
            .onComplete(it -> {
@@ -144,8 +159,8 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retry(limitRetries(2)
-                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE)))
+           .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                  limitRetries(2)
                  )
            .get()
            .onComplete(it -> {
@@ -199,8 +214,8 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retry(limitRetries(2)
-                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE)))
+           .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
+                  limitRetries(2)
                  )
            .get()
            .onComplete(it -> {
@@ -218,8 +233,8 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retry(limitRetries(2)
-                          .join(retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE)))
+           .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.HTTP_REQUEST_TIMEOUT_CODE),
+                  limitRetries(2)
                  )
            .get()
            .onComplete(it -> {
@@ -241,11 +256,9 @@ public class TestAny {
         Any.parallel(True.get(),
                      True.get()
                     )
-           .retry(limitRetries(3)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException)
-                                       .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                        MILLISECONDS
-                                                                                       ))))
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(3)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
            .onSuccess(it -> {
                context.verify(() -> {
@@ -267,11 +280,9 @@ public class TestAny {
         Any.sequential(True.get(),
                        True.get()
                       )
-           .retry(limitRetries(3)
-                          .join(retryIf(it -> it instanceof IllegalArgumentException)
-                                       .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                        MILLISECONDS
-                                                                                       ))))
+           .retryEach(it -> it instanceof IllegalArgumentException,
+                  limitRetries(3)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
            .onSuccess(it -> {
                context.verify(() -> {
@@ -288,10 +299,8 @@ public class TestAny {
         Any.parallel(TRUE.get(),
                      FALSE.get()
                     )
-           .retry(limitRetries(ATTEMPTS)
-                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                           MILLISECONDS
-                                                                          )))
+           .retryEach(limitRetries(ATTEMPTS)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
            .get()
            .onComplete(r -> context.verify(() -> {
@@ -310,10 +319,8 @@ public class TestAny {
         Any.sequential(TRUE.get(),
                        FALSE.get()
                       )
-           .retry(limitRetries(ATTEMPTS)
-                          .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                           MILLISECONDS
-                                                                          )))
+           .retryEach(limitRetries(ATTEMPTS)
+                          .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                  )
            .get()
            .onComplete(r -> context.verify(() -> {

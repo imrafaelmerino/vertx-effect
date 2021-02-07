@@ -10,17 +10,17 @@ import vertx.effect.core.AbstractVal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
 
-public final class Cond<O> extends AbstractVal<O> {
+public final class Cond<O> extends AbstractVal<O> implements Exp<O> {
 
     private final List<Val<Boolean>> tests;
     private final List<Val<O>> consequences;
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
     private Val<O> otherwise;
 
 
@@ -329,13 +329,25 @@ public final class Cond<O> extends AbstractVal<O> {
 
 
     @Override
-    public Val<O> retry(final RetryPolicy policy) {
+    public Val<O> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+    }
 
+    @Override
+    public Val<O> retryEach(final Predicate<Throwable> predicate,
+                            final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new Cond<>(tests.stream()
-                               .map(it -> it.retry(policy))
+                               .map(it -> it.retry(predicate,
+                                                   policy
+                                                  ))
                                .collect(Collectors.toList()),
                           consequences.stream()
-                                      .map(it -> it.retry(policy))
+                                      .map(it -> it.retry(predicate,
+                                                          policy
+                                                         ))
                                       .collect(Collectors.toList()
                                               ),
                           otherwise

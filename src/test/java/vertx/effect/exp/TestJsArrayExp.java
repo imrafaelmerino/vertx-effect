@@ -16,7 +16,8 @@ import vertx.effect.Val;
 import vertx.effect.VertxRef;
 import vertx.effect.mock.ValOrErrorMock;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import java.time.Duration;
+
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
 
@@ -115,10 +116,8 @@ public class TestJsArrayExp {
         JsArrayExp.parallel(a.get(),
                             b.get()
                            )
-                  .retry(limitRetries(ATTEMPTS)
-                                 .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                  MILLISECONDS
-                                                                                 )))
+                  .retryEach(limitRetries(ATTEMPTS)
+                                 .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                         )
                   .get()
                   .onComplete(r -> context.verify(() -> {
@@ -151,11 +150,9 @@ public class TestJsArrayExp {
         JsArrayExp.sequential(a.get(),
                               b.get()
                              )
-                  .retry(limitRetries(ATTEMPTS)
-                                 .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                  MILLISECONDS
-                                                                                 )))
-                                 .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException))
+                  .retryEach(e -> e instanceof RuntimeException,
+                         limitRetries(ATTEMPTS)
+                                 .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                         )
                   .get()
                   .onComplete(r -> context.verify(() -> {
@@ -188,11 +185,9 @@ public class TestJsArrayExp {
         JsArrayExp.sequential(a.get(),
                               b.get()
                              )
-                  .retry(limitRetries(ATTEMPTS)
-                                 .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                  MILLISECONDS
-                                                                                 )))
-                        )
+                  .retryEach(limitRetries(ATTEMPTS)
+                                     .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                            )
                   .get()
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertEquals(JsArray.of("a",
@@ -223,8 +218,8 @@ public class TestJsArrayExp {
         JsArrayExp.sequential(a.get(),
                               b.get()
                              )
-                  .retry(limitRetries(ATTEMPTS)
-                                 .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException))
+                  .retryEach(e -> e instanceof RuntimeException,
+                         limitRetries(ATTEMPTS)
                         )
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertEquals(JsArray.of("a",
@@ -234,6 +229,35 @@ public class TestJsArrayExp {
                                              );
                       context.completeNow();
 
+                  }))
+                  .get();
+
+    }
+
+    @Test
+    public void test_array_exp_retryEach_with_delay_failure(VertxTestContext context) {
+        int ATTEMPTS = 3;
+
+        long start = System.nanoTime();
+        ValOrErrorMock<JsStr> a = new ValOrErrorMock<>(ATTEMPTS,
+                                                       counter -> new RuntimeException("counter: " + counter),
+                                                       JsStr.of("a")
+        );
+        ValOrErrorMock<JsStr> b = new ValOrErrorMock<>(ATTEMPTS,
+                                                       counter -> new RuntimeException("counter: " + counter),
+                                                       JsStr.of("b")
+        );
+
+        JsArrayExp.parallel(a.get(),
+                            b.get()
+                           )
+                  .retryEach(limitRetries(ATTEMPTS - 1)
+                                 .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                        )
+                  .onComplete(r -> context.verify(() -> {
+                      Assertions.assertTrue(r.cause() instanceof RuntimeException);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS - 1);
+                      context.completeNow();
                   }))
                   .get();
 
@@ -256,14 +280,12 @@ public class TestJsArrayExp {
         JsArrayExp.parallel(a.get(),
                             b.get()
                            )
-                  .retry(limitRetries(ATTEMPTS - 1)
-                                 .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                  MILLISECONDS
-                                                                                 )))
-                        )
+                  .retry(limitRetries(2)
+                                     .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
+                            )
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertTrue(r.cause() instanceof RuntimeException);
-                     Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS - 1);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= 2);
                       context.completeNow();
                   }))
                   .get();
@@ -287,12 +309,9 @@ public class TestJsArrayExp {
         JsArrayExp.parallel(a.get(),
                             b.get()
                            )
-                  .retry(limitRetries(ATTEMPTS - 1)
-                                 .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException)
-                                      )
-                                 .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                  MILLISECONDS
-                                                                                 )))
+                  .retryEach(e -> e instanceof RuntimeException,
+                         limitRetries(ATTEMPTS - 1)
+                                 .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                         )
                   .get()
                   .onComplete(r -> context.verify(() -> {

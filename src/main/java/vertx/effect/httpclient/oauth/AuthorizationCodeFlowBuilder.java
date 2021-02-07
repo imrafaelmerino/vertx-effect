@@ -32,7 +32,7 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
         this.accessTokenReq = requireNonNull(refreshAccessTokenReq);
     }
 
-    public AuthorizationCodeFlowBuilder setReadTokensAfterAuthentication(final λ<JsObj, Tuple2<String, String>> readTokensAfterAuthentication) {
+    public AuthorizationCodeFlowBuilder readTokensAfterAuthentication(final λ<JsObj, Tuple2<String, String>> readTokensAfterAuthentication) {
         this.readTokensAfterAuthentication = Objects.requireNonNull(readTokensAfterAuthentication);
         return this;
     }
@@ -46,7 +46,6 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
                                            readNewAccessTokenAfterRefresh,
                                            refreshTokenPredicate,
                                            accessTokenRetryPolicy,
-                                           reqRetryPolicy,
                                            refreshToken
         );
     }
@@ -70,8 +69,7 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
                                            authorizationHeaderValue,
                                            readNewAccessTokenAfterRefresh,
                                            refreshTokenPredicate,
-                                           accessTokenRetryPolicy,
-                                           reqRetryPolicy
+                                           accessTokenRetryPolicy
         );
     }
 

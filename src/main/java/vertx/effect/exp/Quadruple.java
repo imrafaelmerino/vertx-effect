@@ -6,7 +6,7 @@ import vertx.effect.core.AbstractVal;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class Quadruple<A, B, C, D> extends AbstractVal<Tuple4<A, B, C, D>> {
+public abstract class Quadruple<A, B, C, D> extends AbstractVal<Tuple4<A, B, C, D>> implements Exp<Tuple4<A, B, C, D>>{
 
     public static <A, B, C, D> Quadruple<A, B, C, D> parallel(final Val<A> _1,
                                                               final Val<B> _2,

@@ -18,9 +18,10 @@ import vertx.effect.mock.*;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static vertx.effect.Failures.*;
 
 @ExtendWith(VertxExtension.class)
 public class AuthorizationCodeModuleTest {
@@ -47,21 +48,8 @@ public class AuthorizationCodeModuleTest {
                                                  new RefreshAccessTokenReq("client_id",
                                                                            "client_secret"
                                                  )
-                ).setReqRetryPolicy(
-                        RetryPolicies.limitRetries(4)
-                                     .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM
-                                                                        .exists
-                                                                        .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
-                                                                                                     exc.failureCode()
-                                                                                                    ) ||
-                                                                                Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
-                                                                                               exc.failureCode()
-                                                                                              )
-                                                                                || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
-                                                                                                  exc.failureCode()
-                                                                                                 )
-                                                                              ))))
-                 .createFromRefreshToken("refresh_token");
+                )
+                        .createFromRefreshToken("refresh_token");
 
         Triple.parallel(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
                         new HttpServerBuilder(vertx,
@@ -112,11 +100,17 @@ public class AuthorizationCodeModuleTest {
                                         TimeUnit.MILLISECONDS
                                        );
         httpClient.getOauth.apply(t)
+                           .retry(Failures.anyOf(HTTP_UNKNOWN_HOST_CODE,
+                                                 HTTP_CONNECT_TIMEOUT_CODE,
+                                                 HTTP_REQUEST_TIMEOUT_CODE
+                                                ),
+                                  RetryPolicies.limitRetries(4)
+                                 )
                            .onComplete(it -> {
-                               if (it.succeeded())
-                                   context.completeNow();
+                               if (it.succeeded()) context.completeNow();
                                else context.failNow(it.cause());
                            })
+
                            .get();
 
     }

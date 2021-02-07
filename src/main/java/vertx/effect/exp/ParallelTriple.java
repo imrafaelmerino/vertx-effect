@@ -5,7 +5,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-import java.util.function.BiFunction;
+
 import java.util.function.Predicate;
 
 
@@ -24,11 +24,22 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
     }
 
     @Override
-    public Val<Tuple3<A, B, C>> retry(final RetryPolicy policy) {
+    public Val<Tuple3<A, B, C>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+    }
 
-        return new ParallelTriple<>(_1.retry(policy),
-                                    _2.retry(policy),
-                                    _3.retry(policy)
+    @Override
+    public Val<Tuple3<A, B, C>> retryEach(final Predicate<Throwable> predicate,
+                                          final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new ParallelTriple<>(_1.retry(predicate,
+                                             policy),
+                                    _2.retry(predicate,
+                                             policy),
+                                    _3.retry(predicate,
+                                             policy)
         );
     }
 

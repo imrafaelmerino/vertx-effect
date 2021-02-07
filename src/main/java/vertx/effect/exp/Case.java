@@ -4,10 +4,12 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 import vertx.effect.core.AbstractVal;
+
 import java.util.List;
+import java.util.function.Predicate;
 
 
-public final class Case<I, O> extends AbstractVal<O> {
+public final class Case<I, O> extends AbstractVal<O> implements Exp<O> {
 
     private final Val<I> keyVal;
     private Cond<O> cond;
@@ -87,6 +89,7 @@ public final class Case<I, O> extends AbstractVal<O> {
 
         return this;
     }
+
     public Case<I, O> of(final List<I> keyList1,
                          final Val<O> consequent1,
                          final List<I> keyList2,
@@ -617,17 +620,26 @@ public final class Case<I, O> extends AbstractVal<O> {
 
 
     @Override
-    public Val<O> retry(final RetryPolicy retryPolicy) {
-        return cond.retry(retryPolicy);
+    public Val<O> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
     }
+
+    @Override
+    public Val<O> retryEach(final Predicate<Throwable> predicate,
+                            final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return cond.retryEach(predicate,
+                              policy);
+    }
+
 
 
     @Override
     public Future<O> get() {
         return cond.get();
     }
-
-
 
 
 }

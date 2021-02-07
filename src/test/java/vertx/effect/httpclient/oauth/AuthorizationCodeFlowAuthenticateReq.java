@@ -9,7 +9,10 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.*;
+import vertx.effect.Port;
+import vertx.effect.RegisterJsValuesCodecs;
+import vertx.effect.Verifiers;
+import vertx.effect.VertxRef;
 import vertx.effect.exp.Triple;
 import vertx.effect.httpclient.GetReq;
 import vertx.effect.httpclient.PostReq;
@@ -19,7 +22,6 @@ import vertx.effect.mock.MockReqHandler;
 import vertx.effect.mock.MockReqResp;
 
 import java.util.List;
-import java.util.Objects;
 
 import static vertx.effect.mock.MockReqResp.ALWAYS;
 
@@ -63,21 +65,7 @@ public class AuthorizationCodeFlowAuthenticateReq {
                                                  )
 
 
-                ).setReqRetryPolicy(
-                        RetryPolicies.limitRetries(4)
-                                     .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM
-                                                                        .exists
-                                                                        .apply(exc -> Objects.equals(Failures.HTTP_UNKNOWN_HOST_CODE,
-                                                                                                     exc.failureCode()
-                                                                                                    ) ||
-                                                                                Objects.equals(Failures.HTTP_CONNECT_TIMEOUT_CODE,
-                                                                                               exc.failureCode()
-                                                                                              )
-                                                                                || Objects.equals(Failures.HTTP_REQUEST_TIMEOUT_CODE,
-                                                                                                  exc.failureCode()
-                                                                                                 )
-                                                                              ))))
-                 .createFromAuthReq((mod, input) ->
+                ).createFromAuthReq((mod, input) ->
                                             mod.post.apply(new PostReq(String.format("code=%s&redirect_uri=%s",
                                                                                      input.getStr("code"),
                                                                                      input.getStr("redirect_uri")

@@ -54,8 +54,10 @@ public class ReadmeCodeTest {
                                   )
                             .get()
                             .onSuccess(it -> context.verify(() -> {
-                                    Assertions.assertEquals("abcds", it);
-                                    context.completeNow();
+                                Assertions.assertEquals("abcds",
+                                                        it
+                                                       );
+                                context.completeNow();
                             }));
     }
 

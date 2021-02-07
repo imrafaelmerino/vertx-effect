@@ -7,11 +7,11 @@ import vertx.effect.Val;
 import javax.naming.OperationNotSupportedException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-class SequentialSeq<O> extends ListExp<O> {
+class SequentialSeq<O> extends ListExp<O>  {
 
     @SuppressWarnings("rawtypes")
     protected static final ListExp EMPTY = new SequentialSeq<>(io.vavr.collection.List.empty());
@@ -22,8 +22,20 @@ class SequentialSeq<O> extends ListExp<O> {
 
 
     @Override
-    public Val<List<O>> retry(final RetryPolicy policy) {
-        return new SequentialSeq<>(seq.map(it -> it.retry(policy)));
+    public Val<List<O>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+
+    }
+
+    @Override
+    public Val<List<O>> retryEach(final Predicate<Throwable> predicate,
+                                  final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+
+        return new SequentialSeq<>(seq.map(it -> it.retry(predicate,
+                                                          policy)));
     }
 
     @Override

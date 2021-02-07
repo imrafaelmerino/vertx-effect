@@ -10,10 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
 import static vertx.effect.exp.Cons.FALSE;
@@ -90,7 +90,7 @@ public class TestCond {
     }
 
     @Test
-    public void test_cond_exp_returns_the_first_branch_with_retries(VertxTestContext context) {
+    public void test_cond_exp_returns_the_first_branch_with_retryEach(VertxTestContext context) {
         Supplier<Val<Boolean>> valSupplier =
                 new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
                                      counter -> new RuntimeException("counter:+" + counter),
@@ -101,7 +101,30 @@ public class TestCond {
                 FALSE,
                 Cons.success("bye")
                )
-            .retry(limitRetries(2))
+            .retryEach(limitRetries(2))
+            .onSuccess(it -> context.verify(() -> {
+                Assertions.assertEquals("hi",
+                                        it
+                                       );
+                context.completeNow();
+            }))
+            .get();
+
+    }
+
+    @Test
+    public void test_cond_exp_returns_the_first_branch_with_retry(VertxTestContext context) {
+        Supplier<Val<Boolean>> valSupplier =
+                new ValOrErrorMock<>(counter -> counter == 1 || counter == 2,
+                                     counter -> new RuntimeException("counter:+" + counter),
+                                     true
+                );
+        Cond.of(valSupplier.get(),
+                Cons.success("hi"),
+                FALSE,
+                Cons.success("bye")
+               )
+            .retry(limitRetries(4))
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("hi",
                                         it
@@ -125,7 +148,7 @@ public class TestCond {
                 Cons.success("bye"),
                 Cons.success("otherwise")
                )
-            .retry(limitRetries(2))
+            .retryEach(limitRetries(2))
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("otherwise",
                                         it
@@ -192,7 +215,7 @@ public class TestCond {
                 Cons.success("bye"),
                 Cons.success("otherwise")
                )
-            .retry(limitRetries(2))
+            .retryEach(limitRetries(2))
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("otherwise",
                                         it
@@ -306,9 +329,9 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.retryIf(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE))
-                                ))
+            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
+                   limitRetries(ATTEMPTS)
+                  )
             .onComplete(
                     r -> context.verify(() -> {
                         Assertions.assertTrue(r.failed());
@@ -326,9 +349,8 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.retryIf(e -> e instanceof RuntimeException)
-                                )
+            .retryEach(e -> e instanceof RuntimeException,
+                   limitRetries(ATTEMPTS)
                   )
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals("a",
@@ -349,10 +371,8 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                            MILLISECONDS
-                                                                           )))
+            .retryEach(limitRetries(ATTEMPTS)
+                           .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals("a",
@@ -471,10 +491,8 @@ public class TestCond {
                 FALSE,
                 b.get()
                )
-            .retry(limitRetries(ATTEMPTS)
-                           .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                            MILLISECONDS
-                                                                           )))
+            .retryEach(limitRetries(ATTEMPTS)
+                           .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                   )
             .get()
             .onComplete(r -> context.verify(() -> {

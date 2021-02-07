@@ -9,7 +9,6 @@ import jsonvalues.JsValue;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
@@ -23,7 +22,8 @@ import static java.util.Objects.requireNonNull;
 final class SequentialJsObj extends JsObjExp {
     Map<String, Val<? extends JsValue>> bindings = TreeMap.empty();
 
-    SequentialJsObj(){}
+    SequentialJsObj() {
+    }
 
     SequentialJsObj(final Map<String, Val<? extends JsValue>> bindings) {
         this.bindings = bindings;
@@ -72,8 +72,17 @@ final class SequentialJsObj extends JsObjExp {
     }
 
     @Override
-    public Val<JsObj> retry(final RetryPolicy policy) {
-        return new SequentialJsObj(bindings.mapValues(it -> it.retry(policy)));
+    public Val<JsObj> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,policy);
+    }
+
+    @Override
+    public Val<JsObj> retryEach(final Predicate<Throwable> predicate,
+                                final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new SequentialJsObj(bindings.mapValues(it -> it.retry(predicate,
+                                                                     policy)));
     }
 
 

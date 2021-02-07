@@ -30,7 +30,6 @@ public class AuthorizationCodeModule extends OauthModule {
                             final λ<JsObj, String> readNewAccessTokenAfterRefresh,
                             final Predicate<JsObj> refreshTokenPredicate,
                             final RetryPolicy accessTokenReqRetryPolicy,
-                            final RetryPolicy reqRetryPolicy,
                             final String refreshToken
                            ) {
 
@@ -40,8 +39,7 @@ public class AuthorizationCodeModule extends OauthModule {
               authorizationHeaderValue,
               readNewAccessTokenAfterRefresh,
               refreshTokenPredicate,
-              accessTokenReqRetryPolicy,
-              reqRetryPolicy
+              accessTokenReqRetryPolicy
              );
         this.accessTokenReq = accessTokenReq.apply(refreshToken);
         this.refreshToken = refreshToken;
@@ -57,8 +55,7 @@ public class AuthorizationCodeModule extends OauthModule {
                             final Function<String, String> authorizationHeaderValue,
                             final λ<JsObj, String> readNewAccessTokenAfterRefresh,
                             final Predicate<JsObj> refreshTokenPredicate,
-                            final RetryPolicy accessTokenReqRetryPolicy,
-                            final RetryPolicy reqRetryPolicy
+                            final RetryPolicy accessTokenReqRetryPolicy
                            ) {
 
         super(options,
@@ -67,8 +64,7 @@ public class AuthorizationCodeModule extends OauthModule {
               authorizationHeaderValue,
               readNewAccessTokenAfterRefresh,
               refreshTokenPredicate,
-              accessTokenReqRetryPolicy,
-              reqRetryPolicy
+              accessTokenReqRetryPolicy
              );
         this.accessTokenReq = accessTokenReq.apply(refreshToken);
         this.authenticateReq = authenticateReq;

@@ -11,16 +11,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.mock.ValOrErrorMock;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
-import static vertx.effect.RetryPolicies.retryIf;
 
 @ExtendWith(VertxExtension.class)
 public class TestParallelSeq {
@@ -101,7 +100,7 @@ public class TestParallelSeq {
         Val<List<String>> val = ListExp.<String>parallel()
                 .append(b.get())
                 .prepend(a.get())
-                .retry(limitRetries(ATTEMPTS));
+                .retryEach(limitRetries(ATTEMPTS));
         List<String> expected = new ArrayList<>();
         expected.add("a");
         expected.add("b");
@@ -135,10 +134,8 @@ public class TestParallelSeq {
         Val<List<String>> val = ListExp.<String>parallel()
                 .append(b.get())
                 .prepend(a.get())
-                .retry(limitRetries(ATTEMPTS)
-                               .join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                MILLISECONDS
-                                                                               )))
+                .retryEach(limitRetries(ATTEMPTS)
+                               .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                       );
 
         List<String> expected = new ArrayList<>();
@@ -206,18 +203,15 @@ public class TestParallelSeq {
         ListExp.parallel(hi.get(),
                          hi.get()
                         )
-               .retry(RetryPolicies.limitRetries(3)
-                                   .join(retryIf(it -> it instanceof IllegalArgumentException))
-
+               .retryEach(it -> it instanceof IllegalArgumentException,
+                      RetryPolicies.limitRetries(3)
                      )
-               .onSuccess(it -> {
-                   context.verify(() -> {
-                       Assertions.assertEquals(expected,
-                                               it
-                                              );
-                       context.completeNow();
-                   });
-               })
+               .onSuccess(it -> context.verify(() -> {
+                   Assertions.assertEquals(expected,
+                                           it
+                                          );
+                   context.completeNow();
+               }))
                .get();
     }
 
@@ -233,20 +227,16 @@ public class TestParallelSeq {
         ListExp.parallel(hi.get(),
                          hi.get()
                         )
-               .retry(limitRetries(3)
-                              .join(RetryPolicies.retryIf(e-> e instanceof IllegalArgumentException)
-                                   ).join(RetryPolicies.constantDelay(vertxRef.delay(100,
-                                                                                     MILLISECONDS
-                                                                                    )))
+               .retryEach(e -> e instanceof IllegalArgumentException,
+                      limitRetries(3)
+                              .append(RetryPolicies.constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                      )
-               .onSuccess(it -> {
-                   context.verify(() -> {
-                       Assertions.assertEquals(expected,
-                                               it
-                                              );
-                       context.completeNow();
-                   });
-               })
+               .onSuccess(it -> context.verify(() -> {
+                   Assertions.assertEquals(expected,
+                                           it
+                                          );
+                   context.completeNow();
+               }))
                .get();
     }
 

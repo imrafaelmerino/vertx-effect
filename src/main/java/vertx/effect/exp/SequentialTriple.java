@@ -5,13 +5,14 @@ import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
 
+import java.util.function.Predicate;
 
-public final class SequentialTriple<A, B, C> extends Triple<A, B, C> {
+
+public final class SequentialTriple<A, B, C> extends Triple<A, B, C>  {
 
     private final Val<A> _1;
     private final Val<B> _2;
     private final Val<C> _3;
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     SequentialTriple(final Val<A> _1,
                      final Val<B> _2,
@@ -23,10 +24,23 @@ public final class SequentialTriple<A, B, C> extends Triple<A, B, C> {
 
 
     @Override
-    public Val<Tuple3<A, B, C>> retry(final RetryPolicy policy) {
-        return new SequentialTriple<>(_1.retry(policy),
-                                      _2.retry(policy),
-                                      _3.retry(policy)
+    public Val<Tuple3<A, B, C>> retryEach(final RetryPolicy policy) {
+        return retryEach(e -> true,
+                         policy);
+
+    }
+
+    @Override
+    public Val<Tuple3<A, B, C>> retryEach(final Predicate<Throwable> predicate,
+                                          final RetryPolicy policy) {
+        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        return new SequentialTriple<>(_1.retry(predicate,
+                                               policy),
+                                      _2.retry(predicate,
+                                               policy),
+                                      _3.retry(predicate,
+                                               policy)
         );
     }
 
@@ -34,15 +48,15 @@ public final class SequentialTriple<A, B, C> extends Triple<A, B, C> {
     @Override
     public Future<Tuple3<A, B, C>> get() {
         return _1.flatMap(first -> _2
-                                 .flatMap(sec -> _3
-                                                  .map(third -> new Tuple3<>(first,
-                                                                             sec,
-                                                                             third
+                                  .flatMap(sec -> _3
+                                                   .map(third -> new Tuple3<>(first,
+                                                                              sec,
+                                                                              third
+                                                        )
                                                        )
-                                                      )
-                                         )
-                        )
-                .get();
+                                          )
+                         )
+                 .get();
     }
 
 
