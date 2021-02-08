@@ -555,8 +555,8 @@ public interface Val<O> extends Supplier<Future<O>> {
     Val<O> retry(Predicate<Throwable>,
                  RetryPolicy policy);
 
-    Val<O> retryOnFailure(Predicate<O> predicate,
-                          RetryPolicy policy);
+    Val<O> repeat(Predicate<O> predicate,
+                  RetryPolicy policy);
 
     Val<O> recoverWith(λ<Throwable, O> fn);
 
@@ -595,23 +595,21 @@ limiteRetries(5).followedBy(incrementalDelay(oneHundredMillis).capDelay(oneSec))
 There are very interesting policies implemented based on [this article](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/):
 exponential backoff, full jitter, equal jitter, decorrelated jitter etc
 
-**retryOnFailure**: A failure is a not expected value. The specified predicate catches the failures. You can define any
-imaginable policy as well.
+**repeat**: When you get a not expected value (a failure) and want to repeat the computation. A predicate is
+specified to catch the failures. You can define any imaginable policy as well. Imagine you make a http request
+and you get a 500. That's not an error, it's a server failure. You can repeat the request according to a 
+policy.
 
-For expressions like **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, you can apply
-the retry policy to each value of the expression instead of the overall result with the methods:
+For expressions like **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, you can retry 
+each value of the expression instead of the overall expresion with the methods:
 
 ```java
     Val<O> retryEach(RetryPolicy policy);
 
     Val<O> retryEach(Predicate<Throwable>,
-                 RetryPolicy policy);
+                     RetryPolicy policy);
 
-    Val<O> retryEachOnFailure(Predicate<O> predicate,
-                              RetryPolicy policy);
 ```
-
-
 
 ## <a name="modules"><a/> Modules
  
