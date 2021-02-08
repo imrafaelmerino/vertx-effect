@@ -13,10 +13,10 @@ import java.util.function.Function;
  return value from the function implies we have reached the retry limit.
  You can collapse multiple strategies into one using append. There are a number of policies available in
  {@link RetryPolicies}. There are also a few combinators to transform policies, including:
- {@link #capDelay(Delay)}, {@link #limitRetriesByDelay(Duration)} and {@link #limitRetriesByCumulativeDelay(Duration)}.
+ {@link #capDelay(Timer)}, {@link #limitRetriesByDelay(Duration)} and {@link #limitRetriesByCumulativeDelay(Duration)}.
  Always S¡simulate any policy you define with {@link #simulate(int)}
  */
-public interface RetryPolicy extends Function<RetryStatus, Optional<Delay>> {
+public interface RetryPolicy extends Function<RetryStatus, Optional<Timer>> {
 
     /**
      The semantics of this combination is as follows:
@@ -31,9 +31,9 @@ public interface RetryPolicy extends Function<RetryStatus, Optional<Delay>> {
      */
     default RetryPolicy append(final RetryPolicy other) {
         return retryStatus -> {
-            Optional<Delay> aOpt = RetryPolicy.this.apply(retryStatus);
+            Optional<Timer> aOpt = RetryPolicy.this.apply(retryStatus);
             if (aOpt.isEmpty()) return aOpt;
-            Optional<Delay> bOpt = other.apply(retryStatus);
+            Optional<Timer> bOpt = other.apply(retryStatus);
             if (bOpt.isEmpty()) return bOpt;
             return Optional.of(aOpt.get()
                                    .max(bOpt.get()));
@@ -48,7 +48,7 @@ public interface RetryPolicy extends Function<RetryStatus, Optional<Delay>> {
      */
     default RetryPolicy followedBy(final RetryPolicy other) {
         return rs -> {
-            Optional<Delay> delay = this.apply(rs);
+            Optional<Timer> delay = this.apply(rs);
             if(delay.isEmpty())return other.apply(rs);
             return delay;
         } ;
@@ -60,9 +60,9 @@ public interface RetryPolicy extends Function<RetryStatus, Optional<Delay>> {
      @see VertxRef#sleep(Duration) to create delays
      @return a new policy
      */
-    default RetryPolicy capDelay(final Delay cap) {
+    default RetryPolicy capDelay(final Timer cap) {
         return rs -> {
-            Optional<Delay> delay = this.apply(rs);
+            Optional<Timer> delay = this.apply(rs);
             if(delay.isEmpty())return delay;
             if (delay.get().duration.toMillis() >= cap.duration.toMillis()) return Optional.of(cap);
             return delay;
@@ -77,7 +77,7 @@ public interface RetryPolicy extends Function<RetryStatus, Optional<Delay>> {
      */
     default RetryPolicy limitRetriesByDelay(final Duration max) {
         return rs -> {
-            Optional<Delay> delay = this.apply(rs);
+            Optional<Timer> delay = this.apply(rs);
             if(delay.isEmpty())return delay;
             if (delay.get().duration.toMillis() >= max.toMillis()) return Optional.empty();
             return delay;
@@ -107,7 +107,7 @@ public interface RetryPolicy extends Function<RetryStatus, Optional<Delay>> {
         RetryStatus next = first;
 
         for (int i = 1; i <= iterations; i++) {
-            Optional<Delay> opt = this.apply(next);
+            Optional<Timer> opt = this.apply(next);
             if (opt.isPresent()) {
                 simulation.add(next);
                 long delay = opt.get().duration.toMillis();

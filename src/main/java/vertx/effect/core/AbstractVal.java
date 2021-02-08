@@ -131,17 +131,17 @@ public abstract class AbstractVal<O> extends Val<O> {
     }
 
     private Val<O> retryOnFailure(Val<O> exp,
-                                  Function<RetryStatus, Optional<Delay>> policy,
+                                  Function<RetryStatus, Optional<Timer>> policy,
                                   RetryStatus rs,
                                   Predicate<O> predicate) {
 
         return exp.flatMap(o -> {
                                if (predicate.test(o)) {
-                                   Optional<Delay> delayOpt = policy.apply(rs);
+                                   Optional<Timer> delayOpt = policy.apply(rs);
                                    if (delayOpt.isEmpty()) return Val.succeed(o);
-                                   Delay delay = delayOpt.get();
-                                   return delay.val.flatMap(nill -> {
-                                                                long delayDuration = delay.duration.toMillis();
+                                   Timer timer = delayOpt.get();
+                                   return timer.delay.flatMap(nill -> {
+                                                                long delayDuration = timer.duration.toMillis();
                                                                 return retryOnFailure(exp,
                                                                                       policy,
                                                                                       new RetryStatus(rs.rsIterNumber + 1,
@@ -151,7 +151,7 @@ public abstract class AbstractVal<O> extends Val<O> {
                                                                                       predicate
                                                                                      );
                                                             }
-                                                           );
+                                                             );
                                }
                                else return Val.succeed(o);
                            }
@@ -191,7 +191,7 @@ public abstract class AbstractVal<O> extends Val<O> {
 
 
     private Val<O> retry(Val<O> exp,
-                         Function<RetryStatus, Optional<Delay>> policy,
+                         Function<RetryStatus, Optional<Timer>> policy,
                          RetryStatus rs,
                          Predicate<Throwable> predicate) {
 
@@ -200,11 +200,11 @@ public abstract class AbstractVal<O> extends Val<O> {
                            },
                            exc -> {
                                if (predicate.test(exc)) {
-                                   Optional<Delay> delayOpt = policy.apply(rs);
+                                   Optional<Timer> delayOpt = policy.apply(rs);
                                    if (delayOpt.isEmpty()) return Val.fail(exc);
-                                   Delay delay = delayOpt.get();
-                                   return delay.val.flatMap(nill -> {
-                                                                long delayDuration = delay.duration.toMillis();
+                                   Timer timer = delayOpt.get();
+                                   return timer.delay.flatMap(nill -> {
+                                                                long delayDuration = timer.duration.toMillis();
                                                                 return retry(exp,
                                                                              policy,
                                                                              new RetryStatus(rs.rsIterNumber + 1,
@@ -214,7 +214,7 @@ public abstract class AbstractVal<O> extends Val<O> {
                                                                              predicate
                                                                             );
                                                             }
-                                                           );
+                                                             );
                                }
                                else return Val.fail(exc);
                            }

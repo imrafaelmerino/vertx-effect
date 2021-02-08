@@ -26,38 +26,38 @@ public class RetryPolicies {
         }
 
         @Override
-        public Optional<Delay> apply(final RetryStatus retryStatus) {
+        public Optional<Timer> apply(final RetryStatus retryStatus) {
             boolean retry = retryStatus.rsIterNumber < maxAttempts;
-            if (retry) return Optional.of(Delay.ZERO);
+            if (retry) return Optional.of(Timer.ZERO);
             return Optional.empty();
         }
     }
 
     static class IncrementalDelay implements RetryPolicy {
-        private final Delay base;
+        private final Timer base;
 
-        public IncrementalDelay(final Delay base) {
+        public IncrementalDelay(final Timer base) {
             this.base = base;
         }
 
         @Override
-        public Optional<Delay> apply(final RetryStatus retryStatus) {
+        public Optional<Timer> apply(final RetryStatus retryStatus) {
             return Optional.of(base.multipliedBy(retryStatus.rsIterNumber + 1));
         }
     }
 
     static class ExponentialBackoffDelay implements RetryPolicy {
-        private final Function<Duration, Delay> fn;
-        private final Delay base;
+        private final Function<Duration, Timer> fn;
+        private final Timer base;
 
-        public ExponentialBackoffDelay(final Delay base,
-                                       final Function<Duration, Delay> fn) {
+        public ExponentialBackoffDelay(final Timer base,
+                                       final Function<Duration, Timer> fn) {
             this.base = base;
             this.fn = fn;
         }
 
         @Override
-        public Optional<Delay> apply(final RetryStatus rs) {
+        public Optional<Timer> apply(final RetryStatus rs) {
             int multiplicand = (int) Math.pow(2,
                                               rs.rsIterNumber
                                              );
@@ -83,29 +83,29 @@ public class RetryPolicies {
      @return a policy that increments by the base the delay between retries
      @see VertxRef#sleep(Duration) to create delays
      */
-    public static RetryPolicy incrementalDelay(final Delay base) {
+    public static RetryPolicy incrementalDelay(final Timer base) {
         return new IncrementalDelay(requireNonNull(base));
     }
 
     /**
      returns a policy that retries forever, with a fixed delay between retries
-     @param delay the fixed delay
+     @param timer the fixed delay
      @return a policy that retries forever, with a fixed delay between retries
      @see VertxRef#sleep(Duration) to create delays
      */
-    public static RetryPolicy constantDelay(final Delay delay) {
-        return rs -> Optional.of(delay);
+    public static RetryPolicy constantDelay(final Timer timer) {
+        return rs -> Optional.of(timer);
     }
 
     /**
      returns a policy that doubles the delay after each retry: delay = 2 * base  attempt
      @param base the base amount of time
-     @param fn a function that produces {@link Delay} from duration of times. You only need the method {@link VertxRef#sleep(Duration)} to define one.
+     @param fn a function that produces {@link Timer} from duration of times. You only need the method {@link VertxRef#sleep(Duration)} to define one.
      @return a policy that doubles the delay after each retry
      @see VertxRef#sleep(Duration) to create delays
      */
     public static RetryPolicy exponentialBackoffDelay(final Duration base,
-                                                      final Function<Duration, Delay> fn) {
+                                                      final Function<Duration, Timer> fn) {
         return new ExponentialBackoffDelay(fn.apply(base),
                                            fn
         );
@@ -117,14 +117,14 @@ public class RetryPolicies {
      delay = random_between(0,min(cap,base*2*attempt))
      @param base the base amount of time
      @param cap the max upper bound
-     @param fn a function that produces {@link Delay} from duration of times. You only need the method {@link VertxRef#sleep(Duration)} to define one.
+     @param fn a function that produces {@link Timer} from duration of times. You only need the method {@link VertxRef#sleep(Duration)} to define one.
      @return a policy that adds some jitter to the backoff
      @see VertxRef#sleep(Duration) to create delays
 
      */
     public static RetryPolicy fullJitter(final Duration base,
                                          final Duration cap,
-                                         final Function<Duration, Delay> fn) {
+                                         final Function<Duration, Timer> fn) {
         return rs -> exponentialBackoffDelay(base,
                                              fn
                                             ).capDelay(fn.apply(cap))
@@ -134,8 +134,8 @@ public class RetryPolicies {
                                                  Duration duration =
                                                          Duration.ofMillis(ThreadLocalRandom.current()
                                                                                             .nextLong(bound));
-                                                 return new Delay(duration,
-                                                                  fn.apply(duration).val
+                                                 return new Timer(duration,
+                                                                  fn.apply(duration).delay
                                                  );
                                              });
     }
@@ -153,7 +153,7 @@ public class RetryPolicies {
      */
     public static RetryPolicy equalJitter(final Duration base,
                                           final Duration cap,
-                                          final Function<Duration, Delay> fn) {
+                                          final Function<Duration, Timer> fn) {
         return rs -> exponentialBackoffDelay(base,
                                              fn
                                             ).capDelay(fn.apply(cap))
@@ -163,8 +163,8 @@ public class RetryPolicies {
                                                  Duration duration =
                                                          Duration.ofMillis(temp.toMillis() + ThreadLocalRandom.current()
                                                                                                               .nextLong(temp.toMillis()));
-                                                 return new Delay(duration,
-                                                                  fn.apply(duration).val
+                                                 return new Timer(duration,
+                                                                  fn.apply(duration).delay
                                                  );
                                              });
 
@@ -179,7 +179,7 @@ public class RetryPolicies {
      */
     public static RetryPolicy decorrelatedJitter(final Duration base,
                                                  final Duration cap,
-                                                 final Function<Duration, Delay> fn) {
+                                                 final Function<Duration, Timer> fn) {
 
         return rs -> {
             if (rs.rsCumulativeDelay == 0) return Optional.of(fn.apply(base));

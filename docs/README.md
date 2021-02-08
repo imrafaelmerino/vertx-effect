@@ -611,8 +611,8 @@ Retry policies are created in a very declarative and composable way, for example
 ```java
 import static vertx.effect.RetryPolicies.*
 
-Delay oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
-Delay oneSec = vertxRef.sleep(Duration.ofSeconds(1));
+Timer oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
+Timer oneSec = vertxRef.sleep(Duration.ofSeconds(1));
 
 // up to five retries waiting 100 ms 
 constantDelay(oneHundredMillis).append(limitRetries(5))
@@ -620,7 +620,7 @@ constantDelay(oneHundredMillis).append(limitRetries(5))
 //during 3 seconds up to 10 times     
 limitRetries(10).limitRetriesByCumulativeDelay(Duration.ofSeconds(3))    
 
-//5 times without delay and then, if it keeps failing, an incremental delay from 100 ms up to 1 second
+//5 times without timer and then, if it keeps failing, an incremental timer from 100 ms up to 1 second
 limiteRetries(5).followedBy(incrementalDelay(oneHundredMillis).capDelay(oneSec))
 
 ```
@@ -1016,7 +1016,7 @@ BiFunction<Integer, String, Val<JsObj>> search =
                                              ),
                                  attempts,
                                  (error, remainingAttempts) ->
-                                             vertxRef.delay(attempts - remainingAttempts + 1,
+                                             vertxRef.timer(attempts - remainingAttempts + 1,
                                                             SECONDS
                                                            )
                                  )

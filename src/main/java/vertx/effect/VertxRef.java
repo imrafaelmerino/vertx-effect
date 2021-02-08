@@ -597,8 +597,8 @@ public class VertxRef {
      @param duration the amount of time
      @return a Delay
      */
-    public Delay sleep(Duration duration) {
-        return new Delay(duration,
+    public Timer sleep(Duration duration) {
+        return new Timer(duration,
                          Val.effect(() -> {
                              EventPublisher.PUBLISHER.timer(Event.TIMER_STARTS_EVENT)
                                                      .accept(vertx);
