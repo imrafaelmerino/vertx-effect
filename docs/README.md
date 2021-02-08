@@ -1241,7 +1241,7 @@ Fields of a http request event:
 ## <a name="requirements"><a/> Requirements
 Java 11 or greater
 
-Vertx version 4.0.0.CR1 
+Vertx version 4.0.2 
 
 ## <a name="installation"><a/> Installation
 
