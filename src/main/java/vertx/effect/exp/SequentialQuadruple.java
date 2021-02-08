@@ -8,13 +8,12 @@ import vertx.effect.Val;
 import java.util.function.Predicate;
 
 
-class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> implements Exp<Tuple4<A, B, C, D>> {
+class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D>  {
 
     private final Val<A> _1;
     private final Val<B> _2;
     private final Val<C> _3;
     private final Val<D> _4;
-    private static final String ATTEMPTS_LOWER_THAN_ONE_ERROR = "attempts < 1";
 
     SequentialQuadruple(final Val<A> _1,
                         final Val<B> _2,
@@ -37,8 +36,8 @@ class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D> implements E
     @Override
     public Val<Tuple4<A, B, C, D>> retryEach(final Predicate<Throwable> predicate,
                                              final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new SequentialQuadruple<>(_1.retry(predicate,
                                                   policy),
                                          _2.retry(predicate,

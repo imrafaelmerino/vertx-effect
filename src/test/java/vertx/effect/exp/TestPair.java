@@ -306,8 +306,8 @@ public class TestPair {
     @Test
     public void test_parallel_pair_exp_map(VertxTestContext context) {
 
-        Pair.parallel(Cons.success("a"),
-                      Cons.success("ab")
+        Pair.parallel(Val.succeed("a"),
+                      Val.succeed("ab")
                      )
             .map(pair -> pair.map((a, b) -> new Tuple2<>(a.length(),
                                                          b.length()
@@ -327,8 +327,8 @@ public class TestPair {
     @Test
     public void test_sequential_pair_exp_map(VertxTestContext context) {
 
-        Pair.sequential(Cons.success("a"),
-                        Cons.success("ab")
+        Pair.sequential(Val.succeed("a"),
+                        Val.succeed("ab")
                        )
             .map(pair -> pair.map((a, b) -> new Tuple2<>(a.length(),
                                                          b.length()
@@ -349,13 +349,13 @@ public class TestPair {
     public void test_parallel_pair_exp_flatmap_success(VertxTestContext context) {
 
 
-        Pair.parallel(Cons.success("a"),
-                      Cons.success("b")
+        Pair.parallel(Val.succeed("a"),
+                      Val.succeed("b")
                      )
-            .flatMap(pair -> Cons.success(pair.map((a, b) -> new Tuple2<>(a.toUpperCase(),
-                                                                          b.toUpperCase()
+            .flatMap(pair -> Val.succeed(pair.map((a, b) -> new Tuple2<>(a.toUpperCase(),
+                                                                         b.toUpperCase()
                                                    )
-                                                  )))
+                                                 )))
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("A",
                                                      "B"
@@ -371,13 +371,13 @@ public class TestPair {
     public void test_sequential_pair_exp_flatmap_success(VertxTestContext context) {
 
 
-        Pair.sequential(Cons.success("a"),
-                        Cons.success("b")
+        Pair.sequential(Val.succeed("a"),
+                        Val.succeed("b")
                        )
-            .flatMap(pair -> Cons.success(pair.map((a, b) -> new Tuple2<>(a.toUpperCase(),
-                                                                          b.toUpperCase()
+            .flatMap(pair -> Val.succeed(pair.map((a, b) -> new Tuple2<>(a.toUpperCase(),
+                                                                         b.toUpperCase()
                                                    )
-                                                  )))
+                                                 )))
             .onSuccess(r -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("A",
                                                      "B"
@@ -393,10 +393,10 @@ public class TestPair {
     public void test_parallel_pair_exp_flatmap_failure(VertxTestContext context) {
 
 
-        Pair.parallel(Cons.success("a"),
-                      Cons.success("ab")
+        Pair.parallel(Val.succeed("a"),
+                      Val.succeed("ab")
                      )
-            .flatMap(s -> Cons.failure(new RuntimeException()))
+            .flatMap(s -> Val.fail(new RuntimeException()))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
                 context.completeNow();
@@ -409,10 +409,10 @@ public class TestPair {
     public void test_sequential_pair_exp_flatmap_failure(VertxTestContext context) {
 
 
-        Pair.sequential(Cons.success("a"),
-                        Cons.success("ab")
+        Pair.sequential(Val.succeed("a"),
+                        Val.succeed("ab")
                        )
-            .flatMap(s -> Cons.failure(new RuntimeException()))
+            .flatMap(s -> Val.fail(new RuntimeException()))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
                 context.completeNow();
@@ -427,8 +427,8 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .recoverWith(e -> Cons.success(new Tuple2<>("",
-                                                        ""
+            .recoverWith(e -> Val.succeed(new Tuple2<>("",
+                                                       ""
             )))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("",
@@ -447,8 +447,8 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .recoverWith(e -> Cons.success(new Tuple2<>("",
-                                                        ""
+            .recoverWith(e -> Val.succeed(new Tuple2<>("",
+                                                       ""
             )))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("",
@@ -467,7 +467,7 @@ public class TestPair {
         Pair.parallel(a.get(),
                       a.get()
                      )
-            .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+            .recoverWith(e -> Val.fail(new IllegalArgumentException()))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
                 Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -482,7 +482,7 @@ public class TestPair {
         Pair.sequential(a.get(),
                         a.get()
                        )
-            .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+            .recoverWith(e -> Val.fail(new IllegalArgumentException()))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
                 Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -497,7 +497,7 @@ public class TestPair {
                       a.get()
                      )
             .retryEach(limitRetries(2))
-            .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+            .recoverWith(e -> Val.fail(new IllegalArgumentException()))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("a",
                                                      "a"
@@ -515,7 +515,7 @@ public class TestPair {
                         a.get()
                        )
             .retryEach(limitRetries(2))
-            .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+            .recoverWith(e -> Val.fail(new IllegalArgumentException()))
             .onSuccess(map -> context.verify(() -> {
                 Assertions.assertEquals(new Tuple2<>("a",
                                                      "a"

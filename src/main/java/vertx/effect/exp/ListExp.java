@@ -1,14 +1,12 @@
 package vertx.effect.exp;
 
-import jsonvalues.JsArray;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class ListExp<O> extends AbstractVal<List<O>> implements Exp<List<O>>{
+public abstract class ListExp<O> extends Exp<List<O>>{
 
     @SuppressWarnings("unchecked")
     @SafeVarargs

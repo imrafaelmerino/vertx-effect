@@ -5,7 +5,6 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
 
-public final class Cond<O> extends AbstractVal<O> implements Exp<O> {
+public final class Cond<O> extends Exp<O> {
 
     private final List<Val<Boolean>> tests;
     private final List<Val<O>> consequences;
@@ -337,8 +336,8 @@ public final class Cond<O> extends AbstractVal<O> implements Exp<O> {
     @Override
     public Val<O> retryEach(final Predicate<Throwable> predicate,
                             final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new Cond<>(tests.stream()
                                .map(it -> it.retry(predicate,
                                                    policy

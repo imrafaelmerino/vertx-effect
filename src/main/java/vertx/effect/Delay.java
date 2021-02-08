@@ -1,7 +1,5 @@
 package vertx.effect;
 
-import vertx.effect.exp.Cons;
-
 import java.time.Duration;
 import java.util.Objects;
 
@@ -16,7 +14,7 @@ public class Delay {
      delay of zero seconds
      */
     public static final Delay ZERO = new Delay(Duration.ofSeconds(0),
-                                               Cons.success(0L)
+                                               Val.succeed(0L)
     );
 
     /**

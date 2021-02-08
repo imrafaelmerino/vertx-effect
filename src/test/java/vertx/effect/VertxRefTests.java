@@ -9,7 +9,6 @@ import jsonvalues.JsObj;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
 
 import java.util.concurrent.CountDownLatch;
@@ -62,11 +61,11 @@ public class VertxRefTests {
     @Test
     public void test_sending_messages(VertxTestContext context) {
 
-        λ<Integer, Integer> inc = i -> Cons.success(i + 1);
+        λ<Integer, Integer> inc = i -> Val.succeed(i + 1);
         Val<VerticleRef<Integer, Integer>> addOneExp = vertxRef.deploy("inc",
                                                                        inc
                                                                       );
-        λ<Integer, Integer> sum = i -> Cons.success(i + 3);
+        λ<Integer, Integer> sum = i -> Val.succeed(i + 3);
         Val<VerticleRef<Integer, Integer>> tripleExp = vertxRef.deploy("incBy3",
                                                                        sum
                                                                       );

@@ -3,18 +3,13 @@ package vertx.effect.core;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import jsonvalues.JsPath;
-import vertx.effect.Failures;
-import vertx.effect.RetryPolicies;
-import vertx.effect.RetryPolicy;
-import vertx.effect.exp.Cons;
+import vertx.effect.*;
 import vertx.effect.httpclient.HttpResp;
-import vertx.effect.λ;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
-import static vertx.effect.Failures.*;
 import static vertx.effect.httpclient.oauth.OauthFailures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION;
 
 @SuppressWarnings("unchecked")
@@ -38,10 +33,10 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
                                           .key("body")
                                           .key("access_token"));
                     if (token == null || token.isEmpty())
-                        return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
-                    return Cons.success(token);
+                        return Val.fail(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                    return Val.succeed(token);
                 } catch (Exception e) {
-                    return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                    return Val.fail(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                 }
             };
     protected Predicate<JsObj> refreshTokenPredicate = resp -> {

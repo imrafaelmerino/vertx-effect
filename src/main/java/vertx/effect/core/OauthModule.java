@@ -6,7 +6,6 @@ import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.IfElse;
 import vertx.effect.httpclient.*;
 import vertx.effect.λ;
@@ -106,7 +105,7 @@ public abstract class OauthModule extends HttpClientModule {
                                                                                           )
                                                                                     .apply(reqParams)
                                                                                )
-                                                                   .alternative(Cons.success(resp))
+                                                                   .alternative(Val.succeed(resp))
 
 
                                                   );
@@ -119,7 +118,7 @@ public abstract class OauthModule extends HttpClientModule {
                                                        ) {
         return (context, reqParams) ->
                 //really important: Cons.of instead of Cons.success to capture the state of this.accessToken
-                IfElse.<String>predicate(Cons.of(() -> Future.succeededFuture(refreshToken || accessToken == null)))
+                IfElse.<String>predicate(Val.effect(() -> Future.succeededFuture(refreshToken || accessToken == null)))
                         .consequence(
                                 accessTokenReq.apply(context,
                                                      this
@@ -129,7 +128,7 @@ public abstract class OauthModule extends HttpClientModule {
                                               .onSuccess(newToken -> this.accessToken = newToken)
                                     )
                         //really important: Cons.of instead of Cons.success to capture the state of this.accessToken
-                        .alternative(Cons.of(() -> Future.succeededFuture(this.accessToken)))
+                        .alternative(Val.effect(() -> Future.succeededFuture(this.accessToken)))
                         .flatMap(token -> resilientReq(req
                                                       ).apply(reqParams.setHeader(authorizationHeaderName,
                                                                                   authorizationHeaderValue.apply(token)

@@ -2,14 +2,15 @@ package vertx.effect.exp;
 
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
+import vertx.effect.core.AbstractVal;
 
 import java.util.function.Predicate;
 
-interface Exp<O> extends Val<O>{
+abstract class Exp<O> extends AbstractVal<O> {
 
-    Val<O> retryEach(final Predicate<Throwable> predicate,
-                     final RetryPolicy policy);
+    public abstract Val<O> retryEach(final Predicate<Throwable> predicate,
+                                     final RetryPolicy policy);
 
-    Val<O> retryEach(final RetryPolicy policy);
+    public abstract Val<O> retryEach(final RetryPolicy policy);
 
 }

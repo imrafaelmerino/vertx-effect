@@ -201,9 +201,9 @@ public class TestTriple {
     public void test_parallel_triple_exp_map(VertxTestContext context) {
 
         Val<Tuple3<Integer, Integer, Integer>> val =
-                Triple.parallel(Cons.success("a"),
-                                Cons.success("ab"),
-                                Cons.success("abc")
+                Triple.parallel(Val.succeed("a"),
+                                Val.succeed("ab"),
+                                Val.succeed("abc")
                                )
                       .map(pair -> pair.map((a, b, c) -> new Tuple3<>(a.length(),
                                                                       b.length(),
@@ -229,9 +229,9 @@ public class TestTriple {
     public void test_sequential_triple_exp_map(VertxTestContext context) {
 
         Val<Tuple3<Integer, Integer, Integer>> val =
-                Triple.sequential(Cons.success("a"),
-                                  Cons.success("ab"),
-                                  Cons.success("abc")
+                Triple.sequential(Val.succeed("a"),
+                                  Val.succeed("ab"),
+                                  Val.succeed("abc")
                                  )
                       .map(pair -> pair.map((a, b, c) -> new Tuple3<>(a.length(),
                                                                       b.length(),
@@ -258,16 +258,16 @@ public class TestTriple {
 
 
         Val<Tuple3<String, String, String>> val =
-                Triple.parallel(Cons.success("a"),
-                                Cons.success("b"),
-                                Cons.success("c")
+                Triple.parallel(Val.succeed("a"),
+                                Val.succeed("b"),
+                                Val.succeed("c")
                                )
-                      .flatMap(pair -> Cons.success(pair.map((a, b, c) -> new Tuple3<>(a.toUpperCase(),
-                                                                                       b.toUpperCase(),
-                                                                                       c.toUpperCase()
+                      .flatMap(pair -> Val.succeed(pair.map((a, b, c) -> new Tuple3<>(a.toUpperCase(),
+                                                                                      b.toUpperCase(),
+                                                                                      c.toUpperCase()
                                                              )
-                                                            )
-                                                   )
+                                                           )
+                                                  )
                               );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(tuple -> Objects.equals(tuple,
                                                                                         new Tuple3<>("A",
@@ -285,16 +285,16 @@ public class TestTriple {
 
 
         Val<Tuple3<String, String, String>> val =
-                Triple.sequential(Cons.success("a"),
-                                  Cons.success("b"),
-                                  Cons.success("c")
+                Triple.sequential(Val.succeed("a"),
+                                  Val.succeed("b"),
+                                  Val.succeed("c")
                                  )
-                      .flatMap(pair -> Cons.success(pair.map((a, b, c) -> new Tuple3<>(a.toUpperCase(),
-                                                                                       b.toUpperCase(),
-                                                                                       c.toUpperCase()
+                      .flatMap(pair -> Val.succeed(pair.map((a, b, c) -> new Tuple3<>(a.toUpperCase(),
+                                                                                      b.toUpperCase(),
+                                                                                      c.toUpperCase()
                                                              )
-                                                            )
-                                                   )
+                                                           )
+                                                  )
                               );
         Verifiers.<Tuple3<String, String, String>>verifySuccess(tuple -> Objects.equals(tuple,
                                                                                         new Tuple3<>("A",
@@ -312,11 +312,11 @@ public class TestTriple {
     public void test_parallel_triple_exp_flatmap_success_failure(VertxTestContext context) {
 
 
-        Val<String> val = Triple.parallel(Cons.success("a"),
-                                          Cons.success("ab"),
-                                          Cons.success("abc")
+        Val<String> val = Triple.parallel(Val.succeed("a"),
+                                          Val.succeed("ab"),
+                                          Val.succeed("abc")
                                          )
-                                .flatMap(s -> Cons.failure(new RuntimeException()));
+                                .flatMap(s -> Val.fail(new RuntimeException()));
 
 
         Verifiers.<String>verifyFailure()
@@ -329,11 +329,11 @@ public class TestTriple {
     public void test_sequential_triple_exp_flatmap_success_failure(VertxTestContext context) {
 
 
-        Val<String> val = Triple.sequential(Cons.success("a"),
-                                            Cons.success("ab"),
-                                            Cons.success("abc")
+        Val<String> val = Triple.sequential(Val.succeed("a"),
+                                            Val.succeed("ab"),
+                                            Val.succeed("abc")
                                            )
-                                .flatMap(s -> Cons.failure(new RuntimeException()));
+                                .flatMap(s -> Val.fail(new RuntimeException()));
 
 
         Verifiers.<String>verifyFailure()
@@ -350,11 +350,11 @@ public class TestTriple {
                                 True.get(),
                                 b.get()
                                )
-                      .recoverWith(e -> Cons.success(new Tuple3<>("",
-                                                                  false,
-                                                                  ""
+                      .recoverWith(e -> Val.succeed(new Tuple3<>("",
+                                                                 false,
+                                                                 ""
                                                      )
-                                                    )
+                                                   )
                                   );
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
                 tuple -> Objects.equals(tuple,
@@ -377,11 +377,11 @@ public class TestTriple {
                                   True.get(),
                                   b.get()
                                  )
-                      .recoverWith(e -> Cons.success(new Tuple3<>("",
-                                                                  false,
-                                                                  ""
+                      .recoverWith(e -> Val.succeed(new Tuple3<>("",
+                                                                 false,
+                                                                 ""
                                                      )
-                                                    )
+                                                   )
                                   );
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
                 tuple -> Objects.equals(tuple,
@@ -404,7 +404,7 @@ public class TestTriple {
                                 True.get(),
                                 b.get()
                                )
-                      .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
+                      .recoverWith(e -> Val.fail(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifyFailure(e -> e instanceof IllegalArgumentException)
                 .accept(val,
@@ -422,7 +422,7 @@ public class TestTriple {
                                   True.get(),
                                   b.get()
                                  )
-                      .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
+                      .recoverWith(e -> Val.fail(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifyFailure(e -> e instanceof IllegalArgumentException)
                 .accept(val,
@@ -440,7 +440,7 @@ public class TestTriple {
                                 b.get()
                                )
                       .retryEach(limitRetries(2))
-                      .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
+                      .recoverWith(e -> Val.fail(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
                 tuple -> Objects.equals(tuple,
@@ -464,7 +464,7 @@ public class TestTriple {
                                   b.get()
                                  )
                       .retryEach(limitRetries(2))
-                      .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
+                      .recoverWith(e -> Val.fail(new IllegalArgumentException()));
 
         Verifiers.<Tuple3<String, Boolean, String>>verifySuccess(
                 tuple -> Objects.equals(tuple,

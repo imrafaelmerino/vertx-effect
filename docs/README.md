@@ -83,62 +83,84 @@ JacksonVsJsValues.jackson     thrpt    5    38816.552 ± 8916.894    ops/s
 JacksonVsJsValues.jsonValues  thrpt    5    51183.223 ± 10154.660   ops/s
 ```
 
-## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
+## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code
 
 ```java
 import jsonvalues.JsInt;
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
 import jsonvalues.spec.JsObjSpec;
+
 import static jsonvalues.JsPath.path;
 import static jsonvalues.spec.JsSpecs.*;
+
+import vertx.effect.Val;
 import vertx.effect.Validators;
 import vertx.effect.VertxModule;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.JsObjExp;
 import vertx.effect.λ;
 
 public class MyModule extends VertxModule {
 
-  public static λ<String, String> toLowerCase, toUpperCase;
-  public static λ<Integer, Integer> inc;
-  public static λ<JsObj, JsObj> validate, validateAndMap;
+    public static λ<String, String> toLowerCase, toUpperCase;
+    public static λ<Integer, Integer> inc;
+    public static λ<JsObj, JsObj> validate, validateAndMap;
 
-  @Override
-  protected void deploy() {
+    @Override
+    protected void deploy() {
 
-    this.deploy("toLowerCase", (String str) -> Cons.success(str.toLowerCase()));
-    this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
-    this.deploy("inc", (Integer n) -> Cons.success(n+1));
-     
-    // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]} 
-    JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
-    this.deploy("validate", Validators.validateJsObj(spec));
+        this.deploy("toLowerCase",
+                    (String str) -> Val.succeed(str.toLowerCase())
+                   );
+        this.deploy("toUpperCase",
+                    (String str) -> Val.succeed(str.toUpperCase())
+                   );
+        this.deploy("inc",
+                    (Integer n) -> Val.succeed(n + 1)
+                   );
 
-    λ<JsObj, JsObj> map = obj-> 
-          JsObjExp.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
-                            "b", JsArrayExp.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
-                                                                .map(JsStr::of),
-                                                     toUpperCase.apply(obj.getStr(path("/b/1")))
-                                                                .map(JsStr::of)
+        // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]} 
+        JsObjSpec spec = JsObjSpec.strict("a",
+                                          integer,
+                                          "b",
+                                          tuple(str,
+                                                str
+                                               )
+                                         );
+        this.deploy("validate",
+                    Validators.validateJsObj(spec)
+                   );
+
+        λ<JsObj, JsObj> map = obj ->
+                JsObjExp.parallel("a",
+                                  inc.apply(obj.getInt("a"))
+                                     .map(JsInt::of),
+                                  "b",
+                                  JsArrayExp.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+                                                                 .map(JsStr::of),
+                                                      toUpperCase.apply(obj.getStr(path("/b/1")))
+                                                                 .map(JsStr::of)
                                                      )
-                            )
-                  .retry(RetryPolicies.limitRetries(2));   
-    this.deploy("validateAnMap",(JsObj obj) -> validate.apply(obj).flatMap(map));
+                                 )
+                        .retry(RetryPolicies.limitRetries(2));
+        this.deploy("validateAnMap",
+                    (JsObj obj) -> validate.apply(obj)
+                                           .flatMap(map)
+                   );
 
-  }
+    }
 
-  @Override
-  protected void initialize() {
+    @Override
+    protected void initialize() {
 
-    toUpperCase = this.ask("toUpperCase");
-    toLowerCase = this.ask("toLowerCase");
-    inc = this.ask("inc");
-    validate = this.ask("validate");
-    validateAndMap = this.ask("validateAnMap");
+        toUpperCase = this.ask("toUpperCase");
+        toLowerCase = this.ask("toLowerCase");
+        inc = this.ask("inc");
+        validate = this.ask("validate");
+        validateAndMap = this.ask("validateAnMap");
 
-  }
+    }
 }
 ```
 **A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them**. 
@@ -614,41 +636,41 @@ each value of the expression instead of the overall expresion with the methods:
 ## <a name="modules"><a/> Modules
  
 In vertx-effect, **a module is a special verticle whose purpose is to deploy other verticles and expose lambdas 
-to communicate with them**. Let's put an example. 
+to communicate with them**. Let's put an example.
 
 ```java
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
+import vertx.effect.Val;
 import vertx.effect.VertxModule;
-import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 public class MyModule extends VertxModule {
 
-  private static final String REMOVE_NULL_ADDRESS = "removeNull";
-  private static final String TRIM_ADDRESS = "trim";
- 
-  public static λ<JsObj, JsObj> removeNull;
-  public static λ<JsObj, JsObj> trim;
- 
-  @Override
-  public void deploy() {
- 
-   this.deploy(REMOVE_NULL_ADDRESS,
-              (JsObj o) -> Cons.success(o.filterAllValues(pair -> pair.value.isNotNull())) 
-              );
-   
-   Function<JsValue, JsValue> trim = JsStr.prism.modify.apply(String::trim);
-   this.deploy(TRIM_ADDRESS,
-              (JsObj o)->  Cons.success(o.mapAllValues(pair -> trim.apply(pair.value)))
-              );
-  }
- 
-  @Override
-  protected void initialize() {
-     removeNull = this.ask(REMOVE_NULL_ADDRESS);
-     trim = this.ask(TRIM_ADDRESS);
-  } 
+    private static final String REMOVE_NULL_ADDRESS = "removeNull";
+    private static final String TRIM_ADDRESS = "trim";
+
+    public static λ<JsObj, JsObj> removeNull;
+    public static λ<JsObj, JsObj> trim;
+
+    @Override
+    public void deploy() {
+
+        this.deploy(REMOVE_NULL_ADDRESS,
+                    (JsObj o) -> Val.succeed(o.filterAllValues(pair -> pair.value.isNotNull()))
+                   );
+
+        Function<JsValue, JsValue> trim = JsStr.prism.modify.apply(String::trim);
+        this.deploy(TRIM_ADDRESS,
+                    (JsObj o) -> Val.succeed(o.mapAllValues(pair -> trim.apply(pair.value)))
+                   );
+    }
+
+    @Override
+    protected void initialize() {
+        removeNull = this.ask(REMOVE_NULL_ADDRESS);
+        trim = this.ask(TRIM_ADDRESS);
+    }
 }
 ```
 

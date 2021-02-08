@@ -43,8 +43,8 @@ public class TestJsArrayExp {
     @Test
     public void test_array_exp_map(VertxTestContext context) {
 
-        JsArrayExp.parallel(Cons.success(JsStr.of("a")),
-                            Cons.success(JsStr.of("b"))
+        JsArrayExp.parallel(Val.succeed(JsStr.of("a")),
+                            Val.succeed(JsStr.of("b"))
                            )
                   .map(arr -> arr.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
                                                                        .apply(value))
@@ -65,12 +65,12 @@ public class TestJsArrayExp {
     @Test
     public void test_array_exp_flatmap_success(VertxTestContext context) {
 
-        JsArrayExp.sequential(Cons.success(JsStr.of("a")),
-                              Cons.success(JsStr.of("b"))
+        JsArrayExp.sequential(Val.succeed(JsStr.of("a")),
+                              Val.succeed(JsStr.of("b"))
                              )
-                  .flatMap(obj -> Cons.success(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                                        .apply(value)
-                                                            ))
+                  .flatMap(obj -> Val.succeed(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                                       .apply(value)
+                                                           ))
                           )
                   .onSuccess(r -> context.verify(() -> {
                       Assertions.assertEquals(JsArray.of("A",
@@ -87,10 +87,10 @@ public class TestJsArrayExp {
 
     @Test
     public void test_array_exp_flatmap_failure(VertxTestContext context) {
-        JsArrayExp.parallel(Cons.success(JsStr.of("a")),
-                            Cons.success(JsStr.of("b"))
+        JsArrayExp.parallel(Val.succeed(JsStr.of("a")),
+                            Val.succeed(JsStr.of("b"))
                            )
-                  .flatMap(s -> Cons.failure(new RuntimeException()))
+                  .flatMap(s -> Val.fail(new RuntimeException()))
                   .onComplete(r -> context.verify(() -> {
                       Assertions.assertTrue(r.failed());
                       context.completeNow();
@@ -325,8 +325,8 @@ public class TestJsArrayExp {
 
     @Test
     public void test_race(final VertxTestContext context) {
-        Val<JsStr> a = Cons.of(() -> Future.succeededFuture(JsStr.of("a")));
-        Val<JsStr> b = Cons.of(() -> Future.succeededFuture(JsStr.of("b")));
+        Val<JsStr> a = Val.effect(() -> Future.succeededFuture(JsStr.of("a")));
+        Val<JsStr> b = Val.effect(() -> Future.succeededFuture(JsStr.of("b")));
         JsArrayExp.parallel()
                   .append(a)
                   .append(b)

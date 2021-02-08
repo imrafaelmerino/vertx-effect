@@ -8,7 +8,7 @@ import vertx.effect.Val;
 import java.util.function.Predicate;
 
 
-final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> implements Exp<Tuple5<A, B, C, D, E>> {
+final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A,B,C,D,E> {
 
     private final Val<A> _1;
     private final Val<B> _2;
@@ -38,8 +38,8 @@ final class SequentialQuintuple<A, B, C, D, E> extends Quintuple<A, B, C, D, E> 
     @Override
     public Val<Tuple5<A, B, C, D, E>> retryEach(final Predicate<Throwable> predicate,
                                                 final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new SequentialQuintuple<>(_1.retry(predicate,
                                                   policy),
                                          _2.retry(predicate,

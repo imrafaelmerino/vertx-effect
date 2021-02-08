@@ -2,7 +2,6 @@ package vertx.effect;
 
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
-import vertx.effect.exp.Cons;
 
 public class MyModule extends VertxModule {
     private static final String REMOVE_NULL_ADDRESS = "removeNull";
@@ -15,16 +14,16 @@ public class MyModule extends VertxModule {
     @Override
     public void deploy() {
         λ<JsObj, JsObj> removeNull = o ->
-                Cons.success(o.filterAllValues(value -> value.isNotNull()));
+                Val.succeed(o.filterAllValues(value -> value.isNotNull()));
         this.deploy(REMOVE_NULL_ADDRESS,
                     removeNull
                    );
 
         λ<JsObj, JsObj> trim = o ->
-                Cons.success(o.mapAllValues(value -> JsStr.prism.modify.apply(String::trim)
+                Val.succeed(o.mapAllValues(value -> JsStr.prism.modify.apply(String::trim)
                                                                       .apply(value)
-                                           )
-                            );
+                                          )
+                           );
         this.deploy(TRIM_ADDRESS,
                     trim
                    );
@@ -34,7 +33,7 @@ public class MyModule extends VertxModule {
     protected void initialize() {
         removeNull = this.ask(REMOVE_NULL_ADDRESS);
         trim = this.ask(TRIM_ADDRESS);
-        λc<String, String> toLowerCase = (context, string) -> Cons.success(string.toLowerCase());
+        λc<String, String> toLowerCase = (context, string) -> Val.succeed(string.toLowerCase());
         this.toLowerCase = vertxRef.spawn("toLowerCase",
                                           toLowerCase
                                          );

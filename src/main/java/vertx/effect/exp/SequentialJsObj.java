@@ -79,8 +79,8 @@ final class SequentialJsObj extends JsObjExp {
     @Override
     public Val<JsObj> retryEach(final Predicate<Throwable> predicate,
                                 final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new SequentialJsObj(bindings.mapValues(it -> it.retry(predicate,
                                                                      policy)));
     }

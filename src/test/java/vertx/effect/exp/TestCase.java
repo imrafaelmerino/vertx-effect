@@ -54,11 +54,11 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_two_branches(VertxTestContext context) {
 
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
-                    Cons.success("a"),
+                    Val.succeed("a"),
                     "b",
-                    Cons.success("b")
+                    Val.succeed("b")
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("a",
@@ -72,12 +72,12 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_two_branches_otherwise(VertxTestContext context) {
 
-        new Case<String, String>(Cons.success("c"))
+        new Case<String, String>(Val.succeed("c"))
                 .of("a",
-                    Cons.success("a"),
+                    Val.succeed("a"),
                     "b",
-                    Cons.success("b"),
-                    Cons.success("otherwise")
+                    Val.succeed("b"),
+                    Val.succeed("otherwise")
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("otherwise",
@@ -90,15 +90,15 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_two_list_branches(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("bb"))
+        new Case<String, Integer>(Val.succeed("bb"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2)
+                    Val.succeed(2)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(2,
@@ -111,16 +111,16 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_two_list_branches_otherwise(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("cc"))
+        new Case<String, Integer>(Val.succeed("cc"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
-                    Cons.success(-1)
+                    Val.succeed(2),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -133,19 +133,19 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_three_list_branches(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("bbb"))
+        new Case<String, Integer>(Val.succeed("bbb"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3)
+                    Val.succeed(3)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(3,
@@ -158,20 +158,20 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_three_list_branches_otherwise(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("ccc"))
+        new Case<String, Integer>(Val.succeed("ccc"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3),
-                    Cons.success(-1)
+                    Val.succeed(3),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -184,23 +184,23 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_four_list_branches(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("bbbb"))
+        new Case<String, Integer>(Val.succeed("bbbb"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3),
+                    Val.succeed(3),
                     Arrays.asList("aaaa",
                                   "bbbb"
                                  ),
-                    Cons.success(4)
+                    Val.succeed(4)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(4,
@@ -213,24 +213,24 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_four_list_branches_otherwise(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("cccc"))
+        new Case<String, Integer>(Val.succeed("cccc"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3),
+                    Val.succeed(3),
                     Arrays.asList("aaaa",
                                   "bbbb"
                                  ),
-                    Cons.success(4),
-                    Cons.success(-1)
+                    Val.succeed(4),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -243,27 +243,27 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_five_list_branches(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("aaaaa"))
+        new Case<String, Integer>(Val.succeed("aaaaa"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3),
+                    Val.succeed(3),
                     Arrays.asList("aaaa",
                                   "bbbb"
                                  ),
-                    Cons.success(4),
+                    Val.succeed(4),
                     Arrays.asList("aaaaa",
                                   "bbbbb"
                                  ),
-                    Cons.success(5)
+                    Val.succeed(5)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(5,
@@ -276,28 +276,28 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_five_list_branches_otherwise(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("ccccc"))
+        new Case<String, Integer>(Val.succeed("ccccc"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3),
+                    Val.succeed(3),
                     Arrays.asList("aaaa",
                                   "bbbb"
                                  ),
-                    Cons.success(4),
+                    Val.succeed(4),
                     Arrays.asList("aaaaa",
                                   "bbbbb"
                                  ),
-                    Cons.success(5),
-                    Cons.success(-1)
+                    Val.succeed(5),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -310,31 +310,31 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_six_list_branches(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("aaaaaa"))
+        new Case<String, Integer>(Val.succeed("aaaaaa"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3),
+                    Val.succeed(3),
                     Arrays.asList("aaaa",
                                   "bbbb"
                                  ),
-                    Cons.success(4),
+                    Val.succeed(4),
                     Arrays.asList("aaaaa",
                                   "bbbbb"
                                  ),
-                    Cons.success(5),
+                    Val.succeed(5),
                     Arrays.asList("aaaaaa",
                                   "bbbbbb"
                                  ),
-                    Cons.success(6)
+                    Val.succeed(6)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(6,
@@ -347,32 +347,32 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_six_list_branches_otherwise(VertxTestContext context) {
-        new Case<String, Integer>(Cons.success("ccccccc"))
+        new Case<String, Integer>(Val.succeed("ccccccc"))
                 .of(Arrays.asList("a",
                                   "b"
                                  ),
-                    Cons.success(1),
+                    Val.succeed(1),
                     Arrays.asList("aa",
                                   "bb"
                                  ),
-                    Cons.success(2),
+                    Val.succeed(2),
                     Arrays.asList("aaa",
                                   "bbb"
                                  ),
-                    Cons.success(3),
+                    Val.succeed(3),
                     Arrays.asList("aaaa",
                                   "bbbb"
                                  ),
-                    Cons.success(4),
+                    Val.succeed(4),
                     Arrays.asList("aaaaa",
                                   "bbbbb"
                                  ),
-                    Cons.success(5),
+                    Val.succeed(5),
                     Arrays.asList("aaaaaa",
                                   "bbbbbb"
                                  ),
-                    Cons.success(6),
-                    Cons.success(-1)
+                    Val.succeed(6),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -386,13 +386,13 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_three_branches(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("c"))
+        new Case<String, Integer>(Val.succeed("c"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3)
+                    Val.succeed(3)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(3,
@@ -406,14 +406,14 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_three_branches_otherwise(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("d"))
+        new Case<String, Integer>(Val.succeed("d"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3),
-                    Cons.success(-1)
+                    Val.succeed(3),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -427,15 +427,15 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_four_branches(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("d"))
+        new Case<String, Integer>(Val.succeed("d"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3),
+                    Val.succeed(3),
                     "d",
-                    Cons.success(4)
+                    Val.succeed(4)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(4,
@@ -449,16 +449,16 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_four_branches_otherwise(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("e"))
+        new Case<String, Integer>(Val.succeed("e"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3),
+                    Val.succeed(3),
                     "d",
-                    Cons.success(4),
-                    Cons.success(-1)
+                    Val.succeed(4),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -472,17 +472,17 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_five_branches(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("e"))
+        new Case<String, Integer>(Val.succeed("e"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3),
+                    Val.succeed(3),
                     "d",
-                    Cons.success(4),
+                    Val.succeed(4),
                     "e",
-                    Cons.success(5)
+                    Val.succeed(5)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(5,
@@ -496,18 +496,18 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_five_branches_otherwise(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("f"))
+        new Case<String, Integer>(Val.succeed("f"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3),
+                    Val.succeed(3),
                     "d",
-                    Cons.success(4),
+                    Val.succeed(4),
                     "e",
-                    Cons.success(5),
-                    Cons.success(-1)
+                    Val.succeed(5),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -521,19 +521,19 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_six_branches(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("f"))
+        new Case<String, Integer>(Val.succeed("f"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3),
+                    Val.succeed(3),
                     "d",
-                    Cons.success(4),
+                    Val.succeed(4),
                     "e",
-                    Cons.success(5),
+                    Val.succeed(5),
                     "f",
-                    Cons.success(6)
+                    Val.succeed(6)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(6,
@@ -547,20 +547,20 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_six_branches_otherwise(VertxTestContext context) {
 
-        new Case<String, Integer>(Cons.success("g"))
+        new Case<String, Integer>(Val.succeed("g"))
                 .of("a",
-                    Cons.success(1),
+                    Val.succeed(1),
                     "b",
-                    Cons.success(2),
+                    Val.succeed(2),
                     "c",
-                    Cons.success(3),
+                    Val.succeed(3),
                     "d",
-                    Cons.success(4),
+                    Val.succeed(4),
                     "e",
-                    Cons.success(5),
+                    Val.succeed(5),
                     "f",
-                    Cons.success(6),
-                    Cons.success(-1)
+                    Val.succeed(6),
+                    Val.succeed(-1)
                    )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(-1,
@@ -574,11 +574,11 @@ public class TestCase {
     @Test
     public void test_case_exp_map(VertxTestContext context) {
 
-        new Case<Integer, String>(Cons.success(5))
+        new Case<Integer, String>(Val.succeed(5))
                 .of(1,
-                    Cons.success("a"),
+                    Val.succeed("a"),
                     5,
-                    Cons.success("bcd")
+                    Val.succeed("bcd")
                    )
                 .map(String::length)
                 .onSuccess(r -> context.verify(() -> {
@@ -595,13 +595,13 @@ public class TestCase {
     @Test
     public void test_case_exp_flatmap_failure(VertxTestContext context) {
 
-        new Case<Integer, String>(Cons.success(5))
+        new Case<Integer, String>(Val.succeed(5))
                 .of(1,
-                    Cons.success("a"),
+                    Val.succeed("a"),
                     5,
-                    Cons.success("bcd")
+                    Val.succeed("bcd")
                    )
-                .flatMap(s -> Cons.failure(new RuntimeException()))
+                .flatMap(s -> Val.fail(new RuntimeException()))
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertTrue(r.failed());
                     context.completeNow();
@@ -613,13 +613,13 @@ public class TestCase {
     @Test
     public void test_case_exp_flatmap_success(VertxTestContext context) {
 
-        new Case<Integer, String>(Cons.success(5))
+        new Case<Integer, String>(Val.succeed(5))
                 .of(1,
-                    Cons.success("a"),
+                    Val.succeed("a"),
                     5,
-                    Cons.success("bcd")
+                    Val.succeed("bcd")
                    )
-                .flatMap(s -> Cons.success(s.length()))
+                .flatMap(s -> Val.succeed(s.length()))
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(3,
                                             r
@@ -635,7 +635,7 @@ public class TestCase {
     public void test_case_exp_succeeds_after_two_retries(VertxTestContext context) {
 
 
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",
@@ -655,7 +655,7 @@ public class TestCase {
     @Test
     public void test_retries_never_happens_because_error_is_texted_false_on_the_predicate(VertxTestContext context) {
 
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",
@@ -676,7 +676,7 @@ public class TestCase {
     @Test
     public void test_retries_if_with_delay(VertxTestContext context) {
 
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",
@@ -698,7 +698,7 @@ public class TestCase {
     @Test
     public void test_retries_happens_because_error_is_texted_true_on_the_predicate(VertxTestContext context) {
 
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",
@@ -722,7 +722,7 @@ public class TestCase {
 
         int  attempts = 2;
         long start    = System.nanoTime();
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",
@@ -744,9 +744,9 @@ public class TestCase {
 
     @Test
     public void test_case_exp_recover(VertxTestContext context) {
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
-                    Cons.failure(new RuntimeException()),
+                    Val.fail(new RuntimeException()),
                     "c",
                     b.get()
                    )
@@ -765,13 +765,13 @@ public class TestCase {
 
     @Test
     public void test_case_exp_fails_and_recover_with_success(VertxTestContext context) {
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
-                    Cons.failure(new RuntimeException()),
+                    Val.fail(new RuntimeException()),
                     "c",
                     b.get()
                    )
-                .recoverWith(e -> e instanceof RuntimeException ? Cons.success("hi!") : Cons.success("bye!"))
+                .recoverWith(e -> e instanceof RuntimeException ? Val.succeed("hi!") : Val.succeed("bye!"))
                 .onSuccess(str -> context.verify(() -> {
                     Assertions.assertEquals("hi!",
                                             str
@@ -784,15 +784,15 @@ public class TestCase {
     @Test
     public void test_case_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
-                    Cons.failure(new RuntimeException()),
+                    Val.fail(new RuntimeException()),
                     "c",
                     b.get()
                    )
                 .recoverWith(e -> e instanceof RuntimeException ?
-                                  Cons.failure(new IllegalArgumentException()) :
-                                  Cons.success("bye!")
+                                  Val.fail(new IllegalArgumentException()) :
+                                  Val.succeed("bye!")
                             )
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertTrue(r.failed());
@@ -804,14 +804,14 @@ public class TestCase {
 
     @Test
     public void test_case_exp_recover_with_success(VertxTestContext context) {
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",
                     b.get()
                    )
                 .retryEach(limitRetries(2))
-                .recoverWith(e -> e instanceof RuntimeException ? Cons.success("hi!") : Cons.success("bye!"))
+                .recoverWith(e -> e instanceof RuntimeException ? Val.succeed("hi!") : Val.succeed("bye!"))
                 .onSuccess(str -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             str
@@ -824,15 +824,15 @@ public class TestCase {
 
     @Test
     public void test_case_exp_fails_and_fallbackto_success(VertxTestContext context) {
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
-                    Cons.failure(new RuntimeException()),
+                    Val.fail(new RuntimeException()),
                     "c",
                     b.get()
                    )
                 .fallbackTo(e -> e instanceof RuntimeException ?
-                                 Cons.success("hi!") :
-                                 Cons.success("bye!"))
+                                 Val.succeed("hi!") :
+                                 Val.succeed("bye!"))
                 .onSuccess(str -> context.verify(() -> {
                     Assertions.assertEquals("hi!",
                                             str
@@ -844,15 +844,15 @@ public class TestCase {
 
     @Test
     public void test_case_exp_fails_and_fallbackto_fails(VertxTestContext context) {
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
-                    Cons.failure(new RuntimeException()),
+                    Val.fail(new RuntimeException()),
                     "c",
                     b.get()
                    )
                 .fallbackTo(e -> e instanceof RuntimeException ?
-                                 Cons.failure(new IllegalArgumentException()) :
-                                 Cons.success("bye!"))
+                                 Val.fail(new IllegalArgumentException()) :
+                                 Val.succeed("bye!"))
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertTrue(r.failed());
                     Assertions.assertTrue(r.cause() instanceof RuntimeException);
@@ -863,7 +863,7 @@ public class TestCase {
 
     @Test
     public void test_case_exp_success_and_fallback_is_not_applied(VertxTestContext context) {
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",
@@ -871,8 +871,8 @@ public class TestCase {
                    )
                 .retryEach(limitRetries(2))
                 .fallbackTo(e -> e instanceof RuntimeException ?
-                                 Cons.success("hi!") :
-                                 Cons.success("bye!"))
+                                 Val.succeed("hi!") :
+                                 Val.succeed("bye!"))
                 .onSuccess(str -> context.verify(() -> {
                     Assertions.assertEquals("a",
                                             str
@@ -887,7 +887,7 @@ public class TestCase {
 
         long start = System.nanoTime();
 
-        new Case<String, String>(Cons.success("a"))
+        new Case<String, String>(Val.succeed("a"))
                 .of("a",
                     a.get(),
                     "c",

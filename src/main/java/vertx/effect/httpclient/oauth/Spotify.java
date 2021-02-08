@@ -3,7 +3,6 @@ package vertx.effect.httpclient.oauth;
 import io.vertx.core.MultiMap;
 import jsonvalues.JsObj;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 import vertx.effect.httpclient.HttpClientModule;
 import vertx.effect.httpclient.PostReq;
 
@@ -43,10 +42,10 @@ public class Spotify {
         return (module, inputs) -> {
             String code = inputs.getStr("code");
             if (code == null || code.isEmpty())
-                return Cons.failure(GET_EMPTY_AUTHORIZATION_CODE_EXCEPTION.apply("Empty code."));
+                return Val.fail(GET_EMPTY_AUTHORIZATION_CODE_EXCEPTION.apply("Empty code."));
             String redirectUri = inputs.getStr("redirect_uri");
             if (redirectUri == null || redirectUri.isEmpty())
-                return Cons.failure(GET_EMPTY_REDIRECT_URL_CODE_EXCEPTION.apply("Empty redirect_uri."));
+                return Val.fail(GET_EMPTY_REDIRECT_URL_CODE_EXCEPTION.apply("Empty redirect_uri."));
 
             String credentials = String.format("%s:%s",
                                                clientId,

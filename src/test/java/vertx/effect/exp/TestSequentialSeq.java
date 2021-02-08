@@ -44,8 +44,8 @@ public class TestSequentialSeq {
 
 
         Val<String> val = ListExp.<String>sequential()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
                 .head();
 
         Verifiers.<String>verifySuccess(head -> Objects.equals(head,
@@ -64,9 +64,9 @@ public class TestSequentialSeq {
         expected.add("b");
         expected.add("c");
         ListExp<String> val = ListExp.<String>sequential()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
-                .append(Cons.success("c"))
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
+                .append(Val.succeed("c"))
                 .tail();
 
 
@@ -146,12 +146,12 @@ public class TestSequentialSeq {
         expected.add("b");
         expected.add("c");
         expected.add("d");
-        ListExp<String> a = ListExp.sequential(Cons.success("a"),
-                                               Cons.success("b")
+        ListExp<String> a = ListExp.sequential(Val.succeed("a"),
+                                               Val.succeed("b")
                                               );
 
-        ListExp<String> b = ListExp.sequential(Cons.success("c"),
-                                               Cons.success("d")
+        ListExp<String> b = ListExp.sequential(Val.succeed("c"),
+                                               Val.succeed("d")
                                               );
 
         a.appendAll(b)
@@ -235,8 +235,8 @@ public class TestSequentialSeq {
         expected.add("A");
         expected.add("B");
         Val<List<String>> val = ListExp.<String>sequential()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
                 .map(it -> it.stream()
                              .map(String::toUpperCase)
                              .collect(Collectors.toList()));
@@ -256,9 +256,9 @@ public class TestSequentialSeq {
     public void test_seqval_exp_flatmap_failure(VertxTestContext context) {
 
         Val<List<String>> val = ListExp.<String>sequential()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
-                .flatMap(s -> Cons.failure(new RuntimeException()));
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
+                .flatMap(s -> Val.fail(new RuntimeException()));
 
 
         Verifiers.<List<String>>verifyFailure()
@@ -275,11 +275,11 @@ public class TestSequentialSeq {
         expected.add("A");
         expected.add("B");
         Val<List<String>> val = ListExp.<String>sequential()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
-                .flatMap(list -> Cons.success(list.stream()
-                                                  .map(String::toUpperCase)
-                                                  .collect(Collectors.toList())));
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
+                .flatMap(list -> Val.succeed(list.stream()
+                                                 .map(String::toUpperCase)
+                                                 .collect(Collectors.toList())));
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
                                                                      expected
@@ -294,9 +294,9 @@ public class TestSequentialSeq {
     @Test
     public void test_size(VertxTestContext context) {
         Assertions.assertEquals(3,
-                                ListExp.sequential(Cons.success(1),
-                                                   Cons.success(2),
-                                                   Cons.success(3)
+                                ListExp.sequential(Val.succeed(1),
+                                                   Val.succeed(2),
+                                                   Val.succeed(3)
                                                   )
                                        .size()
                                );

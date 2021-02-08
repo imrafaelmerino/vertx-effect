@@ -1,6 +1,5 @@
 package vertx.effect.exp;
 
-import jsonvalues.JsArray;
 import jsonvalues.JsObj;
 import jsonvalues.JsValue;
 import vertx.effect.Val;
@@ -14,7 +13,7 @@ import static java.util.Objects.requireNonNull;
  executed asynchronously. When all the futures are completed, all the results are combined into
  a json object.
  */
-public abstract class JsObjExp extends AbstractVal<JsObj> implements Exp<JsObj>{
+public abstract class JsObjExp extends Exp<JsObj>{
 
     /**
      static factory method to create a JsObjFuture of one mapping

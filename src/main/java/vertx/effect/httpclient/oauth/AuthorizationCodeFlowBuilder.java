@@ -7,7 +7,6 @@ import jsonvalues.JsObj;
 import jsonvalues.JsPath;
 import vertx.effect.Val;
 import vertx.effect.core.OauthBuilder;
-import vertx.effect.exp.Cons;
 import vertx.effect.httpclient.HttpClientModule;
 import vertx.effect.httpclient.HttpResp;
 import vertx.effect.λ;
@@ -88,16 +87,16 @@ public class AuthorizationCodeFlowBuilder extends OauthBuilder<AuthorizationCode
                     JsObj  jsonResp    = HttpResp.mapBody2Json.apply(resp);
                     String accessToken = jsonResp.getStr(ACCESS_TOKEN);
                     if (accessToken == null || accessToken.isEmpty())
-                        return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                        return Val.fail(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                     String refreshToken = jsonResp.getStr(REFRESH_TOKEN);
                     if (refreshToken == null || refreshToken.isEmpty())
-                        return Cons.failure(GET_REFRESH_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
-                    return Cons.success(new Tuple2<>(accessToken,
-                                                     refreshToken
+                        return Val.fail(GET_REFRESH_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                    return Val.succeed(new Tuple2<>(accessToken,
+                                                    refreshToken
                                         )
-                                       );
+                                      );
                 } catch (Exception e) {
-                    return Cons.failure(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                    return Val.fail(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                 }
             };
 

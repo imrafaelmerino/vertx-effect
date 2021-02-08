@@ -8,7 +8,6 @@ import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
 
 import static vertx.effect.VertxRef.EVENTS_ADDRESS;
@@ -32,9 +31,9 @@ public class Timeout {
             λ<Integer, Integer> inc = i -> {
                 try {
                     Thread.sleep(10000);
-                    return Cons.success(i + 1);
+                    return Val.succeed(i + 1);
                 } catch (InterruptedException e) {
-                    return Cons.failure(e);
+                    return Val.fail(e);
                 }
 
             };

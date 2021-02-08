@@ -68,7 +68,7 @@ public class TestParallelMap {
                     );
 
         MapExp.parallel("a",
-                        Cons.success("a")
+                        Val.succeed("a")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -96,9 +96,9 @@ public class TestParallelMap {
                      "B"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b")
+                        Val.succeed("b")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -130,11 +130,11 @@ public class TestParallelMap {
                      "C"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c")
+                        Val.succeed("c")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -169,13 +169,13 @@ public class TestParallelMap {
                      "D"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d")
+                        Val.succeed("d")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -212,15 +212,15 @@ public class TestParallelMap {
                      "E"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e")
+                        Val.succeed("e")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -261,17 +261,17 @@ public class TestParallelMap {
                      "F"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f")
+                        Val.succeed("f")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -314,19 +314,19 @@ public class TestParallelMap {
                      "G"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g")
+                        Val.succeed("g")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -372,21 +372,21 @@ public class TestParallelMap {
                      "H"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h")
+                        Val.succeed("h")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -435,23 +435,23 @@ public class TestParallelMap {
                      "I"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h"),
+                        Val.succeed("h"),
                         "i",
-                        Cons.success("i")
+                        Val.succeed("i")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -503,25 +503,25 @@ public class TestParallelMap {
                      "J"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h"),
+                        Val.succeed("h"),
                         "i",
-                        Cons.success("i"),
+                        Val.succeed("i"),
                         "j",
-                        Cons.success("j")
+                        Val.succeed("j")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -576,27 +576,27 @@ public class TestParallelMap {
                      "K"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h"),
+                        Val.succeed("h"),
                         "i",
-                        Cons.success("i"),
+                        Val.succeed("i"),
                         "j",
-                        Cons.success("j"),
+                        Val.succeed("j"),
                         "k",
-                        Cons.success("k")
+                        Val.succeed("k")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -654,29 +654,29 @@ public class TestParallelMap {
                      "L"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h"),
+                        Val.succeed("h"),
                         "i",
-                        Cons.success("i"),
+                        Val.succeed("i"),
                         "j",
-                        Cons.success("j"),
+                        Val.succeed("j"),
                         "k",
-                        Cons.success("k"),
+                        Val.succeed("k"),
                         "l",
-                        Cons.success("l")
+                        Val.succeed("l")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -736,31 +736,31 @@ public class TestParallelMap {
                      "M"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h"),
+                        Val.succeed("h"),
                         "i",
-                        Cons.success("i"),
+                        Val.succeed("i"),
                         "j",
-                        Cons.success("j"),
+                        Val.succeed("j"),
                         "k",
-                        Cons.success("k"),
+                        Val.succeed("k"),
                         "l",
-                        Cons.success("l"),
+                        Val.succeed("l"),
                         "m",
-                        Cons.success("m")
+                        Val.succeed("m")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -823,33 +823,33 @@ public class TestParallelMap {
                      "N"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h"),
+                        Val.succeed("h"),
                         "i",
-                        Cons.success("i"),
+                        Val.succeed("i"),
                         "j",
-                        Cons.success("j"),
+                        Val.succeed("j"),
                         "k",
-                        Cons.success("k"),
+                        Val.succeed("k"),
                         "l",
-                        Cons.success("l"),
+                        Val.succeed("l"),
                         "m",
-                        Cons.success("m"),
+                        Val.succeed("m"),
                         "n",
-                        Cons.success("n")
+                        Val.succeed("n")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -915,35 +915,35 @@ public class TestParallelMap {
                      "O"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b"),
+                        Val.succeed("b"),
                         "c",
-                        Cons.success("c"),
+                        Val.succeed("c"),
                         "d",
-                        Cons.success("d"),
+                        Val.succeed("d"),
                         "e",
-                        Cons.success("e"),
+                        Val.succeed("e"),
                         "f",
-                        Cons.success("f"),
+                        Val.succeed("f"),
                         "g",
-                        Cons.success("g"),
+                        Val.succeed("g"),
                         "h",
-                        Cons.success("h"),
+                        Val.succeed("h"),
                         "i",
-                        Cons.success("i"),
+                        Val.succeed("i"),
                         "j",
-                        Cons.success("j"),
+                        Val.succeed("j"),
                         "k",
-                        Cons.success("k"),
+                        Val.succeed("k"),
                         "l",
-                        Cons.success("l"),
+                        Val.succeed("l"),
                         "m",
-                        Cons.success("m"),
+                        Val.succeed("m"),
                         "n",
-                        Cons.success("n"),
+                        Val.succeed("n"),
                         "o",
-                        Cons.success("o")
+                        Val.succeed("o")
                        )
               .map(m -> m.entrySet()
                          .stream()
@@ -970,13 +970,13 @@ public class TestParallelMap {
                      "B"
                     );
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b")
+                        Val.succeed("b")
                        )
-              .flatMap(m -> Cons.success(m.entrySet()
-                                          .stream()
-                                          .collect(Collectors.toMap(Map.Entry::getKey,
+              .flatMap(m -> Val.succeed(m.entrySet()
+                                         .stream()
+                                         .collect(Collectors.toMap(Map.Entry::getKey,
                                                                     e -> e.getValue()
                                                                           .toUpperCase()
                                                                    ))))
@@ -995,11 +995,11 @@ public class TestParallelMap {
     public void test_map_exp_flatmap_failure(VertxTestContext context) {
 
         MapExp.parallel("a",
-                        Cons.success("a"),
+                        Val.succeed("a"),
                         "b",
-                        Cons.success("b")
+                        Val.succeed("b")
                        )
-              .flatMap(s -> Cons.failure(new RuntimeException()))
+              .flatMap(s -> Val.fail(new RuntimeException()))
               .onComplete(r -> context.verify(() -> {
                   Assertions.assertTrue(r.failed());
                   context.completeNow();
@@ -1042,11 +1042,11 @@ public class TestParallelMap {
     public void test_mapval_exp_fails_and_recover_with_success(VertxTestContext context) {
         Map empty = new LinkedHashMap();
         MapExp.parallel("a",
-                        Cons.failure(new RuntimeException()),
+                        Val.fail(new RuntimeException()),
                         "b",
                         b.get()
                        )
-              .recoverWith(e -> Cons.success(empty))
+              .recoverWith(e -> Val.succeed(empty))
               .onSuccess(map -> context.verify(() -> {
                   Assertions.assertEquals(empty,
                                           map
@@ -1060,11 +1060,11 @@ public class TestParallelMap {
     public void test_mapval_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
         MapExp.parallel("a",
-                        Cons.failure(new RuntimeException()),
+                        Val.fail(new RuntimeException()),
                         "b",
                         b.get()
                        )
-              .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+              .recoverWith(e -> Val.fail(new IllegalArgumentException()))
               .onComplete(r -> context.verify(() -> {
                   Assertions.assertTrue(r.failed());
                   Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -1089,7 +1089,7 @@ public class TestParallelMap {
                        )
               .retryEach(limitRetries(ATTEMPTS)
                              )
-              .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+              .recoverWith(e -> Val.fail(new IllegalArgumentException()))
               .onSuccess(map -> context.verify(() -> {
                   Assertions.assertEquals(expected,
                                           map

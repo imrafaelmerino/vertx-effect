@@ -2,7 +2,6 @@ package vertx.effect.patterns.bankaccount;
 
 import jsonvalues.JsObj;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 import static vertx.effect.patterns.bankaccount.Operation.IS_DEPOSIT;
@@ -25,10 +24,10 @@ public class AccountVerticle implements λ<JsObj, Integer> {
         return validateOp.apply(op)
                          .flatMap(o -> {
                              int amount = amountLens.get.apply(op);
-                             if (IS_DEPOSIT.test(op)) return Cons.success(credit += amount);
+                             if (IS_DEPOSIT.test(op)) return Val.succeed(credit += amount);
                              else {
-                                 if (credit - amount < 0) return Cons.success(BankAccountModule.BROKE_RESP);
-                                 else return Cons.success(credit -= amount);
+                                 if (credit - amount < 0) return Val.succeed(BankAccountModule.BROKE_RESP);
+                                 else return Val.succeed(credit -= amount);
                              }
                          });
     }

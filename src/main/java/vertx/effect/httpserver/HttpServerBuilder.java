@@ -6,7 +6,6 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 
 import java.util.Objects;
 
@@ -50,7 +49,7 @@ public class HttpServerBuilder {
     public Val<HttpServer> startAtRandom(final String localhost,
                                          final int start,
                                          final int end) {
-        if (start > end) return Cons.failure(new IllegalArgumentException("start greater than end"));
+        if (start > end) return Val.fail(new IllegalArgumentException("start greater than end"));
         return startAtRandomRec(localhost,
                                 start,
                                 end
@@ -60,7 +59,7 @@ public class HttpServerBuilder {
     private Val<HttpServer> startAtRandomRec(final String localhost,
                                              final int start,
                                              final int end) {
-        if (start == end) return Cons.failure(new IllegalArgumentException("range of ports exhausted"));
+        if (start == end) return Val.fail(new IllegalArgumentException("range of ports exhausted"));
         return start(localhost,
                      start
                     ).recoverWith(error -> startAtRandomRec(localhost,
@@ -72,10 +71,10 @@ public class HttpServerBuilder {
 
     public Val<HttpServer> start(final String host,
                                  final int port) {
-        return Cons.of(() -> vertx.createHttpServer(options.setHost(host))
-                                  .requestHandler(reqHandler)
-                                  .listen(port)
-                      );
+        return Val.effect(() -> vertx.createHttpServer(options.setHost(host))
+                                     .requestHandler(reqHandler)
+                                     .listen(port)
+                         );
     }
 
     public Val<HttpServer> start(final int port) {
