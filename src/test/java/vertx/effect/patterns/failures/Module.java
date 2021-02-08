@@ -2,8 +2,8 @@ package vertx.effect.patterns.failures;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
+import vertx.effect.Val;
 import vertx.effect.VertxModule;
-import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 import java.util.function.Function;
@@ -28,7 +28,7 @@ public class Module extends VertxModule {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
             }
-            return Cons.success(n + 100);
+            return Val.succeed(n + 100);
         };
 
 

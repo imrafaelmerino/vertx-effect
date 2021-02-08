@@ -1,7 +1,6 @@
 package vertx.effect.patterns.oauth;
 
 import jsonvalues.JsObj;
-import vertx.effect.exp.Cons;
 import vertx.effect.Val;
 import vertx.effect.λ;
 
@@ -13,7 +12,7 @@ public class GetTokenReqVerticle implements λ<JsObj, String> {
     public Val<String> apply(final JsObj input) {
         count += 1;
 
-        return Cons.success(count +"");
+        return Val.succeed(count +"");
 
     }
 }

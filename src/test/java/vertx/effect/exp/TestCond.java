@@ -16,8 +16,8 @@ import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
-import static vertx.effect.exp.Cons.FALSE;
-import static vertx.effect.exp.Cons.TRUE;
+import static vertx.effect.Val.FALSE;
+import static vertx.effect.Val.TRUE;
 
 @ExtendWith(VertxExtension.class)
 public class TestCond {
@@ -56,9 +56,9 @@ public class TestCond {
     public void test_cond_exp_returns_the_first_branch(VertxTestContext context) {
 
         Cond.of(TRUE,
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 FALSE,
-                Cons.success("bye")
+                Val.succeed("bye")
                )
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("hi",
@@ -74,10 +74,10 @@ public class TestCond {
     public void test_cond_exp_returns_the_first_branch_otherwise(VertxTestContext context) {
 
         Cond.of(FALSE,
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 FALSE,
-                Cons.success("bye"),
-                Cons.success("otherwise")
+                Val.succeed("bye"),
+                Val.succeed("otherwise")
                )
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("otherwise",
@@ -97,9 +97,9 @@ public class TestCond {
                                      true
                 );
         Cond.of(valSupplier.get(),
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 FALSE,
-                Cons.success("bye")
+                Val.succeed("bye")
                )
             .retryEach(limitRetries(2))
             .onSuccess(it -> context.verify(() -> {
@@ -120,9 +120,9 @@ public class TestCond {
                                      true
                 );
         Cond.of(valSupplier.get(),
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 FALSE,
-                Cons.success("bye")
+                Val.succeed("bye")
                )
             .retry(limitRetries(4))
             .onSuccess(it -> context.verify(() -> {
@@ -143,10 +143,10 @@ public class TestCond {
                                      false
                 );
         Cond.of(valSupplier.get(),
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 FALSE,
-                Cons.success("bye"),
-                Cons.success("otherwise")
+                Val.succeed("bye"),
+                Val.succeed("otherwise")
                )
             .retryEach(limitRetries(2))
             .onSuccess(it -> context.verify(() -> {
@@ -163,9 +163,9 @@ public class TestCond {
     public void test_cond_exp_returns_the_second_branch(VertxTestContext context) {
 
         Cond.of(FALSE,
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 TRUE,
-                Cons.success("bye")
+                Val.succeed("bye")
                )
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("bye",
@@ -181,10 +181,10 @@ public class TestCond {
     public void test_cond_exp_returns_the_second_branch_otherwise(VertxTestContext context) {
 
         Cond.of(FALSE,
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 FALSE,
-                Cons.success("bye"),
-                Cons.success("otherwise")
+                Val.succeed("bye"),
+                Val.succeed("otherwise")
                )
             .onSuccess(it -> context.verify(() -> {
                 Assertions.assertEquals("otherwise",
@@ -210,10 +210,10 @@ public class TestCond {
                 );
 
         Cond.of(falseSupplier.get(),
-                Cons.success("hi"),
+                Val.succeed("hi"),
                 trueSupplier.get(),
-                Cons.success("bye"),
-                Cons.success("otherwise")
+                Val.succeed("bye"),
+                Val.succeed("otherwise")
                )
             .retryEach(limitRetries(2))
             .onSuccess(it -> context.verify(() -> {
@@ -231,9 +231,9 @@ public class TestCond {
     public void test_cond_exp_map_returns_first(VertxTestContext context) {
 
         Cond.of(TRUE,
-                Cons.success("a"),
+                Val.succeed("a"),
                 FALSE,
-                Cons.success("bcd")
+                Val.succeed("bcd")
                )
             .map(String::toUpperCase)
             .onSuccess(r -> context.verify(() -> {
@@ -249,10 +249,10 @@ public class TestCond {
     public void test_cond_exp_map_returns_first_otherwise(VertxTestContext context) {
 
         Cond.of(FALSE,
-                Cons.success("a"),
+                Val.succeed("a"),
                 FALSE,
-                Cons.success("bcd"),
-                Cons.success("otherwise")
+                Val.succeed("bcd"),
+                Val.succeed("otherwise")
                )
             .map(String::toUpperCase)
             .onSuccess(r -> context.verify(() -> {
@@ -268,9 +268,9 @@ public class TestCond {
     @Test
     public void test_cond_exp_map_returns_second(VertxTestContext context) {
         Cond.of(FALSE,
-                Cons.success("a"),
+                Val.succeed("a"),
                 TRUE,
-                Cons.success("bcd")
+                Val.succeed("bcd")
                )
             .map(String::length)
             .onSuccess(r -> context.verify(() -> {
@@ -287,10 +287,10 @@ public class TestCond {
     @Test
     public void test_cond_exp_map_returns_second_otherwise(VertxTestContext context) {
         Cond.of(FALSE,
-                Cons.success("a"),
+                Val.succeed("a"),
                 FALSE,
-                Cons.success("bcd"),
-                Cons.success("otherwise")
+                Val.succeed("bcd"),
+                Val.succeed("otherwise")
                )
             .map(String::length)
             .onSuccess(r -> context.verify(() -> {
@@ -306,11 +306,11 @@ public class TestCond {
     public void test_case_exp_flatmap(VertxTestContext context) {
 
         Cond.of(FALSE,
-                Cons.success("a"),
+                Val.succeed("a"),
                 TRUE,
-                Cons.success("bcd")
+                Val.succeed("bcd")
                )
-            .flatMap(s -> Cons.failure(new RuntimeException()))
+            .flatMap(s -> Val.fail(new RuntimeException()))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
                 context.completeNow();
@@ -389,7 +389,7 @@ public class TestCond {
     @Test
     public void test_cond_exp_recover_successfully(VertxTestContext context) {
         Cond.of(TRUE,
-                Cons.failure(new RuntimeException()),
+                Val.fail(new RuntimeException()),
                 FALSE,
                 b.get()
                )
@@ -408,13 +408,13 @@ public class TestCond {
     public void test_cond_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
         Cond.of(TRUE,
-                Cons.failure(new RuntimeException()),
+                Val.fail(new RuntimeException()),
                 FALSE,
                 b.get()
                )
             .recoverWith(e -> e instanceof RuntimeException ?
-                              Cons.failure(new IllegalArgumentException()) :
-                              Cons.success("bye!"))
+                              Val.fail(new IllegalArgumentException()) :
+                              Val.succeed("bye!"))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
                 Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -427,11 +427,11 @@ public class TestCond {
     @Test
     public void test_cond_exp_fails_and_recover_with_success(VertxTestContext context) {
         Cond.of(TRUE,
-                Cons.failure(new RuntimeException()),
+                Val.fail(new RuntimeException()),
                 FALSE,
                 b.get()
                )
-            .recoverWith(e -> e instanceof RuntimeException ? Cons.success("hi!") : Cons.success("bye!"))
+            .recoverWith(e -> e instanceof RuntimeException ? Val.succeed("hi!") : Val.succeed("bye!"))
             .onSuccess(str -> context.verify(() -> {
                 Assertions.assertEquals("hi!",
                                         str
@@ -446,11 +446,11 @@ public class TestCond {
     @Test
     public void test_cond_exp_fallbackto_success(VertxTestContext context) {
         Cond.of(TRUE,
-                Cons.failure(new RuntimeException()),
+                Val.fail(new RuntimeException()),
                 FALSE,
                 b.get()
                )
-            .fallbackTo(e -> e instanceof RuntimeException ? Cons.success("hi!") : Cons.success("bye!"))
+            .fallbackTo(e -> e instanceof RuntimeException ? Val.succeed("hi!") : Val.succeed("bye!"))
             .onSuccess(str -> context.verify(() -> {
                 Assertions.assertEquals("hi!",
                                         str
@@ -463,11 +463,11 @@ public class TestCond {
     @Test
     public void test_cond_exp_fallbackto_failure(VertxTestContext context) {
         Cond.of(TRUE,
-                Cons.failure(new RuntimeException()),
+                Val.fail(new RuntimeException()),
                 FALSE,
                 b.get()
                )
-            .fallbackTo(e -> e instanceof RuntimeException ? Cons.failure(new IllegalArgumentException()) : Cons.success("bye!"))
+            .fallbackTo(e -> e instanceof RuntimeException ? Val.fail(new IllegalArgumentException()) : Val.succeed("bye!"))
             .onComplete(r -> context.verify(() -> {
                 Assertions.assertTrue(r.failed());
                 Assertions.assertTrue(r.cause() instanceof RuntimeException);
@@ -487,7 +487,7 @@ public class TestCond {
         );
 
         Cond.of(True.get(),
-                Cons.success("a"),
+                Val.succeed("a"),
                 FALSE,
                 b.get()
                )

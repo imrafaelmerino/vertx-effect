@@ -3,13 +3,12 @@ package vertx.effect.exp;
 import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import java.util.List;
 import java.util.function.Predicate;
 
 
-public final class Case<I, O> extends AbstractVal<O> implements Exp<O> {
+public final class Case<I, O> extends Exp<O> {
 
     private final Val<I> keyVal;
     private Cond<O> cond;
@@ -622,18 +621,19 @@ public final class Case<I, O> extends AbstractVal<O> implements Exp<O> {
     @Override
     public Val<O> retryEach(final RetryPolicy policy) {
         return retryEach(e -> true,
-                         policy);
+                         policy
+                        );
     }
 
     @Override
     public Val<O> retryEach(final Predicate<Throwable> predicate,
                             final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return cond.retryEach(predicate,
-                              policy);
+                              policy
+                             );
     }
-
 
 
     @Override

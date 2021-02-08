@@ -2,7 +2,6 @@ package vertx.effect.mock;
 
 import io.vertx.core.Future;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 
 import java.util.Objects;
 import java.util.function.IntFunction;
@@ -26,11 +25,11 @@ public class ValMock<O> implements Supplier<Val<O>> {
     public ValMock(final IntFunction<O> getValue) {
 
         this.getValue = Objects.requireNonNull(getValue);
-        this.val = Cons.of(() -> {
+        this.val = Val.effect(() -> {
                                counter += 1;
                                return Future.succeededFuture(getValue.apply(counter));
                            }
-                          );
+                             );
     }
 
 

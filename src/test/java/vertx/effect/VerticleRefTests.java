@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.exp.Cons;
 
 import java.util.Set;
 
@@ -34,7 +33,7 @@ public class VerticleRefTests {
 
     @Test
     public void _1(final VertxTestContext context) {
-        λ<Integer, Integer> doubleFn = i -> Cons.success(i * 2);
+        λ<Integer, Integer> doubleFn = i -> Val.succeed(i * 2);
 
 
         //nothing is executing, a val is a lazy data structure

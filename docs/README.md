@@ -6,11 +6,10 @@
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/2.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/2.0.0/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/3.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/3.0.0/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
-
 
 - [vertx-effect manifesto](#manifesto)
 - [How persistent data structures makes a difference working with actors](#persistendata)
@@ -83,62 +82,84 @@ JacksonVsJsValues.jackson     thrpt    5    38816.552 ± 8916.894    ops/s
 JacksonVsJsValues.jsonValues  thrpt    5    51183.223 ± 10154.660   ops/s
 ```
 
-## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code 
+## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code
 
 ```java
 import jsonvalues.JsInt;
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
 import jsonvalues.spec.JsObjSpec;
+
 import static jsonvalues.JsPath.path;
 import static jsonvalues.spec.JsSpecs.*;
+
+import vertx.effect.Val;
 import vertx.effect.Validators;
 import vertx.effect.VertxModule;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.JsObjExp;
 import vertx.effect.λ;
 
 public class MyModule extends VertxModule {
 
-  public static λ<String, String> toLowerCase, toUpperCase;
-  public static λ<Integer, Integer> inc;
-  public static λ<JsObj, JsObj> validate, validateAndMap;
+    public static λ<String, String> toLowerCase, toUpperCase;
+    public static λ<Integer, Integer> inc;
+    public static λ<JsObj, JsObj> validate, validateAndMap;
 
-  @Override
-  protected void deploy() {
+    @Override
+    protected void deploy() {
 
-    this.deploy("toLowerCase", (String str) -> Cons.success(str.toLowerCase()));
-    this.deploy("toUpperCase", (String str) -> Cons.success(str.toUpperCase()));
-    this.deploy("inc", (Integer n) -> Cons.success(n+1));
-     
-    // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]} 
-    JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
-    this.deploy("validate", Validators.validateJsObj(spec));
+        this.deploy("toLowerCase",
+                    (String str) -> Val.succeed(str.toLowerCase())
+                   );
+        this.deploy("toUpperCase",
+                    (String str) -> Val.succeed(str.toUpperCase())
+                   );
+        this.deploy("inc",
+                    (Integer n) -> Val.succeed(n + 1)
+                   );
 
-    λ<JsObj, JsObj> map = obj-> 
-          JsObjExp.parallel("a", inc.apply(obj.getInt("a")).map(JsInt::of),
-                            "b", JsArrayExp.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
-                                                                .map(JsStr::of),
-                                                     toUpperCase.apply(obj.getStr(path("/b/1")))
-                                                                .map(JsStr::of)
+        // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]} 
+        JsObjSpec spec = JsObjSpec.strict("a",
+                                          integer,
+                                          "b",
+                                          tuple(str,
+                                                str
+                                               )
+                                         );
+        this.deploy("validate",
+                    Validators.validateJsObj(spec)
+                   );
+
+        λ<JsObj, JsObj> map = obj ->
+                JsObjExp.parallel("a",
+                                  inc.apply(obj.getInt("a"))
+                                     .map(JsInt::of),
+                                  "b",
+                                  JsArrayExp.parallel(toLowerCase.apply(obj.getStr(path("/b/0")))
+                                                                 .map(JsStr::of),
+                                                      toUpperCase.apply(obj.getStr(path("/b/1")))
+                                                                 .map(JsStr::of)
                                                      )
-                            )
-                  .retry(RetryPolicies.limitRetries(2));   
-    this.deploy("validateAnMap",(JsObj obj) -> validate.apply(obj).flatMap(map));
+                                 )
+                        .retry(RetryPolicies.limitRetries(2));
+        this.deploy("validateAnMap",
+                    (JsObj obj) -> validate.apply(obj)
+                                           .flatMap(map)
+                   );
 
-  }
+    }
 
-  @Override
-  protected void initialize() {
+    @Override
+    protected void initialize() {
 
-    toUpperCase = this.ask("toUpperCase");
-    toLowerCase = this.ask("toLowerCase");
-    inc = this.ask("inc");
-    validate = this.ask("validate");
-    validateAndMap = this.ask("validateAnMap");
+        toUpperCase = this.ask("toUpperCase");
+        toLowerCase = this.ask("toLowerCase");
+        inc = this.ask("inc");
+        validate = this.ask("validate");
+        validateAndMap = this.ask("validateAnMap");
 
-  }
+    }
 }
 ```
 **A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them**. 
@@ -222,11 +243,11 @@ public class TestMyModule {
 
 ```java
 
- λ<String, String> toLowerCase = str -> Cons.success(str.toLowerCase());
+ λ<String, String> toLowerCase = str -> Val.succeed(str.toLowerCase());
  
- λ<String, String> toUpperCase = str -> Cons.success(str.toUpperCase()); 
+ λ<String, String> toUpperCase = str -> Val.succeed(str.toUpperCase()); 
  
- λ<Integer, Integer> inc = n -> Cons.success(n+1);
+ λ<Integer, Integer> inc = n -> Val.succeed(n+1);
  
  JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
  
@@ -305,7 +326,17 @@ Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's 
 import java.util.function.Supplier
 import io.vertx.core.Future
 
-public interface Val<O> extends Supplier<Future<O>> {}
+public abstract class Val<O> extends Supplier<Future<O>> {
+    //from a constant
+    public static Val<O> succeed(O constant);
+    
+    //from a exception
+    public static Val<O> fail(Throwable error);
+    
+    // from an effect
+    public static Val<O> effect(Supplier<Future<O>> effect);
+    
+}
 
 ```
 
@@ -316,9 +347,9 @@ If we turn Future into Val in the previous example:
 
 ```java 
 
-Val<Customer> a = insertDb(customer);
+Val<Customer> a = Val.effect( ()->insertDb(customer) );
 
-Val<Customer> b = insertDb(customer);
+Val<Customer> b = Val.effect( ()->insertDb(customer) );
 
 ```
 
@@ -326,7 +357,7 @@ The above example is entirely equivalent to:
 
 ```java
 
-Val<Customer> c = insertDb(customer)
+Val<Customer> c = Val.effect( ()->insertDb(customer) ); 
 
 Val<Customer> a = c;
 
@@ -357,21 +388,23 @@ be of a type that can be sent across the event bus; otherwise, you must implemen
 **Using expressions and function composition is how we deal with complexity in functional programming**. 
 Let's go over the essential expressions in vertx-effect:
 
-- **Cons** (stands for constant). 
-
+- **Val constructors** 
 
 ```java
 import io.vertx.core.Future
 
 public final class Cons<O> implements Val<O>{...}
 
-Val<String> str = Cons.success("hi"); // from a constant
+Val<String> str = Val.succeed("hi"); // from a constant
 
 // from an error
-Val<Throwable> error = Cons.failure(new RuntimeException("something went wrong :("));
+Val<Throwable> error = Val.fail(new RuntimeException("something went wrong :("));
 
+//from effects
 Future<JsObj> getProfile(final String id){...}
-Val<JsObj> profile = Cons.of( () -> getProfile(id)); // from a Future
+Val<JsObj> profile = Val.effect( () -> getProfile(id)); // from a Future
+
+Val<Long> realTime = Val.effect(() -> System.currentTimeMillis() );
 ``` 
 
 
@@ -418,12 +451,12 @@ new Case<I,O>(Val<I>).of(cons of type I, Val<O>,
                         );      
 
 // reduces to Wednesday
-new Case<Integer,String>(Cons.success(3)).of(1, Cons.success("Monday"),
-                                             2, Cons.success("Tuesday"),
-                                             3, Cons.success("Wednesday"),
-                                             4, Cons.success("Thursday"),
-                                             5, Cons.success("Friday"),
-                                             Cons.success("weekend")
+new Case<Integer,String>(Val.succeed(3)).of(1, Val.succeed("Monday"),
+                                             2, Val.succeed("Tuesday"),
+                                             3, Val.succeed("Wednesday"),
+                                             4, Val.succeed("Thursday"),
+                                             5, Val.succeed("Friday"),
+                                             Val.succeed("weekend")
                                             );
 ```
 
@@ -438,12 +471,12 @@ new Case<I,O>(Val<I>).of(List<I>, Val<O>,
                         );      
         
 // reduces to third week
-new Case<Integer,String>(Cons.success(20))
-                 .of(asList(1, 2, 3, 4, 5, 6, 7), Cons.success("first week"),
-                     asList(8, 9, 10, 11, 12, 13, 14), Cons.success("second week"),
-                     asList(15, 16, 17, 18, 19, 20, 10), Cons.success("third week"),
-                     asList(21, 12, 23, 24, 25, 26, 27), Cons.success("forth week"),
-                     Cons.success("last days of the month")
+new Case<Integer,String>(Val.succeed(20))
+                 .of(asList(1, 2, 3, 4, 5, 6, 7), Val.succeed("first week"),
+                     asList(8, 9, 10, 11, 12, 13, 14), Val.succeed("second week"),
+                     asList(15, 16, 17, 18, 19, 20, 10), Val.succeed("third week"),
+                     asList(21, 12, 23, 24, 25, 26, 27), Val.succeed("forth week"),
+                     Val.succeed("last days of the month")
                     );
 ```
     
@@ -555,8 +588,8 @@ public interface Val<O> extends Supplier<Future<O>> {
     Val<O> retry(Predicate<Throwable>,
                  RetryPolicy policy);
 
-    Val<O> retryOnFailure(Predicate<O> predicate,
-                          RetryPolicy policy);
+    Val<O> repeat(Predicate<O> predicate,
+                  RetryPolicy policy);
 
     Val<O> recoverWith(λ<Throwable, O> fn);
 
@@ -578,8 +611,8 @@ Retry policies are created in a very declarative and composable way, for example
 ```java
 import static vertx.effect.RetryPolicies.*
 
-Delay oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
-Delay oneSec = vertxRef.sleep(Duration.ofSeconds(1));
+Timer oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
+Timer oneSec = vertxRef.sleep(Duration.ofSeconds(1));
 
 // up to five retries waiting 100 ms 
 constantDelay(oneHundredMillis).append(limitRetries(5))
@@ -587,7 +620,7 @@ constantDelay(oneHundredMillis).append(limitRetries(5))
 //during 3 seconds up to 10 times     
 limitRetries(10).limitRetriesByCumulativeDelay(Duration.ofSeconds(3))    
 
-//5 times without delay and then, if it keeps failing, an incremental delay from 100 ms up to 1 second
+//5 times without timer and then, if it keeps failing, an incremental timer from 100 ms up to 1 second
 limiteRetries(5).followedBy(incrementalDelay(oneHundredMillis).capDelay(oneSec))
 
 ```
@@ -595,62 +628,60 @@ limiteRetries(5).followedBy(incrementalDelay(oneHundredMillis).capDelay(oneSec))
 There are very interesting policies implemented based on [this article](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/):
 exponential backoff, full jitter, equal jitter, decorrelated jitter etc
 
-**retryOnFailure**: A failure is a not expected value. The specified predicate catches the failures. You can define any
-imaginable policy as well.
+**repeat**: When you get a not expected value (a failure) and want to repeat the computation. A predicate is
+specified to catch the failures. You can define any imaginable policy as well. Imagine you make a http request
+and you get a 500. That's not an error, it's a server failure. You can repeat the request according to a 
+policy.
 
-For expressions like **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, you can apply
-the retry policy to each value of the expression instead of the overall result with the methods:
+For expressions like **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, you can retry 
+each value of the expression instead of the overall expresion with the methods:
 
 ```java
     Val<O> retryEach(RetryPolicy policy);
 
     Val<O> retryEach(Predicate<Throwable>,
-                 RetryPolicy policy);
+                     RetryPolicy policy);
 
-    Val<O> retryEachOnFailure(Predicate<O> predicate,
-                              RetryPolicy policy);
 ```
-
-
 
 ## <a name="modules"><a/> Modules
  
 In vertx-effect, **a module is a special verticle whose purpose is to deploy other verticles and expose lambdas 
-to communicate with them**. Let's put an example. 
+to communicate with them**. Let's put an example.
 
 ```java
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
+import vertx.effect.Val;
 import vertx.effect.VertxModule;
-import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 public class MyModule extends VertxModule {
 
-  private static final String REMOVE_NULL_ADDRESS = "removeNull";
-  private static final String TRIM_ADDRESS = "trim";
- 
-  public static λ<JsObj, JsObj> removeNull;
-  public static λ<JsObj, JsObj> trim;
- 
-  @Override
-  public void deploy() {
- 
-   this.deploy(REMOVE_NULL_ADDRESS,
-              (JsObj o) -> Cons.success(o.filterAllValues(pair -> pair.value.isNotNull())) 
-              );
-   
-   Function<JsValue, JsValue> trim = JsStr.prism.modify.apply(String::trim);
-   this.deploy(TRIM_ADDRESS,
-              (JsObj o)->  Cons.success(o.mapAllValues(pair -> trim.apply(pair.value)))
-              );
-  }
- 
-  @Override
-  protected void initialize() {
-     removeNull = this.ask(REMOVE_NULL_ADDRESS);
-     trim = this.ask(TRIM_ADDRESS);
-  } 
+    private static final String REMOVE_NULL_ADDRESS = "removeNull";
+    private static final String TRIM_ADDRESS = "trim";
+
+    public static λ<JsObj, JsObj> removeNull;
+    public static λ<JsObj, JsObj> trim;
+
+    @Override
+    public void deploy() {
+
+        this.deploy(REMOVE_NULL_ADDRESS,
+                    (JsObj o) -> Val.succeed(o.filterAllValues(pair -> pair.value.isNotNull()))
+                   );
+
+        Function<JsValue, JsValue> trim = JsStr.prism.modify.apply(String::trim);
+        this.deploy(TRIM_ADDRESS,
+                    (JsObj o) -> Val.succeed(o.mapAllValues(pair -> trim.apply(pair.value)))
+                   );
+    }
+
+    @Override
+    protected void initialize() {
+        removeNull = this.ask(REMOVE_NULL_ADDRESS);
+        trim = this.ask(TRIM_ADDRESS);
+    }
 }
 ```
 
@@ -816,11 +847,11 @@ same email. That's only an example.
     @Override
     protected void deploy() {
 
-        this.deploy(IS_LEGAL_AGE, (Integer age) -> Cons.success(age > 16));
+        this.deploy(IS_LEGAL_AGE, (Integer age) -> Val.succeed(age > 16));
 
-        this.deploy(IS_VALID_ID, (String id) -> Cons.success(!id.isEmpty()));
+        this.deploy(IS_VALID_ID, (String id) -> Val.succeed(!id.isEmpty()));
         
-        this.deploy(IS_VALID_EMAIL, (String email) -> Cons.success(!email.isEmpty()));
+        this.deploy(IS_VALID_EMAIL, (String email) -> Val.succeed(!email.isEmpty()));
 
         λc<JsObj, Boolean> isValid = (context, obj) ->
                 All.parallel(isLegalAge.apply(context,
@@ -985,11 +1016,11 @@ BiFunction<Integer, String, Val<JsObj>> search =
                                              ),
                                  attempts,
                                  (error, remainingAttempts) ->
-                                             vertxRef.delay(attempts - remainingAttempts + 1,
+                                             vertxRef.timer(attempts - remainingAttempts + 1,
                                                             SECONDS
                                                            )
                                  )
-                          .recoverWith(e -> Cons.success(JsObj.EMPTY));
+                          .recoverWith(e -> Val.succeed(JsObj.EMPTY));
 
 search.apply(3, "vertx").get();
 
@@ -1218,7 +1249,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>2.0.0</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 

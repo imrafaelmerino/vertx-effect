@@ -3,13 +3,12 @@ package vertx.effect.exp;
 import io.vertx.core.Future;
 import vertx.effect.RetryPolicy;
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-public final class IfElse<O> extends AbstractVal<O> implements Exp<O> {
+public final class IfElse<O> extends Exp<O> {
 
     private final Val<Boolean> predicate;
     private Val<O> consequence;
@@ -20,7 +19,7 @@ public final class IfElse<O> extends AbstractVal<O> implements Exp<O> {
     }
 
     public static <O> IfElse<O> predicate(boolean bool) {
-        return new IfElse<>(requireNonNull(Cons.success(bool)));
+        return new IfElse<>(requireNonNull(Val.succeed(bool)));
     }
 
     IfElse(final Val<Boolean> predicate) {
@@ -57,8 +56,8 @@ public final class IfElse<O> extends AbstractVal<O> implements Exp<O> {
     @Override
     public Val<O> retryEach(final Predicate<Throwable> retryPredicate,
                             final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new IfElse<O>(predicate.retry(retryPredicate,
                                              policy
                                             ))

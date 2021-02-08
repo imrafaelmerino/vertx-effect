@@ -337,8 +337,8 @@ public class TestAll {
     @Test
     public void test_sequential_map(final VertxTestContext context) {
 
-        All.sequential(Cons.success(true),
-                       Cons.success(true)
+        All.sequential(Val.succeed(true),
+                       Val.succeed(true)
                       )
            .map(it -> !it)
            .onSuccess(result -> context.verify(() -> {
@@ -351,8 +351,8 @@ public class TestAll {
     @Test
     public void test_parallel_map(final VertxTestContext context) {
 
-        All.parallel(Cons.success(true),
-                     Cons.success(true)
+        All.parallel(Val.succeed(true),
+                     Val.succeed(true)
                     )
            .map(it -> !it)
            .onSuccess(result -> context.verify(() -> {

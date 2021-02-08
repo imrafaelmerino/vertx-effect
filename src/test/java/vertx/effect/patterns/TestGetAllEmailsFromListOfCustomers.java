@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.Val;
 import vertx.effect.Validators;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.JsObjExp;
 import vertx.effect.patterns.oauth.GetTokenReqVerticle;
@@ -25,8 +24,8 @@ public class TestGetAllEmailsFromListOfCustomers {
 
     public static λ<String, JsArray> getCustomerEmails =
             id -> JsArrayExp.sequential()
-                            .append(Cons.success(JsStr.of(id + "_a")))
-                            .append(Cons.success(JsStr.of(id + "_b")));
+                            .append(Val.succeed(JsStr.of(id + "_a")))
+                            .append(Val.succeed(JsStr.of(id + "_b")));
 
 
     public static λ<JsArray, JsArray> getCustomersEmails =
@@ -34,7 +33,7 @@ public class TestGetAllEmailsFromListOfCustomers {
                              .apply(ids)
                              .flatMap($ -> ids.stream()
                                               .map(pair -> pair.value.toJsStr().value)
-                                              .reduce(Cons.success(JsArray.empty()),
+                                              .reduce(Val.succeed(JsArray.empty()),
                                                       (acc, id) -> acc.flatMap(emails -> getCustomerEmails.apply(id)
                                                                                                           .map(emails::appendAll)
                                                                               ),
@@ -45,7 +44,7 @@ public class TestGetAllEmailsFromListOfCustomers {
     public static final λ<JsObj, JsArray> getCustomerEmailsRec =
             input -> {
                 JsArray ids = input.getArray("ids");
-                if (ids.isEmpty()) return Cons.success(input.getArray("acc"));
+                if (ids.isEmpty()) return Val.succeed(input.getArray("acc"));
                 String head = ids.head()
                                  .toJsStr().value;
                 Val<JsArray> headEmailsVal = getCustomerEmails.apply(head);
@@ -66,12 +65,12 @@ public class TestGetAllEmailsFromListOfCustomers {
     public static final λ<JsObj, JsArray> getCustomerEmailsRecI =
             input -> {
                 JsArray ids = input.getArray("ids");
-                if (ids.isEmpty()) return Cons.success(input.getArray("acc"));
+                if (ids.isEmpty()) return Val.succeed(input.getArray("acc"));
                 String head = ids.head()
                                  .toJsStr().value;
 
                 return JsObjExp.sequential("ids",
-                                           Cons.success(ids.tail()),
+                                           Val.succeed(ids.tail()),
                                            "acc",
                                            getCustomerEmails.apply(head)
                                           )

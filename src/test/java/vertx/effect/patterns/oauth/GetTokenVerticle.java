@@ -2,7 +2,6 @@ package vertx.effect.patterns.oauth;
 
 import jsonvalues.JsObj;
 import vertx.effect.Failures;
-import vertx.effect.exp.Cons;
 import vertx.effect.Val;
 import vertx.effect.λ;
 
@@ -10,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 
 public class GetTokenVerticle implements λ<JsObj, String> {
 
-    private final Val<String> BAD_MESSAGE = Cons.failure(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("GetTokenMessage or RenewTokenMessage expected"));
+    private final Val<String> BAD_MESSAGE = Val.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("GetTokenMessage or RenewTokenMessage expected"));
 
     private String token;
 
@@ -35,7 +34,7 @@ public class GetTokenVerticle implements λ<JsObj, String> {
                                               if (token == null)
                                                   return getTokenReq.apply(getMessage)
                                                                     .onSuccess(newToken -> token = newToken);
-                                              return Cons.success(token);
+                                              return Val.succeed(token);
                                           },
                                           $ -> validateRenewMessage.apply(input)
                                                                    .flatMap(renewMessage ->

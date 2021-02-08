@@ -67,8 +67,8 @@ final class SequentialJsArray extends JsArrayExp {
     @Override
     public Val<JsArray> retryEach(final Predicate<Throwable> predicate,
                                   final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new SequentialJsArray(seq.map(it -> it.retry(predicate,
                                                             policy
                                                            )));
@@ -85,7 +85,7 @@ final class SequentialJsArray extends JsArrayExp {
 
     @Override
     public Val<JsValue> race() {
-        return Cons.failure(new IllegalCallerException("race doesn't make any sense in a sequential execution"));
+        return Val.fail(new IllegalCallerException("race doesn't make any sense in a sequential execution"));
     }
 
     @Override

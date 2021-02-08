@@ -6,7 +6,6 @@ import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.exp.Cons;
 
 @ExtendWith(VertxExtension.class)
 public class TestLambdas {
@@ -15,9 +14,9 @@ public class TestLambdas {
     @Test
     public void test_and_then(final VertxTestContext context) {
 
-        λc<String, Integer> count = (c, str) -> Cons.success(str.length());
+        λc<String, Integer> count = (c, str) -> Val.succeed(str.length());
 
-        λc<Integer, Boolean> isOdd = (c, n) -> Cons.success(n % 2 == 1);
+        λc<Integer, Boolean> isOdd = (c, n) -> Val.succeed(n % 2 == 1);
 
         λc<String, Boolean> λc = count.andThen(isOdd);
 
@@ -35,7 +34,7 @@ public class TestLambdas {
 
         λc<String, Integer> count = (c, str) -> {
             System.out.println(c);
-            return Cons.success(str.length());
+            return Val.succeed(str.length());
         };
 
         λ<String, Integer> lambda = count.apply(MultiMap.caseInsensitiveMultiMap()

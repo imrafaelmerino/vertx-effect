@@ -32,8 +32,8 @@ public final class ParallelTriple<A, B, C> extends Triple<A, B, C> {
     @Override
     public Val<Tuple3<A, B, C>> retryEach(final Predicate<Throwable> predicate,
                                           final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new ParallelTriple<>(_1.retry(predicate,
                                              policy),
                                     _2.retry(predicate,

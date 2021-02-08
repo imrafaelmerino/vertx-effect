@@ -14,7 +14,7 @@ class Functions {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <O> Val<O> race(List<Val<? extends O>> seq) {
-        return Cons.of(() ->
+        return Val.effect(() ->
                        {
                            java.util.List futures = seq.map(Supplier::get)
                                                        .toJavaList();

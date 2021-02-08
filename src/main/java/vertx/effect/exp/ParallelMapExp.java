@@ -58,8 +58,8 @@ final class ParallelMapExp<O> extends MapExp<O>  {
     @Override
     public Val<Map<String, O>> retryEach(final Predicate<Throwable> predicate,
                                          final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new ParallelMapExp<>(bindings.mapValues(it -> it.retry(predicate,
                                                                       policy)));
 

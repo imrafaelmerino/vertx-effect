@@ -9,7 +9,6 @@ import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.Pair;
 
 import java.util.function.Consumer;
@@ -110,10 +109,10 @@ public class VertxModuleTest extends VertxModule {
         incCounter = this.ask("incCounter");
         getCounter = this.<Integer, Integer>ask("getCounter").apply(null);
         mulBy1000 = vertxRef.spawn("mulBy1000",
-                                   n -> Cons.success(1000 * n)
+                                   n -> Val.succeed(1000 * n)
                                   );
         mulBy10000 = vertxRef.spawn("mulBy10000",
-                                    n -> Cons.success(10000 * n),
+                                    n -> Val.succeed(10000 * n),
                                     new DeploymentOptions().setWorker(true)
                                    );
 
@@ -121,12 +120,12 @@ public class VertxModuleTest extends VertxModule {
 
     @Override
     protected void deploy() {
-        λ<Integer, Integer> mulByTwo = i -> Cons.success(i * 2);
+        λ<Integer, Integer> mulByTwo = i -> Val.succeed(i * 2);
         deploy("double",
                mulByTwo
               );
 
-        λ<Integer, Integer> mulByThree = i -> Cons.success(i * 3);
+        λ<Integer, Integer> mulByThree = i -> Val.succeed(i * 3);
         deploy("triple",
                mulByThree,
                new DeploymentOptions().setInstances(3)

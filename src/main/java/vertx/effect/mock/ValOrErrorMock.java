@@ -2,7 +2,6 @@ package vertx.effect.mock;
 
 import io.vertx.core.Future;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
@@ -48,13 +47,13 @@ public class ValOrErrorMock<O> implements Supplier<Val<O>> {
         this.getError = getError;
         this.testIfError = testIfError;
         this.value = value;
-        this.val = Cons.of(() -> {
+        this.val = Val.effect(() -> {
                                counter += 1;
                                if (testIfError.test(counter))
                                    return Future.failedFuture(getError.apply(counter));
                                return Future.succeededFuture(value);
                            }
-                          );
+                             );
     }
 
     /**

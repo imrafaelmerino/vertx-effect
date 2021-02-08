@@ -1,8 +1,8 @@
 package vertx.effect.patterns.exp;
 
 import io.vertx.core.DeploymentOptions;
+import vertx.effect.Val;
 import vertx.effect.VertxModule;
-import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 public class Module extends VertxModule {
@@ -27,14 +27,14 @@ public class Module extends VertxModule {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
             }
-            return Cons.success(s.toLowerCase());
+            return Val.succeed(s.toLowerCase());
         };
         λ<String, String> toUpperCaseAfter200ms = s -> {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
             }
-            return Cons.success(s.toUpperCase());
+            return Val.succeed(s.toUpperCase());
         };
 
         λ<String, String> head = s -> {
@@ -42,14 +42,14 @@ public class Module extends VertxModule {
                 Thread.sleep(300);
             } catch (InterruptedException e) {
             }
-            return Cons.success(s.substring(0,1));
+            return Val.succeed(s.substring(0, 1));
         };
         λ<String, String> tail = s -> {
             try {
                 Thread.sleep(400);
             } catch (InterruptedException e) {
             }
-            return Cons.success(s.substring(1));
+            return Val.succeed(s.substring(1));
         };
         this.deploy("head",
                     head,

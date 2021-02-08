@@ -19,7 +19,7 @@ public class SumJsonStringLengthWithVerticles implements λ<Integer, Integer> {
         return IntStream.range(0,
                                times
                               )
-                        .mapToObj(n -> Cons.of(() -> generator.apply(DELAY)
+                        .mapToObj(n -> Val.effect(() -> generator.apply(DELAY)
                                                               .flatMap(filter.andThen(map)
                                                                              .andThen(reduce)
                                                                       )

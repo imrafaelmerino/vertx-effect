@@ -177,8 +177,8 @@ public class TestAny {
     public void test_parallel_map(final VertxTestContext context,
                                   final Vertx vertx) {
 
-        Any.parallel(Cons.success(true),
-                     Cons.success(true)
+        Any.parallel(Val.succeed(true),
+                     Val.succeed(true)
                     )
            .map(it -> !it)
            .onSuccess(result -> {
@@ -194,8 +194,8 @@ public class TestAny {
     public void test_sequential_map(final VertxTestContext context,
                                     final Vertx vertx) {
 
-        Any.sequential(Cons.success(true),
-                       Cons.success(true)
+        Any.sequential(Val.succeed(true),
+                       Val.succeed(true)
                       )
            .map(it -> !it)
            .onSuccess(result -> {

@@ -5,7 +5,7 @@ import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Delay;
+import vertx.effect.Timer;
 import vertx.effect.RetryPolicies;
 import vertx.effect.RetryStatus;
 import vertx.effect.VertxRef;
@@ -20,7 +20,7 @@ public class TestPolicies {
     public void test_simulation_1(Vertx vertx) {
         VertxRef ref = new VertxRef(vertx);
 
-        Delay base = ref.sleep(Duration.ofMillis(10));
+        Timer base = ref.sleep(Duration.ofMillis(10));
         List<RetryStatus> simulation = RetryPolicies.incrementalDelay(base)
                                                     .limitRetriesByCumulativeDelay(Duration.ofMillis(120))
                                                     .simulate(20);
@@ -41,7 +41,7 @@ public class TestPolicies {
     public void test_simulation_2(Vertx vertx) {
         VertxRef ref = new VertxRef(vertx);
 
-        Delay base = ref.sleep(Duration.ofMillis(10));
+        Timer base = ref.sleep(Duration.ofMillis(10));
         int   cap  = 100;
         List<RetryStatus> simulation = RetryPolicies.incrementalDelay(base)
                                                     .capDelay(ref.sleep(Duration.ofMillis(cap)))
@@ -59,7 +59,7 @@ public class TestPolicies {
     public void test_simulation_3(Vertx vertx) {
         VertxRef ref = new VertxRef(vertx);
 
-        Delay base = ref.sleep(Duration.ofMillis(10));
+        Timer base = ref.sleep(Duration.ofMillis(10));
         int   acc  = 150;
         List<RetryStatus> simulation = RetryPolicies.incrementalDelay(base)
                                                     .limitRetriesByCumulativeDelay(Duration.ofMillis(acc))
@@ -78,7 +78,7 @@ public class TestPolicies {
     public void test_simulation_4(Vertx vertx) {
         VertxRef ref = new VertxRef(vertx);
 
-        Delay base = ref.sleep(Duration.ofMillis(10));
+        Timer base = ref.sleep(Duration.ofMillis(10));
         List<RetryStatus> simulation = RetryPolicies.incrementalDelay(base)
                                                     .limitRetriesByDelay(Duration.ofMillis(100))
                                                     .simulate(20);
@@ -97,7 +97,7 @@ public class TestPolicies {
         VertxRef ref = new VertxRef(vertx);
 
         Duration tenMillis = Duration.ofMillis(10);
-        Delay    base      = ref.sleep(tenMillis);
+        Timer    base      = ref.sleep(tenMillis);
         List<RetryStatus> simulation = RetryPolicies.incrementalDelay(base)
                                                     .append(RetryPolicies.limitRetries(2))
                                                     .followedBy(RetryPolicies.constantDelay(base)
@@ -133,7 +133,7 @@ public class TestPolicies {
 
         Duration tenMillis = Duration.ofMillis(10);
 
-        Delay cap = ref.sleep(Duration.ofMillis(400));
+        Timer cap = ref.sleep(Duration.ofMillis(400));
 
 
         List<RetryStatus> simulation = RetryPolicies.exponentialBackoffDelay(tenMillis,

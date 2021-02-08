@@ -7,7 +7,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import vertx.effect.core.EventPublisher;
-import vertx.effect.exp.Cons;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +69,7 @@ public class VerticleRef<I, O> {
 
     public λ<I, O> ask(final DeliveryOptions options) {
         requireNonNull(options);
-        return body -> Cons.of(() -> {
+        return body -> Val.effect(() -> {
                                    try {
                                        MessageEvent messageEvent = new MessageEvent();
                                        messageEvent.address = address;
@@ -105,7 +104,7 @@ public class VerticleRef<I, O> {
                                        return Future.failedFuture(e);
                                    }
                                }
-                              );
+                                 );
     }
 
     /**
@@ -118,7 +117,7 @@ public class VerticleRef<I, O> {
      */
     public λc<I, O> trace(final DeliveryOptions options) {
         requireNonNull(options);
-        return (context, body) -> Cons.of(() -> {
+        return (context, body) -> Val.effect(() -> {
                                               try {
                                                   MessageEvent messageEvent = new MessageEvent();
                                                   messageEvent.address = address;
@@ -155,7 +154,7 @@ public class VerticleRef<I, O> {
                                                   return Future.failedFuture(e);
                                               }
                                           }
-                                         );
+                                            );
     }
 
     /**

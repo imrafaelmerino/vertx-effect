@@ -2,7 +2,6 @@ package vertx.effect.patterns.bankaccount;
 
 import vertx.effect.λ;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 import jsonvalues.JsObj;
 
 public class TxVerticle implements λ<Integer, Integer> {
@@ -22,7 +21,7 @@ public class TxVerticle implements λ<Integer, Integer> {
         return from.apply(Operation.makeWithdraw.apply(amount))
                    .flatMap(resp -> BankAccountModule.IS_OK_RESP.test(resp) ?
                                     to.apply(Operation.makeDeposit.apply(amount)) :
-                                    Cons.success(resp)
+                                    Val.succeed(resp)
                            );
     }
 }

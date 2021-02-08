@@ -231,11 +231,11 @@ public class TestQuintuple {
     @Test
     public void test_parallel_quintuple_exp_map(VertxTestContext context) {
 
-        Quintuple.parallel(Cons.success("a"),
-                           Cons.success("b"),
-                           Cons.success("c"),
-                           Cons.success("d"),
-                           Cons.success("e")
+        Quintuple.parallel(Val.succeed("a"),
+                           Val.succeed("b"),
+                           Val.succeed("c"),
+                           Val.succeed("d"),
+                           Val.succeed("e")
                           )
                  .map(pair -> pair.map((a, b, c, d, e) -> new Tuple5<>(a.toUpperCase(),
                                                                        b.toUpperCase(),
@@ -260,11 +260,11 @@ public class TestQuintuple {
     @Test
     public void test_sequential_quintuple_exp_map(VertxTestContext context) {
 
-        Quintuple.sequential(Cons.success("a"),
-                             Cons.success("b"),
-                             Cons.success("c"),
-                             Cons.success("d"),
-                             Cons.success("e")
+        Quintuple.sequential(Val.succeed("a"),
+                             Val.succeed("b"),
+                             Val.succeed("c"),
+                             Val.succeed("d"),
+                             Val.succeed("e")
                             )
                  .map(pair -> pair.map((a, b, c, d, e) -> new Tuple5<>(a.toUpperCase(),
                                                                        b.toUpperCase(),
@@ -288,19 +288,19 @@ public class TestQuintuple {
 
     @Test
     public void test_parallel_quintuple_exp_flatmap_success(VertxTestContext context) {
-        Quintuple.parallel(Cons.success("a"),
-                           Cons.success("ab"),
-                           Cons.success("abc"),
-                           Cons.success("abcd"),
-                           Cons.success("abcde")
+        Quintuple.parallel(Val.succeed("a"),
+                           Val.succeed("ab"),
+                           Val.succeed("abc"),
+                           Val.succeed("abcd"),
+                           Val.succeed("abcde")
                           )
-                 .flatMap(pair -> Cons.success(pair.map((a, b, c, d, e) -> new Tuple5<>(a.length(),
-                                                                                        b.length(),
-                                                                                        c.length(),
-                                                                                        d.length(),
-                                                                                        e.length()
+                 .flatMap(pair -> Val.succeed(pair.map((a, b, c, d, e) -> new Tuple5<>(a.length(),
+                                                                                       b.length(),
+                                                                                       c.length(),
+                                                                                       d.length(),
+                                                                                       e.length()
                                                         )
-                                                       )))
+                                                      )))
                  .onSuccess(r -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>(1,
                                                           2,
@@ -319,19 +319,19 @@ public class TestQuintuple {
 
     @Test
     public void test_sequential_quintuple_exp_flatmap_success(VertxTestContext context) {
-        Quintuple.sequential(Cons.success("a"),
-                             Cons.success("ab"),
-                             Cons.success("abc"),
-                             Cons.success("abcd"),
-                             Cons.success("abcde")
+        Quintuple.sequential(Val.succeed("a"),
+                             Val.succeed("ab"),
+                             Val.succeed("abc"),
+                             Val.succeed("abcd"),
+                             Val.succeed("abcde")
                             )
-                 .flatMap(pair -> Cons.success(pair.map((a, b, c, d, e) -> new Tuple5<>(a.length(),
-                                                                                        b.length(),
-                                                                                        c.length(),
-                                                                                        d.length(),
-                                                                                        e.length()
+                 .flatMap(pair -> Val.succeed(pair.map((a, b, c, d, e) -> new Tuple5<>(a.length(),
+                                                                                       b.length(),
+                                                                                       c.length(),
+                                                                                       d.length(),
+                                                                                       e.length()
                                                         )
-                                                       )))
+                                                      )))
                  .onSuccess(r -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>(1,
                                                           2,
@@ -351,13 +351,13 @@ public class TestQuintuple {
     @Test
     public void test_parallel_quintuple_exp_flatmap_failure(VertxTestContext context) {
 
-        Quintuple.parallel(Cons.success("a"),
-                           Cons.success("ab"),
-                           Cons.success("abc"),
-                           Cons.success("abcd"),
-                           Cons.success("abcde")
+        Quintuple.parallel(Val.succeed("a"),
+                           Val.succeed("ab"),
+                           Val.succeed("abc"),
+                           Val.succeed("abcd"),
+                           Val.succeed("abcde")
                           )
-                 .flatMap(s -> Cons.failure(new RuntimeException()))
+                 .flatMap(s -> Val.fail(new RuntimeException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      context.completeNow();
@@ -369,13 +369,13 @@ public class TestQuintuple {
     @Test
     public void test_sequential_quintuple_exp_flatmap_failure(VertxTestContext context) {
 
-        Quintuple.sequential(Cons.success("a"),
-                             Cons.success("ab"),
-                             Cons.success("abc"),
-                             Cons.success("abcd"),
-                             Cons.success("abcde")
+        Quintuple.sequential(Val.succeed("a"),
+                             Val.succeed("ab"),
+                             Val.succeed("abc"),
+                             Val.succeed("abcd"),
+                             Val.succeed("abcde")
                             )
-                 .flatMap(s -> Cons.failure(new RuntimeException()))
+                 .flatMap(s -> Val.fail(new RuntimeException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      context.completeNow();
@@ -393,11 +393,11 @@ public class TestQuintuple {
                            a.get(),
                            a.get()
                           )
-                 .recoverWith(e -> Cons.success(new Tuple5<>("",
-                                                             "",
-                                                             "",
-                                                             "",
-                                                             ""
+                 .recoverWith(e -> Val.succeed(new Tuple5<>("",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            ""
                               ))
                              )
                  .onSuccess(map -> context.verify(() -> {
@@ -423,11 +423,11 @@ public class TestQuintuple {
                              a.get(),
                              a.get()
                             )
-                 .recoverWith(e -> Cons.success(new Tuple5<>("",
-                                                             "",
-                                                             "",
-                                                             "",
-                                                             ""
+                 .recoverWith(e -> Val.succeed(new Tuple5<>("",
+                                                            "",
+                                                            "",
+                                                            "",
+                                                            ""
                               ))
                              )
                  .onSuccess(map -> context.verify(() -> {
@@ -453,7 +453,7 @@ public class TestQuintuple {
                            a.get(),
                            a.get()
                           )
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -471,7 +471,7 @@ public class TestQuintuple {
                              a.get(),
                              a.get()
                             )
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -489,7 +489,7 @@ public class TestQuintuple {
                            a.get()
                           )
                  .retryEach(limitRetries(2))
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>("a",
                                                           "a",
@@ -513,7 +513,7 @@ public class TestQuintuple {
                              a.get()
                             )
                  .retryEach(limitRetries(2))
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple5<>("a",
                                                           "a",

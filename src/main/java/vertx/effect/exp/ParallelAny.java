@@ -30,8 +30,8 @@ final class ParallelAny extends Any {
     @Override
     public Val<Boolean> retryEach(final Predicate<Throwable> predicate,
                                   final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return new ParallelAny(exps.stream()
                                    .map(it -> it.retry(predicate,
                                                        policy))

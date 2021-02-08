@@ -4,7 +4,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import vertx.effect.*;
-import vertx.effect.exp.Cons;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -12,7 +11,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 
-public abstract class AbstractVal<O> implements Val<O> {
+public abstract class AbstractVal<O> extends Val<O> {
 
     private static final String LAMBDA_IS_NULL = "λ is null";
     private static final String SUCCESS_CONSUMER_IS_NULL = "successConsumer is null";
@@ -20,101 +19,101 @@ public abstract class AbstractVal<O> implements Val<O> {
     @Override
     public Val<O> recover(final Function<Throwable, O> lambda) {
         if (lambda == null)
-            return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
+            return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
 
-        return Cons.of(() -> get().compose(Future::succeededFuture,
+        return Val.effect(() -> get().compose(Future::succeededFuture,
                                            e -> Future.succeededFuture(lambda.apply(e))
-                                          )
-                      );
+                                             )
+                         );
     }
 
     @Override
     public <P> Val<P> map(final Function<O, P> fn) {
         if (fn == null)
-            return Cons.failure(new NullPointerException("fn is null"));
-        return Cons.of(() -> get()
+            return Val.fail(new NullPointerException("fn is null"));
+        return Val.effect(() -> get()
                                .map(fn)
 
-                      );
+                         );
     }
 
     @Override
     public Val<O> recoverWith(final λ<Throwable, O> lambda) {
         if (lambda == null)
-            return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
-        return Cons.of(() -> get().compose(Future::succeededFuture,
+            return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
+        return Val.effect(() -> get().compose(Future::succeededFuture,
                                            e -> lambda.apply(e)
                                                       .get()
-                                          )
-                      );
+                                             )
+                         );
     }
 
     @Override
     public Val<O> fallbackTo(final λ<Throwable, O> lambda) {
         if (lambda == null)
-            return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
-        return Cons.of(() -> get().compose(Future::succeededFuture,
+            return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
+        return Val.effect(() -> get().compose(Future::succeededFuture,
                                            e -> lambda.apply(e)
                                                       .get()
                                                       .compose(Future::succeededFuture,
                                                                e1 -> Future.failedFuture(e)
                                                               )
-                                          )
-                      );
+                                             )
+                         );
 
     }
 
     @Override
     public <Q> Val<Q> flatMap(final λ<O, Q> lambda) {
         if (lambda == null)
-            return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
-        return Cons.of(() -> get().flatMap(o -> lambda.apply(o)
-                                                      .get())
-                      );
+            return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
+        return Val.effect(() -> get().flatMap(o -> lambda.apply(o)
+                                                         .get())
+                         );
     }
 
     @Override
     public Val<O> onSuccess(final Consumer<O> successConsumer) {
         if (successConsumer == null)
-            return Cons.failure(new NullPointerException(SUCCESS_CONSUMER_IS_NULL));
-        return Cons.of(() -> get().onSuccess(successConsumer::accept));
+            return Val.fail(new NullPointerException(SUCCESS_CONSUMER_IS_NULL));
+        return Val.effect(() -> get().onSuccess(successConsumer::accept));
     }
 
     @Override
     public Val<O> onComplete(final Consumer<O> successConsumer,
                              final Consumer<Throwable> failureConsumer) {
         if (successConsumer == null)
-            return Cons.failure(new NullPointerException(SUCCESS_CONSUMER_IS_NULL));
+            return Val.fail(new NullPointerException(SUCCESS_CONSUMER_IS_NULL));
         if (failureConsumer == null)
-            return Cons.failure(new NullPointerException("failureConsumer is null"));
-        return Cons.of(() -> get().onComplete(event -> {
+            return Val.fail(new NullPointerException("failureConsumer is null"));
+        return Val.effect(() -> get().onComplete(event -> {
                            if (event.succeeded()) successConsumer.accept(event.result());
                            else failureConsumer.accept(event.cause());
                        })
-                      );
+                         );
     }
 
     @Override
     public <U> Val<U> flatMap(final λ<O, U> successMapper,
                               final λ<Throwable, U> failureMapper) {
         if (successMapper == null)
-            return Cons.failure(new NullPointerException("successMapper is null"));
+            return Val.fail(new NullPointerException("successMapper is null"));
         if (failureMapper == null)
-            return Cons.failure(new NullPointerException("failureMapper is null"));
-        return Cons.of(() -> get().compose(result -> successMapper.apply(result)
-                                                                  .get(),
+            return Val.fail(new NullPointerException("failureMapper is null"));
+        return Val.effect(() -> get().compose(result -> successMapper.apply(result)
+                                                                     .get(),
                                            failure -> failureMapper.apply(failure)
                                                                    .get()
-                                          )
-                      );
+                                             )
+                         );
 
     }
 
     @Override
     public Val<O> onComplete(final Handler<AsyncResult<O>> handler) {
         if (handler == null)
-            return Cons.failure(new NullPointerException("handler is null"));
-        return Cons.of(() -> get().onComplete(handler));
+            return Val.fail(new NullPointerException("handler is null"));
+        return Val.effect(() -> get().onComplete(handler));
 
     }
 
@@ -132,17 +131,17 @@ public abstract class AbstractVal<O> implements Val<O> {
     }
 
     private Val<O> retryOnFailure(Val<O> exp,
-                                  Function<RetryStatus, Optional<Delay>> policy,
+                                  Function<RetryStatus, Optional<Timer>> policy,
                                   RetryStatus rs,
                                   Predicate<O> predicate) {
 
         return exp.flatMap(o -> {
                                if (predicate.test(o)) {
-                                   Optional<Delay> delayOpt = policy.apply(rs);
-                                   if (delayOpt.isEmpty()) return Cons.success(o);
-                                   Delay delay = delayOpt.get();
-                                   return delay.val.flatMap(nill -> {
-                                                                long delayDuration = delay.duration.toMillis();
+                                   Optional<Timer> delayOpt = policy.apply(rs);
+                                   if (delayOpt.isEmpty()) return Val.succeed(o);
+                                   Timer timer = delayOpt.get();
+                                   return timer.delay.flatMap(nill -> {
+                                                                long delayDuration = timer.duration.toMillis();
                                                                 return retryOnFailure(exp,
                                                                                       policy,
                                                                                       new RetryStatus(rs.rsIterNumber + 1,
@@ -152,9 +151,9 @@ public abstract class AbstractVal<O> implements Val<O> {
                                                                                       predicate
                                                                                      );
                                                             }
-                                                           );
+                                                             );
                                }
-                               else return Cons.success(o);
+                               else return Val.succeed(o);
                            }
                           );
 
@@ -162,7 +161,7 @@ public abstract class AbstractVal<O> implements Val<O> {
 
     @Override
     public Val<O> retry(final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
 
         return retry(this,
                      policy,
@@ -178,8 +177,8 @@ public abstract class AbstractVal<O> implements Val<O> {
     @Override
     public Val<O> retry(final Predicate<Throwable> predicate,
                         final RetryPolicy policy) {
-        if (policy == null) return Cons.failure(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Cons.failure(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
         return retry(this,
                      policy,
                      new RetryStatus(0,
@@ -192,20 +191,20 @@ public abstract class AbstractVal<O> implements Val<O> {
 
 
     private Val<O> retry(Val<O> exp,
-                         Function<RetryStatus, Optional<Delay>> policy,
+                         Function<RetryStatus, Optional<Timer>> policy,
                          RetryStatus rs,
                          Predicate<Throwable> predicate) {
 
         return exp.flatMap(o -> {
-                               return Cons.success(o);
+                               return Val.succeed(o);
                            },
                            exc -> {
                                if (predicate.test(exc)) {
-                                   Optional<Delay> delayOpt = policy.apply(rs);
-                                   if (delayOpt.isEmpty()) return Cons.failure(exc);
-                                   Delay delay = delayOpt.get();
-                                   return delay.val.flatMap(nill -> {
-                                                                long delayDuration = delay.duration.toMillis();
+                                   Optional<Timer> delayOpt = policy.apply(rs);
+                                   if (delayOpt.isEmpty()) return Val.fail(exc);
+                                   Timer timer = delayOpt.get();
+                                   return timer.delay.flatMap(nill -> {
+                                                                long delayDuration = timer.duration.toMillis();
                                                                 return retry(exp,
                                                                              policy,
                                                                              new RetryStatus(rs.rsIterNumber + 1,
@@ -215,9 +214,9 @@ public abstract class AbstractVal<O> implements Val<O> {
                                                                              predicate
                                                                             );
                                                             }
-                                                           );
+                                                             );
                                }
-                               else return Cons.failure(exc);
+                               else return Val.fail(exc);
                            }
                           );
     }

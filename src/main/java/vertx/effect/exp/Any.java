@@ -1,14 +1,13 @@
 package vertx.effect.exp;
 
 import vertx.effect.Val;
-import vertx.effect.core.AbstractVal;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class Any extends AbstractVal<Boolean> implements Exp<Boolean> {
+public abstract class Any extends Exp<Boolean> {
 
     @SafeVarargs
     public static Any parallel(final Val<Boolean> a,
@@ -39,8 +38,8 @@ public abstract class Any extends AbstractVal<Boolean> implements Exp<Boolean> {
         for (final boolean other : others) {
             exps.add(other);
         }
-        return Cons.success(exps.stream()
-                                .anyMatch(it -> it)
-                           );
+        return Val.succeed(exps.stream()
+                               .anyMatch(it -> it)
+                          );
     }
 }

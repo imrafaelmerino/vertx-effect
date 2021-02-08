@@ -44,7 +44,7 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_one_elem(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a"))
+                            Val.succeed(JsStr.of("a"))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -60,7 +60,7 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_one_elem(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a"))
+                          Val.succeed(JsStr.of("a"))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -76,9 +76,9 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_two_elems(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b"))
+                            Val.succeed(JsStr.of("b"))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -96,9 +96,9 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_two_elems(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b"))
+                          Val.succeed(JsStr.of("b"))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -116,11 +116,11 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_three_elems(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE)
+                          Val.succeed(JsBool.TRUE)
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -140,11 +140,11 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_three_elems(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE)
+                            Val.succeed(JsBool.TRUE)
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -164,13 +164,13 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_four_elems(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL)
+                          Val.succeed(JsNull.NULL)
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -192,13 +192,13 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_four_elems(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL)
+                            Val.succeed(JsNull.NULL)
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -220,15 +220,15 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_five_elems(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1))
+                            Val.succeed(JsInt.of(1))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -252,15 +252,15 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_five_elems(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1))
+                          Val.succeed(JsInt.of(1))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -284,17 +284,17 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_six_elems(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L))
+                            Val.succeed(JsLong.of(1L))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -320,17 +320,17 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_six_elems(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L))
+                          Val.succeed(JsLong.of(1L))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -356,22 +356,22 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_seven_elems(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   ))
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  ))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -402,22 +402,22 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_seven_elems(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 ))
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                ))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -448,24 +448,24 @@ public class TestJsObjExp {
     @Test
     public void test_parallel_jsobj_exp_eight_elems(VertxTestContext context) {
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty())
+                          Val.succeed(JsObj.empty())
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -498,24 +498,24 @@ public class TestJsObjExp {
     @Test
     public void test_sequential_jsobj_exp_eight_elems(VertxTestContext context) {
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty())
+                            Val.succeed(JsObj.empty())
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -549,26 +549,26 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_nine_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty()),
+                          Val.succeed(JsObj.empty()),
                           "i",
-                          Cons.success(JsInstant.of(now))
+                          Val.succeed(JsInstant.of(now))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -604,26 +604,26 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_nine_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty()),
+                            Val.succeed(JsObj.empty()),
                             "i",
-                            Cons.success(JsInstant.of(now))
+                            Val.succeed(JsInstant.of(now))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -659,28 +659,28 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_ten_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty()),
+                            Val.succeed(JsObj.empty()),
                             "i",
-                            Cons.success(JsInstant.of(now)),
+                            Val.succeed(JsInstant.of(now)),
                             "j",
-                            Cons.success(JsBinary.of("hi"))
+                            Val.succeed(JsBinary.of("hi"))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -718,28 +718,28 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_ten_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty()),
+                          Val.succeed(JsObj.empty()),
                           "i",
-                          Cons.success(JsInstant.of(now)),
+                          Val.succeed(JsInstant.of(now)),
                           "j",
-                          Cons.success(JsBinary.of("hi"))
+                          Val.succeed(JsBinary.of("hi"))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -777,30 +777,30 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_eleven_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty()),
+                          Val.succeed(JsObj.empty()),
                           "i",
-                          Cons.success(JsInstant.of(now)),
+                          Val.succeed(JsInstant.of(now)),
                           "j",
-                          Cons.success(JsBinary.of("hi")),
+                          Val.succeed(JsBinary.of("hi")),
                           "k",
-                          Cons.success(JsDouble.of(2.5d))
+                          Val.succeed(JsDouble.of(2.5d))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -840,30 +840,30 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_eleven_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty()),
+                            Val.succeed(JsObj.empty()),
                             "i",
-                            Cons.success(JsInstant.of(now)),
+                            Val.succeed(JsInstant.of(now)),
                             "j",
-                            Cons.success(JsBinary.of("hi")),
+                            Val.succeed(JsBinary.of("hi")),
                             "k",
-                            Cons.success(JsDouble.of(2.5d))
+                            Val.succeed(JsDouble.of(2.5d))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -903,32 +903,32 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_twelve_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty()),
+                            Val.succeed(JsObj.empty()),
                             "i",
-                            Cons.success(JsInstant.of(now)),
+                            Val.succeed(JsInstant.of(now)),
                             "j",
-                            Cons.success(JsBinary.of("hi")),
+                            Val.succeed(JsBinary.of("hi")),
                             "k",
-                            Cons.success(JsDouble.of(2.5d)),
+                            Val.succeed(JsDouble.of(2.5d)),
                             "l",
-                            Cons.success(JsArray.of(JsObj.empty()))
+                            Val.succeed(JsArray.of(JsObj.empty()))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -970,32 +970,32 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_twelve_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty()),
+                          Val.succeed(JsObj.empty()),
                           "i",
-                          Cons.success(JsInstant.of(now)),
+                          Val.succeed(JsInstant.of(now)),
                           "j",
-                          Cons.success(JsBinary.of("hi")),
+                          Val.succeed(JsBinary.of("hi")),
                           "k",
-                          Cons.success(JsDouble.of(2.5d)),
+                          Val.succeed(JsDouble.of(2.5d)),
                           "l",
-                          Cons.success(JsArray.of(JsObj.empty()))
+                          Val.succeed(JsArray.of(JsObj.empty()))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -1037,36 +1037,36 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_thirteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty()),
+                          Val.succeed(JsObj.empty()),
                           "i",
-                          Cons.success(JsInstant.of(now)),
+                          Val.succeed(JsInstant.of(now)),
                           "j",
-                          Cons.success(JsBinary.of("hi")),
+                          Val.succeed(JsBinary.of("hi")),
                           "k",
-                          Cons.success(JsDouble.of(2.5d)),
+                          Val.succeed(JsDouble.of(2.5d)),
                           "l",
-                          Cons.success(JsArray.of(JsObj.empty())),
+                          Val.succeed(JsArray.of(JsObj.empty())),
                           "m",
-                          Cons.success(JsObj.of("a",
-                                                JsBool.TRUE
-                                               ))
+                          Val.succeed(JsObj.of("a",
+                                               JsBool.TRUE
+                                              ))
                          )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -1112,36 +1112,36 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_thirteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty()),
+                            Val.succeed(JsObj.empty()),
                             "i",
-                            Cons.success(JsInstant.of(now)),
+                            Val.succeed(JsInstant.of(now)),
                             "j",
-                            Cons.success(JsBinary.of("hi")),
+                            Val.succeed(JsBinary.of("hi")),
                             "k",
-                            Cons.success(JsDouble.of(2.5d)),
+                            Val.succeed(JsDouble.of(2.5d)),
                             "l",
-                            Cons.success(JsArray.of(JsObj.empty())),
+                            Val.succeed(JsArray.of(JsObj.empty())),
                             "m",
-                            Cons.success(JsObj.of("a",
-                                                  JsBool.TRUE
-                                                 ))
+                            Val.succeed(JsObj.of("a",
+                                                 JsBool.TRUE
+                                                ))
                            )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -1187,38 +1187,38 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_fourteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty()),
+                            Val.succeed(JsObj.empty()),
                             "i",
-                            Cons.success(JsInstant.of(now)),
+                            Val.succeed(JsInstant.of(now)),
                             "j",
-                            Cons.success(JsBinary.of("hi")),
+                            Val.succeed(JsBinary.of("hi")),
                             "k",
-                            Cons.success(JsDouble.of(2.5d)),
+                            Val.succeed(JsDouble.of(2.5d)),
                             "l",
-                            Cons.success(JsArray.of(JsObj.empty())),
+                            Val.succeed(JsArray.of(JsObj.empty())),
                             "m",
-                            Cons.success(JsObj.of("a",
-                                                  JsBool.TRUE
-                                                 )),
+                            Val.succeed(JsObj.of("a",
+                                                 JsBool.TRUE
+                                                )),
                             "m",
-                            Cons.success(JsStr.of("a"))
+                            Val.succeed(JsStr.of("a"))
 
                            )
                 .onSuccess(r -> context.verify(() -> {
@@ -1267,38 +1267,38 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_fourteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty()),
+                          Val.succeed(JsObj.empty()),
                           "i",
-                          Cons.success(JsInstant.of(now)),
+                          Val.succeed(JsInstant.of(now)),
                           "j",
-                          Cons.success(JsBinary.of("hi")),
+                          Val.succeed(JsBinary.of("hi")),
                           "k",
-                          Cons.success(JsDouble.of(2.5d)),
+                          Val.succeed(JsDouble.of(2.5d)),
                           "l",
-                          Cons.success(JsArray.of(JsObj.empty())),
+                          Val.succeed(JsArray.of(JsObj.empty())),
                           "m",
-                          Cons.success(JsObj.of("a",
-                                                JsBool.TRUE
-                                               )),
+                          Val.succeed(JsObj.of("a",
+                                               JsBool.TRUE
+                                              )),
                           "m",
-                          Cons.success(JsStr.of("a"))
+                          Val.succeed(JsStr.of("a"))
 
                          )
                 .onSuccess(r -> context.verify(() -> {
@@ -1347,40 +1347,40 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_fifteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b")),
+                          Val.succeed(JsStr.of("b")),
                           "c",
-                          Cons.success(JsBool.TRUE),
+                          Val.succeed(JsBool.TRUE),
                           "d",
-                          Cons.success(JsNull.NULL),
+                          Val.succeed(JsNull.NULL),
                           "e",
-                          Cons.success(JsInt.of(1)),
+                          Val.succeed(JsInt.of(1)),
                           "f",
-                          Cons.success(JsLong.of(1L)),
+                          Val.succeed(JsLong.of(1L)),
                           "g",
-                          Cons.success(JsArray.of(1,
-                                                  2,
-                                                  3
-                                                 )),
+                          Val.succeed(JsArray.of(1,
+                                                 2,
+                                                 3
+                                                )),
                           "h",
-                          Cons.success(JsObj.empty()),
+                          Val.succeed(JsObj.empty()),
                           "i",
-                          Cons.success(JsInstant.of(now)),
+                          Val.succeed(JsInstant.of(now)),
                           "j",
-                          Cons.success(JsBinary.of("hi")),
+                          Val.succeed(JsBinary.of("hi")),
                           "k",
-                          Cons.success(JsDouble.of(2.5d)),
+                          Val.succeed(JsDouble.of(2.5d)),
                           "l",
-                          Cons.success(JsArray.of(JsObj.empty())),
+                          Val.succeed(JsArray.of(JsObj.empty())),
                           "m",
-                          Cons.success(JsObj.of("a",
-                                                JsBool.TRUE
-                                               )),
+                          Val.succeed(JsObj.of("a",
+                                               JsBool.TRUE
+                                              )),
                           "m",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "n",
-                          Cons.success(JsArray.empty())
+                          Val.succeed(JsArray.empty())
 
                          )
                 .onSuccess(r -> context.verify(() -> {
@@ -1431,40 +1431,40 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_fifteen_elems(VertxTestContext context) {
         Instant now = Instant.now();
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b")),
+                            Val.succeed(JsStr.of("b")),
                             "c",
-                            Cons.success(JsBool.TRUE),
+                            Val.succeed(JsBool.TRUE),
                             "d",
-                            Cons.success(JsNull.NULL),
+                            Val.succeed(JsNull.NULL),
                             "e",
-                            Cons.success(JsInt.of(1)),
+                            Val.succeed(JsInt.of(1)),
                             "f",
-                            Cons.success(JsLong.of(1L)),
+                            Val.succeed(JsLong.of(1L)),
                             "g",
-                            Cons.success(JsArray.of(1,
-                                                    2,
-                                                    3
-                                                   )),
+                            Val.succeed(JsArray.of(1,
+                                                   2,
+                                                   3
+                                                  )),
                             "h",
-                            Cons.success(JsObj.empty()),
+                            Val.succeed(JsObj.empty()),
                             "i",
-                            Cons.success(JsInstant.of(now)),
+                            Val.succeed(JsInstant.of(now)),
                             "j",
-                            Cons.success(JsBinary.of("hi")),
+                            Val.succeed(JsBinary.of("hi")),
                             "k",
-                            Cons.success(JsDouble.of(2.5d)),
+                            Val.succeed(JsDouble.of(2.5d)),
                             "l",
-                            Cons.success(JsArray.of(JsObj.empty())),
+                            Val.succeed(JsArray.of(JsObj.empty())),
                             "m",
-                            Cons.success(JsObj.of("a",
-                                                  JsBool.TRUE
-                                                 )),
+                            Val.succeed(JsObj.of("a",
+                                                 JsBool.TRUE
+                                                )),
                             "m",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "n",
-                            Cons.success(JsArray.empty())
+                            Val.succeed(JsArray.empty())
 
                            )
                 .onSuccess(r -> context.verify(() -> {
@@ -1619,9 +1619,9 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_map(VertxTestContext context) {
 
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b"))
+                          Val.succeed(JsStr.of("b"))
                          )
                 .map(obj -> obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
                                                                  .apply(value)
@@ -1645,9 +1645,9 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_map(VertxTestContext context) {
 
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b"))
+                            Val.succeed(JsStr.of("b"))
                            )
                 .map(obj -> obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
                                                                  .apply(value)
@@ -1671,13 +1671,13 @@ public class TestJsObjExp {
     public void test_parallel_jsobj_exp_flatmap_success(VertxTestContext context) {
 
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b"))
+                          Val.succeed(JsStr.of("b"))
                          )
-                .flatMap(obj -> Cons.success(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                                  .apply(value)
-                                                          ))
+                .flatMap(obj -> Val.succeed(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                                     .apply(value)
+                                                         ))
                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -1698,13 +1698,13 @@ public class TestJsObjExp {
     public void test_sequential_jsobj_exp_flatmap_success(VertxTestContext context) {
 
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b"))
+                            Val.succeed(JsStr.of("b"))
                            )
-                .flatMap(obj -> Cons.success(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
-                                                                                  .apply(value)
-                                                          ))
+                .flatMap(obj -> Val.succeed(obj.mapValues(value -> JsStr.prism.modify.apply(String::toUpperCase)
+                                                                                     .apply(value)
+                                                         ))
                         )
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(JsObj.of("a",
@@ -1726,11 +1726,11 @@ public class TestJsObjExp {
 
 
         JsObjExp.parallel("a",
-                          Cons.success(JsStr.of("a")),
+                          Val.succeed(JsStr.of("a")),
                           "b",
-                          Cons.success(JsStr.of("b"))
+                          Val.succeed(JsStr.of("b"))
                          )
-                .flatMap(s -> Cons.failure(new RuntimeException()))
+                .flatMap(s -> Val.fail(new RuntimeException()))
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertTrue(r.failed());
                     context.completeNow();
@@ -1745,11 +1745,11 @@ public class TestJsObjExp {
 
 
         JsObjExp.sequential("a",
-                            Cons.success(JsStr.of("a")),
+                            Val.succeed(JsStr.of("a")),
                             "b",
-                            Cons.success(JsStr.of("b"))
+                            Val.succeed(JsStr.of("b"))
                            )
-                .flatMap(s -> Cons.failure(new RuntimeException()))
+                .flatMap(s -> Val.fail(new RuntimeException()))
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertTrue(r.failed());
                     context.completeNow();

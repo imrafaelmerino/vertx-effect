@@ -45,8 +45,8 @@ public class TestParallelSeq {
 
 
         Val<String> val = ListExp.<String>parallel()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
                 .head();
 
         Verifiers.<String>verifySuccess(head -> Objects.equals(head,
@@ -63,9 +63,9 @@ public class TestParallelSeq {
 
 
         ListExp<String> val = ListExp.<String>parallel()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
-                .append(Cons.success("c"))
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
+                .append(Val.succeed("c"))
                 .tail();
 
         List<String> expected = new ArrayList<>();
@@ -155,8 +155,8 @@ public class TestParallelSeq {
     public void test_map(VertxTestContext context) {
 
         Val<List<String>> val = ListExp.<String>parallel()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
                 .map(it -> it.stream()
                              .map(String::toUpperCase)
                              .collect(Collectors.toList()));
@@ -178,9 +178,9 @@ public class TestParallelSeq {
     public void test_seqval_exp_flatmap_failure(VertxTestContext context) {
 
         Val<List<String>> val = ListExp.<String>parallel()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
-                .flatMap(s -> Cons.failure(new RuntimeException()));
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
+                .flatMap(s -> Val.fail(new RuntimeException()));
 
 
         Verifiers.<List<String>>verifyFailure()
@@ -246,11 +246,11 @@ public class TestParallelSeq {
         expected.add("A");
         expected.add("B");
         Val<List<String>> val = ListExp.<String>parallel()
-                .append(Cons.success("a"))
-                .append(Cons.success("b"))
-                .flatMap(list -> Cons.success(list.stream()
-                                                  .map(String::toUpperCase)
-                                                  .collect(Collectors.toList())));
+                .append(Val.succeed("a"))
+                .append(Val.succeed("b"))
+                .flatMap(list -> Val.succeed(list.stream()
+                                                 .map(String::toUpperCase)
+                                                 .collect(Collectors.toList())));
 
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
                                                                      expected
@@ -269,12 +269,12 @@ public class TestParallelSeq {
         expected.add("b");
         expected.add("c");
         expected.add("d");
-        ListExp<String> a = ListExp.parallel(Cons.success("a"),
-                                             Cons.success("b")
+        ListExp<String> a = ListExp.parallel(Val.succeed("a"),
+                                             Val.succeed("b")
                                             );
 
-        ListExp<String> b = ListExp.parallel(Cons.success("c"),
-                                             Cons.success("d")
+        ListExp<String> b = ListExp.parallel(Val.succeed("c"),
+                                             Val.succeed("d")
                                             );
 
         a.appendAll(b)
@@ -291,9 +291,9 @@ public class TestParallelSeq {
     @Test
     public void test_size(VertxTestContext context) {
         Assertions.assertEquals(3,
-                                ListExp.parallel(Cons.success(1),
-                                                 Cons.success(2),
-                                                 Cons.success(3)
+                                ListExp.parallel(Val.succeed(1),
+                                                 Val.succeed(2),
+                                                 Val.succeed(3)
                                                 )
                                        .size()
                                );
@@ -310,8 +310,8 @@ public class TestParallelSeq {
 
     @Test
     public void test_race(final VertxTestContext context) {
-        Val<String> a = Cons.of(() -> Future.succeededFuture("a"));
-        Val<String> b = Cons.of(() -> Future.succeededFuture("b"));
+        Val<String> a = Val.succeed("a");
+        Val<String> b = Val.succeed("b");
         ListExp.parallel(a,
                          b
                         )

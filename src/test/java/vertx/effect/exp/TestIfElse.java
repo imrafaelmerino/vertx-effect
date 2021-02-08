@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.constantDelay;
 import static vertx.effect.RetryPolicies.limitRetries;
-import static vertx.effect.exp.Cons.FALSE;
-import static vertx.effect.exp.Cons.TRUE;
+import static vertx.effect.Val.FALSE;
+import static vertx.effect.Val.TRUE;
 
 @ExtendWith(VertxExtension.class)
 public class TestIfElse {
@@ -51,8 +51,8 @@ public class TestIfElse {
     @Test
     public void testRetryIfElsePredicate(final VertxTestContext context) {
         IfElse.predicate(trueVal.get())
-              .consequence(Cons.success("consequence"))
-              .alternative(Cons.success("alternative"))
+              .consequence(Val.succeed("consequence"))
+              .alternative(Val.succeed("alternative"))
               .retryEach(limitRetries(2))
               .onComplete(r -> {
                   if (r.succeeded()) {
@@ -76,8 +76,8 @@ public class TestIfElse {
                                      true
                 );
         IfElse.predicate(trueVal.get())
-              .consequence(Cons.success("consequence"))
-              .alternative(Cons.success("alternative"))
+              .consequence(Val.succeed("consequence"))
+              .alternative(Val.succeed("alternative"))
               .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                      limitRetries(2)
                     )
@@ -104,9 +104,9 @@ public class TestIfElse {
                 );
 
 
-        IfElse.<String>predicate(Cons.TRUE)
+        IfElse.<String>predicate(Val.TRUE)
                 .consequence(consequence.get())
-                .alternative(Cons.success("alternative"))
+                .alternative(Val.succeed("alternative"))
                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                        limitRetries(2)
                       )
@@ -133,9 +133,9 @@ public class TestIfElse {
                 );
 
 
-        IfElse.<String>predicate(Cons.TRUE)
+        IfElse.<String>predicate(Val.TRUE)
                 .consequence(consequence.get())
-                .alternative(Cons.success("alternative"))
+                .alternative(Val.succeed("alternative"))
                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                            limitRetries(4)
                           )
@@ -162,8 +162,8 @@ public class TestIfElse {
                 );
 
 
-        IfElse.<String>predicate(Cons.success(false))
-                .consequence(Cons.success("consequence"))
+        IfElse.<String>predicate(Val.succeed(false))
+                .consequence(Val.succeed("consequence"))
                 .alternative(alternative.get())
                 .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                        limitRetries(2)
@@ -192,9 +192,9 @@ public class TestIfElse {
                 );
 
 
-        IfElse.<String>predicate(Cons.success(true))
+        IfElse.<String>predicate(Val.succeed(true))
                 .consequence(consequence.get())
-                .alternative(Cons.success("alternative"))
+                .alternative(Val.succeed("alternative"))
                 .retryEach(limitRetries(2))
                 .onComplete(r -> {
                     if (r.succeeded()) {
@@ -220,8 +220,8 @@ public class TestIfElse {
                 );
 
 
-        IfElse.<String>predicate(Cons.success(false))
-                .consequence(Cons.success("consequence"))
+        IfElse.<String>predicate(Val.succeed(false))
+                .consequence(Val.succeed("consequence"))
                 .alternative(alternative.get())
                 .retryEach(limitRetries(2))
                 .onComplete(r -> {
@@ -241,17 +241,17 @@ public class TestIfElse {
     @Test
     public void test() {
 
-        Val<Boolean> a = IfElse.<Boolean>predicate(Cons.TRUE)
+        Val<Boolean> a = IfElse.<Boolean>predicate(Val.TRUE)
                 .consequence(FALSE)
                 .alternative(TRUE);
 
-        IfElse<Integer> b = IfElse.<Integer>predicate(Cons.TRUE)
-                .consequence(Cons.success(1))
-                .alternative(Cons.success(2));
+        IfElse<Integer> b = IfElse.<Integer>predicate(Val.TRUE)
+                .consequence(Val.succeed(1))
+                .alternative(Val.succeed(2));
 
         IfElse<Integer> c = IfElse.<Integer>predicate(TRUE)
-                .consequence(Cons.success(89))
-                .alternative(Cons.success(99));
+                .consequence(Val.succeed(89))
+                .alternative(Val.succeed(99));
 
         IfElse<Integer> d = IfElse.<Integer>predicate(a).consequence(b)
                                                         .alternative(c);
@@ -290,8 +290,8 @@ public class TestIfElse {
     public void test_ifelse_exp_map_returns_consequence(VertxTestContext context) {
 
         IfElse.<String>predicate(TRUE)
-                .consequence(Cons.success("a"))
-                .alternative(Cons.success("bcd"))
+                .consequence(Val.succeed("a"))
+                .alternative(Val.succeed("bcd"))
                 .map(String::toUpperCase)
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("A",
@@ -306,8 +306,8 @@ public class TestIfElse {
     public void test_ifelse_exp_map_returns_alternative(VertxTestContext context) {
 
         IfElse.<String>predicate(FALSE)
-                .consequence(Cons.success("a"))
-                .alternative(Cons.success("bcd"))
+                .consequence(Val.succeed("a"))
+                .alternative(Val.succeed("bcd"))
                 .map(String::length)
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(3,
@@ -324,9 +324,9 @@ public class TestIfElse {
     public void test_ifelse_exp_flatmap_success_returns_consequence(VertxTestContext context) {
 
         IfElse.<String>predicate(TRUE)
-                .consequence(Cons.success("a"))
-                .alternative(Cons.success("bcd"))
-                .flatMap(str -> Cons.success(str.toUpperCase()))
+                .consequence(Val.succeed("a"))
+                .alternative(Val.succeed("bcd"))
+                .flatMap(str -> Val.succeed(str.toUpperCase()))
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals("A",
                                             r
@@ -340,9 +340,9 @@ public class TestIfElse {
     public void test_ifelse_exp_flatmap_success_returns_alternative(VertxTestContext context) {
 
         IfElse.<String>predicate(FALSE)
-                .consequence(Cons.success("a"))
-                .alternative(Cons.success("bcd"))
-                .flatMap(s -> Cons.success(s.length()))
+                .consequence(Val.succeed("a"))
+                .alternative(Val.succeed("bcd"))
+                .flatMap(s -> Val.succeed(s.length()))
                 .onSuccess(r -> context.verify(() -> {
                     Assertions.assertEquals(3,
                                             r
@@ -357,9 +357,9 @@ public class TestIfElse {
 
 
         IfElse.<String>predicate(FALSE)
-                .consequence(Cons.success("a"))
-                .alternative(Cons.success("bcd"))
-                .flatMap(s -> Cons.failure(new RuntimeException()))
+                .consequence(Val.succeed("a"))
+                .alternative(Val.succeed("bcd"))
+                .flatMap(s -> Val.fail(new RuntimeException()))
                 .onComplete(r -> context.verify(() -> {
                     Assertions.assertTrue(r.failed());
                     context.completeNow();
@@ -372,9 +372,9 @@ public class TestIfElse {
     public void test_ifelse_exp_fails_and_recover_with_success(VertxTestContext context) {
 
         Val<Object> val = IfElse.predicate(trueVal.get())
-                                .consequence(Cons.failure(new RuntimeException()))
-                                .alternative(Cons.success("a"))
-                                .recoverWith(e -> Cons.success(""));
+                                .consequence(Val.fail(new RuntimeException()))
+                                .alternative(Val.succeed("a"))
+                                .recoverWith(e -> Val.succeed(""));
         val
                 .onSuccess(it -> context.verify(() -> {
                     Assertions.assertEquals("",
@@ -388,9 +388,9 @@ public class TestIfElse {
     @Test
     public void test_ifelse_exp_fails_and_recover_with_failure(VertxTestContext context) {
         Val<Object> val = IfElse.predicate(trueVal.get())
-                                .consequence(Cons.failure(new RuntimeException()))
-                                .alternative(Cons.success("a"))
-                                .recoverWith(e -> Cons.failure(new IllegalArgumentException()));
+                                .consequence(Val.fail(new RuntimeException()))
+                                .alternative(Val.succeed("a"))
+                                .recoverWith(e -> Val.fail(new IllegalArgumentException()));
 
         Verifiers.verifyFailure(e -> e instanceof IllegalArgumentException)
                  .accept(val,
@@ -403,10 +403,10 @@ public class TestIfElse {
     public void test_ifelse_exp_recover_with_success(VertxTestContext context) {
 
         IfElse.predicate(trueVal.get())
-              .consequence(Cons.success("b"))
-              .alternative(Cons.success("a"))
+              .consequence(Val.succeed("b"))
+              .alternative(Val.succeed("a"))
               .retryEach(limitRetries(2))
-              .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+              .recoverWith(e -> Val.fail(new IllegalArgumentException()))
               .onSuccess(it -> context.verify(() -> {
                   Assertions.assertEquals("b",
                                           it
@@ -427,8 +427,8 @@ public class TestIfElse {
         );
 
         IfElse.predicate(True.get())
-              .consequence(Cons.success("b"))
-              .alternative(Cons.success("a"))
+              .consequence(Val.succeed("b"))
+              .alternative(Val.succeed("a"))
               .retryEach(limitRetries(ATTEMPTS)
                              .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
                     )
@@ -455,7 +455,7 @@ public class TestIfElse {
         );
         IfElse.<String>predicate(TRUE)
                 .consequence(str.get())
-                .alternative(Cons.success("bye"))
+                .alternative(Val.succeed("bye"))
                 .retryEach(e -> e instanceof IllegalArgumentException,
                        limitRetries(3)
                                .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
@@ -479,7 +479,7 @@ public class TestIfElse {
         );
         IfElse.<String>predicate(TRUE)
                 .consequence(str.get())
-                .alternative(Cons.success("bye"))
+                .alternative(Val.succeed("bye"))
                 .retryEach(e -> e instanceof IllegalArgumentException,
                         limitRetries(2)
                                 .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100)))))

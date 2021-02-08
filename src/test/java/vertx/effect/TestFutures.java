@@ -9,7 +9,6 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.exp.Cons;
 import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.JsObjExp;
 
@@ -91,9 +90,9 @@ public class TestFutures extends VertxModule {
 
     @Override
     protected void deploy() {
-        λ<String, String>                      keysToUpper = i -> Cons.success(i.toUpperCase());
-        Function<Integer, λ<Integer, Integer>> multiplyBy  = i -> j -> Cons.success(j * i);
-        Function<Integer, λ<Integer, Integer>> add = i -> j -> Cons.success(i + j);
+        λ<String, String>                      keysToUpper = i -> Val.succeed(i.toUpperCase());
+        Function<Integer, λ<Integer, Integer>> multiplyBy  = i -> j -> Val.succeed(j * i);
+        Function<Integer, λ<Integer, Integer>> add = i -> j -> Val.succeed(i + j);
         this.deploy("toUpper",
                     keysToUpper
                    );

@@ -10,7 +10,6 @@ import io.vertx.ext.shell.ShellServiceOptions;
 import vertx.effect.core.EventPublisher;
 import vertx.effect.core.Functions;
 import vertx.effect.core.MyVerticle;
-import vertx.effect.exp.Cons;
 
 import java.time.Duration;
 import java.util.*;
@@ -91,8 +90,8 @@ public class VertxRef {
     public <I, O> Val<VerticleRef<I, O>> deployConsumer(final String address,
                                                         final Consumer<Message<I>> consumer
                                                        ) {
-        if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
-        if (consumer == null) return Cons.failure(new NullPointerException(CONSUMER_IS_NULL));
+        if (address == null) return Val.fail(new NullPointerException(ADDRESS_IS_NULL));
+        if (consumer == null) return Val.fail(new NullPointerException(CONSUMER_IS_NULL));
 
         return deployConsumer(address,
                               consumer,
@@ -116,9 +115,9 @@ public class VertxRef {
                                                         final Consumer<Message<I>> consumer,
                                                         final DeploymentOptions options
                                                        ) {
-        if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
-        if (consumer == null) return Cons.failure(new NullPointerException(CONSUMER_IS_NULL));
-        if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
+        if (address == null) return Val.fail(new NullPointerException(ADDRESS_IS_NULL));
+        if (consumer == null) return Val.fail(new NullPointerException(CONSUMER_IS_NULL));
+        if (options == null) return Val.fail(new NullPointerException(OPTIONS_IS_NULL));
         final int                                                         instances = options.getInstances();
         final Set<String>                                                 ids       = new HashSet<>();
         @SuppressWarnings({"rawtypes", "squid:S3740"}) final List<Future> futures   = new ArrayList<>();
@@ -126,7 +125,7 @@ public class VertxRef {
                                                         address
         );
 
-        return Cons.of(() -> {
+        return Val.effect(() -> {
                            for (int i = 0; i < instances; i++) {
                                final Future<String> future = vertx.deployVerticle(verticle,
                                                                                   options.setInstances(1)
@@ -150,7 +149,7 @@ public class VertxRef {
                                                                                       )
                                                          );
                        }
-                      );
+                         );
     }
 
 
@@ -167,8 +166,8 @@ public class VertxRef {
     public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
                                                 final λ<I, O> lambda
                                                ) {
-        if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
-        if (lambda == null) return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
+        if (address == null) return Val.fail(new NullPointerException(ADDRESS_IS_NULL));
+        if (lambda == null) return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
         return deploy(address,
                       lambda,
                       deploymentOptions
@@ -190,10 +189,10 @@ public class VertxRef {
                                                 final λ<I, O> lambda,
                                                 final DeploymentOptions options
                                                ) {
-        if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
-        if (lambda == null) return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
-        if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
-        return Cons.of(() -> {
+        if (address == null) return Val.fail(new NullPointerException(ADDRESS_IS_NULL));
+        if (lambda == null) return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
+        if (options == null) return Val.fail(new NullPointerException(OPTIONS_IS_NULL));
+        return Val.effect(() -> {
                            final int                                                         instances = options.getInstances();
                            final Set<String>                                                 ids       = new HashSet<>();
                            @SuppressWarnings({"rawtypes", "squid:S3740"}) final List<Future> futures   = new ArrayList<>();
@@ -225,7 +224,7 @@ public class VertxRef {
                                                                                       )
                                                          );
                        }
-                      );
+                         );
     }
 
     /**
@@ -241,8 +240,8 @@ public class VertxRef {
     public <I, O> Val<VerticleRef<I, O>> deploy(final String address,
                                                 final λc<I, O> lambda
                                                ) {
-        if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
-        if (lambda == null) return Cons.failure(new NullPointerException(LAMBDA_IS_NULL));
+        if (address == null) return Val.fail(new NullPointerException(ADDRESS_IS_NULL));
+        if (lambda == null) return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
         return deploy(address,
                       lambda,
                       deploymentOptions
@@ -265,11 +264,11 @@ public class VertxRef {
                                                 final DeploymentOptions options
                                                ) {
 
-        if (address == null) return Cons.failure(new NullPointerException(ADDRESS_IS_NULL));
-        if (lambda == null) return Cons.failure(new NullPointerException(LAMBDAC_IS_NULL));
-        if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
+        if (address == null) return Val.fail(new NullPointerException(ADDRESS_IS_NULL));
+        if (lambda == null) return Val.fail(new NullPointerException(LAMBDAC_IS_NULL));
+        if (options == null) return Val.fail(new NullPointerException(OPTIONS_IS_NULL));
 
-        return Cons.of(() -> {
+        return Val.effect(() -> {
                            final int                                                         instances = options.getInstances();
                            final Set<String>                                                 ids       = new HashSet<>();
                            @SuppressWarnings({"rawtypes", "squid:S3740"}) final List<Future> futures   = new ArrayList<>();
@@ -301,7 +300,7 @@ public class VertxRef {
                                                                                       )
                                                          );
                        }
-                      );
+                         );
     }
 
     /**
@@ -463,13 +462,13 @@ public class VertxRef {
      */
     public Val<String> deployVerticle(final AbstractVerticle verticle,
                                       final DeploymentOptions options) {
-        if (verticle == null) return Cons.failure(new NullPointerException(VERTICLE_IS_NULL));
-        if (options == null) return Cons.failure(new NullPointerException(OPTIONS_IS_NULL));
+        if (verticle == null) return Val.fail(new NullPointerException(VERTICLE_IS_NULL));
+        if (options == null) return Val.fail(new NullPointerException(OPTIONS_IS_NULL));
 
-        return Cons.of(() -> vertx.deployVerticle(verticle,
-                                                  options
-                                                 )
-                                  .onComplete(event -> {
+        return Val.effect(() -> vertx.deployVerticle(verticle,
+                                                     options
+                                                    )
+                                     .onComplete(event -> {
                                                   if (event.succeeded())
                                                       EventPublisher.PUBLISHER.deployedVerticle(verticle.getClass(),
                                                                                                 event.result()
@@ -483,7 +482,7 @@ public class VertxRef {
                                                                               .accept(vertx);
                                               }
                                              )
-                      );
+                         );
     }
 
     /**
@@ -598,9 +597,9 @@ public class VertxRef {
      @param duration the amount of time
      @return a Delay
      */
-    public Delay sleep(Duration duration) {
-        return new Delay(duration,
-                         Cons.of(() -> {
+    public Timer sleep(Duration duration) {
+        return new Timer(duration,
+                         Val.effect(() -> {
                              EventPublisher.PUBLISHER.timer(Event.TIMER_STARTS_EVENT)
                                                      .accept(vertx);
                              Promise<Long> promise = Promise.promise();
@@ -754,7 +753,7 @@ public class VertxRef {
      */
     public Val<ShellService> startShellService(final ShellServiceOptions options) {
         requireNonNull(options);
-        return Cons.of(() -> {
+        return Val.effect(() -> {
             ShellService service = ShellService.create(vertx,
                                                        options
                                                       );

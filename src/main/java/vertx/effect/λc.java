@@ -1,7 +1,6 @@
 package vertx.effect;
 
 import io.vertx.core.MultiMap;
-import vertx.effect.exp.Cons;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -14,13 +13,13 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
     MultiMap empty = MultiMap.caseInsensitiveMultiMap();
 
     static <I> λc<I, I> identity() {
-        return (context, val) -> Cons.success(val);
+        return (context, val) -> Val.succeed(val);
     }
 
     static <I, O> λc<I, O> fail(final Supplier<Exception> supplier) {
         Objects.requireNonNull(supplier);
         return (context, val) ->
-                Cons.failure(supplier.get());
+                Val.fail(supplier.get());
     }
 
 
@@ -28,7 +27,7 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
         requireNonNull(context);
         return input -> {
             if (input == null)
-                return Cons.failure(new IllegalArgumentException("input is null"));
+                return Val.fail(new IllegalArgumentException("input is null"));
             return this.apply(context,
                               input
                              );
@@ -37,7 +36,7 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
 
     default Val<O> apply(final I input) {
         if (input == null)
-            return Cons.failure(new IllegalArgumentException("input is null"));
+            return Val.fail(new IllegalArgumentException("input is null"));
         return this.apply(empty,
                           requireNonNull(input)
                          );
@@ -47,7 +46,7 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
         requireNonNull(other);
         return (context, input) -> {
             if (input == null)
-                return Cons.failure(new IllegalArgumentException("input is null"));
+                return Val.fail(new IllegalArgumentException("input is null"));
             return other.apply(context,
                                input
                               )
@@ -62,7 +61,7 @@ public interface λc<I, O> extends BiFunction<MultiMap, I, Val<O>> {
         requireNonNull(other);
         return (context, input) -> {
             if (input == null)
-                return Cons.failure(new IllegalArgumentException("input is null"));
+                return Val.fail(new IllegalArgumentException("input is null"));
             return this.apply(context,
                               input
                              )

@@ -221,10 +221,10 @@ public class TestQuadruple {
     @Test
     public void test_parallel_quadruple_exp_map(VertxTestContext context) {
 
-        Quadruple.parallel(Cons.success("a"),
-                           Cons.success("ab"),
-                           Cons.success("abc"),
-                           Cons.success("abcd")
+        Quadruple.parallel(Val.succeed("a"),
+                           Val.succeed("ab"),
+                           Val.succeed("abc"),
+                           Val.succeed("abcd")
                           )
                  .map(pair -> pair.map((a, b, c, d) -> new Tuple4<>(a.length(),
                                                                     b.length(),
@@ -248,10 +248,10 @@ public class TestQuadruple {
     @Test
     public void test_sequential_quadruple_exp_map(VertxTestContext context) {
 
-        Quadruple.sequential(Cons.success("a"),
-                             Cons.success("ab"),
-                             Cons.success("abc"),
-                             Cons.success("abcd")
+        Quadruple.sequential(Val.succeed("a"),
+                             Val.succeed("ab"),
+                             Val.succeed("abc"),
+                             Val.succeed("abcd")
                             )
                  .map(pair -> pair.map((a, b, c, d) -> new Tuple4<>(a.length(),
                                                                     b.length(),
@@ -275,17 +275,17 @@ public class TestQuadruple {
     @Test
     public void test_parallel_quadruple_exp_flatmap_success(VertxTestContext context) {
 
-        Quadruple.parallel(Cons.success("a"),
-                           Cons.success("b"),
-                           Cons.success("c"),
-                           Cons.success("d")
+        Quadruple.parallel(Val.succeed("a"),
+                           Val.succeed("b"),
+                           Val.succeed("c"),
+                           Val.succeed("d")
                           )
-                 .flatMap(pair -> Cons.success(pair.map((a, b, c, d) -> new Tuple4<>(a.toUpperCase(),
-                                                                                     b.toUpperCase(),
-                                                                                     c.toUpperCase(),
-                                                                                     d.toUpperCase()
+                 .flatMap(pair -> Val.succeed(pair.map((a, b, c, d) -> new Tuple4<>(a.toUpperCase(),
+                                                                                    b.toUpperCase(),
+                                                                                    c.toUpperCase(),
+                                                                                    d.toUpperCase()
                                                         )
-                                                       )))
+                                                      )))
                  .onSuccess(r -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("A",
                                                           "B",
@@ -302,17 +302,17 @@ public class TestQuadruple {
     @Test
     public void test_sequential_quadruple_exp_flatmap_success(VertxTestContext context) {
 
-        Quadruple.sequential(Cons.success("a"),
-                             Cons.success("b"),
-                             Cons.success("c"),
-                             Cons.success("d")
+        Quadruple.sequential(Val.succeed("a"),
+                             Val.succeed("b"),
+                             Val.succeed("c"),
+                             Val.succeed("d")
                             )
-                 .flatMap(pair -> Cons.success(pair.map((a, b, c, d) -> new Tuple4<>(a.toUpperCase(),
-                                                                                     b.toUpperCase(),
-                                                                                     c.toUpperCase(),
-                                                                                     d.toUpperCase()
+                 .flatMap(pair -> Val.succeed(pair.map((a, b, c, d) -> new Tuple4<>(a.toUpperCase(),
+                                                                                    b.toUpperCase(),
+                                                                                    c.toUpperCase(),
+                                                                                    d.toUpperCase()
                                                         )
-                                                       )))
+                                                      )))
                  .onSuccess(r -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("A",
                                                           "B",
@@ -329,12 +329,12 @@ public class TestQuadruple {
     @Test
     public void test_parallel_quadruple_exp_flatmap_failure(VertxTestContext context) {
 
-        Quadruple.parallel(Cons.success("a"),
-                           Cons.success("ab"),
-                           Cons.success("abc"),
-                           Cons.success("abcd")
+        Quadruple.parallel(Val.succeed("a"),
+                           Val.succeed("ab"),
+                           Val.succeed("abc"),
+                           Val.succeed("abcd")
                           )
-                 .flatMap(s -> Cons.failure(new RuntimeException()))
+                 .flatMap(s -> Val.fail(new RuntimeException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      context.completeNow();
@@ -346,12 +346,12 @@ public class TestQuadruple {
     @Test
     public void test_sequential_quadruple_exp_flatmap_failure(VertxTestContext context) {
 
-        Quadruple.sequential(Cons.success("a"),
-                             Cons.success("ab"),
-                             Cons.success("abc"),
-                             Cons.success("abcd")
+        Quadruple.sequential(Val.succeed("a"),
+                             Val.succeed("ab"),
+                             Val.succeed("abc"),
+                             Val.succeed("abcd")
                             )
-                 .flatMap(s -> Cons.failure(new RuntimeException()))
+                 .flatMap(s -> Val.fail(new RuntimeException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      context.completeNow();
@@ -368,10 +368,10 @@ public class TestQuadruple {
                            b.get(),
                            a.get()
                           )
-                 .recoverWith(e -> Cons.success(new Tuple4<>("",
-                                                             "",
-                                                             "",
-                                                             ""
+                 .recoverWith(e -> Val.succeed(new Tuple4<>("",
+                                                            "",
+                                                            "",
+                                                            ""
                               ))
                              )
                  .onSuccess(map -> context.verify(() -> {
@@ -395,10 +395,10 @@ public class TestQuadruple {
                              b.get(),
                              a.get()
                             )
-                 .recoverWith(e -> Cons.success(new Tuple4<>("",
-                                                             "",
-                                                             "",
-                                                             ""
+                 .recoverWith(e -> Val.succeed(new Tuple4<>("",
+                                                            "",
+                                                            "",
+                                                            ""
                               ))
                              )
                  .onSuccess(map -> context.verify(() -> {
@@ -422,7 +422,7 @@ public class TestQuadruple {
                            b.get(),
                            a.get()
                           )
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -439,7 +439,7 @@ public class TestQuadruple {
                              b.get(),
                              a.get()
                             )
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onComplete(r -> context.verify(() -> {
                      Assertions.assertTrue(r.failed());
                      Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -456,7 +456,7 @@ public class TestQuadruple {
                            a.get()
                           )
                  .retryEach(limitRetries(2))
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("a",
                                                           "b",
@@ -478,7 +478,7 @@ public class TestQuadruple {
                              a.get()
                             )
                  .retryEach(limitRetries(2))
-                 .recoverWith(e -> Cons.failure(new IllegalArgumentException()))
+                 .recoverWith(e -> Val.fail(new IllegalArgumentException()))
                  .onSuccess(map -> context.verify(() -> {
                      Assertions.assertEquals(new Tuple4<>("a",
                                                           "b",

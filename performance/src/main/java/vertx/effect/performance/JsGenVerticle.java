@@ -2,7 +2,6 @@ package vertx.effect.performance;
 
 import jsonvalues.JsObj;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 import java.util.Random;
@@ -21,12 +20,12 @@ public class JsGenVerticle implements λ<Integer, JsObj>
 
   @Override
   public Val<JsObj> apply(final Integer delay) {
-    if(delay==0)return Cons.success(supplier.get());
+    if(delay==0)return Val.succeed(supplier.get());
     try {
       Thread.sleep(delay);
-      return Cons.success(supplier.get());
+      return Val.succeed(supplier.get());
     } catch (InterruptedException e) {
-       return Cons.failure(e);
+       return Val.fail(e);
     }
 
   }
