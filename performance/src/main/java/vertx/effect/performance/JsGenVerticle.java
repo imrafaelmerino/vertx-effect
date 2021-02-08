@@ -2,7 +2,6 @@ package vertx.effect.performance;
 
 import jsonvalues.JsObj;
 import vertx.effect.Val;
-import vertx.effect.exp.Cons;
 import vertx.effect.λ;
 
 import java.util.Random;

@@ -1,8 +1,6 @@
 package vertx.effect.core;
 
-import io.vertx.core.http.HttpMethod;
 import jdk.jfr.*;
-
 @Label("http request")
 @Name("vertx.effect.httpclient.Request")
 @Category("vertx.effect")
