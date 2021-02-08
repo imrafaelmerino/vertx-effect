@@ -325,8 +325,8 @@ public class TestJsArrayExp {
 
     @Test
     public void test_race(final VertxTestContext context) {
-        Val<JsStr> a = Val.effect(() -> Future.succeededFuture(JsStr.of("a")));
-        Val<JsStr> b = Val.effect(() -> Future.succeededFuture(JsStr.of("b")));
+        Val<JsStr> a = Val.succeed(JsStr.of("a"));
+        Val<JsStr> b = Val.succeed(JsStr.of("b"));
         JsArrayExp.parallel()
                   .append(a)
                   .append(b)

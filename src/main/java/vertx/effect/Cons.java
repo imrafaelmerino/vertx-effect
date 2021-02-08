@@ -5,7 +5,6 @@ import vertx.effect.core.AbstractVal;
 
 import java.util.function.Supplier;
 
-import static java.util.Objects.requireNonNull;
 
 final class Cons<O> extends AbstractVal<O> {
     private final Supplier<Future<O>> futureSupplier;

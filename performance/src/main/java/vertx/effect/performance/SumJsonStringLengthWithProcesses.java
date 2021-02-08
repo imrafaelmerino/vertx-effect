@@ -18,7 +18,7 @@ public class SumJsonStringLengthWithProcesses implements λ<Integer, Integer> {
                                times
                               )
                         .mapToObj(
-                                n -> Cons.of(() -> generatorProcess.apply(DELAY)
+                                n -> Val.effect(() -> generatorProcess.apply(DELAY)
                                                                    .flatMap(filterProcess.andThen(mapProcess)
                                                                                          .andThen(reduceProcess)
                                                                            )

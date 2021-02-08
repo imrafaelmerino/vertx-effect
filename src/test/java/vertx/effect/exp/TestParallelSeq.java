@@ -310,8 +310,8 @@ public class TestParallelSeq {
 
     @Test
     public void test_race(final VertxTestContext context) {
-        Val<String> a = Val.effect(() -> Future.succeededFuture("a"));
-        Val<String> b = Val.effect(() -> Future.succeededFuture("b"));
+        Val<String> a = Val.succeed("a");
+        Val<String> b = Val.succeed("b");
         ListExp.parallel(a,
                          b
                         )

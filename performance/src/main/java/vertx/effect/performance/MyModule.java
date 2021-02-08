@@ -42,13 +42,13 @@ public class MyModule extends VertxModule {
     private static final String COUNT_STRING_LENGTH_MULTIPROCESSES_ADDRESS = "countStringsLengthMultiProcesses";
 
     final λ<JsObj, JsObj> mapFn = obj ->
-            Cons.success(obj.mapAllValues(pair -> JsInt.of(pair.value.toJsStr().value.length())));
+            Val.succeed(obj.mapAllValues(pair -> JsInt.of(pair.value.toJsStr().value.length())));
 
     final λ<JsObj, JsObj> filterFn = obj ->
-            Cons.success(obj.filterAllValues(pair -> pair.value.isStr()));
+            Val.succeed(obj.filterAllValues(pair -> pair.value.isStr()));
 
     final λ<JsObj, Integer> reduceFn = json ->
-            Cons.success(json.reduceAll(Integer::sum,
+            Val.succeed(json.reduceAll(Integer::sum,
                                         pair -> pair.value.toJsInt().value,
                                         pair -> true
                                        )
@@ -140,12 +140,12 @@ public class MyModule extends VertxModule {
                     λ.<JsonObject>identity()
                    );
 
-        final λ<String, JsObj> parser = str -> Cons.success(JsObj.parse(str));
+        final λ<String, JsObj> parser = str -> Val.succeed(JsObj.parse(str));
 
         this.deploy(PARSER_ADDRESS,
                     parser
                    );
-        final λ<String, JsonObject> jacksonParser = str -> Cons.success(new JsonObject(str));
+        final λ<String, JsonObject> jacksonParser = str -> Val.succeed(new JsonObject(str));
 
         this.deploy(JACKSON_PARSER_ADDRESS,
                     jacksonParser
