@@ -1,13 +1,11 @@
 package vertx.effect.performance;
 
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import jsonvalues.JsInt;
 import jsonvalues.JsObj;
 import vertx.effect.*;
-import vertx.effect.exp.Cons;
-import vertx.effect.exp.Pair;
+
 
 import static vertx.effect.performance.benchmarks.Inputs.VERTICLE_INSTANCES;
 
@@ -42,14 +40,14 @@ public class MyModule extends VertxModule {
     private static final String COUNT_STRING_LENGTH_MULTIPROCESSES_ADDRESS = "countStringsLengthMultiProcesses";
 
     final λ<JsObj, JsObj> mapFn = obj ->
-            Val.succeed(obj.mapAllValues(pair -> JsInt.of(pair.value.toJsStr().value.length())));
+            Val.succeed(obj.mapAllValues(val -> JsInt.of(val.toJsStr().value.length())));
 
     final λ<JsObj, JsObj> filterFn = obj ->
-            Val.succeed(obj.filterAllValues(pair -> pair.value.isStr()));
+            Val.succeed(obj.filterAllValues(val -> val.isStr()));
 
     final λ<JsObj, Integer> reduceFn = json ->
             Val.succeed(json.reduceAll(Integer::sum,
-                                        pair -> pair.value.toJsInt().value,
+                                        val -> val.toJsInt().value,
                                         pair -> true
                                        )
                              .orElse(0));

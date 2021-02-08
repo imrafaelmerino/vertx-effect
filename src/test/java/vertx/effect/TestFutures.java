@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.exp.JsArrayExp;
 import vertx.effect.exp.JsObjExp;
+import vertx.effect.exp.Pair;
 
 import java.util.function.Function;
 
@@ -32,13 +33,15 @@ public class TestFutures extends VertxModule {
                                   System.out::println
                                  );
 
-        CompositeFuture.all(vertx.deployVerticle(new TestFutures()),
-                            vertx.deployVerticle(new RegisterJsValuesCodecs())
-                           )
-                       .onComplete(event -> {
-                           if (event.failed()) testContext.failNow(event.cause());
-                           else testContext.completeNow();
-                       });
+        Pair.sequential(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                        vertxRef.deployVerticle(new TestFutures())
+                       )
+            .onComplete(event -> {
+                if (event.failed()) testContext.failNow(event.cause());
+                else testContext.completeNow();
+            })
+            .get();
+
 
 
     }
@@ -48,13 +51,13 @@ public class TestFutures extends VertxModule {
 
         JsObjExp.parallel("a",
                           multiplyBy10.apply(10)
-                                .map(JsInt::of),
+                                      .map(JsInt::of),
                           "b",
                           add10.apply(5)
-                         .map(JsInt::of),
+                               .map(JsInt::of),
                           "c",
                           toUpper.apply("abc")
-                           .map(JsStr::of),
+                                 .map(JsStr::of),
                           "d",
                           JsArrayExp.sequential(multiplyBy10.apply(1)
                                                             .map(JsInt::of),
@@ -92,7 +95,7 @@ public class TestFutures extends VertxModule {
     protected void deploy() {
         λ<String, String>                      keysToUpper = i -> Val.succeed(i.toUpperCase());
         Function<Integer, λ<Integer, Integer>> multiplyBy  = i -> j -> Val.succeed(j * i);
-        Function<Integer, λ<Integer, Integer>> add = i -> j -> Val.succeed(i + j);
+        Function<Integer, λ<Integer, Integer>> add         = i -> j -> Val.succeed(i + j);
         this.deploy("toUpper",
                     keysToUpper
                    );
