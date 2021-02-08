@@ -6,6 +6,7 @@
 - 💡 Val.fail instead of Cons.failure
 - 💡 Val.effect instead of Cons.of
 - 💡 Cons is private now
+- 💡 Delay -> Timer 
 
 ## Features
 - 🎸 Clock class with monotonic and realTime lambdas 
