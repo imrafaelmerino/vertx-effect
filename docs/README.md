@@ -6,11 +6,10 @@
 [![codecov](https://codecov.io/gh/imrafaelmerino/vertx-effect/branch/master/graph/badge.svg?token=30SaJ84Ctd)](https://codecov.io/gh/imrafaelmerino/vertx-effect)
 
 [![Javadocs](https://www.javadoc.io/badge/com.github.imrafaelmerino/vertx-effect.svg)](https://www.javadoc.io/doc/com.github.imrafaelmerino/vertx-effect)
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/2.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/2.0.0/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/3.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/3.0.0/jar)
 [![](https://jitpack.io/v/imrafaelmerino/vertx-effect.svg)](https://jitpack.io/#imrafaelmerino/vertx-effect)
 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=imrafaelmerino_vertx-effect&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=imrafaelmerino_vertx-effect)
-
 
 - [vertx-effect manifesto](#manifesto)
 - [How persistent data structures makes a difference working with actors](#persistendata)
@@ -244,11 +243,11 @@ public class TestMyModule {
 
 ```java
 
- λ<String, String> toLowerCase = str -> Cons.success(str.toLowerCase());
+ λ<String, String> toLowerCase = str -> Val.succeed(str.toLowerCase());
  
- λ<String, String> toUpperCase = str -> Cons.success(str.toUpperCase()); 
+ λ<String, String> toUpperCase = str -> Val.succeed(str.toUpperCase()); 
  
- λ<Integer, Integer> inc = n -> Cons.success(n+1);
+ λ<Integer, Integer> inc = n -> Val.succeed(n+1);
  
  JsObjSpec spec = JsObjSpec.strict("a", integer, "b", tuple(str, str));
  
@@ -327,7 +326,17 @@ Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's 
 import java.util.function.Supplier
 import io.vertx.core.Future
 
-public interface Val<O> extends Supplier<Future<O>> {}
+public abstract class Val<O> extends Supplier<Future<O>> {
+    //from a constant
+    public static Val<O> succeed(O constant);
+    
+    //from a exception
+    public static Val<O> fail(Throwable error);
+    
+    // from an effect
+    public static Val<O> effect(Supplier<Future<O>> effect);
+    
+}
 
 ```
 
@@ -338,9 +347,9 @@ If we turn Future into Val in the previous example:
 
 ```java 
 
-Val<Customer> a = insertDb(customer);
+Val<Customer> a = Val.effect( ()->insertDb(customer) );
 
-Val<Customer> b = insertDb(customer);
+Val<Customer> b = Val.effect( ()->insertDb(customer) );
 
 ```
 
@@ -348,7 +357,7 @@ The above example is entirely equivalent to:
 
 ```java
 
-Val<Customer> c = insertDb(customer)
+Val<Customer> c = Val.effect( ()->insertDb(customer) ); 
 
 Val<Customer> a = c;
 
@@ -379,21 +388,23 @@ be of a type that can be sent across the event bus; otherwise, you must implemen
 **Using expressions and function composition is how we deal with complexity in functional programming**. 
 Let's go over the essential expressions in vertx-effect:
 
-- **Cons** (stands for constant). 
-
+- **Val constructors** 
 
 ```java
 import io.vertx.core.Future
 
 public final class Cons<O> implements Val<O>{...}
 
-Val<String> str = Cons.success("hi"); // from a constant
+Val<String> str = Val.succeed("hi"); // from a constant
 
 // from an error
-Val<Throwable> error = Cons.failure(new RuntimeException("something went wrong :("));
+Val<Throwable> error = Val.fail(new RuntimeException("something went wrong :("));
 
+//from effects
 Future<JsObj> getProfile(final String id){...}
-Val<JsObj> profile = Cons.of( () -> getProfile(id)); // from a Future
+Val<JsObj> profile = Val.effect( () -> getProfile(id)); // from a Future
+
+Val<Long> realTime = Val.effect(() -> System.currentTimeMillis() );
 ``` 
 
 
@@ -440,12 +451,12 @@ new Case<I,O>(Val<I>).of(cons of type I, Val<O>,
                         );      
 
 // reduces to Wednesday
-new Case<Integer,String>(Cons.success(3)).of(1, Cons.success("Monday"),
-                                             2, Cons.success("Tuesday"),
-                                             3, Cons.success("Wednesday"),
-                                             4, Cons.success("Thursday"),
-                                             5, Cons.success("Friday"),
-                                             Cons.success("weekend")
+new Case<Integer,String>(Val.succeed(3)).of(1, Val.succeed("Monday"),
+                                             2, Val.succeed("Tuesday"),
+                                             3, Val.succeed("Wednesday"),
+                                             4, Val.succeed("Thursday"),
+                                             5, Val.succeed("Friday"),
+                                             Val.succeed("weekend")
                                             );
 ```
 
@@ -460,12 +471,12 @@ new Case<I,O>(Val<I>).of(List<I>, Val<O>,
                         );      
         
 // reduces to third week
-new Case<Integer,String>(Cons.success(20))
-                 .of(asList(1, 2, 3, 4, 5, 6, 7), Cons.success("first week"),
-                     asList(8, 9, 10, 11, 12, 13, 14), Cons.success("second week"),
-                     asList(15, 16, 17, 18, 19, 20, 10), Cons.success("third week"),
-                     asList(21, 12, 23, 24, 25, 26, 27), Cons.success("forth week"),
-                     Cons.success("last days of the month")
+new Case<Integer,String>(Val.succeed(20))
+                 .of(asList(1, 2, 3, 4, 5, 6, 7), Val.succeed("first week"),
+                     asList(8, 9, 10, 11, 12, 13, 14), Val.succeed("second week"),
+                     asList(15, 16, 17, 18, 19, 20, 10), Val.succeed("third week"),
+                     asList(21, 12, 23, 24, 25, 26, 27), Val.succeed("forth week"),
+                     Val.succeed("last days of the month")
                     );
 ```
     
@@ -836,11 +847,11 @@ same email. That's only an example.
     @Override
     protected void deploy() {
 
-        this.deploy(IS_LEGAL_AGE, (Integer age) -> Cons.success(age > 16));
+        this.deploy(IS_LEGAL_AGE, (Integer age) -> Val.succeed(age > 16));
 
-        this.deploy(IS_VALID_ID, (String id) -> Cons.success(!id.isEmpty()));
+        this.deploy(IS_VALID_ID, (String id) -> Val.succeed(!id.isEmpty()));
         
-        this.deploy(IS_VALID_EMAIL, (String email) -> Cons.success(!email.isEmpty()));
+        this.deploy(IS_VALID_EMAIL, (String email) -> Val.succeed(!email.isEmpty()));
 
         λc<JsObj, Boolean> isValid = (context, obj) ->
                 All.parallel(isLegalAge.apply(context,
@@ -1009,7 +1020,7 @@ BiFunction<Integer, String, Val<JsObj>> search =
                                                             SECONDS
                                                            )
                                  )
-                          .recoverWith(e -> Cons.success(JsObj.EMPTY));
+                          .recoverWith(e -> Val.succeed(JsObj.EMPTY));
 
 search.apply(3, "vertx").get();
 
@@ -1238,7 +1249,7 @@ Vertx version 4.0.0.CR1
 <dependency>
   <groupId>com.github.imrafaelmerino</groupId>
   <artifactId>vertx-effect</artifactId>
-  <version>2.0.0</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 
