@@ -1,6 +1,6 @@
 {
     "app_name": "vertx-effect",
-    "branch" : "policy",
+    "branch" : "v3.0.1",
     "repo_url": "",
     "version_name" : "v3.0.1",
     "file": "docs/CHANGELOG.md",

@@ -1,12 +1,10 @@
 # VERTX-EFFECT
-## v3.0.1  ( Mon Feb 08 2021 20:06:32 GMT+0100 (Central European Standard Time) )
+## v3.0.1  ( Wed Feb 10 2021 20:38:45 GMT+0100 (Central European Standard Time) )
 
-## Refactor 
-- 💡 Val.succeed instead of Cons.success
-- 💡 Val.fail instead of Cons.failure
-- 💡 Val.effect instead of Cons.of
-- 💡 Cons is private now
-- 💡 Delay -> Timer 
 
-## Features
-- 🎸 Clock class with monotonic and realTime lambdas 
+## Refactor
+  - 💡 retryOnFailure -> repeat
+  ([0abf3b81](https://github.com/imrafaelmerino/vertx-effect/commit/0abf3b8108af09a00925b36aeab7a3363ec07871))
+
+
+
