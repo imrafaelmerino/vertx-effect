@@ -32,8 +32,8 @@ final class SequentialPair<A, B> extends Pair<A, B>  {
     @Override
     public Val<Tuple2<A, B>> retryEach(final Predicate<Throwable> predicate,
                                        final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Pair.retryEach: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Pair.retryEach: predicate is null"));
         return new SequentialPair<>(_1.retry(predicate,
                                              policy
                                             ),

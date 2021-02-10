@@ -76,8 +76,8 @@ public abstract class Val<O> implements Supplier<Future<O>> {
                                  final RetryPolicy policy);
 
 
-    public abstract Val<O> retryOnFailure(final Predicate<O> predicate,
-                                          final RetryPolicy policy);
+    public abstract Val<O> repeat(final Predicate<O> predicate,
+                                  final RetryPolicy policy);
 
     /**
      Creates a new value that will handle any matching throwable that this value might contain.

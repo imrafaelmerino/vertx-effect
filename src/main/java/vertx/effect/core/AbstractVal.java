@@ -22,7 +22,7 @@ public abstract class AbstractVal<O> extends Val<O> {
             return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
 
         return Val.effect(() -> get().compose(Future::succeededFuture,
-                                           e -> Future.succeededFuture(lambda.apply(e))
+                                              e -> Future.succeededFuture(lambda.apply(e))
                                              )
                          );
     }
@@ -32,7 +32,7 @@ public abstract class AbstractVal<O> extends Val<O> {
         if (fn == null)
             return Val.fail(new NullPointerException("fn is null"));
         return Val.effect(() -> get()
-                               .map(fn)
+                                  .map(fn)
 
                          );
     }
@@ -42,8 +42,8 @@ public abstract class AbstractVal<O> extends Val<O> {
         if (lambda == null)
             return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
         return Val.effect(() -> get().compose(Future::succeededFuture,
-                                           e -> lambda.apply(e)
-                                                      .get()
+                                              e -> lambda.apply(e)
+                                                         .get()
                                              )
                          );
     }
@@ -53,11 +53,11 @@ public abstract class AbstractVal<O> extends Val<O> {
         if (lambda == null)
             return Val.fail(new NullPointerException(LAMBDA_IS_NULL));
         return Val.effect(() -> get().compose(Future::succeededFuture,
-                                           e -> lambda.apply(e)
-                                                      .get()
-                                                      .compose(Future::succeededFuture,
-                                                               e1 -> Future.failedFuture(e)
-                                                              )
+                                              e -> lambda.apply(e)
+                                                         .get()
+                                                         .compose(Future::succeededFuture,
+                                                                  e1 -> Future.failedFuture(e)
+                                                                 )
                                              )
                          );
 
@@ -87,9 +87,9 @@ public abstract class AbstractVal<O> extends Val<O> {
         if (failureConsumer == null)
             return Val.fail(new NullPointerException("failureConsumer is null"));
         return Val.effect(() -> get().onComplete(event -> {
-                           if (event.succeeded()) successConsumer.accept(event.result());
-                           else failureConsumer.accept(event.cause());
-                       })
+                              if (event.succeeded()) successConsumer.accept(event.result());
+                              else failureConsumer.accept(event.cause());
+                          })
                          );
     }
 
@@ -102,8 +102,8 @@ public abstract class AbstractVal<O> extends Val<O> {
             return Val.fail(new NullPointerException("failureMapper is null"));
         return Val.effect(() -> get().compose(result -> successMapper.apply(result)
                                                                      .get(),
-                                           failure -> failureMapper.apply(failure)
-                                                                   .get()
+                                              failure -> failureMapper.apply(failure)
+                                                                      .get()
                                              )
                          );
 
@@ -118,22 +118,22 @@ public abstract class AbstractVal<O> extends Val<O> {
     }
 
     @Override
-    public Val<O> retryOnFailure(final Predicate<O> predicate,
-                                 final RetryPolicy policy) {
-        return retryOnFailure(this,
-                              policy,
-                              new RetryStatus(0,
-                                              0,
-                                              0
-                              ),
-                              predicate
-                             );
+    public Val<O> repeat(final Predicate<O> predicate,
+                         final RetryPolicy policy) {
+        return repeat(this,
+                      policy,
+                      new RetryStatus(0,
+                                      0,
+                                      0
+                      ),
+                      predicate
+                     );
     }
 
-    private Val<O> retryOnFailure(Val<O> exp,
-                                  Function<RetryStatus, Optional<Timer>> policy,
-                                  RetryStatus rs,
-                                  Predicate<O> predicate) {
+    private Val<O> repeat(Val<O> exp,
+                          Function<RetryStatus, Optional<Timer>> policy,
+                          RetryStatus rs,
+                          Predicate<O> predicate) {
 
         return exp.flatMap(o -> {
                                if (predicate.test(o)) {
@@ -141,16 +141,16 @@ public abstract class AbstractVal<O> extends Val<O> {
                                    if (delayOpt.isEmpty()) return Val.succeed(o);
                                    Timer timer = delayOpt.get();
                                    return timer.delay.flatMap(nill -> {
-                                                                long delayDuration = timer.duration.toMillis();
-                                                                return retryOnFailure(exp,
-                                                                                      policy,
-                                                                                      new RetryStatus(rs.rsIterNumber + 1,
-                                                                                                      rs.rsCumulativeDelay + delayDuration,
-                                                                                                      delayDuration
-                                                                                      ),
-                                                                                      predicate
-                                                                                     );
-                                                            }
+                                                                  long delayDuration = timer.duration.toMillis();
+                                                                  return repeat(exp,
+                                                                                policy,
+                                                                                new RetryStatus(rs.rsIterNumber + 1,
+                                                                                                rs.rsCumulativeDelay + delayDuration,
+                                                                                                delayDuration
+                                                                                ),
+                                                                                predicate
+                                                                               );
+                                                              }
                                                              );
                                }
                                else return Val.succeed(o);
@@ -161,7 +161,7 @@ public abstract class AbstractVal<O> extends Val<O> {
 
     @Override
     public Val<O> retry(final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Val.retry: policy is null"));
 
         return retry(this,
                      policy,
@@ -177,8 +177,8 @@ public abstract class AbstractVal<O> extends Val<O> {
     @Override
     public Val<O> retry(final Predicate<Throwable> predicate,
                         final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Val.retry: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Val.retry: predicate is null"));
         return retry(this,
                      policy,
                      new RetryStatus(0,
@@ -195,25 +195,23 @@ public abstract class AbstractVal<O> extends Val<O> {
                          RetryStatus rs,
                          Predicate<Throwable> predicate) {
 
-        return exp.flatMap(o -> {
-                               return Val.succeed(o);
-                           },
+        return exp.flatMap(o -> Val.succeed(o),
                            exc -> {
                                if (predicate.test(exc)) {
                                    Optional<Timer> delayOpt = policy.apply(rs);
                                    if (delayOpt.isEmpty()) return Val.fail(exc);
                                    Timer timer = delayOpt.get();
                                    return timer.delay.flatMap(nill -> {
-                                                                long delayDuration = timer.duration.toMillis();
-                                                                return retry(exp,
-                                                                             policy,
-                                                                             new RetryStatus(rs.rsIterNumber + 1,
-                                                                                             rs.rsCumulativeDelay + delayDuration,
-                                                                                             delayDuration
-                                                                             ),
-                                                                             predicate
-                                                                            );
-                                                            }
+                                                                  long delayDuration = timer.duration.toMillis();
+                                                                  return retry(exp,
+                                                                               policy,
+                                                                               new RetryStatus(rs.rsIterNumber + 1,
+                                                                                               rs.rsCumulativeDelay + delayDuration,
+                                                                                               delayDuration
+                                                                               ),
+                                                                               predicate
+                                                                              );
+                                                              }
                                                              );
                                }
                                else return Val.fail(exc);

@@ -1,5 +1,5 @@
 # VERTX-EFFECT
-## v3.0.0  ( Mon Feb 08 2021 20:06:32 GMT+0100 (Central European Standard Time) )
+## v3.0.1  ( Mon Feb 08 2021 20:06:32 GMT+0100 (Central European Standard Time) )
 
 ## Refactor 
 - 💡 Val.succeed instead of Cons.success

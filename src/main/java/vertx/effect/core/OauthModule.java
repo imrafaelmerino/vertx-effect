@@ -117,7 +117,6 @@ public abstract class OauthModule extends HttpClientModule {
                                                         final boolean refreshToken
                                                        ) {
         return (context, reqParams) ->
-                //really important: Cons.of instead of Cons.success to capture the state of this.accessToken
                 IfElse.<String>predicate(Val.effect(() -> Future.succeededFuture(refreshToken || accessToken == null)))
                         .consequence(
                                 accessTokenReq.apply(context,
@@ -127,7 +126,6 @@ public abstract class OauthModule extends HttpClientModule {
                                               .retry(accessTokenReqRetryPolicy)
                                               .onSuccess(newToken -> this.accessToken = newToken)
                                     )
-                        //really important: Cons.of instead of Cons.success to capture the state of this.accessToken
                         .alternative(Val.effect(() -> Future.succeededFuture(this.accessToken)))
                         .flatMap(token -> resilientReq(req
                                                       ).apply(reqParams.setHeader(authorizationHeaderName,

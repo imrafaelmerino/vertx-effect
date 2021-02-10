@@ -30,8 +30,8 @@ final class SequentialAll extends All  {
     @Override
     public Val<Boolean> retryEach(final Predicate<Throwable> predicate,
                                   final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("All.retryEach: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("All.retryEach: predicate is null"));
         return new SequentialAll(exps.stream()
                                      .map(it -> it.retry(policy))
                                      .collect(Collectors.toList()));

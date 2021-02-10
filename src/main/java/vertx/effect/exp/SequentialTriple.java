@@ -33,8 +33,8 @@ public final class SequentialTriple<A, B, C> extends Triple<A, B, C>  {
     @Override
     public Val<Tuple3<A, B, C>> retryEach(final Predicate<Throwable> predicate,
                                           final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Triple.retryEach: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Triple.retryEach: predicate is null"));
         return new SequentialTriple<>(_1.retry(predicate,
                                                policy),
                                       _2.retry(predicate,
