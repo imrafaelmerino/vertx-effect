@@ -56,8 +56,8 @@ public final class IfElse<O> extends Exp<O> {
     @Override
     public Val<O> retryEach(final Predicate<Throwable> retryPredicate,
                             final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("IfElse.retryEach: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("IfElse.retryEach: predicate is null"));
         return new IfElse<O>(predicate.retry(retryPredicate,
                                              policy
                                             ))

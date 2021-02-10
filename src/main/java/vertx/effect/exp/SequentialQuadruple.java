@@ -36,8 +36,8 @@ class SequentialQuadruple<A, B, C, D> extends Quadruple<A, B, C, D>  {
     @Override
     public Val<Tuple4<A, B, C, D>> retryEach(final Predicate<Throwable> predicate,
                                              final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Sequential.retryEach: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Sequential.retryEach: predicate is null"));
         return new SequentialQuadruple<>(_1.retry(predicate,
                                                   policy),
                                          _2.retry(predicate,

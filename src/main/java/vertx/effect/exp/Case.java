@@ -628,8 +628,8 @@ public final class Case<I, O> extends Exp<O> {
     @Override
     public Val<O> retryEach(final Predicate<Throwable> predicate,
                             final RetryPolicy policy) {
-        if (policy == null) return Val.fail(new IllegalArgumentException("Cons.retry: policy is null"));
-        if (predicate == null) return Val.fail(new IllegalArgumentException("Cons.retry: predicate is null"));
+        if (policy == null) return Val.fail(new IllegalArgumentException("Case.retryEach: policy is null"));
+        if (predicate == null) return Val.fail(new IllegalArgumentException("Case.retryEach: predicate is null"));
         return cond.retryEach(predicate,
                               policy
                              );

@@ -83,9 +83,9 @@ public class HttpClientTestRetryOnFailure {
                 .accept(httpClient.get.apply(new GetReq().port(PORT)
                                                          .uri("example")
                                             )
-                                      .retryOnFailure(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
-                                                      limitRetries(3)
-                                                     ),
+                                      .repeat(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
+                                              limitRetries(3)
+                                             ),
                         context
                        );
 
@@ -107,10 +107,10 @@ public class HttpClientTestRetryOnFailure {
         }).accept(httpClient.get.apply(new GetReq().port(PORT)
                                                    .uri("example")
                                       )
-                                .retryOnFailure(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
-                                                limitRetries(3)
+                                .repeat(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
+                                        limitRetries(3)
                                                         .append(constantDelay(vertxRef.sleep(Duration.ofMillis(100))))
-                                               ),
+                                       ),
                   context
                  );
 
