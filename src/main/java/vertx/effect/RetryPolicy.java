@@ -35,8 +35,7 @@ public interface RetryPolicy extends Function<RetryStatus, Optional<Timer>> {
             if (aOpt.isEmpty()) return aOpt;
             Optional<Timer> bOpt = other.apply(retryStatus);
             if (bOpt.isEmpty()) return bOpt;
-            return Optional.of(aOpt.get()
-                                   .max(bOpt.get()));
+            return Optional.of(aOpt.get().duration.compareTo(bOpt.get().duration) >= 0 ? aOpt.get() : bOpt.get());
         };
     }
 

@@ -39,7 +39,7 @@ public class Timer {
      @param n the factor the delay is multiplied
      @return a new Delay
      */
-    public final Timer multipliedBy(long n) {
+     final Timer multipliedBy(long n) {
         Val<Long> acc = delay;
         for (int i = 0; i < n; i++) {
             acc = acc.flatMap(it -> delay);
@@ -49,38 +49,6 @@ public class Timer {
         );
     }
 
-    /**
-     Creates a new delay adding the given delay to this
 
-     @param timer the delay to be added to this
-     @return a new delay
-     */
-    final Timer plus(Timer timer) {
-        return new Timer(duration.plus(timer.duration),
-                         delay.flatMap(it -> timer.delay)
-        );
-    }
-
-    /**
-     returns the maximum delay
-
-     @param other the other delay
-     @return the maximum delay
-     */
-    public Timer max(Timer other) {
-        if (this.duration.compareTo(other.duration) >= 0) return this;
-        return other;
-    }
-
-    /**
-     returns the minimum delay
-
-     @param other the other delay
-     @return the minimum delay
-     */
-    public Timer min(Timer other) {
-        if (this.duration.compareTo(other.duration) <= 0) return this;
-        return other;
-    }
 
 }
