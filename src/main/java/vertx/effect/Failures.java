@@ -2,13 +2,12 @@ package vertx.effect;
 
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
-import jsonvalues.Prism;
-import vertx.effect.httpclient.oauth.AuthorizationCodeFlowBuilder;
+import fun.optic.Prism;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
 import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
 import static io.vertx.core.eventbus.ReplyFailure.TIMEOUT;
 import static java.util.Objects.requireNonNull;
@@ -21,7 +20,8 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings({"serial", "squid:S110"})
 public final class Failures {
 
-    private Failures() {}
+    private Failures() {
+    }
 
     /**
      Error returned by a validator when the message is not valid
@@ -81,7 +81,7 @@ public final class Failures {
     public static final int HTTP_EMPTY_AUTHORIZATION_CODE = 4003;
     /**
      when the oauth access token is not found in the response (Authorization code flow or Client credentials flow)
-     @see vertx.effect.core.OauthBuilder#readAccessTokenAfterRefresh(λ)
+     @see vertx.effect.core.OauthBuilder#readAccessTokenAfterRefresh(Lambda)
      */
     public static final int HTTP_ACCESS_TOKEN_NOT_FOUND_CODE = 4004;
      /**
@@ -93,7 +93,7 @@ public final class Failures {
     /**
      when the oauth refresh token is not found in the response. In an Authorization code flow, just after authentication,
      you need to get the refresh token to get access tokens to perform requests.
-     @see AuthorizationCodeFlowBuilder#readTokensAfterAuthentication(λ)
+     @see AuthorizationCodeFlowBuilder#readTokensAfterAuthentication(Lambda)
      */
     public static final int HTTP_REFRESH_TOKEN_NOT_FOUND_CODE = 4006;
 
@@ -121,8 +121,9 @@ public final class Failures {
      @return a predicate to test if
      @see ReplyException
      */
-    public static Predicate<Throwable> anyOf(final int code,
-                                             final int... others
+    public static Predicate<Throwable> anyOf(
+            final int code,
+            final int... others
                                             ) {
         return exc -> {
             if (exc instanceof ReplyException) {
@@ -171,9 +172,10 @@ public final class Failures {
      the given message
      */
     public static final Function<String, ReplyException> GET_BAD_MESSAGE_EXCEPTION =
-            errorMessage -> new ReplyException(RECIPIENT_FAILURE,
-                                               BAD_MESSAGE_CODE,
-                                               requireNonNull(errorMessage)
+            errorMessage -> new ReplyException(
+                    RECIPIENT_FAILURE,
+                    BAD_MESSAGE_CODE,
+                    requireNonNull(errorMessage)
             );
 
 }

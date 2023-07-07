@@ -1,8 +1,7 @@
+.idea/
 target
-.idea
-*.iml
-out
-performance/dependency-reduced-pom.xml
-tests_with_secure_credentials.sh
-key.asc
 vertx-effect-recording.jfr
+vertx-effect.iml
+../.idea/
+.DS_Store
+.idea/**

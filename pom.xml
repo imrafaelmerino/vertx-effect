@@ -29,6 +29,7 @@
     </scm>
 
     <properties>
+        <error-prone.version>2.18.0</error-prone.version>
         <NEXUS-STAGING-MAVEN-PLUGIN.VERSION>1.6.8</NEXUS-STAGING-MAVEN-PLUGIN.VERSION>
         <MAVEN-GPG-PLUGIN.VERSION>1.6</MAVEN-GPG-PLUGIN.VERSION>
         <JACOCO-MAVEN-PLUGIN.VERSION>0.8.4</JACOCO-MAVEN-PLUGIN.VERSION>
@@ -36,13 +37,15 @@
         <MAVEN-SOURCE-PLUGIN.VERSION>3.0.1</MAVEN-SOURCE-PLUGIN.VERSION>
         <MAVEN-SUREFIRE-PLUGIN.VERSION>2.22.2</MAVEN-SUREFIRE-PLUGIN.VERSION>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <MAVEN-COMPILER-PLUGIN.VERSION>3.1</MAVEN-COMPILER-PLUGIN.VERSION>
         <MAVEN-COMPILER-PLUGIN.SOURCE>11</MAVEN-COMPILER-PLUGIN.SOURCE>
         <MAVEN-COMPILER-PLUGIN.TARGET>11</MAVEN-COMPILER-PLUGIN.TARGET>
-        <VERTX-VERSION>4.0.2</VERTX-VERSION>
-        <JSON-VALUES.VERSION>9.0.0-RC2</JSON-VALUES.VERSION>
+        <VERTX-VERSION>4.4.4</VERTX-VERSION>
+        <JSON-VALUES.VERSION>11.9.0</JSON-VALUES.VERSION>
+        <JAVA-FUN.VERSION>0.9.4</JAVA-FUN.VERSION>
+        <VERTX.JSON-VALUES.VERSION>0.7</VERTX.JSON-VALUES.VERSION>
         <MAVEN-JAR-PLUGIN.VERSION>3.2.0</MAVEN-JAR-PLUGIN.VERSION>
-
+        <PROJECT.BUILD.SOURCE_ENCODING>UTF-8</PROJECT.BUILD.SOURCE_ENCODING>
+        <MAVEN-COMPILER-PLUGIN.VERSION>3.10.1</MAVEN-COMPILER-PLUGIN.VERSION>
     </properties>
 
 
@@ -63,27 +66,31 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${MAVEN-COMPILER-PLUGIN.VERSION}</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>${MAVEN-COMPILER-PLUGIN.SOURCE}</source>
-                    <target>${MAVEN-COMPILER-PLUGIN.TARGET}</target>
+                    <release>11</release>
                     <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
                     <compilerArgs>
+                        <arg>-XDcompilePolicy=simple</arg>
+                        <arg>-Xplugin:ErrorProne</arg>
                         <arg>-Xlint:all</arg>
-                        <arg>-Xlint:unchecked</arg>
                     </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.google.errorprone</groupId>
+                            <artifactId>error_prone_core</artifactId>
+                            <version>${error-prone.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
-
             </plugin>
+
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${MAVEN-SUREFIRE-PLUGIN.VERSION}</version>
-                <configuration>
-                    <argLine>-XX:+FlightRecorder
-                        -XX:StartFlightRecording=duration=180s,filename=vertx-effect-recording.jfr
-                    </argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -106,16 +113,12 @@
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>javax.mail-api</artifactId>
-            <version>1.6.2</version>
-        </dependency>
+
 
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
+            <groupId>com.github.imrafaelmerino</groupId>
+            <artifactId>java-fun</artifactId>
+            <version>${JAVA-FUN.VERSION}</version>
         </dependency>
 
         <dependency>
@@ -123,16 +126,26 @@
             <artifactId>json-values</artifactId>
             <version>${JSON-VALUES.VERSION}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.imrafaelmerino</groupId>
+            <artifactId>vertx-json-values</artifactId>
+            <version>${VERTX.JSON-VALUES.VERSION}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.vertx/vertx-codegen -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-codegen</artifactId>
+            <version>${VERTX-VERSION}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <version>${VERTX-VERSION}</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-shell</artifactId>
-            <version>${VERTX-VERSION}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -143,24 +156,24 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.6.2</version>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.29</version>
+            <version>1.7.36</version>
             <scope>test</scope>
         </dependency>
-
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.11</version>
             <scope>test</scope>
         </dependency>
+
 
     </dependencies>
     <profiles>
