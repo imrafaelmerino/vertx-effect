@@ -27,8 +27,8 @@ final class AllExpPar extends AllExp {
     public VIO<Boolean> retryEach(final Predicate<Throwable> predicate,
                                   final RetryPolicy policy
                                  ) {
-        Objects.requireNonNull(policy);
-        Objects.requireNonNull(predicate);
+        requireNonNull(policy);
+        requireNonNull(predicate);
         return new AllExpPar(exps.stream()
                                  .map(it -> it.retry(predicate, policy))
                                  .collect(Collectors.toList()));

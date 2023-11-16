@@ -23,7 +23,7 @@ public abstract sealed class AllExp extends Exp<Boolean> permits AllExpPar, AllE
                             ) {
         List<VIO<Boolean>> exps = new ArrayList<>();
         exps.add(requireNonNull(a));
-        for (final VIO<Boolean> other : others) exps.add(requireNonNull(other));
+        for (VIO<Boolean> other : others) exps.add(requireNonNull(other));
         return new AllExpSeq(exps);
     }
 

@@ -4,6 +4,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -67,6 +68,34 @@ public sealed interface VIO<O> extends Supplier<Future<O>> permits Exp, Val {
 
     static <O> VIO<O> succeed(final O constant) {
         return new Val<>(() -> Future.succeededFuture(constant));
+    }
+
+    /**
+     * Sleeps for the specified duration before evaluating this effect.
+     * <p>This method introduces a pause in the execution flow for the specified duration using the
+     * {@link Thread#sleep(long)} method. It can be useful for testing purposes, or when working with virtual threads.
+     * However, it should be used with caution, as introducing delays in a program's execution blocking threads can
+     * impact performance and behavior.
+     *
+     * @param duration The duration to sleep for.
+     * @return An {@code IO<O>} representing the delayed operation.
+     */
+    default VIO<O> sleep(final Duration duration) {
+        Objects.requireNonNull(duration);
+        return VIO.lazy(() -> {
+            try {
+                Thread.sleep(duration.toMillis());
+                return null;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+        }).then(nill -> this);
+
+    }
+
+    static <O> VIO<O> lazy(final Supplier<O> supplier){
+        return VIO.effect(()-> Future.succeededFuture(supplier.get()));
     }
 
     static <E> VIO<E> NULL() {

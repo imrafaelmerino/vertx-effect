@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -11,13 +12,14 @@ import vertx.effect.AllExp;
 import vertx.effect.RetryPolicies;
 import vertx.effect.VIO;
 import vertx.effect.VertxRef;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestAll {
@@ -41,11 +43,15 @@ public class TestAll {
     public void test_sequential_retryEach_returns_true(VertxTestContext context) {
         int attempts = 2;
 
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null, true);
+        var trueValBuilder =
+                StubBuilder.ofGen(Gen.seq(counter -> counter <= attempts ?
+                                          VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                          VIO.TRUE
+                                         )
+                                 );
 
-        AllExp.seq(trueVal.get(),
-                   trueVal.get()
+        AllExp.seq(trueValBuilder.build(),
+                   trueValBuilder.build()
                   )
               .retryEach(limitRetries(attempts))
               .get()
@@ -60,13 +66,16 @@ public class TestAll {
     @Test
     public void test_sequential_retry_returns_true(VertxTestContext context) {
 
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(counter -> counter <= 2 ? new RuntimeException("counter:+" + counter) : null,
-                                        true
-                                       );
 
-        AllExp.seq(trueVal.get(),
-                   trueVal.get()
+
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 2 ?
+                                  VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                  VIO.TRUE
+                                 )
+                         );
+
+        AllExp.seq(trueVal.build(),
+                   trueVal.build()
                   )
               .retry(limitRetries(4))
               .get()
@@ -82,13 +91,15 @@ public class TestAll {
     public void test_parallel_retryEach_returns_true(VertxTestContext context) {
         int attempts = 2;
 
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(
-                        counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null,
-                        true
+
+
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 2 ?
+                                                VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                VIO.TRUE
+                                               )
                                        );
 
-        AllExp.par(trueVal.get(), trueVal.get())
+        AllExp.par(trueVal.build(), trueVal.build())
               .retryEach(limitRetries(attempts))
               .get()
               .onComplete(it -> {
@@ -102,14 +113,16 @@ public class TestAll {
     @Test
     public void test_parallel_retry_returns_true(VertxTestContext context) {
 
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(
-                        counter -> counter <= 2 ? new RuntimeException("counter:+" + counter) : null,
-                        true
+
+
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 2 ?
+                                                VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                VIO.TRUE
+                                               )
                                        );
 
-        AllExp.par(trueVal.get(),
-                   trueVal.get()
+        AllExp.par(trueVal.build(),
+                   trueVal.build()
                   )
               .retryEach(limitRetries(4))
               .get()
@@ -125,11 +138,12 @@ public class TestAll {
     public void test_parallel_retryEach_returns_false(VertxTestContext context) {
 
         int attempts = 2;
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null, false);
-
-
-        AllExp.par(falseVal.get(), falseVal.get())
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= attempts ?
+                                                VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                VIO.FALSE
+                                               )
+                                       );
+        AllExp.par(falseVal.build(), falseVal.build())
               .retryEach(limitRetries(attempts))
               .get()
               .onComplete(it -> {
@@ -141,11 +155,12 @@ public class TestAll {
     @Test
     public void test_parallel_retry_returns_false(VertxTestContext context) {
 
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= 2 ? new RuntimeException("counter:+" + counter) : null, false);
-
-
-        AllExp.par(falseVal.get(), falseVal.get())
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 2 ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
+        AllExp.par(falseVal.build(), falseVal.build())
               .retry(limitRetries(4))
               .get()
               .onComplete(it -> {
@@ -160,14 +175,17 @@ public class TestAll {
     public void test_sequential_retryEach_returns_false(VertxTestContext context) {
 
         int attempts = 2;
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null,
-                                        false
-                                       );
 
 
-        AllExp.seq(falseVal.get(),
-                   falseVal.get()
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= attempts ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
+
+
+        AllExp.seq(falseVal.build(),
+                   falseVal.build()
                   )
               .retryEach(limitRetries(attempts))
               .get()
@@ -182,14 +200,15 @@ public class TestAll {
     @Test
     public void test_sequential_retry_returns_false(VertxTestContext context) {
 
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= 2 ? new RuntimeException("counter:+" + counter) : null,
-                                        false
-                                       );
 
 
-        AllExp.seq(falseVal.get(),
-                   falseVal.get()
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 2 ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
+        AllExp.seq(falseVal.build(),
+                   falseVal.build()
                   )
               .retryEach(limitRetries(4))
               .get()
@@ -204,18 +223,19 @@ public class TestAll {
     @Test
     public void test_parallel_retryEach_with_delay(VertxTestContext context) {
         int attempts = 3;
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null,
-                                        true
-                                       );
-
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null,
-                                        false
-                                       );
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= attempts ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= attempts ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
         long start = System.nanoTime();
-        AllExp.par(trueVal.get(),
-                   falseVal.get()
+        AllExp.par(trueVal.build(),
+                   falseVal.build()
                   )
               .retryEach(limitRetries(attempts)
                                  .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -231,18 +251,19 @@ public class TestAll {
 
     @Test
     public void test_parallel_retry_with_delay(VertxTestContext context) {
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter:+" + counter) : null,
-                                        true
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                VIO.FALSE
+                                               )
                                        );
-
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter:+" + counter) : null,
-                                        false
-                                       );
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
         long start = System.nanoTime();
-        AllExp.par(trueVal.get(),
-                   falseVal.get()
+        AllExp.par(trueVal.build(),
+                   falseVal.build()
                   )
               .retry(limitRetries(6)
                              .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -259,16 +280,19 @@ public class TestAll {
     @Test
     public void test_sequential_retryEach_with_delay(VertxTestContext context) {
         int attempts = 3;
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null, true);
-
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= attempts ? new RuntimeException("counter:+" + counter) : null,
-                                        false
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= attempts ?
+                                                VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                VIO.FALSE
+                                               )
                                        );
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= attempts ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
         long start = System.nanoTime();
-        AllExp.seq(trueVal.get(),
-                   falseVal.get()
+        AllExp.seq(trueVal.build(),
+                   falseVal.build()
                   )
               .retryEach(limitRetries(attempts)
                                  .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -284,18 +308,19 @@ public class TestAll {
 
     @Test
     public void test_sequential_retry_with_delay(VertxTestContext context) {
-        VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter:+" + counter) : null,
-                                        true
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                VIO.FALSE
+                                               )
                                        );
-
-        VIOStub<Boolean> falseVal =
-                VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter:+" + counter) : null,
-                                        false
-                                       );
+        var falseVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                 VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                 VIO.FALSE
+                                                )
+                                        );
         long start = System.nanoTime();
-        AllExp.seq(trueVal.get(),
-                   falseVal.get()
+        AllExp.seq(trueVal.build(),
+                   falseVal.build()
                   )
               .retry(limitRetries(6)
                              .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -341,12 +366,16 @@ public class TestAll {
     public void test_parallel_retry_if_success(final VertxTestContext context) {
 
 
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(
-                counter -> counter <= 3 ? new IllegalArgumentException() : null,
-                true
-                                                       );
-        AllExp.par(True.get(),
-                   True.get()
+
+
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new IllegalArgumentException()) :
+                                                VIO.TRUE
+                                               )
+                                       );
+
+        AllExp.par(trueVal.build(),
+                   trueVal.build()
                   )
               .retryEach(it -> it instanceof IllegalArgumentException,
                          limitRetries(3)
@@ -362,11 +391,13 @@ public class TestAll {
     public void test_sequential_retry_if_success(final VertxTestContext context) {
 
 
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(counter -> counter <= 3 ? new IllegalArgumentException() : null,
-                                                        true
-                                                       );
-        AllExp.seq(True.get(),
-                   True.get()
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new IllegalArgumentException()) :
+                                                VIO.TRUE
+                                               )
+                                       );
+        AllExp.seq(trueVal.build(),
+                   trueVal.build()
                   )
               .retryEach(it -> it instanceof IllegalArgumentException,
                          limitRetries(3)
@@ -382,11 +413,13 @@ public class TestAll {
     public void test_parallel_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(counter -> counter <= 3 ? new IllegalArgumentException() : null,
-                                                        true
-                                                       );
-        AllExp.par(True.get(),
-                   True.get()
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new IllegalArgumentException()) :
+                                                VIO.TRUE
+                                               )
+                                       );
+        AllExp.par(trueVal.build(),
+                   trueVal.build()
                   )
               .retryEach(it -> it instanceof IllegalArgumentException,
                          limitRetries(3)
@@ -402,12 +435,13 @@ public class TestAll {
     @Test
     public void test_sequential_retry_if_success_with_delay(final VertxTestContext context) {
 
-
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(counter -> counter <= 3 ? new IllegalArgumentException() : null,
-                                                        true
-                                                       );
-        AllExp.seq(True.get(),
-                   True.get()
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new IllegalArgumentException()) :
+                                                VIO.TRUE
+                                               )
+                                       );
+        AllExp.seq(trueVal.build(),
+                   trueVal.build()
                   )
               .retryEach(it -> it instanceof IllegalArgumentException,
                          limitRetries(3)
@@ -424,11 +458,13 @@ public class TestAll {
     public void test_sequential_retry_if_failure(final VertxTestContext context) {
 
 
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(counter -> counter <= 3 ? new IllegalArgumentException() : null,
-                                                        true
-                                                       );
-        AllExp.seq(True.get(),
-                   True.get()
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new IllegalArgumentException()) :
+                                                VIO.TRUE
+                                               )
+                                       );
+        AllExp.seq(trueVal.build(),
+                   trueVal.build()
                   )
               .retryEach(it -> it instanceof IllegalArgumentException,
                          limitRetries(2)
@@ -444,11 +480,13 @@ public class TestAll {
     public void test_parallel_retry_if_failure(final VertxTestContext context) {
 
 
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(counter -> counter <= 3 ? new IllegalArgumentException() : null,
-                                                        true
-                                                       );
-        AllExp.par(True.get(),
-                   True.get()
+        var trueVal = StubBuilder.ofGen(Gen.seq(counter -> counter <= 3 ?
+                                                VIO.fail(new IllegalArgumentException()) :
+                                                VIO.TRUE
+                                               )
+                                       );
+        AllExp.par(trueVal.build(),
+                   trueVal.build()
                   )
               .retryEach(it -> it instanceof IllegalArgumentException,
                          limitRetries(2)

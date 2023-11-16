@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import fun.tuple.Triple;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
@@ -7,40 +8,42 @@ import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.*;
+import vertx.effect.Failures;
+import vertx.effect.TripleExp;
+import vertx.effect.VIO;
+import vertx.effect.VertxRef;
 import vertx.effect.api.Verifiers;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import static vertx.effect.RetryPolicies.limitRetries;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestTriple {
-    final Supplier<VIO<String>> a =
-            VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ?
-                                            new RuntimeException("counter: " + counter) :
-                                            null,
-                                    "a"
-                                   );
-
-    final Supplier<VIO<String>> b =
-            VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ?
-                                            new RuntimeException("counter: " + counter) :
-                                            null,
-                                    "b"
-                                   );
-    final VIOStub<Boolean> True =
-            VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ?
-                                            new RuntimeException("counter: " + counter) :
-                                            null,
-                                    true
-                                   );
 
 
     private static VertxRef vertxRef;
+    StubBuilder<String> a =
+            StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2 ?
+                                      VIO.fail(new RuntimeException("counter: " + counter)) :
+                                      VIO.succeed("a")
+                                     )
+                             );
+    StubBuilder<String> b =
+            StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2 ?
+                                      VIO.fail(new RuntimeException("counter: " + counter)) :
+                                      VIO.succeed("b")
+                                     )
+                             );
+    StubBuilder<Boolean> True =
+            StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2 ?
+                                      VIO.fail(new RuntimeException("counter: " + counter)) :
+                                      VIO.TRUE
+                                     )
+                             );
 
     @BeforeAll
     public static void prepare(
@@ -61,9 +64,9 @@ public class TestTriple {
     public void test_parallel_retries(VertxTestContext context) {
 
 
-        VIO<Triple<String, String, String>> val = TripleExp.par(a.get(),
-                                                                a.get(),
-                                                                a.get()
+        VIO<Triple<String, String, String>> val = TripleExp.par(a.build(),
+                                                                a.build(),
+                                                                a.build()
                                                                )
                                                            .retryEach(limitRetries(2));
 
@@ -86,9 +89,9 @@ public class TestTriple {
     public void test_sequential_retries(VertxTestContext context) {
 
 
-        VIO<Triple<String, String, String>> val = TripleExp.seq(a.get(),
-                                                                a.get(),
-                                                                a.get()
+        VIO<Triple<String, String, String>> val = TripleExp.seq(a.build(),
+                                                                a.build(),
+                                                                a.build()
                                                                )
                                                            .retryEach(limitRetries(2));
 
@@ -110,15 +113,17 @@ public class TestTriple {
     @Test
     public void test_parallel_retries_if_Success(VertxTestContext context) {
 
-        final Supplier<VIO<String>> a =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter) : null,
-                        "a"
-                                       );
 
-        VIO<Triple<String, String, String>> val = TripleExp.par(a.get(),
-                                                                a.get(),
-                                                                a.get()
+        StubBuilder<String> a =
+                StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2 ?
+                                          VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter)) :
+                                          VIO.succeed("a")
+                                         )
+                                 );
+
+        VIO<Triple<String, String, String>> val = TripleExp.par(a.build(),
+                                                                a.build(),
+                                                                a.build()
                                                                )
                                                            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                                                       limitRetries(2)
@@ -137,15 +142,16 @@ public class TestTriple {
     @Test
     public void test_sequential_retries_if_Success(VertxTestContext context) {
 
-        final Supplier<VIO<String>> a =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter) : null,
-                        "a"
-                                       );
+        StubBuilder<String> a =
+                StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2 ?
+                                          VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter)) :
+                                          VIO.succeed("a")
+                                         )
+                                 );
 
-        VIO<Triple<String, String, String>> val = TripleExp.seq(a.get(),
-                                                                a.get(),
-                                                                a.get()
+        VIO<Triple<String, String, String>> val = TripleExp.seq(a.build(),
+                                                                a.build(),
+                                                                a.build()
                                                                )
                                                            .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                                                       limitRetries(2)
@@ -166,9 +172,9 @@ public class TestTriple {
 
 
         VIO<Triple<String, String, String>> val =
-                TripleExp.par(a.get(),
-                              a.get(),
-                              a.get()
+                TripleExp.par(a.build(),
+                              a.build(),
+                              a.build()
                              )
                          .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                     limitRetries(2)
@@ -187,9 +193,9 @@ public class TestTriple {
 
 
         VIO<Triple<String, String, String>> val =
-                TripleExp.seq(a.get(),
-                              a.get(),
-                              a.get()
+                TripleExp.seq(a.build(),
+                              a.build(),
+                              a.build()
                              )
                          .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                                     limitRetries(2)
@@ -351,9 +357,9 @@ public class TestTriple {
     public void test_parallel_triple_exp_fails_and_recover_with_success(VertxTestContext context) {
 
         VIO<Triple<String, Boolean, String>> val =
-                TripleExp.par(a.get(),
-                              True.get(),
-                              b.get()
+                TripleExp.par(a.build(),
+                              True.build(),
+                              b.build()
                              )
                          .recoverWith(e -> VIO.succeed(Triple.of("",
                                                                  false,
@@ -378,9 +384,9 @@ public class TestTriple {
     public void test_sequential_triple_exp_fails_and_recover_with_success(VertxTestContext context) {
 
         VIO<Triple<String, Boolean, String>> val =
-                TripleExp.seq(a.get(),
-                              True.get(),
-                              b.get()
+                TripleExp.seq(a.build(),
+                              True.build(),
+                              b.build()
                              )
                          .recoverWith(e -> VIO.succeed(Triple.of("",
                                                                  false,
@@ -405,9 +411,9 @@ public class TestTriple {
     public void test_parallel_triple_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
         VIO<Triple<String, Boolean, String>> val =
-                TripleExp.par(a.get(),
-                              True.get(),
-                              b.get()
+                TripleExp.par(a.build(),
+                              True.build(),
+                              b.build()
                              )
                          .recoverWith(e -> VIO.fail(new IllegalArgumentException()));
 
@@ -423,9 +429,9 @@ public class TestTriple {
     public void test_sequential_triple_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
         VIO<Triple<String, Boolean, String>> val =
-                TripleExp.seq(a.get(),
-                              True.get(),
-                              b.get()
+                TripleExp.seq(a.build(),
+                              True.build(),
+                              b.build()
                              )
                          .recoverWith(e -> VIO.fail(new IllegalArgumentException()));
 
@@ -440,9 +446,9 @@ public class TestTriple {
     @Test
     public void test_parallel_triple_exp_recover_with_success(VertxTestContext context) {
         VIO<Triple<String, Boolean, String>> val =
-                TripleExp.par(a.get(),
-                              True.get(),
-                              b.get()
+                TripleExp.par(a.build(),
+                              True.build(),
+                              b.build()
                              )
                          .retryEach(limitRetries(2))
                          .recoverWith(e -> VIO.fail(new IllegalArgumentException()));
@@ -464,9 +470,9 @@ public class TestTriple {
     @Test
     public void test_sequential_triple_exp_recover_with_success(VertxTestContext context) {
         VIO<Triple<String, Boolean, String>> val =
-                TripleExp.seq(a.get(),
-                              True.get(),
-                              b.get()
+                TripleExp.seq(a.build(),
+                              True.build(),
+                              b.build()
                              )
                          .retryEach(limitRetries(2))
                          .recoverWith(e -> VIO.fail(new IllegalArgumentException()));

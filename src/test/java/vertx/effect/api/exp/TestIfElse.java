@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -11,24 +12,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.api.Verifiers;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
-import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.constantDelay;
 import static vertx.effect.RetryPolicies.limitRetries;
 import static vertx.effect.VIO.FALSE;
 import static vertx.effect.VIO.TRUE;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestIfElse {
 
-    static final VIOStub<Boolean> trueVal =
-            VIOStub.failThenSucceed(counter -> (counter == 1 || counter == 2) ? new RuntimeException("counter:+" + counter) : null, true);
 
+    static StubBuilder<Boolean> trueVal =
+            StubBuilder.ofGen(Gen.seq(counter -> (counter == 1 || counter == 2)
+                                      ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                      TRUE
+                                     )
+                             );
     private static VertxRef vertxRef;
 
 
@@ -49,7 +54,7 @@ public class TestIfElse {
 
     @Test
     public void testRetryIfElsePredicate(final VertxTestContext context) {
-        IfElseExp.predicate(trueVal.get())
+        IfElseExp.predicate(trueVal.build())
                  .consequence(() -> VIO.succeed("consequence"))
                  .alternative(() -> VIO.succeed("alternative"))
                  .retryEach(limitRetries(2))
@@ -69,13 +74,14 @@ public class TestIfElse {
 
     @Test
     public void testRetryPredicateWhenBadMessage(final VertxTestContext context) {
-        final VIOStub<Boolean> trueVal =
-                VIOStub.failThenSucceed(
-                        counter -> (counter == 1 || counter == 2) ?
-                                Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message") : null,
-                        true
-                                       );
-        IfElseExp.predicate(trueVal.get())
+
+        StubBuilder<Boolean> trueVal =
+                StubBuilder.ofGen(Gen.seq(counter -> (counter == 1 || counter == 2)
+                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message")) :
+                                          TRUE
+                                         )
+                                 );
+        IfElseExp.predicate(trueVal.build())
                  .consequence(() -> VIO.succeed("consequence"))
                  .alternative(() -> VIO.succeed("alternative"))
                  .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
@@ -97,15 +103,18 @@ public class TestIfElse {
 
     @Test
     public void testRetryEachIfIfElseConsequence(final VertxTestContext context) {
-        final Supplier<VIO<String>> consequence =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message") : null,
-                        "consequence"
-                                       );
+
+
+        StubBuilder<String> consequence =
+                StubBuilder.ofGen(Gen.seq(counter -> (counter == 1 || counter == 2)
+                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message")) :
+                                          VIO.succeed("consequence")
+                                         )
+                                 );
 
 
         IfElseExp.<String>predicate(VIO.TRUE)
-                 .consequence(() -> consequence.get())
+                 .consequence(() -> consequence.build())
                  .alternative(() -> VIO.succeed("alternative"))
                  .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                             limitRetries(2)
@@ -126,15 +135,18 @@ public class TestIfElse {
 
     @Test
     public void testRetryIfIfElseConsequence(final VertxTestContext context) {
-        final Supplier<VIO<String>> consequence =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message") : null,
-                        "consequence"
-                                       );
+
+
+        StubBuilder<String> consequence =
+                StubBuilder.ofGen(Gen.seq(counter -> (counter == 1 || counter == 2)
+                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message")) :
+                                          VIO.succeed("consequence")
+                                         )
+                                 );
 
 
         IfElseExp.<String>predicate(VIO.TRUE)
-                 .consequence(() -> consequence.get())
+                 .consequence(() -> consequence.build())
                  .alternative(() -> VIO.succeed("alternative"))
                  .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                             limitRetries(4)
@@ -156,16 +168,18 @@ public class TestIfElse {
     @Test
     public void testRetryIfIfElseAlternative(final VertxTestContext context) {
 
-        final Supplier<VIO<String>> alternative =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message") : null,
-                        "alternative"
-                                       );
+
+        StubBuilder<String> alternative =
+                StubBuilder.ofGen(Gen.seq(counter -> (counter == 1 || counter == 2)
+                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message")) :
+                                          VIO.succeed("alternative")
+                                         )
+                                 );
 
 
         IfElseExp.<String>predicate(VIO.succeed(false))
                  .consequence(() -> VIO.succeed("consequence"))
-                 .alternative(alternative)
+                 .alternative(alternative::build)
                  .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                             limitRetries(2)
                            )
@@ -186,14 +200,18 @@ public class TestIfElse {
 
     @Test
     public void testRetryIfElseConsequence(final VertxTestContext context) {
-        final Supplier<VIO<String>> consequence =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? new RuntimeException("counter: " + counter) : null,
-                                        "consequence"
-                                       );
+
+
+        StubBuilder<String> consequence =
+                StubBuilder.ofGen(Gen.seq(counter -> (counter == 1 || counter == 2)
+                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message")) :
+                                          VIO.succeed("consequence")
+                                         )
+                                 );
 
 
         IfElseExp.<String>predicate(VIO.succeed(true))
-                 .consequence(() -> consequence.get())
+                 .consequence(() -> consequence.build())
                  .alternative(() -> VIO.succeed("alternative"))
                  .retryEach(limitRetries(2))
                  .onComplete(r -> {
@@ -213,16 +231,17 @@ public class TestIfElse {
     @Test
     public void testRetryIfElseAlternative(final VertxTestContext context) {
 
-        final Supplier<VIO<String>> alternative =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? new RuntimeException("counter: " + counter) : null,
-                        "alternative"
-                                       );
+        StubBuilder<String> alternative =
+                StubBuilder.ofGen(Gen.seq(counter -> (counter == 1 || counter == 2)
+                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("bad message")) :
+                                          VIO.succeed("alternative")
+                                         )
+                                 );
 
 
         IfElseExp.<String>predicate(VIO.succeed(false))
                  .consequence(() -> VIO.succeed("consequence"))
-                 .alternative(alternative)
+                 .alternative(alternative::build)
                  .retryEach(limitRetries(2))
                  .onComplete(r -> {
                      if (r.succeeded()) {
@@ -371,7 +390,7 @@ public class TestIfElse {
     @Test
     public void test_ifelse_exp_fails_and_recover_with_success(VertxTestContext context) {
 
-        VIO<Object> val = IfElseExp.predicate(trueVal.get())
+        VIO<Object> val = IfElseExp.predicate(trueVal.build())
                                    .consequence(() -> VIO.fail(new RuntimeException()))
                                    .alternative(() -> VIO.succeed("a"))
                                    .recoverWith(e -> VIO.succeed(""));
@@ -387,7 +406,7 @@ public class TestIfElse {
 
     @Test
     public void test_ifelse_exp_fails_and_recover_with_failure(VertxTestContext context) {
-        VIO<Object> val = IfElseExp.predicate(trueVal.get())
+        VIO<Object> val = IfElseExp.predicate(trueVal.build())
                                    .consequence(() -> VIO.fail(new RuntimeException()))
                                    .alternative(() -> VIO.succeed("a"))
                                    .recoverWith(e -> VIO.fail(new IllegalArgumentException()));
@@ -402,7 +421,7 @@ public class TestIfElse {
     @Test
     public void test_ifelse_exp_recover_with_success(VertxTestContext context) {
 
-        IfElseExp.predicate(trueVal.get())
+        IfElseExp.predicate(trueVal.build())
                  .consequence(() -> VIO.succeed("b"))
                  .alternative(() -> VIO.succeed("a"))
                  .retryEach(limitRetries(2))
@@ -421,11 +440,14 @@ public class TestIfElse {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                                                        true
-                                                       );
 
-        IfElseExp.predicate(True.get())
+        StubBuilder<Boolean> True =
+                StubBuilder.ofGen(Gen.seq(counter -> counter < ATTEMPTS
+                                          ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                          TRUE
+                                         )
+                                 );
+        IfElseExp.predicate(True.build())
                  .consequence(() -> VIO.succeed("b"))
                  .alternative(() -> VIO.succeed("a"))
                  .retryEach(limitRetries(ATTEMPTS)
@@ -448,12 +470,14 @@ public class TestIfElse {
     public void test_retry_if_success_with_delay(final VertxTestContext context) {
 
 
-        VIOStub<String> str = VIOStub.failThenSucceed(
-                counter -> counter < 3 ? new IllegalArgumentException() : null,
-                "hi"
-                                                     );
+        StubBuilder<String> str =
+                StubBuilder.ofGen(Gen.seq(counter -> counter < 3
+                                          ? VIO.fail(new IllegalArgumentException()) :
+                                          VIO.succeed("hi")
+                                         )
+                                 );
         IfElseExp.<String>predicate(TRUE)
-                 .consequence(str)
+                 .consequence(str::build)
                  .alternative(() -> VIO.succeed("bye"))
                  .retryEach(e -> e instanceof IllegalArgumentException,
                             limitRetries(3)
@@ -470,12 +494,14 @@ public class TestIfElse {
 
     @Test
     public void test_retry_if_failure_with_delay(final VertxTestContext context) {
-        VIOStub<String> str = VIOStub.failThenSucceed(
-                counter -> counter <= 3 ? new IllegalArgumentException() : null,
-                "hi"
-                                                     );
+        StubBuilder<String> str =
+                StubBuilder.ofGen(Gen.seq(counter -> counter <= 3
+                                          ? VIO.fail(new IllegalArgumentException()) :
+                                          VIO.succeed("hi")
+                                         )
+                                 );
         IfElseExp.<String>predicate(TRUE)
-                 .consequence(str)
+                 .consequence(str::build)
                  .alternative(() -> VIO.succeed("bye"))
                  .retryEach(e -> e instanceof IllegalArgumentException,
                             limitRetries(2)

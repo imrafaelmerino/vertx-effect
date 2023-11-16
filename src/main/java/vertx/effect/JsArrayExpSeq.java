@@ -29,6 +29,7 @@ final class JsArrayExpSeq extends JsArrayExp {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     JsArrayExpSeq(final VIO<? extends JsValue> val,
                   final VIO<? extends JsValue>... others
                  ) {

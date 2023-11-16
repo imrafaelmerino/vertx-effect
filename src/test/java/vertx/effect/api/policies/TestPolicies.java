@@ -5,7 +5,6 @@ import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.Delay;
 import vertx.effect.RetryPolicies;
 import vertx.effect.RetryStatus;
 import vertx.effect.VertxRef;

@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import fun.tuple.Pair;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
@@ -9,28 +10,30 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.Failures;
-import vertx.effect.VIO;
 import vertx.effect.PairExp;
+import vertx.effect.VIO;
 import vertx.effect.VertxRef;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
-import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.constantDelay;
 import static vertx.effect.RetryPolicies.limitRetries;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestPair {
 
 
-    private static final Supplier<VIO<String>> a =
-            VIOStub.failThenSucceed(
-                    counter -> counter == 1 || counter == 2 ? new RuntimeException("counter: " + counter) : null,
-                    "a"
-                                   );
+    private static final StubBuilder<String> a =
+            StubBuilder.ofGen(Gen.seq(counter ->
+                                              counter == 1 || counter == 2
+                                                      ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                      VIO.succeed("a")
+                                     )
+                             );
     static VertxRef vertxRef;
 
     @BeforeAll
@@ -53,12 +56,17 @@ public class TestPair {
 
 
         int ATTEMPTS = 3;
-        VIOStub<Integer> one = VIOStub.failThenSucceed(
-                counter -> counter <= ATTEMPTS ? new IllegalArgumentException() : null,
-                1
-                                                      );
-        PairExp.par(one.get(),
-                    one.get()
+
+
+        StubBuilder<Integer> one =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= ATTEMPTS
+                                                          ? VIO.fail(new IllegalArgumentException()) :
+                                                          VIO.succeed(1)
+                                         )
+                                 );
+        PairExp.par(one.build(),
+                    one.build()
                    )
                .retryEach(e -> e instanceof IllegalArgumentException,
                           limitRetries(ATTEMPTS).append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -77,11 +85,15 @@ public class TestPair {
 
 
         int ATTEMPTS = 3;
-        VIOStub<Integer> one = VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? new IllegalArgumentException() : null,
-                                                       1
-                                                      );
-        PairExp.seq(one.get(),
-                    one.get()
+        StubBuilder<Integer> one =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= ATTEMPTS
+                                                          ? VIO.fail(new IllegalArgumentException()) :
+                                                          VIO.succeed(1)
+                                         )
+                                 );
+        PairExp.seq(one.build(),
+                    one.build()
                    )
                .retryEach(e -> e instanceof IllegalArgumentException,
                           limitRetries(ATTEMPTS)
@@ -103,8 +115,8 @@ public class TestPair {
     @Test
     public void test_parallel_retries(VertxTestContext context) {
 
-        PairExp.par(a.get(),
-                    a.get()
+        PairExp.par(a.build(),
+                    a.build()
                    )
                .retryEach(limitRetries(2))
                .get()
@@ -124,8 +136,8 @@ public class TestPair {
     @Test
     public void test_sequential_retries(VertxTestContext context) {
 
-        PairExp.seq(a.get(),
-                    a.get()
+        PairExp.seq(a.build(),
+                    a.build()
                    )
                .retryEach(limitRetries(2))
                .get()
@@ -145,13 +157,17 @@ public class TestPair {
     @Test
     public void test_parallel_retries_if_Success(VertxTestContext context) {
 
-        final Supplier<VIO<String>> val =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter) : null,
-                                        "a"
-                                       );
 
-        PairExp.par(val.get(),
-                    val.get()
+        StubBuilder<String> val =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter == 1 || counter == 2
+                                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
+
+        PairExp.par(val.build(),
+                    val.build()
                    )
                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           limitRetries(2)
@@ -172,13 +188,17 @@ public class TestPair {
     @Test
     public void test_sequential_retries_if_Success(VertxTestContext context) {
 
-        final Supplier<VIO<String>> val =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter) : null,
-                                        "a"
-                                       );
 
-        PairExp.seq(val.get(),
-                    val.get()
+        StubBuilder<String> val =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter == 1 || counter == 2
+                                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
+
+        PairExp.seq(val.build(),
+                    val.build()
                    )
                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           limitRetries(2)
@@ -199,14 +219,16 @@ public class TestPair {
     @Test
     public void test_parallel_retries_if_failure(VertxTestContext context) {
 
-        final Supplier<VIO<String>> val =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? new RuntimeException("counter " + counter) : null,
-                        "a"
-                                       );
+        StubBuilder<String> val =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= 3
+                                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
 
-        PairExp.par(val.get(),
-                    val.get()
+        PairExp.par(val.build(),
+                    val.build()
                    )
                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           limitRetries(2)
@@ -223,13 +245,16 @@ public class TestPair {
     @Test
     public void test_sequential_retries_if_failure(VertxTestContext context) {
 
-        final Supplier<VIO<String>> val =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? new RuntimeException("counter " + counter) : null,
-                                        "a"
-                                       );
+        StubBuilder<String> val =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <=3
+                                                          ? VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply("counter " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
 
-        PairExp.seq(val.get(),
-                    val.get()
+        PairExp.seq(val.build(),
+                    val.build()
                    )
                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           limitRetries(2)
@@ -249,8 +274,8 @@ public class TestPair {
 
         long start = System.nanoTime();
 
-        PairExp.par(a.get(),
-                    a.get()
+        PairExp.par(a.build(),
+                    a.build()
                    )
                .retryEach(limitRetries(ATTEMPTS)
                                   .append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -275,8 +300,8 @@ public class TestPair {
 
         long start = System.nanoTime();
 
-        PairExp.seq(a.get(),
-                    a.get()
+        PairExp.seq(a.build(),
+                    a.build()
                    )
                .retryEach(limitRetries(ATTEMPTS)
                                   .append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -413,8 +438,8 @@ public class TestPair {
     @Test
     public void test_parallel_pair_exp_fails_and_recover_with_success(VertxTestContext context) {
 
-        PairExp.par(a.get(),
-                    a.get()
+        PairExp.par(a.build(),
+                    a.build()
                    )
                .recoverWith(e -> VIO.succeed(Pair.of("",
                                                      ""
@@ -433,8 +458,8 @@ public class TestPair {
     @Test
     public void test_sequential_pair_exp_fails_and_recover_with_success(VertxTestContext context) {
 
-        PairExp.seq(a.get(),
-                    a.get()
+        PairExp.seq(a.build(),
+                    a.build()
                    )
                .recoverWith(e -> VIO.succeed(Pair.of("",
                                                      ""
@@ -453,8 +478,8 @@ public class TestPair {
     @Test
     public void test_parallel_pair_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
-        PairExp.par(a.get(),
-                    a.get()
+        PairExp.par(a.build(),
+                    a.build()
                    )
                .recoverWith(e -> VIO.fail(new IllegalArgumentException()))
                .onComplete(r -> context.verify(() -> {
@@ -468,8 +493,8 @@ public class TestPair {
     @Test
     public void test_sequential_pair_exp_fails_and_recover_with_failure(VertxTestContext context) {
 
-        PairExp.seq(a.get(),
-                    a.get()
+        PairExp.seq(a.build(),
+                    a.build()
                    )
                .recoverWith(e -> VIO.fail(new IllegalArgumentException()))
                .onComplete(r -> context.verify(() -> {
@@ -482,7 +507,7 @@ public class TestPair {
 
     @Test
     public void test_parallel_pair_exp_recover_with_success(VertxTestContext context) {
-        PairExp.par(a.get(), a.get())
+        PairExp.par(a.build(), a.build())
                .retryEach(limitRetries(2))
                .recoverWith(e -> VIO.fail(new IllegalArgumentException()))
                .onSuccess(map -> context.verify(() -> {
@@ -493,8 +518,8 @@ public class TestPair {
 
     @Test
     public void test_sequential_pair_exp_recover_with_success(VertxTestContext context) {
-        PairExp.seq(a.get(),
-                    a.get()
+        PairExp.seq(a.build(),
+                    a.build()
                    )
                .retryEach(limitRetries(2))
                .recoverWith(e -> VIO.fail(new IllegalArgumentException()))
