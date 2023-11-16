@@ -6,6 +6,7 @@ import jsonvalues.spec.JsArraySpec;
 import jsonvalues.spec.JsObjSpec;
 import jsonvalues.spec.SpecError;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -27,7 +28,7 @@ public class Validators {
      */
     public static Lambda<JsObj, JsObj> validateJsObj(final JsObjSpec spec) {
         return obj -> {
-            Set<SpecError> errors = spec.test(obj);
+            List<SpecError> errors = spec.test(obj);
             if (errors.isEmpty()) return VIO.succeed(obj);
             else return VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply(errors.toString()));
         };
@@ -43,7 +44,7 @@ public class Validators {
      */
     public static Lambda<JsArray, JsArray> validateJsArray(final JsArraySpec spec) {
         return arr -> {
-            Set<SpecError> errors = spec.test(arr);
+            List<SpecError> errors = spec.test(arr);
             if (errors.isEmpty()) return VIO.succeed(arr);
             else return VIO.fail(Failures.GET_BAD_MESSAGE_EXCEPTION.apply(errors.toString()));
         };
