@@ -7,11 +7,11 @@ import vertx.effect.http.client.HttpReq;
 import static java.util.Objects.requireNonNull;
 
 public abstract class BodyHttpReq<T extends BodyHttpReq<T>> extends HttpReq<T> {
+    private final byte[] body;
+
     public BodyHttpReq(final byte[] body) {
         this.body = requireNonNull(body);
     }
-
-    private final byte[] body;
 
     @Override
     public JsObj createHttpReq() {

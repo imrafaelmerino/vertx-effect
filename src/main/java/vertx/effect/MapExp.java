@@ -11,11 +11,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
 
     protected Map<String, VIO<? extends O>> bindings = new HashMap<>();
 
-
-    public boolean isEmpty() {
-        return bindings.isEmpty();
-    }
-
     @SuppressWarnings({"unchecked"})
     public static <O> MapExp<O> par() {
         return MapExpPar.EMPTY;
@@ -38,7 +33,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return obj;
     }
-
 
     /**
      * static factory method to create a MapExp of one mapping
@@ -93,7 +87,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
     }
 
-
     /**
      * static factory method to create a MapExp of four mappings
      *
@@ -128,7 +121,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of five mappings
@@ -169,7 +161,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of six mappings
@@ -216,7 +207,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of seven mappings
@@ -267,7 +257,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of eight mappings
@@ -324,7 +313,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
 
     }
-
 
     /**
      * static factory method to create a MapExp of nine mappings
@@ -385,7 +373,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of ten mappings
@@ -451,7 +438,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of eleven mappings
@@ -522,7 +508,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of twelve mappings
@@ -679,7 +664,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
     }
 
-
     /**
      * static factory method to create a MapExp of fourteen mappings
      *
@@ -765,7 +749,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
 
     }
-
 
     /**
      * static factory method to create a MapExp of fifteen mappings
@@ -858,10 +841,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
 
     }
 
-    public abstract MapExp<O> set(final String key,
-                                  final VIO<? extends O> exp
-                                 );
-
     @SuppressWarnings({"unchecked"})
     public static <O> MapExp<O> seq() {
         return MapExpSeq.EMPTY;
@@ -884,7 +863,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return obj;
     }
-
 
     /**
      * static factory method to create a MapExp of one mapping
@@ -939,7 +917,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
     }
 
-
     /**
      * static factory method to create a MapExp of four mappings
      *
@@ -973,7 +950,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of five mappings
@@ -1013,7 +989,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of six mappings
@@ -1059,7 +1034,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of seven mappings
@@ -1109,7 +1083,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of eight mappings
@@ -1164,7 +1137,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of nine mappings
@@ -1224,7 +1196,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
-
 
     /**
      * static factory method to create a MapExp of ten mappings
@@ -1290,7 +1261,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
 
     }
-
 
     /**
      * static factory method to create a MapExp of eleven mappings
@@ -1361,7 +1331,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
 
     }
-
 
     /**
      * static factory method to create a MapExp of twelve mappings
@@ -1516,7 +1485,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
     }
 
-
     /**
      * static factory method to create a MapExp of fourteen mappings
      *
@@ -1601,7 +1569,6 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
         return map;
 
     }
-
 
     /**
      * static factory method to create a MapExp of fifteen mappings
@@ -1692,6 +1659,14 @@ public abstract class MapExp<O> extends Exp<Map<String, O>> {
                         );
         return map;
     }
+
+    public boolean isEmpty() {
+        return bindings.isEmpty();
+    }
+
+    public abstract MapExp<O> set(final String key,
+                                  final VIO<? extends O> exp
+                                 );
 
 
 }

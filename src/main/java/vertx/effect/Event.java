@@ -1,6 +1,7 @@
 package vertx.effect;
 
-import fun.optic.*;
+import fun.optic.Lens;
+import fun.optic.Option;
 import jsonvalues.JsObj;
 import jsonvalues.JsValue;
 
@@ -9,9 +10,6 @@ import java.time.Instant;
 import static jsonvalues.JsPath.path;
 
 public final class Event {
-    private Event() {
-    }
-
     public static final Option<JsObj, String> idOption = JsObj.optional.str(path("/id"));
     public static final Option<JsObj, String> addressOpt = JsObj.optional.str(path("/address"));
     public static final Option<JsObj, String> toOpt = JsObj.optional.str(path("/to"));
@@ -28,7 +26,6 @@ public final class Event {
     public static final Option<JsObj, String> failureTypeLens = JsObj.optional.str(path("/failure/type"));
     public static final Option<JsObj, Integer> failureCodeLens = JsObj.optional.intNum(path("/failure/code"));
     public static final Option<JsObj, String> failureMessageLens = JsObj.optional.str(path("/failure/message"));
-
     public static final String SENT_MESSAGE_EVENT = "MESSAGE_SENT";
     public static final String RECEIVED_MESSAGE_EVENT = "MESSAGE_RECEIVED";
     public static final String DEPLOYED_VERTICLE = "VERTICLE_DEPLOYED";
@@ -39,11 +36,12 @@ public final class Event {
     public static final String RECEIVED_RESP_EVENT = "RESPONSE_RECEIVED";
     public static final String RECEIVED_FAILURE_EVENT = "FAILURE_RECEIVED";
     public static final String EXCEPTION_STARTING_VERTICLE = "EXCEPTION_STARTING_VERTICLE";
-    public static final String EXCEPTION_STARTING_SHELL_SERVICE = "EXCEPTION_STARTING_SHELL";
     public static final String EXCEPTION_PROCESSING_MESSAGE = "EXCEPTION_PROCESSING_MESSAGE";
     public static final String EXCEPTION_UNDEPLOYING_VERTICLE = "EXCEPTION_UNDEPLOYING_VERTICLE";
     public static final String EXCEPTION_DEPLOYING_VERTICLE = "EXCEPTION_DEPLOYING_VERTICLE";
     public static final String TIMER_STARTED = "TIMER_STARTED";
     public static final String TIMER_ENDED = "TIMER_ENDED";
+    private Event() {
+    }
 
 }

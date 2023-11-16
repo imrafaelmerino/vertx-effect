@@ -6,7 +6,6 @@ import vertx.effect.VIO;
 import vertx.effect.http.client.HttpClientModule;
 import vertx.effect.http.client.PostReq;
 
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.function.BiFunction;
@@ -14,19 +13,15 @@ import java.util.function.BiFunction;
 import static java.util.Objects.requireNonNull;
 
 /**
- Default req to get the access token in a Client Credentials Code
-
- POST https://host:port/uri
- grant_type=client_credentials
-
- Accept: application/json
- Authorization: Base64(ClientId:ClientSecret)
- Content-Type: application/x-www-form-urlencoded
-
- the default uri is /token
- the default host and port are the ones specified in the HttpClientModule where the requests that
- need the token are defined
-
+ * Default req to get the access token in a Client Credentials Code
+ * <p>
+ * POST https://host:port/uri grant_type=client_credentials
+ * <p>
+ * Accept: application/json Authorization: Base64(ClientId:ClientSecret) Content-Type:
+ * application/x-www-form-urlencoded
+ * <p>
+ * the default uri is /token the default host and port are the ones specified in the HttpClientModule where the requests
+ * that need the token are defined
  */
 public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> {
 
@@ -54,7 +49,8 @@ public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientMod
     }
 
     public GetAccessTokenRequest(final String clientId,
-                                 final String clientSecret) {
+                                 final String clientSecret
+                                ) {
         this.uri = DEFAULT_URI;
         String credentials = clientId + ":" + clientSecret;
         this.clientIdSecretBase64 = Base64.getEncoder()
@@ -64,7 +60,8 @@ public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientMod
     public GetAccessTokenRequest(final String clientId,
                                  final String clientSecret,
                                  final String host,
-                                 final int port) {
+                                 final int port
+                                ) {
         this(clientId,
              clientSecret
             );
@@ -75,7 +72,8 @@ public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientMod
 
     @Override
     public VIO<JsObj> apply(final MultiMap context,
-                            final HttpClientModule module) {
+                            final HttpClientModule module
+                           ) {
         PostReq message = new PostReq("grant_type=client_credentials".getBytes(StandardCharsets.UTF_8));
         if (host != null && !host.isEmpty()) message = message.host(host);
         if (port != null) message = message.port(port);
@@ -88,8 +86,8 @@ public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientMod
                                                   )
                                         .setHeader("Authorization",
                                                    String.format("Basic %s",
-                                                              clientIdSecretBase64
-                                                             )
+                                                                 clientIdSecretBase64
+                                                                )
                                                   )
                                         .setHeader("Content-Type",
                                                    "application/x-www-form-urlencoded"

@@ -1,7 +1,6 @@
 package vertx.effect;
 
 import io.vertx.core.AsyncResult;
-
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 
@@ -19,9 +18,8 @@ import java.util.stream.IntStream;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A Val is just an alias for a lazy Vertx future. Laziness makes your code more functional and pure.
- * It allows us to describe programs before executing them. The get method triggers the execution
- * of the val and returns a future.
+ * A Val is just an alias for a lazy Vertx future. Laziness makes your code more functional and pure. It allows us to
+ * describe programs before executing them. The get method triggers the execution of the val and returns a future.
  *
  * @param <O> the type of the value produced by the future
  */
@@ -79,8 +77,8 @@ public abstract class VIO<O> implements Supplier<Future<O>> {
     }
 
     /**
-     * Creates a new value by applying a function to the successful result of this value. If this value
-     * returns an exception then the new value will also contain this exception.
+     * Creates a new value by applying a function to the successful result of this value. If this value returns an
+     * exception then the new value will also contain this exception.
      *
      * @param fn  the function which will be applied to the successful result of this value
      * @param <P> the type of the returned value
@@ -89,9 +87,9 @@ public abstract class VIO<O> implements Supplier<Future<O>> {
     public abstract <P> VIO<P> map(final Function<O, P> fn);
 
     /**
-     * Creates a new value by applying a function to the successful result of this value, and returns
-     * the result of the function as the new value. If this value returns an exception then
-     * the new value will also contain this exception.
+     * Creates a new value by applying a function to the successful result of this value, and returns the result of the
+     * function as the new value. If this value returns an exception then the new value will also contain this
+     * exception.
      *
      * @param fn  the function which will be applied to the successful result of this value
      * @param <Q> the type of the returned value
@@ -122,9 +120,8 @@ public abstract class VIO<O> implements Supplier<Future<O>> {
                                  );
 
     /**
-     * Creates a new value that will handle any matching throwable that this value might contain.
-     * If there is no match, or if this future contains a valid result then the new future will
-     * contain the same.
+     * Creates a new value that will handle any matching throwable that this value might contain. If there is no match,
+     * or if this future contains a valid result then the new future will contain the same.
      *
      * @param fn the function to apply if this value fails
      * @return a new value
@@ -133,8 +130,8 @@ public abstract class VIO<O> implements Supplier<Future<O>> {
     public abstract VIO<O> recover(final Function<Throwable, O> fn);
 
     /**
-     * Creates a new value that will handle any matching throwable that this value might contain
-     * by assigning it another value.
+     * Creates a new value that will handle any matching throwable that this value might contain by assigning it another
+     * value.
      *
      * @param fn the function to apply if this Future fails
      * @return a new value
@@ -172,10 +169,9 @@ public abstract class VIO<O> implements Supplier<Future<O>> {
     public abstract VIO<O> onComplete(final Handler<AsyncResult<O>> handler);
 
 
-    public O result(){
+    public O result() {
         return get().result();
     }
-
 
 
 }

@@ -13,17 +13,16 @@ public final class IfElseExp<O> extends Exp<O> {
     private Supplier<VIO<O>> consequence;
     private Supplier<VIO<O>> alternative;
 
+    IfElseExp(final VIO<Boolean> predicate) {
+        this.predicate = requireNonNull(predicate);
+    }
+
     public static <O> IfElseExp<O> predicate(VIO<Boolean> condition) {
         return new IfElseExp<>(requireNonNull(condition));
     }
 
     public static <O> IfElseExp<O> predicate(boolean condition) {
         return new IfElseExp<>(VIO.effect(() -> Future.succeededFuture(condition)));
-    }
-
-
-    IfElseExp(final VIO<Boolean> predicate) {
-        this.predicate = requireNonNull(predicate);
     }
 
     public IfElseExp<O> consequence(final Supplier<VIO<O>> consequence) {

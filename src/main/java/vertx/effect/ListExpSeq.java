@@ -70,7 +70,7 @@ class ListExpSeq<O> extends ListExp<O> {
     @Override
     public ListExp<O> prepend(final VIO<? extends O> exp) {
         var xs = new ListExpSeq<>(seq);
-        xs.seq.add(0,requireNonNull(exp));
+        xs.seq.add(0, requireNonNull(exp));
         return xs;
     }
 
@@ -78,7 +78,7 @@ class ListExpSeq<O> extends ListExp<O> {
     @Override
     public ListExp<O> tail() {
 
-        return new ListExpSeq<>(new ArrayList<>(seq.subList(1,seq.size())));
+        return new ListExpSeq<>(new ArrayList<>(seq.subList(1, seq.size())));
     }
 
 

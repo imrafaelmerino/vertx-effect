@@ -26,42 +26,8 @@ final class CondExpSeq<E> extends CondExp<E> {
     CondExpSeq(final List<VIO<Boolean>> tests,
                final List<Supplier<VIO<E>>> consequences
               ) {
-        this(tests, consequences, () -> VIO.NULL());
+        this(tests, consequences, VIO::NULL);
     }
-
-    @Override
-    public Future<E> get() {
-        return get(tests,
-                   consequences,
-                   otherwise,
-                   0
-                  );
-    }
-
-
-    @Override
-    public VIO<E> retryEach(final Predicate<Throwable> predicate,
-                            final RetryPolicy policy
-                           ) {
-        Objects.requireNonNull(policy);
-        Objects.requireNonNull(predicate);
-        return new CondExpSeq<>(
-                tests.stream().map(it -> it.retry(predicate, policy)).collect(Collectors.toList()),
-                consequences.stream()
-                            .map(it -> {
-                                Supplier<VIO<E>> s = () -> it.get().retry(predicate, policy);
-                                return s;
-                            })
-                            .collect(Collectors.toList()),
-                otherwise
-        );
-    }
-
-    @Override
-    public VIO<E> retryEach(RetryPolicy policy) {
-        return retryEach(e -> true, policy);
-    }
-
 
     private static <E> Future<E> get(List<VIO<Boolean>> tests,
                                      List<Supplier<VIO<E>>> consequences,
@@ -80,5 +46,34 @@ final class CondExpSeq<E> extends CondExp<E> {
                                  condTestedSoFar + 1
                                 ));
 
+    }
+
+    @Override
+    public Future<E> get() {
+        return get(tests,
+                   consequences,
+                   otherwise,
+                   0
+                  );
+    }
+
+    @Override
+    public VIO<E> retryEach(final Predicate<Throwable> predicate,
+                            final RetryPolicy policy
+                           ) {
+        Objects.requireNonNull(policy);
+        Objects.requireNonNull(predicate);
+        return new CondExpSeq<>(
+                tests.stream().map(it -> it.retry(predicate, policy)).collect(Collectors.toList()),
+                consequences.stream()
+                            .map(it -> (Supplier<VIO<E>>) () -> it.get().retry(predicate, policy))
+                            .collect(Collectors.toList()),
+                otherwise
+        );
+    }
+
+    @Override
+    public VIO<E> retryEach(RetryPolicy policy) {
+        return retryEach(e -> true, policy);
     }
 }

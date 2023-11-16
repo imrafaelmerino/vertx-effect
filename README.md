@@ -1113,7 +1113,7 @@ Processes.deploy_undeploy  avgt   10  2.907 ± 0.658   s/op
 
 ## <a name="requirements"><a/> Requirements
 
-Java 11 or greater
+Java 17 or greater
 
 ## <a name="installation"><a/> Installation
 
@@ -1122,7 +1122,7 @@ Java 11 or greater
 <dependency>
     <groupId>com.github.imrafaelmerino</groupId>
     <artifactId>vertx-effect</artifactId>
-    <version>3.0.1</version>
+    <version>4.0.0</version>
 </dependency>
 ```
 

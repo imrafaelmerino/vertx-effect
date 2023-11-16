@@ -20,29 +20,29 @@ import static vertx.effect.EventPublisher.PUBLISHER;
 /**
  * It represents a reference to a Verticle, the unit of computation. It allows to interact with the verticle it
  * represents using just functions. the method {@link #tell(DeliveryOptions)} returns a consumer to establish an
- * unidirectional conversation (a replay is not expected or it's ignored), and the {@link #tell(DeliveryOptions)}
- * method returns a function to establish a bidirectional conversation.
+ * unidirectional conversation (a replay is not expected or it's ignored), and the {@link #tell(DeliveryOptions)} method
+ * returns a function to establish a bidirectional conversation.
  *
  * @param <I> the type of the input message sent to this verticle
  * @param <O> the type of the output message returned by this verticle
  */
 public class VerticleRef<I, O> {
 
-    private final Vertx vertx;
     /**
      * the default delivery options that will be used if not specified
      */
     private static final DeliveryOptions DEFAULT = new DeliveryOptions();
+    private static final Supplier<MultiMap> EMPTY_HEADERS = MultiMap::caseInsensitiveMultiMap;
     /**
      * address where a verticle is listening on
      */
     public final String address;
     /**
-     * the identifiers assigned to the different instances of this verticle after being deployed.
-     * To undeploy a verticle, its identifier is needed.
+     * the identifiers assigned to the different instances of this verticle after being deployed. To undeploy a
+     * verticle, its identifier is needed.
      */
     public final Set<String> ids;
-    private static final Supplier<MultiMap> EMPTY_HEADERS = MultiMap::caseInsensitiveMultiMap;
+    private final Vertx vertx;
 
     public VerticleRef(final Vertx vertx,
                        final String address
@@ -103,9 +103,9 @@ public class VerticleRef<I, O> {
     }
 
     /**
-     * returns a lambda with context to establish a bidirectional conversation with this verticle.
-     * A lambda with context takes two parameters, the message to be sent and the context,
-     * which is represented with message headers {@link Message#headers()}
+     * returns a lambda with context to establish a bidirectional conversation with this verticle. A lambda with context
+     * takes two parameters, the message to be sent and the context, which is represented with message headers
+     * {@link Message#headers()}
      *
      * @param options the delivery options
      * @return a lambda with context
@@ -157,9 +157,9 @@ public class VerticleRef<I, O> {
     }
 
     /**
-     * returns a lambda with context to establish a bidirectional conversation with this verticle.
-     * A lambda with context takes two parameters, the message to be sent and and the context,
-     * which is represented with message headers {@link Message#headers()}
+     * returns a lambda with context to establish a bidirectional conversation with this verticle. A lambda with context
+     * takes two parameters, the message to be sent and and the context, which is represented with message headers
+     * {@link Message#headers()}
      *
      * @return a lambda with context
      */
@@ -169,8 +169,7 @@ public class VerticleRef<I, O> {
 
 
     /**
-     * returns a consumer to send messages to this verticle. Since a consumer is returned, the response
-     * is ignored
+     * returns a consumer to send messages to this verticle. Since a consumer is returned, the response is ignored
      *
      * @param options the delivery options
      * @return a consumer that takes an object of type I
@@ -185,8 +184,7 @@ public class VerticleRef<I, O> {
     }
 
     /**
-     * returns a consumer to send messages to this verticle. Since a consumer is returned, the response
-     * is ignored
+     * returns a consumer to send messages to this verticle. Since a consumer is returned, the response is ignored
      *
      * @return a consumer that takes an object of type I
      */

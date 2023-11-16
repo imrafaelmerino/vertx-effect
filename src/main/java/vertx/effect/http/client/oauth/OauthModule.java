@@ -13,16 +13,22 @@ import java.util.function.Predicate;
 
 public abstract class OauthModule extends HttpClientModule {
 
-    private final RetryPolicy accessTokenReqRetryPolicy;
-    private final Predicate<Throwable> accessTokenReqRetryPredicate;
-    protected String accessToken;
-
-    protected BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> accessTokenReq;
+    public final Lambdac<GetReq, JsObj> getOauth;
+    public final Lambdac<PostReq, JsObj> postOauth;
+    public final Lambdac<PutReq, JsObj> putOauth;
+    public final Lambdac<DeleteReq, JsObj> deleteOauth;
+    public final Lambdac<PatchReq, JsObj> patchOauth;
+    public final Lambdac<HeadReq, JsObj> headOauth;
+    public final Lambdac<OptionsReq, JsObj> optionsOauth;
+    public final Lambdac<TraceReq, JsObj> traceOauth;
     protected final Lambda<JsObj, String> readAccessToken;
     protected final String authorizationHeaderName;
     protected final Function<String, String> authorizationHeaderValue;
     protected final Predicate<JsObj> refreshTokenPredicate;
-
+    private final RetryPolicy accessTokenReqRetryPolicy;
+    private final Predicate<Throwable> accessTokenReqRetryPredicate;
+    protected String accessToken;
+    protected BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> accessTokenReq;
     public OauthModule(final HttpClientOptions options,
                        final String address,
                        final String authorizationHeaderName,
@@ -75,16 +81,6 @@ public abstract class OauthModule extends HttpClientModule {
                                 false
                                );
     }
-
-
-    public final Lambdac<GetReq, JsObj> getOauth;
-    public final Lambdac<PostReq, JsObj> postOauth;
-    public final Lambdac<PutReq, JsObj> putOauth;
-    public final Lambdac<DeleteReq, JsObj> deleteOauth;
-    public final Lambdac<PatchReq, JsObj> patchOauth;
-    public final Lambdac<HeadReq, JsObj> headOauth;
-    public final Lambdac<OptionsReq, JsObj> optionsOauth;
-    public final Lambdac<TraceReq, JsObj> traceOauth;
 
     protected <I extends HttpReq<I>> Lambdac<I, JsObj> resilientReq(final Lambdac<I, JsObj> req) {
 

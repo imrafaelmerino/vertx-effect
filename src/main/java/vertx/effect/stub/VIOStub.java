@@ -10,6 +10,8 @@ import java.util.function.Supplier;
 
 public abstract class VIOStub<O> implements Supplier<VIO<O>> {
 
+    final Supplier<String> THREAD_NAME = () -> "IOMock [Thread " + Thread.currentThread().getName() + "] ";
+
     public static <O> VIOStub<O> succeed(final IntFunction<O> value,
                                          final IntFunction<Duration> delay
                                         ) {
@@ -26,7 +28,6 @@ public abstract class VIOStub<O> implements Supplier<VIO<O>> {
         return new FailureStub<>(error, value);
     }
 
-
     public static <O> VIOStub<O> failThenSucceed(final IntFunction<Throwable> error,
                                                  final IntFunction<Duration> delay,
                                                  final O value
@@ -34,9 +35,6 @@ public abstract class VIOStub<O> implements Supplier<VIO<O>> {
 
         return new FailureStub<>(error, delay, value);
     }
-
-
-    final Supplier<String> THREAD_NAME = () -> "IOMock [Thread " + Thread.currentThread().getName() + "] ";
 
     void sleep(long millis) {
         if (millis != 0) System.out.println(THREAD_NAME.get() + "sleeping " + millis + " ms.");

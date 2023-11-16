@@ -11,11 +11,11 @@ import static java.util.Objects.requireNonNull;
 
 final class AnyExpSeq extends AnyExp {
 
+    final List<VIO<Boolean>> exps;
+
     AnyExpSeq(final List<VIO<Boolean>> exps) {
         this.exps = requireNonNull(exps);
     }
-
-    final List<VIO<Boolean>> exps;
 
     @Override
     public VIO<Boolean> retryEach(final RetryPolicy policy) {

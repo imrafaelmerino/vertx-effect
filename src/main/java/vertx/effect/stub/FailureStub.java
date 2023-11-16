@@ -12,10 +12,10 @@ import static java.util.Objects.requireNonNull;
 
 final class FailureStub<O> extends VIOStub<O> implements Supplier<VIO<O>> {
     private final IntFunction<Duration> delay;
-    private int counter;
     private final IntFunction<Throwable> getError;
     private final O value;
     private final VIO<O> effect;
+    private int counter;
 
     FailureStub(
             final IntFunction<Throwable> getError,
@@ -24,10 +24,9 @@ final class FailureStub<O> extends VIOStub<O> implements Supplier<VIO<O>> {
         this(requireNonNull(getError), n -> Duration.of(0, ChronoUnit.MILLIS), value);
     }
 
-    FailureStub(
-            final IntFunction<Throwable> error,
-            final IntFunction<Duration> delay,
-            final O value
+    FailureStub(final IntFunction<Throwable> error,
+                final IntFunction<Duration> delay,
+                final O value
                ) {
         this.getError = requireNonNull(error);
         this.delay = requireNonNull(delay);

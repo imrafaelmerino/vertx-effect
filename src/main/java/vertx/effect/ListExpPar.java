@@ -47,9 +47,9 @@ class ListExpPar<O> extends ListExp<O> {
     @Override
     public Future<List<O>> get() {
         return Future.all(seq.stream()
-                                      .map(Supplier::get)
-                                      .collect(Collectors.toList()))
-                              .map(CompositeFuture::list);
+                             .map(Supplier::get)
+                             .collect(Collectors.toList()))
+                     .map(CompositeFuture::list);
 
     }
 

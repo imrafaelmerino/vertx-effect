@@ -7,9 +7,9 @@ import java.util.function.Supplier;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This expression is made up of different predicates. Each predicate has an associated consequence.
- * The computed value of the consequence of the first predicate that is true is returned. The predicates
- * of the expression can be evaluated either in parallel or sequentially.
+ * This expression is made up of different predicates. Each predicate has an associated consequence. The computed value
+ * of the consequence of the first predicate that is true is returned. The predicates of the expression can be evaluated
+ * either in parallel or sequentially.
  *
  * @param <O> the type of the effect returned by this expression.
  */
@@ -17,9 +17,9 @@ public abstract class CondExp<O> extends Exp<O> {
 
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -50,9 +50,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns {@link VIO#NULL}
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns {@link VIO#NULL}
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -80,9 +80,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -120,9 +120,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns {@link VIO#NULL}
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns {@link VIO#NULL}
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -157,9 +157,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -204,9 +204,9 @@ public abstract class CondExp<O> extends Exp<O> {
 
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns {@link VIO#NULL}
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns {@link VIO#NULL}
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -248,9 +248,9 @@ public abstract class CondExp<O> extends Exp<O> {
 
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -302,9 +302,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns {@link VIO#NULL}
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns {@link VIO#NULL}
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -353,9 +353,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -410,9 +410,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed in parallel.
-     * Once all the predicates are evaluated, it computes and returns the consequence of the first one that is true.
-     * If no predicate is evaluated to true, it returns {@link VIO#NULL}
+     * It creates a Cond expression which predicates will be executed in parallel. Once all the predicates are
+     * evaluated, it computes and returns the consequence of the first one that is true. If no predicate is evaluated to
+     * true, it returns {@link VIO#NULL}
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -465,9 +465,9 @@ public abstract class CondExp<O> extends Exp<O> {
 
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -498,9 +498,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -529,9 +529,9 @@ public abstract class CondExp<O> extends Exp<O> {
 
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -569,9 +569,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -606,9 +606,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -652,9 +652,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -695,9 +695,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -749,9 +749,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -800,9 +800,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns the specified default value.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns the specified default value.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate
@@ -857,9 +857,9 @@ public abstract class CondExp<O> extends Exp<O> {
     }
 
     /**
-     * It creates a Cond expression which predicates will be executed sequentially.
-     * Each predicate is evaluated at a time and when a predicate is true, its consequence is computed and returned  (the rest
-     * of predicates (if any) are not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
+     * It creates a Cond expression which predicates will be executed sequentially. Each predicate is evaluated at a
+     * time and when a predicate is true, its consequence is computed and returned  (the rest of predicates (if any) are
+     * not evaluated).If no predicate is evaluated to true, it returns {@link VIO#NULL}.
      *
      * @param predicate1   the first predicate
      * @param consequence1 the consequence of the first predicate

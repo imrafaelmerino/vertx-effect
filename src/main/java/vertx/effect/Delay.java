@@ -23,7 +23,8 @@ public final class Delay {
     final Duration duration;
 
     /**
-     * the delay represented as a val. When executed,a brand-new timer is scheduled and the id of the timer will be returned
+     * the delay represented as a val. When executed,a brand-new timer is scheduled and the id of the timer will be
+     * returned
      */
     final VIO<Long> effect;
 

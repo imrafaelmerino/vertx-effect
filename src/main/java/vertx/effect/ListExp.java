@@ -7,6 +7,12 @@ import static java.util.Objects.requireNonNull;
 
 public abstract class ListExp<O> extends Exp<List<O>> {
 
+    protected final List<VIO<? extends O>> seq;
+
+    ListExp(final List<VIO<? extends O>> seq) {
+        this.seq = seq;
+    }
+
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <O> ListExp<O> seq(VIO<O>... others) {
@@ -24,13 +30,6 @@ public abstract class ListExp<O> extends Exp<List<O>> {
         for (final VIO<O> other : others) exp.add(requireNonNull(other));
         return new ListExpPar<>(exp);
     }
-
-    protected final List<VIO<? extends O>> seq;
-
-    ListExp(final List<VIO<? extends O>> seq) {
-        this.seq = seq;
-    }
-
 
     @SuppressWarnings("unchecked")
     public VIO<O> head() {

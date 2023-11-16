@@ -40,9 +40,8 @@
         <MAVEN-COMPILER-PLUGIN.SOURCE>17</MAVEN-COMPILER-PLUGIN.SOURCE>
         <MAVEN-COMPILER-PLUGIN.TARGET>17</MAVEN-COMPILER-PLUGIN.TARGET>
         <VERTX-VERSION>4.4.6</VERTX-VERSION>
-        <JSON-VALUES.VERSION>13.9.0</JSON-VALUES.VERSION>
         <JAVA-FUN.VERSION>1.3.2</JAVA-FUN.VERSION>
-        <VERTX.JSON-VALUES.VERSION>0.8</VERTX.JSON-VALUES.VERSION>
+        <VERTX.JSON-VALUES.VERSION>1.0.0</VERTX.JSON-VALUES.VERSION>
         <MAVEN-JAR-PLUGIN.VERSION>3.2.0</MAVEN-JAR-PLUGIN.VERSION>
         <PROJECT.BUILD.SOURCE_ENCODING>UTF-8</PROJECT.BUILD.SOURCE_ENCODING>
         <MAVEN-COMPILER-PLUGIN.VERSION>3.10.1</MAVEN-COMPILER-PLUGIN.VERSION>
@@ -122,11 +121,6 @@
             <version>${JAVA-FUN.VERSION}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.imrafaelmerino</groupId>
-            <artifactId>json-values</artifactId>
-            <version>${JSON-VALUES.VERSION}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.github.imrafaelmerino</groupId>

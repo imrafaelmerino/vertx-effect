@@ -9,10 +9,9 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Represents a supplier of a vertx future which result is a json object. It has the same
- * recursive structure as a json object. Each key has a future associated that it's
- * executed asynchronously. When all the futures are completed, all the results are combined into
- * a json object.
+ * Represents a supplier of a vertx future which result is a json object. It has the same recursive structure as a json
+ * object. Each key has a future associated that it's executed asynchronously. When all the futures are completed, all
+ * the results are combined into a json object.
  */
 public abstract class JsObjExp extends Exp<JsObj> {
 

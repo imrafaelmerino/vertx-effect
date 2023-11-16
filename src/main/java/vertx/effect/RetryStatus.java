@@ -45,8 +45,8 @@ public class RetryStatus {
         if (!(o instanceof RetryStatus)) return false;
         final RetryStatus that = (RetryStatus) o;
         return cumulativeDelay == that.cumulativeDelay &&
-                previousDelay == that.previousDelay &&
-                counter == that.counter;
+               previousDelay == that.previousDelay &&
+               counter == that.counter;
     }
 
     @Override

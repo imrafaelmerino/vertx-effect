@@ -14,9 +14,8 @@ import java.util.stream.Collectors;
 
 public class HttpReqHandlerStub implements Handler<HttpServerRequest> {
 
-    protected AtomicInteger counter = new AtomicInteger(0);
-
     final List<HttpRespStub> mockReqResp;
+    protected AtomicInteger counter = new AtomicInteger(0);
 
     public HttpReqHandlerStub(final List<HttpRespStub> mockReqResp) {
         this.mockReqResp = Objects.requireNonNull(mockReqResp);

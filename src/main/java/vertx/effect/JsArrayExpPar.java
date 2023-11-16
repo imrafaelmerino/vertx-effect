@@ -15,14 +15,12 @@ import java.util.stream.Collectors;
 
 
 /**
- * Represents a supplier of a completable future which result is a json array. It has the same
- * recursive structure as a json array. Each index of the array is a completable future that it's
- * executed asynchronously. When all the futures are completed, all the results are combined into
- * a json array.
+ * Represents a supplier of a completable future which result is a json array. It has the same recursive structure as a
+ * json array. Each index of the array is a completable future that it's executed asynchronously. When all the futures
+ * are completed, all the results are combined into a json array.
  */
 
 final class JsArrayExpPar extends JsArrayExp {
-
 
 
     JsArrayExpPar(List<VIO<? extends JsValue>> seq) {
@@ -50,17 +48,17 @@ final class JsArrayExpPar extends JsArrayExp {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Future<JsArray> get() {
         List futures = seq.stream().map(Supplier::get)
-                                    .collect(Collectors.toList());
+                          .collect(Collectors.toList());
         return Future.all(futures)
-                              .map(result -> {
-                                       java.util.List<Object> list = result.list();
-                                       JsArray acc = JsArray.empty();
-                                       for (final Object o : list) {
-                                           acc = acc.append(((JsValue) o));
-                                       }
-                                       return acc;
-                                   }
-                                  );
+                     .map(result -> {
+                              java.util.List<Object> list = result.list();
+                              JsArray acc = JsArray.empty();
+                              for (final Object o : list) {
+                                  acc = acc.append(((JsValue) o));
+                              }
+                              return acc;
+                          }
+                         );
 
 
     }
@@ -81,7 +79,7 @@ final class JsArrayExpPar extends JsArrayExp {
 
     @Override
     public JsArrayExp tail() {
-        return new JsArrayExpPar(new ArrayList<>(seq.subList(1,seq.size())));
+        return new JsArrayExpPar(new ArrayList<>(seq.subList(1, seq.size())));
     }
 
 
