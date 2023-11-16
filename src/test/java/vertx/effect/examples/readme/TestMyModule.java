@@ -30,7 +30,7 @@ public class TestMyModule {
     @Test
     public void empty_json_is_sent_and_failure_is_received(VertxTestContext context) {
 
-        MyModule.validateAndMap.apply(JsObj.EMPTY)
+        MyModule.validateAndMap.apply(JsObj.empty())
                                .onComplete(result ->
                                                    context.verify(() -> {
                                                        Assertions.assertTrue(result.failed());

@@ -32,8 +32,12 @@ public class TestGetAllEmailsFromListOfCustomers {
                              .then($ -> ids.stream()
                                            .map(pair -> pair.value().toJsStr().value)
                                            .reduce(VIO.succeed(JsArray.empty()),
-                                                   (acc, id) -> acc.then(emails -> getCustomerEmails.apply(id)
-                                                                                                    .map(emails::appendAll)
+                                                   (acc, id) -> acc.then(emails -> {
+                                                                             VIO<JsArray> a = getCustomerEmails.apply(id);
+                                                                             VIO<JsArray> arr = a
+                                                                                                                 .map(emails::appendAll);
+                                                                             return arr;
+                                                                         }
                                                                         ),
                                                    (arr1, arr2) -> arr1.then(a -> arr2.map(a::appendAll))
                                                   ));

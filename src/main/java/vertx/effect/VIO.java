@@ -172,4 +172,10 @@ public abstract class VIO<O> implements Supplier<Future<O>> {
     public abstract VIO<O> onComplete(final Handler<AsyncResult<O>> handler);
 
 
+    public O result(){
+        return get().result();
+    }
+
+
+
 }
