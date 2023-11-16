@@ -100,7 +100,7 @@ public abstract class OauthModule extends HttpClientModule {
                                                              final boolean refreshToken
                                                             ) {
         return (context, reqParams) ->
-                IfElseExp.<String>predicate(refreshToken || accessToken == null)
+                IfElseExp.<String>predicate( () -> refreshToken || accessToken == null)
                          .consequence(() -> accessTokenReq.apply(context,
                                                                  this
                                                                 )
