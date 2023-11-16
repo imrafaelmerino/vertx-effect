@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @param <O> the type of the effect returned by this expression.
  */
-public abstract class CondExp<O> extends Exp<O> {
+public abstract sealed class CondExp<O> extends Exp<O> permits CondExpPar, CondExpSeq {
 
 
     /**

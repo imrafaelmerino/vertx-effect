@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
  * object. Each key has a future associated that it's executed asynchronously. When all the futures are completed, all
  * the results are combined into a json object.
  */
-public abstract class JsObjExp extends Exp<JsObj> {
+public abstract sealed class JsObjExp extends Exp<JsObj> permits JsObjExpPar, JsObjExpSeq {
 
     Map<String, VIO<? extends JsValue>> bindings = new LinkedHashMap<>();
 

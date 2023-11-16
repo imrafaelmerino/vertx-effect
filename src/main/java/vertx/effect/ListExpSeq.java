@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-class ListExpSeq<O> extends ListExp<O> {
+final class ListExpSeq<O> extends ListExp<O> {
 
     @SuppressWarnings("rawtypes")
     ListExpSeq(final List<VIO<? extends O>> seq) {

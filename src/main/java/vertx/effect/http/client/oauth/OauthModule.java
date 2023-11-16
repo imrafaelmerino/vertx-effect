@@ -5,6 +5,7 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import vertx.effect.*;
+import vertx.effect.http.client.DeleteReq;
 import vertx.effect.http.client.*;
 
 import java.util.function.BiFunction;

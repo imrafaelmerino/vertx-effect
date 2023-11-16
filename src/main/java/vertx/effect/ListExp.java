@@ -5,7 +5,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class ListExp<O> extends Exp<List<O>> {
+public abstract sealed class ListExp<O> extends Exp<List<O>> permits ListExpPar, ListExpSeq {
 
     protected final List<VIO<? extends O>> seq;
 

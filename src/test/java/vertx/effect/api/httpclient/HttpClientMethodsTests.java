@@ -2,6 +2,7 @@ package vertx.effect.api.httpclient;
 
 import vertx.effect.*;
 import vertx.effect.api.Verifiers;
+import vertx.effect.http.client.DeleteReq;
 import vertx.effect.http.client.*;
 import vertx.effect.http.server.HttpServerBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;

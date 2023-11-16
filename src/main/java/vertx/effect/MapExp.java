@@ -7,7 +7,7 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 
-public abstract class MapExp<O> extends Exp<Map<String, O>> {
+public abstract sealed class MapExp<O> extends Exp<Map<String, O>> permits MapExpPar, MapExpSeq {
 
     protected Map<String, VIO<? extends O>> bindings = new HashMap<>();
 

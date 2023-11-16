@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-public abstract class VIOStub<O> implements Supplier<VIO<O>> {
+public abstract sealed class VIOStub<O> implements Supplier<VIO<O>> permits FailureStub, ValStub {
 
     final Supplier<String> THREAD_NAME = () -> "IOMock [Thread " + Thread.currentThread().getName() + "] ";
 

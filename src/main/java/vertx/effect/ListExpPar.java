@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-class ListExpPar<O> extends ListExp<O> {
+final class ListExpPar<O> extends ListExp<O> {
 
     ListExpPar(List<VIO<? extends O>> seq) {
         super(seq);

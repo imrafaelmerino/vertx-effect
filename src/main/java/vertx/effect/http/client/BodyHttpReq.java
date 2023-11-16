@@ -1,12 +1,11 @@
-package vertx.effect;
+package vertx.effect.http.client;
 
 
 import jsonvalues.JsObj;
-import vertx.effect.http.client.HttpReq;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class BodyHttpReq<T extends BodyHttpReq<T>> extends HttpReq<T> {
+abstract sealed class BodyHttpReq<T extends BodyHttpReq<T>> extends HttpReq<T> permits PatchReq, PostReq, PutReq {
     private final byte[] body;
 
     public BodyHttpReq(final byte[] body) {

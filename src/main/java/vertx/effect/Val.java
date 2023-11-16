@@ -5,7 +5,7 @@ import io.vertx.core.Future;
 import java.util.function.Supplier;
 
 
-final class Val<O> extends AbstractVIO<O> {
+final class Val<O> implements VIO<O> {
     private final Supplier<Future<O>> futureSupplier;
 
     Val(final Supplier<Future<O>> futureSupplier) {

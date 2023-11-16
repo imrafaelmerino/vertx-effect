@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class HttpReq<T extends HttpReq<T>> {
+public abstract sealed class HttpReq<T extends HttpReq<T>> permits BodyHttpReq, DeleteReq, GetReq, HeadReq, OptionsReq, TraceReq {
 
     private static final String SSL_FIELD = "ssl";
     private static final String URI_FIELD = "uri";
