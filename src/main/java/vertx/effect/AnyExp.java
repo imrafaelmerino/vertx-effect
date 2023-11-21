@@ -5,7 +5,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class AnyExp extends Exp<Boolean> {
+public abstract sealed class AnyExp extends Exp<Boolean> permits AnyExpPar, AnyExpSeq {
 
     @SafeVarargs
     public static AnyExp par(final VIO<Boolean> a,

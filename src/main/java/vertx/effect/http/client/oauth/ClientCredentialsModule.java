@@ -8,7 +8,6 @@ import vertx.effect.RetryPolicy;
 import vertx.effect.VIO;
 import vertx.effect.http.client.HttpClientModule;
 
-
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;

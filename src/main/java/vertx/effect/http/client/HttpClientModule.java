@@ -3,7 +3,6 @@ package vertx.effect.http.client;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import vertx.effect.AbstractHttpClientModule;
-import vertx.effect.DeleteReq;
 import vertx.effect.Lambdac;
 
 

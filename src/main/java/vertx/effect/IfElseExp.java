@@ -18,7 +18,11 @@ public final class IfElseExp<O> extends Exp<O> {
     }
 
     public static <O> IfElseExp<O> predicate(boolean condition) {
-        return new IfElseExp<>(VIO.effect(() -> Future.succeededFuture(condition)));
+        return new IfElseExp<>(VIO.succeed(condition));
+    }
+
+    public static <O> IfElseExp<O> predicate(Supplier<Boolean> condition) {
+        return new IfElseExp<>(VIO.effect(() -> Future.succeededFuture(condition.get())));
     }
 
 

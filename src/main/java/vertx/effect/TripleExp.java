@@ -5,7 +5,7 @@ import fun.tuple.Triple;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class TripleExp<A, B, C> extends Exp<Triple<A, B, C>> {
+public abstract sealed class TripleExp<A, B, C> extends Exp<Triple<A, B, C>> permits TripleExpPar, TripleExpSeq {
 
     public static <A, B, C> TripleExp<A, B, C> par(final VIO<A> _1,
                                                    final VIO<B> _2,

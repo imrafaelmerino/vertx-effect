@@ -10,7 +10,7 @@ import jdk.jfr.Event;
 @StackTrace(value = false)
 public class HttpReqEvent extends Event {
 
-    private long tic;
+    private final long tic;
 
     public HttpReqEvent() {
         tic = System.nanoTime();

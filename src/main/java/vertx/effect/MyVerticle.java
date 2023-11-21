@@ -25,8 +25,7 @@ class MyVerticle<I> extends AbstractVerticle {
     private MessageConsumer<Object> messageConsumer;
 
     /**
-     * Creates a verticle instance that when deployed will process the messages sent to the given
-     * address
+     * Creates a verticle instance that when deployed will process the messages sent to the given address
      *
      * @param consumer consumer that takes and processes the messages sent to this verticle
      * @param address  address where the verticle is listening on
@@ -39,8 +38,8 @@ class MyVerticle<I> extends AbstractVerticle {
     }
 
     /**
-     * Register the given consumer listening on the given address. When it's done, this
-     * actor is ready to receive messages on that address.
+     * Register the given consumer listening on the given address. When it's done, this actor is ready to receive
+     * messages on that address.
      *
      * @param promise promise to be completed when the consumer is registered
      */
@@ -85,8 +84,8 @@ class MyVerticle<I> extends AbstractVerticle {
     }
 
     /**
-     * Unregister the consumer listening on the give address that was created during the
-     * {@link #start(Promise)} method.
+     * Unregister the consumer listening on the give address that was created during the {@link #start(Promise)}
+     * method.
      *
      * @param promise promise to be completed when the consumer is unregistered
      */

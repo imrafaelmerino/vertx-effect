@@ -7,7 +7,6 @@ import jsonvalues.spec.JsObjSpec;
 import jsonvalues.spec.SpecError;
 
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -19,7 +18,7 @@ public class Validators {
 
     /**
      * returns a λ that validates a json object, returning it if it conforms to the given spec.
-     * In case of error it returns a ReplyFailure withe the code
+     * In case of error it returns a ReplyFailure with the code
      * {@link Failures#BAD_MESSAGE_CODE}
      *
      * @param spec the spec of the schema

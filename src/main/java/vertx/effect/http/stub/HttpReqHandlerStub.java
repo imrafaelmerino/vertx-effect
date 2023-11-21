@@ -12,11 +12,10 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class HttpReqHandlerStub implements Handler<HttpServerRequest> {
-
-    protected AtomicInteger counter = new AtomicInteger(0);
+public final class HttpReqHandlerStub implements Handler<HttpServerRequest> {
 
     final List<HttpRespStub> mockReqResp;
+    AtomicInteger counter = new AtomicInteger(0);
 
     public HttpReqHandlerStub(final List<HttpRespStub> mockReqResp) {
         this.mockReqResp = Objects.requireNonNull(mockReqResp);

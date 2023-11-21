@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 
 /**
- * It's an immutable expression that implements multiple predicate-value branches like the
- * Cond expression. However, it evaluates a type I value and allows multiple value clauses based on evaluating that value.
+ * It's an immutable expression that implements multiple predicate-value branches like the Cond expression. However, it
+ * evaluates a type I value and allows multiple value clauses based on evaluating that value.
  *
  * @param <O> the type of the value this expression will be reduced
  */
@@ -33,8 +33,8 @@ public final class SwitchExp<I, O> extends Exp<O> {
     }
 
     /**
-     * Creates a SwitchMatcher from a given value that will be evaluated and matched against the branches
-     * defined with the {@link SwitchMatcher#match(Object, Lambda, Object, Lambda, Lambda) match} method
+     * Creates a SwitchMatcher from a given value that will be evaluated and matched against the branches defined with
+     * the {@link SwitchMatcher#match(Object, Lambda, Object, Lambda, Lambda) match} method
      *
      * @param input the input that will be evaluated
      * @param <I>   the type of the input
@@ -46,8 +46,8 @@ public final class SwitchExp<I, O> extends Exp<O> {
     }
 
     /**
-     * Creates a SwitchMatcher from a given effect that will be evaluated and matched against the branches
-     * defined with the {@link SwitchMatcher#match(Object, Lambda, Object, Lambda, Lambda) match} method
+     * Creates a SwitchMatcher from a given effect that will be evaluated and matched against the branches defined with
+     * the {@link SwitchMatcher#match(Object, Lambda, Object, Lambda, Lambda) match} method
      *
      * @param input the effect that will be evaluated
      * @param <I>   the type of the input
@@ -58,6 +58,22 @@ public final class SwitchExp<I, O> extends Exp<O> {
         return new SwitchMatcher<>(requireNonNull(input));
     }
 
+    private static <I, O> Future<O> get(final Future<I> val,
+                                        final List<Predicate<I>> tests,
+                                        final List<Lambda<I, O>> lambdas,
+                                        final Lambda<I, O> otherwise,
+                                        final int condTestedSoFar
+                                       ) {
+        return condTestedSoFar == tests.size() ?
+                val.compose(i -> otherwise.apply(i).get()) :
+                val.compose(i ->
+                                    tests.get(condTestedSoFar).test(i) ?
+                                            lambdas.get(condTestedSoFar).apply(i).get() :
+                                            get(val, tests, lambdas, otherwise, condTestedSoFar + 1)
+                           );
+
+
+    }
 
     @Override
     public Future<O> get() {
@@ -81,24 +97,6 @@ public final class SwitchExp<I, O> extends Exp<O> {
     @Override
     public VIO<O> retryEach(RetryPolicy policy) {
         return retryEach(e -> true, policy);
-    }
-
-
-    private static <I, O> Future<O> get(final Future<I> val,
-                                        final List<Predicate<I>> tests,
-                                        final List<Lambda<I, O>> lambdas,
-                                        final Lambda<I, O> otherwise,
-                                        final int condTestedSoFar
-                                       ) {
-        return condTestedSoFar == tests.size() ?
-                val.compose(i -> otherwise.apply(i).get()) :
-                val.compose(i ->
-                                    tests.get(condTestedSoFar).test(i) ?
-                                            lambdas.get(condTestedSoFar).apply(i).get() :
-                                            get(val, tests, lambdas, otherwise, condTestedSoFar + 1)
-                           );
-
-
     }
 
 

@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -7,12 +8,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import vertx.effect.MapExp;
 import vertx.effect.RetryPolicies;
 import vertx.effect.VIO;
 import vertx.effect.VertxRef;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
@@ -22,29 +22,30 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestParallelMap {
     static final int ATTEMPTS = 2;
-
-    static final VIOStub<String> a =
-            VIOStub.failThenSucceed(
-                    counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                    "a"
-                                   );
-
-    static final VIOStub<String> b =
-            VIOStub.failThenSucceed(
-                    counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                    "b"
-                                   );
-    static final VIOStub<Integer> one =
-            VIOStub.failThenSucceed(
-                    counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                    1
-                                   );
-
     private static VertxRef vertxRef;
+    StubBuilder<String> a =
+            StubBuilder.ofGen(Gen.seq(counter -> counter < ATTEMPTS
+                                      ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                      VIO.succeed("a")
+                                     )
+                             );
+    StubBuilder<String> b =
+            StubBuilder.ofGen(Gen.seq(counter -> counter < ATTEMPTS
+                                      ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                      VIO.succeed("b")
+                                     )
+                             );
+    StubBuilder<Integer> one =
+            StubBuilder.ofGen(Gen.seq(counter -> counter < ATTEMPTS
+                                      ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                      VIO.succeed(1)
+                                     )
+                             );
 
     @BeforeAll
     public static void prepare(final Vertx vertx,
@@ -1021,9 +1022,9 @@ public class TestParallelMap {
                      1
                     );
         MapExp.par("a",
-                   a.get(),
+                   a.build(),
                    "b",
-                   one.get()
+                   one.build()
                   )
               .retryEach(limitRetries(2))
               .onComplete(map ->
@@ -1041,7 +1042,7 @@ public class TestParallelMap {
     @Test
     public void test_mapval_exp_fails_and_recover_with_success(VertxTestContext context) {
         Map<String, String> empty = new LinkedHashMap<>();
-        MapExp.par("a", VIO.fail(new RuntimeException()), "b", b.get())
+        MapExp.par("a", VIO.fail(new RuntimeException()), "b", b.build())
               .recoverWith(e -> VIO.succeed(empty))
               .onSuccess(map -> context.verify(() -> {
                   Assertions.assertEquals(empty, map);
@@ -1056,7 +1057,7 @@ public class TestParallelMap {
         MapExp.par("a",
                    VIO.fail(new RuntimeException()),
                    "b",
-                   b.get()
+                   b.build()
                   )
               .recoverWith(e -> VIO.fail(new IllegalArgumentException()))
               .onComplete(r -> context.verify(() -> {
@@ -1077,9 +1078,9 @@ public class TestParallelMap {
                      "b"
                     );
         MapExp.par("a",
-                   a.get(),
+                   a.build(),
                    "b",
-                   b.get()
+                   b.build()
                   )
               .retryEach(limitRetries(ATTEMPTS)
                         )
@@ -1102,9 +1103,9 @@ public class TestParallelMap {
         long start = System.nanoTime();
 
         MapExp.par("a",
-                   a.get(),
+                   a.build(),
                    "b",
-                   b.get()
+                   b.build()
                   )
               .retryEach(limitRetries(ATTEMPTS).append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100)))))
               .get()

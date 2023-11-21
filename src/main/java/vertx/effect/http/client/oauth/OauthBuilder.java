@@ -49,13 +49,13 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     };
 
 
-
     protected RetryPolicy accessTokenRetryPolicy = RetryPolicies.limitRetries(3);
     protected Predicate<Throwable> accessTokenRetryPredicate = e -> true;
 
 
     public OauthBuilder(final HttpClientOptions options,
-                        final String address) {
+                        final String address
+                       ) {
         this.options = requireNonNull(options);
         this.address = address;
     }
@@ -83,9 +83,9 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     }
 
 
-
     public T setAccessTokenReqRetryPolicy(final Predicate<Throwable> condition,
-                                          final RetryPolicy retryPolicy) {
+                                          final RetryPolicy retryPolicy
+                                         ) {
         this.accessTokenRetryPolicy = requireNonNull(retryPolicy);
         this.accessTokenRetryPredicate = requireNonNull(condition);
         return ((T) this);

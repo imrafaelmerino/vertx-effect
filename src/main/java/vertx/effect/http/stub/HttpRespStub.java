@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 
 
-public class HttpRespStub {
+public final class HttpRespStub {
 
     public static final BiPredicate<Integer, HttpServerRequest> ALWAYS =
             (c, req) -> true;

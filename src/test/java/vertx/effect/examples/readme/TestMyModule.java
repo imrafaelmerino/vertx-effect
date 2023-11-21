@@ -23,7 +23,12 @@ public class TestMyModule {
         PairExp.seq(ref.deployVerticle(new RegisterJsValuesCodecs()),
                     ref.deployVerticle(new MyModule())
                    )
-               .onSuccess(ids -> context.completeNow())
+               .onComplete(r -> {
+                               if(r.succeeded()) context.completeNow();
+                               else context.failNow(r.cause());
+                           })
+
+
                .get();
     }
 

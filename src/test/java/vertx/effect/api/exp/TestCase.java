@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
@@ -24,15 +25,21 @@ public class TestCase {
 
     private static int ATTEMPTS = 2;
 
-    private static VIOStub<String> a = VIOStub.failThenSucceed(
-            counter ->
-                    counter <= ATTEMPTS ?
-                            new RuntimeException("counter: " + counter) : null, "a");
-    private static VIOStub<String> b =
-            VIOStub.failThenSucceed(counter ->
-                                            counter <= ATTEMPTS ?
-                                                    new RuntimeException("counter: " + counter) : null, "b");
+  
+    
+    static StubBuilder<String> a = StubBuilder.ofGen(Gen.seq(counter -> counter <= ATTEMPTS ?
+                                            VIO.fail(new RuntimeException("counter: " + counter)) :
+                                            VIO.succeed("a")
+                                                     )
+                                           );
 
+    static StubBuilder<String> b = StubBuilder.ofGen(Gen.seq(counter -> counter <= ATTEMPTS ?
+                                                             VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                             VIO.succeed("b")
+                                                            )
+                                                    );
+
+   
 
     @BeforeAll
     public static void prepare(final Vertx vertx, final VertxTestContext testContext
@@ -154,8 +161,8 @@ public class TestCase {
     @Test
     public void test_case_exp_succeeds_after_two_retries(VertxTestContext context) {
 
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> A, "c", i -> B, it -> VIO.fail(new IllegalArgumentException("not ma"))).retryEach(limitRetries(2)).onSuccess(r -> context.verify(() -> {
             Assertions.assertEquals("a", r);
             context.completeNow();
@@ -165,8 +172,8 @@ public class TestCase {
 
     @Test
     public void test_retries_never_happens_because_error_is_texted_false_on_the_predicate(VertxTestContext context) {
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> A, "c", i -> B,
                                                                it -> VIO.fail(new IllegalArgumentException("not ma"))
                                                               ).retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE), limitRetries(2)).onComplete(r -> context.verify(() -> {
@@ -178,8 +185,8 @@ public class TestCase {
 
     @Test
     public void test_retries_if_with_delay(VertxTestContext context) {
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> A, "c", i -> B, it -> VIO.fail(new IllegalArgumentException("not ma"))).retryEach(e -> e instanceof RuntimeException, limitRetries(3)).onComplete(r -> context.verify(() -> {
             Assertions.assertTrue(r.succeeded());
             context.completeNow();
@@ -190,8 +197,8 @@ public class TestCase {
 
     @Test
     public void test_retries_happens_because_error_is_texted_true_on_the_predicate(VertxTestContext context) {
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
 
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> A, "c", i -> B, it -> VIO.fail(new IllegalArgumentException("not ma"))).retryEach(e -> e instanceof RuntimeException, limitRetries(2)).onSuccess(r -> context.verify(() -> {
             Assertions.assertEquals("a", r);
@@ -202,8 +209,8 @@ public class TestCase {
 
     @Test
     public void test_case_exp_succeeds_after_two_retries_waiting_1sec_before_retries(VertxTestContext context) {
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
 
         int attempts = 2;
         long start = System.nanoTime();
@@ -217,7 +224,7 @@ public class TestCase {
 
     @Test
     public void test_case_exp_recover(VertxTestContext context) {
-        VIO<String> B = b.get();
+        VIO<String> B = b.build();
 
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> VIO.fail(new RuntimeException()), "c", i -> B, it -> VIO.fail(new IllegalArgumentException("not ma"))).recover(e -> e instanceof RuntimeException ? "hi!" : "bye!").onSuccess(str -> context.verify(() -> {
             Assertions.assertEquals("hi!", str);
@@ -230,7 +237,7 @@ public class TestCase {
 
     @Test
     public void test_case_exp_fails_and_recover_with_success(VertxTestContext context) {
-        VIO<String> B = b.get();
+        VIO<String> B = b.build();
 
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> VIO.fail(new RuntimeException()), "c", i -> B, it -> VIO.fail(new IllegalArgumentException("not ma"))).recoverWith(e -> e instanceof RuntimeException ? VIO.succeed("hi!") : VIO.succeed("bye!")).onSuccess(str -> context.verify(() -> {
             Assertions.assertEquals("hi!", str);
@@ -240,7 +247,7 @@ public class TestCase {
 
     @Test
     public void test_case_exp_fails_and_recover_with_failure(VertxTestContext context) {
-        VIO<String> B = b.get();
+        VIO<String> B = b.build();
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> VIO.fail(new RuntimeException()), "c", i -> B, it -> VIO.fail(new IllegalArgumentException("not ma"))).recoverWith(e -> e instanceof RuntimeException ? VIO.fail(new IllegalArgumentException()) : VIO.succeed("bye!")).onComplete(r -> context.verify(() -> {
             Assertions.assertTrue(r.failed());
             Assertions.assertTrue(r.cause() instanceof IllegalArgumentException);
@@ -250,8 +257,8 @@ public class TestCase {
 
     @Test
     public void test_case_exp_recover_with_success(VertxTestContext context) {
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> A, "c", i -> B, it -> VIO.fail(new IllegalArgumentException("not ma"))).retryEach(limitRetries(2)).recoverWith(e -> e instanceof RuntimeException ? VIO.succeed("hi!") : VIO.succeed("bye!")).onSuccess(str -> context.verify(() -> {
             Assertions.assertEquals("a", str);
             context.completeNow();
@@ -261,7 +268,7 @@ public class TestCase {
 
     @Test
     public void test_case_exp_fails_and_fallbackto_success(VertxTestContext context) {
-        VIO<String> B = b.get();
+        VIO<String> B = b.build();
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> VIO.fail(new RuntimeException()), "c", i -> B,
                                                                it -> VIO.fail(new IllegalArgumentException("not ma"))
                                                               ).fallbackTo(e -> e instanceof RuntimeException ? VIO.succeed("hi!") : VIO.succeed("bye!")).onSuccess(str -> context.verify(() -> {
@@ -272,7 +279,7 @@ public class TestCase {
 
     @Test
     public void test_case_exp_fails_and_fallbackto_fails(VertxTestContext context) {
-        SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> VIO.fail(new RuntimeException()), "c", i -> b.get(), it -> VIO.fail(new IllegalArgumentException("not ma"))).fallbackTo(e -> e instanceof RuntimeException ? VIO.fail(new IllegalArgumentException()) : VIO.succeed("bye!")).onComplete(r -> context.verify(() -> {
+        SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> VIO.fail(new RuntimeException()), "c", i -> b.build(), it -> VIO.fail(new IllegalArgumentException("not ma"))).fallbackTo(e -> e instanceof RuntimeException ? VIO.fail(new IllegalArgumentException()) : VIO.succeed("bye!")).onComplete(r -> context.verify(() -> {
             Assertions.assertTrue(r.failed());
             Assertions.assertTrue(r.cause() instanceof RuntimeException);
             context.completeNow();
@@ -281,8 +288,8 @@ public class TestCase {
 
     @Test
     public void test_case_exp_success_and_fallback_is_not_applied(VertxTestContext context) {
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
         SwitchExp.<String, String>eval(VIO.succeed("a")).match("a", i -> A, "c", i -> B,
                                                                it -> VIO.fail(new IllegalArgumentException("not ma"))
                                                               ).retryEach(limitRetries(2)).fallbackTo(e -> e instanceof RuntimeException ? VIO.succeed("hi!") : VIO.succeed("bye!")).onSuccess(str -> context.verify(() -> {
@@ -293,8 +300,8 @@ public class TestCase {
 
     @Test
     public void test_retry_with_delay(VertxTestContext context) {
-        VIO<String> A = a.get();
-        VIO<String> B = b.get();
+        VIO<String> A = a.build();
+        VIO<String> B = b.build();
         long start = System.nanoTime();
 
         SwitchExp.<String, String>eval(VIO.succeed("a"))

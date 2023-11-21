@@ -179,23 +179,7 @@ class EventPublisher {
         };
     }
 
-    public Consumer<Vertx> publishException(final String event,
-                                            final Throwable exception
-                                           ) {
-        return vertx -> {
-            if (enabled) vertx
-                    .eventBus()
-                    .publish(VertxRef.EVENTS_ADDRESS,
-                             eventLens.set.apply(event)
-                                          .andThen(Event.exceptionOpt.set.apply(exception.getClass().getCanonicalName()))
-                                          .andThen(exceptionMessageOpt.set.apply(exception.getMessage()))
-                                          .andThen(exceptionStackOpt.set.apply(Arrays.toString(exception.getStackTrace())))
-                                          .andThen(Event.instantLens.set.apply(Instant.now()))
-                                          .andThen(Event.threadNameLens.set.apply(Thread.currentThread().getName()))
-                                          .apply(JsObj.empty())
-                            );
-        };
-    }
+
 
     public Consumer<Vertx> publishMessageReceived(final String from,
                                                   final MultiMap headers
@@ -368,20 +352,6 @@ class EventPublisher {
         };
     }
 
-    public Consumer<Vertx> publishShellStarted() {
-        return vertx -> {
-            if (enabled) vertx
-                    .eventBus()
-                    .publish(VertxRef.EVENTS_ADDRESS,
-                             eventLens.set.apply(STARTED_SHELL_SERVICE)
-                                          .andThen(instantLens.set.apply(Instant.now()))
-                                          .andThen(threadNameLens.set.apply(Thread.currentThread()
-                                                                                  .getName())
-                                                  )
-                                          .apply(JsObj.empty())
-                            );
-        };
-    }
 
     public Consumer<Vertx> publishVerticleDeployed(final Class<?> verticle,
                                                    final String id

@@ -16,8 +16,8 @@ import static vertx.effect.Failures.EXCEPTION_DEPLOYING_MODULE_CODE;
 
 
 /**
- * A module is a verticle that deploys other verticles and exposes a set of lambdas to communicate with them.
- * The most important methods are:
+ * A module is a verticle that deploys other verticles and exposes a set of lambdas to communicate with them. The most
+ * important methods are:
  * <ul>
  * <li> {@link VertxModule#deploy()}, where the verticles must be deployed using the
  * deploy methods, like {@link #deploy(String, Lambda, DeploymentOptions)}, {@link #deploy(String, Lambdac, DeploymentOptions)}</li>
@@ -30,6 +30,10 @@ public abstract class VertxModule extends AbstractVerticle {
 
     private static final DeploymentOptions DEFAULT_DEPLOYMENT_OPTIONS = new DeploymentOptions();
     protected final DeploymentOptions deploymentOptions;
+    /**
+     * Factory to deploy or spawn verticles
+     */
+    protected VertxRef vertxRef;
     private ListExp<String> idValSeq;
     private MapExp<VerticleRef<?, ?>> refValMap;
     private Map<String, VerticleRef<?, ?>> refMap;
@@ -41,7 +45,6 @@ public abstract class VertxModule extends AbstractVerticle {
         this.deploymentOptions = requireNonNull(deploymentOptions);
         idValSeq = ListExp.seq();
     }
-
 
     /**
      * Creates an instance of this module
@@ -65,26 +68,21 @@ public abstract class VertxModule extends AbstractVerticle {
     }
 
     /**
-     * override this method to initialize the instance fields of this class that represent the functions exposed by
-     * this module. You can establish a dialogue with the Verticle using
-     * the method {@link VerticleRef#ask()}, which returns a function, or just send it messages without waiting for the
-     * response with the method {@link VerticleRef#tell()}, which returns a consumer. You may be interested in deploying
-     * Verticles on the fly to get a greater level of parallelism with the function {@link VertxRef#spawn(String, Lambda)}.
+     * override this method to initialize the instance fields of this class that represent the functions exposed by this
+     * module. You can establish a dialogue with the Verticle using the method {@link VerticleRef#ask()}, which returns
+     * a function, or just send it messages without waiting for the response with the method {@link VerticleRef#tell()},
+     * which returns a consumer. You may be interested in deploying Verticles on the fly to get a greater level of
+     * parallelism with the function {@link VertxRef#spawn(String, Lambda)}.
      */
     protected abstract void initialize();
 
     /**
-     * override this method and deploy the Verticles you want to be exposed by your module.
-     * using the functions {@link VertxModule#deploy(String, Lambda)} (String, Function)} or
-     * {@link VertxModule#deployConsumer(String, Consumer)}.
-     * You can also deployed regular Verticles with the method {@link VertxModule#deployVerticle(AbstractVerticle)}
+     * override this method and deploy the Verticles you want to be exposed by your module. using the functions
+     * {@link VertxModule#deploy(String, Lambda)} (String, Function)} or
+     * {@link VertxModule#deployConsumer(String, Consumer)}. You can also deployed regular Verticles with the method
+     * {@link VertxModule#deployVerticle(AbstractVerticle)}
      */
     protected abstract void deploy();
-
-    /**
-     * Factory to deploy or spawn verticles
-     */
-    protected VertxRef vertxRef;
 
     @Override
     @SuppressWarnings("ReturnValueIgnored")

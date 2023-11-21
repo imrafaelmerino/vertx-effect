@@ -6,7 +6,6 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 
-
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,10 +40,6 @@ public class VertxRef {
     private final Vertx vertx;
     private final DeploymentOptions deploymentOptions;
 
-    private static DeliveryOptions createDeliveryOpt(MultiMap multiMap) {
-        return new DeliveryOptions().setHeaders(multiMap);
-    }
-
     /**
      * @param vertx the vertx instance
      */
@@ -56,8 +51,8 @@ public class VertxRef {
 
     /**
      * @param vertx             the vertx instance
-     * @param deploymentOptions the default deployment options that will be used for deploying and spawning
-     *                          verticles if one is not provided
+     * @param deploymentOptions the default deployment options that will be used for deploying and spawning verticles if
+     *                          one is not provided
      */
     public VertxRef(final Vertx vertx,
                     final DeploymentOptions deploymentOptions
@@ -66,10 +61,20 @@ public class VertxRef {
         this.deploymentOptions = requireNonNull(deploymentOptions);
     }
 
+    private static DeliveryOptions createDeliveryOpt(MultiMap multiMap) {
+        return new DeliveryOptions().setHeaders(multiMap);
+    }
+
+    private static String generateProcessAddress(final String address) {
+        return String.format("spawned.%s.%s",
+                             address,
+                             processSeq.getAndIncrement()
+                            );
+    }
 
     /**
-     * Returns a val that, when executed, deploys a verticle on the specified address. The given consumer processes
-     * the messages sent to the verticle. Use this method if the verticle needs some data from the {@link Message} different
+     * Returns a val that, when executed, deploys a verticle on the specified address. The given consumer processes the
+     * messages sent to the verticle. Use this method if the verticle needs some data from the {@link Message} different
      * than the body, like the message headers. Otherwise, use the {@link #deploy(String, Lambda)} method
      *
      * @param address  the address of the verticle
@@ -91,9 +96,10 @@ public class VertxRef {
     }
 
     /**
-     * Returns a val that, when executed, deploys a verticle on the specified address. The given consumer processes
-     * the messages sent to the verticle. Use this method if the verticle needs some data from the {@link Message} different
-     * than the body, like the message headers. Otherwise, use the {@link #deploy(String, Lambda, DeploymentOptions)} method
+     * Returns a val that, when executed, deploys a verticle on the specified address. The given consumer processes the
+     * messages sent to the verticle. Use this method if the verticle needs some data from the {@link Message} different
+     * than the body, like the message headers. Otherwise, use the {@link #deploy(String, Lambda, DeploymentOptions)}
+     * method
      *
      * @param address  the address of the verticle
      * @param consumer the consumer that will process the messages sent to the verticle
@@ -144,10 +150,9 @@ public class VertxRef {
                          );
     }
 
-
     /**
-     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes
-     * the messages sent to the verticle.
+     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes the
+     * messages sent to the verticle.
      *
      * @param address the address of the verticle
      * @param lambda  the lambda that takes a message of type I and produces an output of type O
@@ -167,8 +172,8 @@ public class VertxRef {
     }
 
     /**
-     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes
-     * the messages sent to the verticle.
+     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes the
+     * messages sent to the verticle.
      *
      * @param address the address of the verticle
      * @param lambda  the lambda that takes a message of type I and produces an output of type O
@@ -220,11 +225,12 @@ public class VertxRef {
     }
 
     /**
-     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes
-     * the messages sent to the verticle.
+     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes the
+     * messages sent to the verticle.
      *
      * @param address the address of the verticle
-     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an output of type O
+     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an
+     *                output of type O
      * @param <I>     the type of the message sent to the verticle
      * @param <O>     the type of the reply
      * @return an VerticleRef wrapped in a Val
@@ -241,11 +247,12 @@ public class VertxRef {
     }
 
     /**
-     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes
-     * the messages sent to the verticle.
+     * Returns a val that, when executed, deploys a verticle on the specified address. The given lambda processes the
+     * messages sent to the verticle.
      *
      * @param address the address of the verticle
-     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an output of type O
+     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an
+     *                output of type O
      * @param options options for configuring the verticle deployment
      * @param <I>     the type of the message sent to the verticle
      * @param <O>     the type of the reply
@@ -295,9 +302,10 @@ public class VertxRef {
     }
 
     /**
-     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and finally
-     * undeploys the verticle. The address is generated according to the following formula: spawned.prefix.n, where
-     * prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1, spawned.get_client.2 etc
+     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and
+     * finally undeploys the verticle. The address is generated according to the following formula: spawned.prefix.n,
+     * where prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1,
+     * spawned.get_client.2 etc
      *
      * @param lambda        the function that takes a message of type I and and produces an output of type O
      * @param <I>           the type of the message sent to the verticle
@@ -314,13 +322,14 @@ public class VertxRef {
                     );
     }
 
-
     /**
-     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and finally
-     * undeploys the verticle.The address is generated according to the following formula: spawned.prefix.n, where
-     * prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1, spawned.get_client.2 etc
+     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and
+     * finally undeploys the verticle.The address is generated according to the following formula: spawned.prefix.n,
+     * where prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1,
+     * spawned.get_client.2 etc
      *
-     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an output of type O
+     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an
+     *                output of type O
      * @param <I>     the type of the message sent to the verticle
      * @param <O>     the type of the reply
      * @param address the prefix of the auto generated address
@@ -335,13 +344,14 @@ public class VertxRef {
                     );
     }
 
-
     /**
-     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and finally
-     * undeploys the verticle.The address is generated according to the following formula: spawned.prefix.n, where
-     * prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1, spawned.get_client.2 etc
+     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and
+     * finally undeploys the verticle.The address is generated according to the following formula: spawned.prefix.n,
+     * where prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1,
+     * spawned.get_client.2 etc
      *
-     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an output of type O
+     * @param lambda  the lambda that takes a message of type I and the context of the computation and produces an
+     *                output of type O
      * @param <I>     the type of the message sent to the verticle
      * @param <O>     the type of the reply
      * @param address the prefix of the auto generated address
@@ -394,9 +404,10 @@ public class VertxRef {
     }
 
     /**
-     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and finally
-     * undeploys the verticle.The address is generated according to the following formula: spawned.prefix.n, where
-     * prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1, spawned.get_client.2 etc
+     * Returns a lambda that given an input, it deploys a verticle, does the computation, replies with the response and
+     * finally undeploys the verticle.The address is generated according to the following formula: spawned.prefix.n,
+     * where prefix is the specified one, and n an internal counter. Examples: spawned.get_client.1,
+     * spawned.get_client.2 etc
      *
      * @param lambda  the function that takes a message of type I and produces an output of type O
      * @param <I>     the type of the message sent to the verticle
@@ -447,7 +458,6 @@ public class VertxRef {
 
     }
 
-
     /**
      * returns a val that, when executes, deploys the given verticle and returns the deployment id
      *
@@ -493,7 +503,6 @@ public class VertxRef {
                              );
     }
 
-
     /**
      * returns a consumer that takes messages of type O and published them (broadcasting) to the given address
      *
@@ -525,9 +534,9 @@ public class VertxRef {
     }
 
     /**
-     * register the given consumer to listen to the messages published to the given address. If the consumer
-     * can't keep up with the publishers, messages will be buffered and eventually discarded. The size of
-     * the buffer can be configured with the returned {@link MessageConsumer}
+     * register the given consumer to listen to the messages published to the given address. If the consumer can't keep
+     * up with the publishers, messages will be buffered and eventually discarded. The size of the buffer can be
+     * configured with the returned {@link MessageConsumer}
      *
      * @param address  the address from which the messages are consumed
      * @param consumer the consumer that processes the messages
@@ -582,7 +591,8 @@ public class VertxRef {
     }
 
     /**
-     * returns a Delay, which a lazy value that when executed, will wait asynchronously for the specified amount of time
+     * returns a Delay, which a lazy value that when executed, will wait asynchronously for the specified amount of
+     * time
      *
      * @param duration the amount of time
      * @return a Delay
@@ -602,14 +612,6 @@ public class VertxRef {
                              return promise.future();
                          })
         );
-    }
-
-
-    private static String generateProcessAddress(final String address) {
-        return String.format("spawned.%s.%s",
-                             address,
-                             processSeq.getAndIncrement()
-                            );
     }
 
     @SuppressWarnings("ReturnValueIgnored")

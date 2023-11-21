@@ -8,7 +8,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class JsArrayExp extends Exp<JsArray> {
+public abstract sealed class JsArrayExp extends Exp<JsArray> permits JsArrayExpPar, JsArrayExpSeq {
 
     List<VIO<? extends JsValue>> seq = new ArrayList<>();
 

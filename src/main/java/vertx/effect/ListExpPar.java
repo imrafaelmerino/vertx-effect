@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-class ListExpPar<O> extends ListExp<O> {
+final class ListExpPar<O> extends ListExp<O> {
 
     ListExpPar(List<VIO<? extends O>> seq) {
         super(seq);
@@ -47,9 +47,9 @@ class ListExpPar<O> extends ListExp<O> {
     @Override
     public Future<List<O>> get() {
         return Future.all(seq.stream()
-                                      .map(Supplier::get)
-                                      .collect(Collectors.toList()))
-                              .map(CompositeFuture::list);
+                             .map(Supplier::get)
+                             .collect(Collectors.toList()))
+                     .map(CompositeFuture::list);
 
     }
 
