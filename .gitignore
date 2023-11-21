@@ -5,3 +5,5 @@ vertx-effect.iml
 ../.idea/
 .DS_Store
 .idea/**
+deploy.sh
+settings.xml
