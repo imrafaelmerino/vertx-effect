@@ -5,17 +5,18 @@ import io.vertx.core.Future;
 import jsonvalues.JsObj;
 import jsonvalues.JsValue;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * Represents a supplier of a vertx future which result is a json object. It has the same
- * recursive structure as a json object. Each key has a future associated that it's
- * executed asynchronously. When all the futures are completed, all the results are combined into
- * a json object.
+ * Represents a supplier of a vertx future which result is a json object. It has the same recursive structure as a json
+ * object. Each key has a future associated that it's executed asynchronously. When all the futures are completed, all
+ * the results are combined into a json object.
  */
 final class JsObjExpSeq extends JsObjExp {
 

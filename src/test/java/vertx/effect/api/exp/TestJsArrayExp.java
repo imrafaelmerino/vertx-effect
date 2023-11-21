@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -10,16 +11,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.JsArrayExp;
-import vertx.effect.RetryPolicies;
 import vertx.effect.VIO;
 import vertx.effect.VertxRef;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static vertx.effect.RetryPolicies.constantDelay;
 import static vertx.effect.RetryPolicies.limitRetries;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestJsArrayExp {
@@ -71,10 +73,20 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<JsStr> a = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("a"));
-        VIOStub<JsStr> b = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("b"));
+        StubBuilder<String> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
 
-        JsArrayExp.par(a.get(), b.get()).retryEach(limitRetries(ATTEMPTS).append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))).get().onComplete(r -> context.verify(() -> {
+        StubBuilder<String> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("b")
+                                         )
+                                 );
+        JsArrayExp.par(a.build().map(JsStr::of), b.build().map(JsStr::of)).retryEach(limitRetries(ATTEMPTS).append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))).get().onComplete(r -> context.verify(() -> {
             Assertions.assertEquals(JsArray.of("a", "b"), r.result());
             Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
             context.completeNow();
@@ -88,10 +100,20 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<JsStr> a = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("a"));
-        VIOStub<JsStr> b = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("b"));
+        StubBuilder<JsStr> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("a"))
+                                         )
+                                 );
 
-        JsArrayExp.seq(a.get(), b.get()).retryEach(e -> e instanceof RuntimeException, limitRetries(ATTEMPTS).append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))).get().onComplete(r -> context.verify(() -> {
+        StubBuilder<JsStr> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("b"))
+                                         )
+                                 );
+        JsArrayExp.seq(a.build(), b.build()).retryEach(e -> e instanceof RuntimeException, limitRetries(ATTEMPTS).append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))).get().onComplete(r -> context.verify(() -> {
             Assertions.assertEquals(JsArray.of("a", "b"), r.result());
             Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
             context.completeNow();
@@ -105,10 +127,22 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<JsStr> a = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("a"));
-        VIOStub<JsStr> b = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("b"));
+        StubBuilder<JsStr> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ?
+                                                          VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("a"))
+                                         )
+                                 );
 
-        JsArrayExp.seq(a.get(), b.get()).retryEach(limitRetries(ATTEMPTS).append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))).get().onComplete(r -> context.verify(() -> {
+        StubBuilder<JsStr> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ?
+                                                          VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("b"))
+                                         )
+                                 );
+        JsArrayExp.seq(a.build(), b.build()).retryEach(limitRetries(ATTEMPTS).append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))).get().onComplete(r -> context.verify(() -> {
             Assertions.assertEquals(JsArray.of("a", "b"), r.result());
             Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS);
             context.completeNow();
@@ -121,10 +155,20 @@ public class TestJsArrayExp {
     public void test_array_exp_retry_if_success(VertxTestContext context) {
         int ATTEMPTS = 3;
 
-        VIOStub<JsStr> a = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("a"));
-        VIOStub<JsStr> b = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("b"));
+        StubBuilder<JsStr> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("a"))
+                                         )
+                                 );
 
-        JsArrayExp.seq(a.get(), b.get()).retryEach(e -> e instanceof RuntimeException, limitRetries(ATTEMPTS)).onComplete(r -> context.verify(() -> {
+        StubBuilder<JsStr> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("b"))
+                                         )
+                                 );
+        JsArrayExp.seq(a.build(), b.build()).retryEach(e -> e instanceof RuntimeException, limitRetries(ATTEMPTS)).onComplete(r -> context.verify(() -> {
             Assertions.assertEquals(JsArray.of("a", "b"), r.result());
             context.completeNow();
 
@@ -137,10 +181,20 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<JsStr> a = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("a"));
-        VIOStub<JsStr> b = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("b"));
+        StubBuilder<JsStr> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("a"))
+                                         )
+                                 );
 
-        JsArrayExp.par(a.get(), b.get()).retryEach(limitRetries(ATTEMPTS - 1).append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))).onComplete(r -> context.verify(() -> {
+        StubBuilder<JsStr> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3 ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("b"))
+                                         )
+                                 );
+        JsArrayExp.par(a.build(), b.build()).retryEach(limitRetries(ATTEMPTS - 1).append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))).onComplete(r -> context.verify(() -> {
             Assertions.assertTrue(r.cause() instanceof RuntimeException);
             Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS - 1);
             context.completeNow();
@@ -153,10 +207,22 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<JsStr> a = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("a"));
-        VIOStub<JsStr> b = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("b"));
+        StubBuilder<JsStr> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("a"))
+                                         )
+                                 );
 
-        JsArrayExp.par(a.get(), b.get()).retry(limitRetries(2).append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))).onComplete(r -> context.verify(() -> {
+        StubBuilder<JsStr> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("b"))
+                                         )
+                                 );
+        JsArrayExp.par(a.build(), b.build())
+                  .retry(limitRetries(2).append(constantDelay(vertxRef.delay(Duration.ofMillis(100)))))
+                  .onComplete(r -> context.verify(() -> {
             Assertions.assertTrue(r.cause() instanceof RuntimeException);
             Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= 2);
             context.completeNow();
@@ -169,15 +235,29 @@ public class TestJsArrayExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<JsStr> a = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("a"));
-        VIOStub<JsStr> b = VIOStub.failThenSucceed(counter -> counter <= 3 ? new RuntimeException("counter: " + counter) : null, JsStr.of("b"));
+        StubBuilder<JsStr> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("a"))
+                                         )
+                                 );
 
-        JsArrayExp.par(a.get(), b.get()).retryEach(e -> e instanceof RuntimeException, limitRetries(ATTEMPTS - 1).append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))).get().onComplete(r -> context.verify(() -> {
-            Assertions.assertTrue(r.cause() instanceof RuntimeException);
-            Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS - 1);
-            context.completeNow();
+        StubBuilder<JsStr> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(JsStr.of("b"))
+                                         )
+                                 );
+        JsArrayExp.par(a.build(), b.build())
+                  .retryEach(e -> e instanceof RuntimeException,
+                             limitRetries(ATTEMPTS - 1).append(constantDelay(vertxRef.delay(Duration.ofMillis(100)))))
+                  .get()
+                  .onComplete(r -> context.verify(() -> {
+                      Assertions.assertTrue(r.cause() instanceof RuntimeException);
+                      Assertions.assertTrue(NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS - 1);
+                      context.completeNow();
 
-        }));
+                  }));
 
     }
 

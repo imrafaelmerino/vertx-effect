@@ -23,14 +23,19 @@ public class TestMyModule {
         PairExp.seq(ref.deployVerticle(new RegisterJsValuesCodecs()),
                     ref.deployVerticle(new MyModule())
                    )
-               .onSuccess(ids -> context.completeNow())
+               .onComplete(r -> {
+                               if(r.succeeded()) context.completeNow();
+                               else context.failNow(r.cause());
+                           })
+
+
                .get();
     }
 
     @Test
     public void empty_json_is_sent_and_failure_is_received(VertxTestContext context) {
 
-        MyModule.validateAndMap.apply(JsObj.EMPTY)
+        MyModule.validateAndMap.apply(JsObj.empty())
                                .onComplete(result ->
                                                    context.verify(() -> {
                                                        Assertions.assertTrue(result.failed());

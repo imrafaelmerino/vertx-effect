@@ -14,9 +14,9 @@ public interface HttpHeadersRespStub extends IntFunction<Function<Buffer, Functi
     HttpHeadersRespStub EMPTY = n -> body -> req -> HttpHeaders.headers();
 
     HttpHeadersRespStub JSON = n -> body -> req -> HttpHeaders.headers()
-                                                          .add("Content-Type",
-                                                               "application/json"
-                                                              );
+                                                              .add("Content-Type",
+                                                                   "application/json"
+                                                                  );
 
 
 }

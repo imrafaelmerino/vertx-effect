@@ -12,9 +12,6 @@ import java.util.function.Function;
 
 class Functions {
 
-    private Functions() {
-    }
-
     static BiFunction<Map.Entry<String, String>, JsObj, JsObj> addHeader =
             (header, result) -> {
                 if (!result.containsKey(header.getKey()))
@@ -29,8 +26,6 @@ class Functions {
                                      );
                 }
             };
-
-
     public static final Function<MultiMap, JsObj> headers2JsObj =
             headers -> {
                 JsObj result = JsObj.empty();
@@ -42,6 +37,10 @@ class Functions {
                 }
                 return result;
             };
+
+
+    private Functions() {
+    }
 
     public static String getErrorMessage(final Throwable e) {
         return e.getStackTrace().length == 0 ?

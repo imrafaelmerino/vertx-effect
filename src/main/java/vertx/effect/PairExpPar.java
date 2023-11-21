@@ -1,7 +1,6 @@
 package vertx.effect;
 
 import fun.tuple.Pair;
-
 import io.vertx.core.Future;
 
 import java.util.Objects;
@@ -46,12 +45,12 @@ final class PairExpPar<A, B> extends PairExp<A, B> {
     @Override
     public Future<Pair<A, B>> get() {
         return Future.all(_1.get(),
-                                   _2.get()
-                                  )
-                              .map(it -> Pair.of(it.resultAt(0),
-                                                 it.resultAt(1)
-                                                )
-                                  );
+                          _2.get()
+                         )
+                     .map(it -> Pair.of(it.resultAt(0),
+                                        it.resultAt(1)
+                                       )
+                         );
     }
 
 

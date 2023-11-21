@@ -1,7 +1,6 @@
 package vertx.effect;
 
 import fun.tuple.Triple;
-
 import io.vertx.core.Future;
 
 import java.util.Objects;
@@ -51,14 +50,14 @@ public final class TripleExpPar<A, B, C> extends TripleExp<A, B, C> {
     @Override
     public Future<Triple<A, B, C>> get() {
         return Future.all(_1.get(),
-                                   _2.get(),
-                                   _3.get()
-                                  )
-                              .map(it -> Triple.of(
-                                      it.resultAt(0),
-                                      it.resultAt(1),
-                                      it.resultAt(2)
-                                                  ));
+                          _2.get(),
+                          _3.get()
+                         )
+                     .map(it -> Triple.of(
+                             it.resultAt(0),
+                             it.resultAt(1),
+                             it.resultAt(2)
+                                         ));
     }
 
     @Override

@@ -1,6 +1,8 @@
 package vertx.effect.api.patterns;
 
 import io.vertx.core.eventbus.Message;
+import jsonvalues.JsInt;
+import jsonvalues.JsObj;
 import vertx.effect.Lambda;
 import vertx.effect.VIO;
 import vertx.effect.VertxModule;
@@ -52,5 +54,9 @@ public class ExampleModule extends VertxModule {
                            );
 
 
+    }
+
+    public static void main(String[] args) {
+        JsObj.of("a", JsInt.of(1)).stream().forEach(p -> System.out.println(p.value()));
     }
 }

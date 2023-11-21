@@ -5,6 +5,7 @@ import jsonvalues.JsArray;
 import jsonvalues.JsValue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -12,10 +13,9 @@ import java.util.stream.Collectors;
 
 
 /**
- * Represents a supplier of a completable future which result is a json array. It has the same
- * recursive structure as a json array. Each index of the array is a completable future that it's
- * executed asynchronously. When all the futures are completed, all the results are combined into
- * a json array.
+ * Represents a supplier of a completable future which result is a json array. It has the same recursive structure as a
+ * json array. Each index of the array is a completable future that it's executed asynchronously. When all the futures
+ * are completed, all the results are combined into a json array.
  */
 
 final class JsArrayExpSeq extends JsArrayExp {
@@ -29,13 +29,12 @@ final class JsArrayExpSeq extends JsArrayExp {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     JsArrayExpSeq(final VIO<? extends JsValue> val,
                   final VIO<? extends JsValue>... others
                  ) {
         seq.add(val);
-        for (VIO<? extends JsValue> other : others) {
-            seq.add(other);
-        }
+        Collections.addAll(seq, others);
     }
 
 
@@ -90,7 +89,7 @@ final class JsArrayExpSeq extends JsArrayExp {
 
     @Override
     public JsArrayExp tail() {
-        return new JsArrayExpSeq(new ArrayList<>(seq.subList(1,seq.size())));
+        return new JsArrayExpSeq(new ArrayList<>(seq.subList(1, seq.size())));
     }
 
 }

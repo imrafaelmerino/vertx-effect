@@ -1,7 +1,6 @@
 package vertx.effect;
 
 
-
 import io.vertx.core.Future;
 
 import java.util.List;
@@ -34,9 +33,9 @@ final class CondExpPar<E> extends CondExp<E> {
     @Override
     public Future<E> get() {
         return Future.all(tests.stream()
-                                        .map(Supplier::get)
-                                        .collect(Collectors.toList()))
-                              .flatMap(result -> getFirstThatIsTrueOrDefault(result.list()));
+                               .map(Supplier::get)
+                               .collect(Collectors.toList()))
+                     .flatMap(result -> getFirstThatIsTrueOrDefault(result.list()));
     }
 
     private Future<E> getFirstThatIsTrueOrDefault(List<Boolean> predicatesResults) {
@@ -55,10 +54,7 @@ final class CondExpPar<E> extends CondExp<E> {
         if (predicate == null)
             throw new IllegalArgumentException("predicate is null");
         return new CondExpPar<>(tests.stream().map(it -> it.retry(predicate, policy)).collect(Collectors.toList()),
-                                consequences.stream().map(it -> {
-                                                              Supplier<VIO<E>> s = () -> it.get().retry(predicate, policy);
-                                                              return s;
-                                                          }
+                                consequences.stream().map(it -> (Supplier<VIO<E>>) () -> it.get().retry(predicate, policy)
                                                          ).collect(Collectors.toList()),
                                 otherwise
         );

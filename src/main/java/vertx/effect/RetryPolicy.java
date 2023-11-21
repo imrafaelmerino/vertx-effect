@@ -8,24 +8,21 @@ import java.util.function.Function;
 
 
 /**
- * A RetryPolicy is a function that takes an RetryStatus and possibly returns a delay.
- * Iteration numbers start at zero and increase by one on each retry. An Optional.empty()
- * return value from the function implies we have reached the retry limit.
- * You can collapse multiple strategies into one using append. There are a number of policies available in
- * {@link RetryPolicies}. There are also a few combinators to transform policies, including:
- * {@link #capDelay(Delay)}, {@link #limitRetriesByDelay(Duration)} and {@link #limitRetriesByCumulativeDelay(Duration)}.
- * Always S¡simulate any policy you define with {@link #simulate(int)}
+ * A RetryPolicy is a function that takes an RetryStatus and possibly returns a delay. Iteration numbers start at zero
+ * and increase by one on each retry. An Optional.empty() return value from the function implies we have reached the
+ * retry limit. You can collapse multiple strategies into one using append. There are a number of policies available in
+ * {@link RetryPolicies}. There are also a few combinators to transform policies, including: {@link #capDelay(Delay)},
+ * {@link #limitRetriesByDelay(Duration)} and {@link #limitRetriesByCumulativeDelay(Duration)}. Always S¡simulate any
+ * policy you define with {@link #simulate(int)}
  */
 public interface RetryPolicy extends Function<RetryStatus, Optional<Delay>> {
 
     /**
-     * The semantics of this combination is as follows:
-     * If either policy (this or other) returns Optional.empty(), the combined policy returns Optional.empty().
-     * This can be used to inhibit after a number of retries, for example.
-     * If both policies return a delay, the larger delay will be used. This is quite natural
-     * when combining multiple policies to achieve a certain effect. For an example of composing policies like this,
-     * we can use join to create a policy that retries up to 5 times, starting with a 10 ms delay and increasing
-     * exponentially.
+     * The semantics of this combination is as follows: If either policy (this or other) returns Optional.empty(), the
+     * combined policy returns Optional.empty(). This can be used to inhibit after a number of retries, for example. If
+     * both policies return a delay, the larger delay will be used. This is quite natural when combining multiple
+     * policies to achieve a certain effect. For an example of composing policies like this, we can use join to create a
+     * policy that retries up to 5 times, starting with a 10 ms delay and increasing exponentially.
      *
      * @param other the other retry policy to be appended
      * @return a new retry policy

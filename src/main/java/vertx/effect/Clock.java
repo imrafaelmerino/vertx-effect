@@ -15,25 +15,23 @@ public interface Clock extends Supplier<Long> {
 
 
     /**
-     * Creates a monotonic clock, appropriate for time measurements.
-     * When invoked, it returns the current value of the running Java
-     * Virtual Machine's high-resolution time source, in nanoseconds
-     * It uses the {@link System#nanoTime } method.
+     * Creates a monotonic clock, appropriate for time measurements. When invoked, it returns the current value of the
+     * running Java Virtual Machine's high-resolution time source, in nanoseconds It uses the {@link System#nanoTime }
+     * method.
      *
      * @see System#nanoTime
      */
     Clock monotonic = System::nanoTime;
 
     /**
-     * Creates a realtime or wall-clock watch. It produces the current time,
-     * as a Unix timestamp in milliseconds (number of time units since the Unix epoch).
-     * This clock is not appropriate for measuring duration of intervals
-     * ( use {@link Clock#monotonic} instead ).
-     * It uses the {@link System#currentTimeMillis } method.
+     * Creates a realtime or wall-clock watch. It produces the current time, as a Unix timestamp in milliseconds (number
+     * of time units since the Unix epoch). This clock is not appropriate for measuring duration of intervals ( use
+     * {@link Clock#monotonic} instead ). It uses the {@link System#currentTimeMillis } method.
      *
      * @see System#currentTimeMillis
      */
     Clock realTime = System::currentTimeMillis;
+    Function<Supplier<Long>, Clock> custom = s -> s::get;
 
     /**
      * returns lambda that produces monotonic clock measurement in the specified unit
@@ -61,8 +59,6 @@ public interface Clock extends Supplier<Long> {
             return unit.convert(Duration.ofMillis(time));
         };
     }
-
-    Function<Supplier<Long>, Clock> custom = s -> s::get;
 
 
 }

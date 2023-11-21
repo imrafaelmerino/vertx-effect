@@ -6,7 +6,7 @@
     <groupId>com.github.imrafaelmerino</groupId>
     <artifactId>vertx-effect</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.1</version>
+    <version>4.0.0</version>
     <name>vertx-effect</name>
     <description>When actors meet Functional Programming</description>
     <url>https://github.com/imrafaelmerino/vertx-effect</url>
@@ -37,12 +37,11 @@
         <MAVEN-SOURCE-PLUGIN.VERSION>3.0.1</MAVEN-SOURCE-PLUGIN.VERSION>
         <MAVEN-SUREFIRE-PLUGIN.VERSION>2.22.2</MAVEN-SUREFIRE-PLUGIN.VERSION>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <MAVEN-COMPILER-PLUGIN.SOURCE>11</MAVEN-COMPILER-PLUGIN.SOURCE>
-        <MAVEN-COMPILER-PLUGIN.TARGET>11</MAVEN-COMPILER-PLUGIN.TARGET>
-        <VERTX-VERSION>4.4.4</VERTX-VERSION>
-        <JSON-VALUES.VERSION>11.9.0</JSON-VALUES.VERSION>
-        <JAVA-FUN.VERSION>0.9.4</JAVA-FUN.VERSION>
-        <VERTX.JSON-VALUES.VERSION>0.7</VERTX.JSON-VALUES.VERSION>
+        <MAVEN-COMPILER-PLUGIN.SOURCE>17</MAVEN-COMPILER-PLUGIN.SOURCE>
+        <MAVEN-COMPILER-PLUGIN.TARGET>17</MAVEN-COMPILER-PLUGIN.TARGET>
+        <VERTX-VERSION>4.5.0</VERTX-VERSION>
+        <JAVA-FUN.VERSION>1.3.2</JAVA-FUN.VERSION>
+        <VERTX.JSON-VALUES.VERSION>1.0.0</VERTX.JSON-VALUES.VERSION>
         <MAVEN-JAR-PLUGIN.VERSION>3.2.0</MAVEN-JAR-PLUGIN.VERSION>
         <PROJECT.BUILD.SOURCE_ENCODING>UTF-8</PROJECT.BUILD.SOURCE_ENCODING>
         <MAVEN-COMPILER-PLUGIN.VERSION>3.10.1</MAVEN-COMPILER-PLUGIN.VERSION>
@@ -55,22 +54,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>${MAVEN-JAR-PLUGIN.VERSION}</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Automatic-Module-Name>vertx.effect</Automatic-Module-Name>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <source>${MAVEN-COMPILER-PLUGIN.SOURCE}</source>
+                    <target>${MAVEN-COMPILER-PLUGIN.TARGET}</target>
                     <showWarnings>true</showWarnings>
-                    <encoding>UTF-8</encoding>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
                         <arg>-Xplugin:ErrorProne</arg>
@@ -97,7 +90,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${MAVEN-JAVADOC-PLUGIN.VERSION}</version>
                 <configuration>
-                    <source>11</source>
+                    <source>${MAVEN-COMPILER-PLUGIN.SOURCE}</source>
                 </configuration>
                 <executions>
                     <execution>
@@ -121,11 +114,6 @@
             <version>${JAVA-FUN.VERSION}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.imrafaelmerino</groupId>
-            <artifactId>json-values</artifactId>
-            <version>${JSON-VALUES.VERSION}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.github.imrafaelmerino</groupId>

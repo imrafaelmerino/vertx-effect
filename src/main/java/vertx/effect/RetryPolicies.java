@@ -17,58 +17,6 @@ public class RetryPolicies {
     private RetryPolicies() {
     }
 
-
-    static class LimitRetries implements RetryPolicy {
-        public final int maxAttempts;
-
-        public LimitRetries(final int maxAttempts) {
-            this.maxAttempts = maxAttempts;
-        }
-
-        @Override
-        public Optional<Delay> apply(final RetryStatus retryStatus) {
-            boolean retry = retryStatus.counter < maxAttempts;
-            if (retry) return Optional.of(Delay.ZERO);
-            return Optional.empty();
-        }
-    }
-
-    static class IncrementalDelay implements RetryPolicy {
-        private final Delay base;
-
-        public IncrementalDelay(final Delay base) {
-            this.base = base;
-        }
-
-        @Override
-        public Optional<Delay> apply(final RetryStatus retryStatus) {
-            return Optional.of(base.multipliedBy(retryStatus.counter + 1));
-        }
-    }
-
-    static class ExponentialBackoffDelay implements RetryPolicy {
-        private final Function<Duration, Delay> fn;
-        private final Delay base;
-
-        public ExponentialBackoffDelay(
-                final Delay base,
-                final Function<Duration, Delay> fn
-                                      ) {
-            this.base = base;
-            this.fn = fn;
-        }
-
-        @Override
-        public Optional<Delay> apply(final RetryStatus rs) {
-            int multiplicand = (int) Math.pow(2,
-                                              rs.counter
-                                             );
-            return Optional.of(rs.cumulativeDelay == 0 ?
-                                       base : fn.apply(base.duration.multipliedBy(multiplicand))
-                              );
-        }
-    }
-
     /**
      * returns a policy that retries up to N times, with no delay between retries
      *
@@ -106,7 +54,8 @@ public class RetryPolicies {
      * returns a policy that doubles the delay after each retry: delay = 2 * base  attempt
      *
      * @param base the base amount of time
-     * @param fn   a function that produces {@link Delay} from duration of times. You only need the method {@link VertxRef#delay(Duration)} (Duration)} to define one.
+     * @param fn   a function that produces {@link Delay} from duration of times. You only need the method
+     *             {@link VertxRef#delay(Duration)} (Duration)} to define one.
      * @return a policy that doubles the delay after each retry
      * @see VertxRef#delay(Duration) (Duration) to create delays
      */
@@ -118,14 +67,14 @@ public class RetryPolicies {
         );
     }
 
-
     /**
-     * returns a policy that adds some jitter to spread out the spikes to an approximately constant rate
-     * delay = random_between(0,min(cap,base*2*attempt))
+     * returns a policy that adds some jitter to spread out the spikes to an approximately constant rate delay =
+     * random_between(0,min(cap,base*2*attempt))
      *
      * @param base the base amount of time
      * @param cap  the max upper bound
-     * @param fn   a function that produces {@link Delay} from duration of times. You only need the method {@link VertxRef#delay(Duration)} to define one.
+     * @param fn   a function that produces {@link Delay} from duration of times. You only need the method
+     *             {@link VertxRef#delay(Duration)} to define one.
      * @return a policy that adds some jitter to the backoff
      * @see VertxRef#delay(Duration) to create delays
      */
@@ -148,10 +97,8 @@ public class RetryPolicies {
                                              });
     }
 
-
     /**
-     * temp = min(cap,base * 2 ^ attempt)
-     * delay = temp/2 + random_between(0,temp/2)
+     * temp = min(cap,base * 2 ^ attempt) delay = temp/2 + random_between(0,temp/2)
      *
      * @param base the base
      * @param cap  the cap
@@ -205,6 +152,57 @@ public class RetryPolicies {
                                                                   ))));
         };
 
+    }
+
+    static class LimitRetries implements RetryPolicy {
+        public final int maxAttempts;
+
+        public LimitRetries(final int maxAttempts) {
+            this.maxAttempts = maxAttempts;
+        }
+
+        @Override
+        public Optional<Delay> apply(final RetryStatus retryStatus) {
+            boolean retry = retryStatus.counter < maxAttempts;
+            if (retry) return Optional.of(Delay.ZERO);
+            return Optional.empty();
+        }
+    }
+
+    static class IncrementalDelay implements RetryPolicy {
+        private final Delay base;
+
+        public IncrementalDelay(final Delay base) {
+            this.base = base;
+        }
+
+        @Override
+        public Optional<Delay> apply(final RetryStatus retryStatus) {
+            return Optional.of(base.multipliedBy(retryStatus.counter + 1));
+        }
+    }
+
+    static class ExponentialBackoffDelay implements RetryPolicy {
+        private final Function<Duration, Delay> fn;
+        private final Delay base;
+
+        public ExponentialBackoffDelay(
+                final Delay base,
+                final Function<Duration, Delay> fn
+                                      ) {
+            this.base = base;
+            this.fn = fn;
+        }
+
+        @Override
+        public Optional<Delay> apply(final RetryStatus rs) {
+            int multiplicand = (int) Math.pow(2,
+                                              rs.counter
+                                             );
+            return Optional.of(rs.cumulativeDelay == 0 ?
+                                       base : fn.apply(base.duration.multipliedBy(multiplicand))
+                              );
+        }
     }
 
 }

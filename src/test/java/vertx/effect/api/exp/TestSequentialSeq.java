@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -7,20 +8,23 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.*;
+import vertx.effect.ListExp;
+import vertx.effect.RetryPolicies;
+import vertx.effect.VIO;
+import vertx.effect.VertxRef;
 import vertx.effect.api.Verifiers;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestSequentialSeq {
@@ -86,23 +90,25 @@ public class TestSequentialSeq {
         expected.add("b");
         int ATTEMPTS = 3;
 
-        Supplier<VIO<String>> a =
-                VIOStub.failThenSucceed(counter ->
-                                                counter <= ATTEMPTS ?
-                                                        new RuntimeException("counter: " + counter) : null,
-                                        "a"
-                                       );
 
-        Supplier<VIO<String>> b =
-                VIOStub.failThenSucceed(counter ->
-                                                counter <= ATTEMPTS ?
-                                                        new RuntimeException("counter: " + counter) : null,
-                                        "b"
-                                       );
+        StubBuilder<String> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
+
+        StubBuilder<String> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("b")
+                                         )
+                                 );
+
 
         VIO<List<String>> val = ListExp.<String>seq()
-                                       .append(b.get())
-                                       .prepend(a.get())
+                                       .append(b.build())
+                                       .prepend(a.build())
                                        .retryEach(limitRetries(ATTEMPTS));
 
 
@@ -120,13 +126,17 @@ public class TestSequentialSeq {
         List<String> expected = new ArrayList<>();
         expected.add("hi");
         expected.add("hi");
-        VIOStub<String> hi = VIOStub.failThenSucceed(counter ->
-                                                             counter <= 3 ?
-                                                                     new IllegalArgumentException("counter: " + counter) : null,
-                                                     "hi"
-                                                    );
-        ListExp.seq(hi.get(),
-                    hi.get()
+        StubBuilder<String> hi =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < 3
+                                                          ? VIO.fail(new IllegalArgumentException()) :
+                                                          VIO.succeed("hi")
+                                         )
+                                 );
+
+
+        ListExp.seq(hi.build(),
+                    hi.build()
                    )
                .retryEach(e -> e instanceof IllegalArgumentException,
                           limitRetries(3)
@@ -172,13 +182,17 @@ public class TestSequentialSeq {
         List<String> expected = new ArrayList<>();
         expected.add("hi");
         expected.add("hi");
-        VIOStub<String> hi = VIOStub.failThenSucceed(counter ->
-                                                             counter <= 3 ?
-                                                                     new IllegalArgumentException("counter: " + counter) : null,
-                                                     "hi"
-                                                    );
-        ListExp.seq(hi.get(),
-                    hi.get()
+
+
+        StubBuilder<String> hi =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter <= 3
+                                                          ? VIO.fail(new IllegalArgumentException()) :
+                                                          VIO.succeed("hi")
+                                         )
+                                 );
+        ListExp.seq(hi.build(),
+                    hi.build()
                    )
                .retryEach(it -> it instanceof IllegalArgumentException,
                           limitRetries(3)
@@ -199,26 +213,26 @@ public class TestSequentialSeq {
         expected.add("a");
         expected.add("b");
         int ATTEMPTS = 3;
-        Supplier<VIO<String>> a =
-                VIOStub.failThenSucceed(counter ->
-                                                counter <= ATTEMPTS ?
-                                                        new RuntimeException("counter: " + counter) : null,
-                                        "a"
-                                       );
+        StubBuilder<String> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
 
-        Supplier<VIO<String>> b =
-                VIOStub.failThenSucceed(counter ->
-                                                counter <= ATTEMPTS ?
-                                                        new RuntimeException("counter: " + counter) : null,
-                                        "b"
-                                       );
+        StubBuilder<String> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("b")
+                                         )
+                                 );
 
 
         long start = System.nanoTime();
 
         VIO<List<String>> val = ListExp.<String>seq()
-                                       .append(b.get())
-                                       .prepend(a.get())
+                                       .append(b.build())
+                                       .prepend(a.build())
                                        .retryEach(limitRetries(ATTEMPTS)
                                                           .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))
                                                  );
@@ -227,7 +241,7 @@ public class TestSequentialSeq {
         Verifiers.<List<String>>verifySuccess(list -> Objects.equals(list,
                                                                      expected
                                                                     )
-                         && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
+                                                      && NANOSECONDS.toMillis(System.nanoTime() - start) >= ATTEMPTS)
                  .accept(val,
                          context
                         );

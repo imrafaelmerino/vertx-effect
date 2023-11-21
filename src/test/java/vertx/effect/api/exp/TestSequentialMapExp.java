@@ -1,6 +1,7 @@
 package vertx.effect.api.exp;
 
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -8,41 +9,51 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.*;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.MapExp;
+import vertx.effect.RetryPolicies;
+import vertx.effect.VIO;
+import vertx.effect.VertxRef;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestSequentialMapExp {
     static final int ATTEMPTS = 2;
 
-    static final Supplier<VIO<String>> a =
-            VIOStub.failThenSucceed(
-                    counter -> counter < 2 ? new RuntimeException("counter: " + counter) : null,
-                    "a"
-                                   );
 
-    static final Supplier<VIO<String>> b =
-            VIOStub.failThenSucceed(
-                    counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                    "b"
-                                   );
-    static final Supplier<VIO<Integer>> one =
-            VIOStub.failThenSucceed(
-                    counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                    1
-                                   );
+    static StubBuilder<String> a =
+            StubBuilder.ofGen(Gen.seq(counter ->
+                                              counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                      VIO.succeed("a")
+                                     )
+                             );
+
+    static StubBuilder<String> b =
+            StubBuilder.ofGen(Gen.seq(counter ->
+                                              counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                      VIO.succeed("b")
+                                     )
+                             );
+
+    static StubBuilder<Integer> one =
+            StubBuilder.ofGen(Gen.seq(counter ->
+                                              counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                      VIO.succeed(1)
+                                     )
+                             );
+
 
     private static VertxRef vertxRef;
+
 
     @BeforeAll
     public static void prepare(final Vertx vertx,
@@ -1019,9 +1030,9 @@ public class TestSequentialMapExp {
                      1
                     );
         MapExp.seq("a",
-                   a.get(),
+                   a.build(),
                    "b",
-                   one.get()
+                   one.build()
                   )
               .retryEach(RetryPolicies.limitRetries(2))
               .onComplete(map ->
@@ -1042,7 +1053,7 @@ public class TestSequentialMapExp {
         MapExp.seq("a",
                    VIO.fail(new RuntimeException()),
                    "b",
-                   b.get()
+                   b.build()
                   )
               .recoverWith(e -> VIO.succeed(empty))
               .onSuccess(map -> context.verify(() -> {
@@ -1060,7 +1071,7 @@ public class TestSequentialMapExp {
         MapExp.seq("a",
                    VIO.fail(new RuntimeException()),
                    "b",
-                   b.get()
+                   b.build()
                   )
               .recoverWith(e -> VIO.fail(new IllegalArgumentException()))
               .onComplete(r -> context.verify(() -> {
@@ -1081,9 +1092,9 @@ public class TestSequentialMapExp {
                      "b"
                     );
         MapExp.seq("a",
-                   a.get(),
+                   a.build(),
                    "b",
-                   b.get()
+                   b.build()
                   )
               .retryEach(RetryPolicies.limitRetries(ATTEMPTS))
               .recoverWith(e -> VIO.fail(new IllegalArgumentException()))
@@ -1109,9 +1120,9 @@ public class TestSequentialMapExp {
         long start = System.nanoTime();
 
         MapExp.seq("a",
-                   a.get(),
+                   a.build(),
                    "b",
-                   b.get()
+                   b.build()
                   )
               .retryEach(limitRetries(ATTEMPTS)
                                  .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))

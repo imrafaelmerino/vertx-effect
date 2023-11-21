@@ -11,16 +11,15 @@ import vertx.effect.VIO;
 import java.util.Objects;
 
 /**
- * Provides a constructor to create http servers, and different methods to wrapped their deployment into
- * a {@link VIO}. It allows to define some interesting methods like {@link #startAtRandom(int, int)}, that
- * deploys the server on the first free port it finds.
+ * Provides a constructor to create http servers, and different methods to wrapped their deployment into a {@link VIO}.
+ * It allows to define some interesting methods like {@link #startAtRandom(int, int)}, that deploys the server on the
+ * first free port it finds.
  */
 public class HttpServerBuilder {
 
-    private final Vertx vertx;
-
-    private final HttpServerOptions options;
     private static final String DEFAULT_HOST = "0.0.0.0";
+    private final Vertx vertx;
+    private final HttpServerOptions options;
     private final Handler<HttpServerRequest> reqHandler;
 
     public HttpServerBuilder(final Vertx vertx,
@@ -81,7 +80,7 @@ public class HttpServerBuilder {
         return VIO.effect(() -> {
                               Future<HttpServer> fut = vertx.createHttpServer(options.setHost(host))
                                                             .requestHandler(reqHandler)
-                                                            .listen(port,host);
+                                                            .listen(port, host);
 
                               System.out.println(fut.result());
                               return fut;

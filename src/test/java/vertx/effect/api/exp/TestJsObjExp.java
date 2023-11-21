@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -9,14 +10,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.function.Supplier;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
 
 @SuppressWarnings("ReturnValueIgnored")
@@ -1515,23 +1515,27 @@ public class TestJsObjExp {
 
         JsStr a = JsStr.of("a");
 
-        final Supplier<VIO<JsStr>> val =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? new RuntimeException("counter: " + counter) : null,
-                                        a
-                                       );
+
+        StubBuilder<JsStr> val =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter == 1 || counter == 2
+                                                          ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(a)
+                                         )
+                                 );
 
 
         JsObjExp.par("a",
-                     val.get(),
+                     val.build(),
                      "b",
-                     val.get(),
+                     val.build(),
                      "c",
-                     val.get(),
+                     val.build(),
                      "d",
-                     JsArrayExp.par(val.get(),
-                                    val.get(),
+                     JsArrayExp.par(val.build(),
+                                    val.build(),
                                     JsObjExp.par("a",
-                                                 val.get()
+                                                 val.build()
                                                 )
                                    )
                     )
@@ -1566,23 +1570,26 @@ public class TestJsObjExp {
 
         JsStr a = JsStr.of("a");
 
-        final Supplier<VIO<JsStr>> val =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? new RuntimeException("counter: " + counter) : null,
-                                        a
-                                       );
+        StubBuilder<JsStr> val =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter == 1 || counter == 2
+                                                          ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed(a)
+                                         )
+                                 );
 
 
         JsObjExp.seq("a",
-                     val.get(),
+                     val.build(),
                      "b",
-                     val.get(),
+                     val.build(),
                      "c",
-                     val.get(),
+                     val.build(),
                      "d",
-                     JsArrayExp.par(val.get(),
-                                    val.get(),
+                     JsArrayExp.par(val.build(),
+                                    val.build(),
                                     JsObjExp.par("a",
-                                                 val.get()
+                                                 val.build()
                                                 )
                                    )
                     )
@@ -1761,20 +1768,28 @@ public class TestJsObjExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<String> a = VIOStub.failThenSucceed(
-                counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                "a"
-                                                   );
-        VIOStub<String> b = VIOStub.failThenSucceed(
-                counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                "b"
-                                                   );
+
+
+        StubBuilder<String> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
+
+        StubBuilder<String> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("b")
+                                         )
+                                 );
+
 
         JsObjExp.par("a",
-                     a.get()
+                     a.build()
                       .map(JsStr::of),
                      "b",
-                     b.get()
+                     b.build()
                       .map(JsStr::of)
                     )
                 .retryEach(limitRetries(ATTEMPTS)
@@ -1801,18 +1816,25 @@ public class TestJsObjExp {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<String> a = VIOStub.failThenSucceed(counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                                                    "a"
-                                                   );
-        VIOStub<String> b = VIOStub.failThenSucceed(counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                                                    "b"
-                                                   );
+        StubBuilder<String> a =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("a")
+                                         )
+                                 );
+
+        StubBuilder<String> b =
+                StubBuilder.ofGen(Gen.seq(counter ->
+                                                  counter < ATTEMPTS ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                                          VIO.succeed("b")
+                                         )
+                                 );
 
         JsObjExp.seq("a",
-                     a.get()
+                     a.build()
                       .map(JsStr::of),
                      "b",
-                     b.get()
+                     b.build()
                       .map(JsStr::of)
                     )
                 .retryEach(limitRetries(ATTEMPTS)

@@ -18,8 +18,9 @@ public class ClientCredentialsFlowBuilder extends OauthBuilder<ClientCredentials
 
     public ClientCredentialsFlowBuilder(final HttpClientOptions options,
                                         final String address,
-                                        final BiFunction<MultiMap,HttpClientModule, VIO<JsObj>> accessTokenReq) {
-        super(options,address);
+                                        final BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> accessTokenReq
+                                       ) {
+        super(options, address);
         this.accessTokenReq = requireNonNull(accessTokenReq);
     }
 
@@ -36,8 +37,6 @@ public class ClientCredentialsFlowBuilder extends OauthBuilder<ClientCredentials
                                            accessTokenRetryPredicate
         );
     }
-
-
 
 
 }

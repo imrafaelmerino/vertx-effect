@@ -12,11 +12,11 @@ import static java.util.Objects.requireNonNull;
 
 final class AllExpPar extends AllExp {
 
+    private final List<VIO<Boolean>> exps;
+
     AllExpPar(final List<VIO<Boolean>> exps) {
         this.exps = requireNonNull(exps);
     }
-
-    private final List<VIO<Boolean>> exps;
 
     @Override
     public VIO<Boolean> retryEach(final RetryPolicy policy) {
@@ -27,8 +27,8 @@ final class AllExpPar extends AllExp {
     public VIO<Boolean> retryEach(final Predicate<Throwable> predicate,
                                   final RetryPolicy policy
                                  ) {
-        Objects.requireNonNull(policy);
-        Objects.requireNonNull(predicate);
+        requireNonNull(policy);
+        requireNonNull(predicate);
         return new AllExpPar(exps.stream()
                                  .map(it -> it.retry(predicate, policy))
                                  .collect(Collectors.toList()));

@@ -2,7 +2,7 @@ package vertx.effect;
 
 import fun.tuple.Pair;
 
-public abstract class PairExp<A, B> extends Exp<Pair<A, B>> {
+public abstract sealed class PairExp<A, B> extends Exp<Pair<A, B>> permits PairExpPar, PairExpSeq {
 
     public static <A, B> PairExp<A, B> seq(final VIO<A> _1,
                                            final VIO<B> _2

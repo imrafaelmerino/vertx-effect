@@ -1,5 +1,6 @@
 package vertx.effect.api.exp;
 
+import fun.gen.Gen;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -8,27 +9,34 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
-import vertx.effect.stub.VIOStub;
+import vertx.effect.stub.StubBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
-import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static vertx.effect.RetryPolicies.limitRetries;
 import static vertx.effect.VIO.FALSE;
 import static vertx.effect.VIO.TRUE;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class TestCond {
 
-    private static VertxRef vertxRef;
     private static final int ATTEMPTS = 2;
-    private static Supplier<VIO<String>> a =
-            VIOStub.failThenSucceed(counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null, "a");
-    private static Supplier<VIO<String>> b =
-            VIOStub.failThenSucceed(counter -> counter < ATTEMPTS ? new RuntimeException("counter: " + counter) : null, "b");
-
+    static StubBuilder<String> a =
+            StubBuilder.ofGen(Gen.seq(counter -> counter < ATTEMPTS
+                                      ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                      VIO.succeed("a")
+                                     )
+                             );
+    static StubBuilder<String> b =
+            StubBuilder.ofGen(Gen.seq(counter -> counter < ATTEMPTS
+                                      ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                      VIO.succeed("b")
+                                     )
+                             );
+    private static VertxRef vertxRef;
 
     @BeforeAll
     public static void prepare(final Vertx vertx,
@@ -84,12 +92,15 @@ public class TestCond {
 
     @Test
     public void test_cond_exp_returns_the_first_branch_with_retryEach(VertxTestContext context) {
-        VIOStub<Boolean> valSupplier =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? new RuntimeException("counter:+" + counter) : null,
-                        true
-                                       );
-        CondExp.seq(valSupplier.get(),
+
+
+        StubBuilder<Boolean> valSupplier =
+                StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2
+                                          ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                          TRUE
+                                         )
+                                 );
+        CondExp.seq(valSupplier.build(),
                     () -> VIO.succeed("hi"),
                     FALSE,
                     () -> VIO.succeed("bye")
@@ -107,12 +118,15 @@ public class TestCond {
 
     @Test
     public void test_cond_exp_returns_the_first_branch_with_retry(VertxTestContext context) {
-        VIOStub<Boolean> valSupplier =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? new RuntimeException("counter:+" + counter) : null,
-                        true
-                                       );
-        CondExp.seq(valSupplier.get(),
+
+
+        StubBuilder<Boolean> valSupplier =
+                StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2
+                                          ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                          TRUE
+                                         )
+                                 );
+        CondExp.seq(valSupplier.build(),
                     () -> VIO.succeed("hi"),
                     FALSE,
                     () -> VIO.succeed("bye")
@@ -130,12 +144,13 @@ public class TestCond {
 
     @Test
     public void test_cond_exp_returns_the_first_branch_with_retries_otherwise(VertxTestContext context) {
-        VIOStub<Boolean> valSupplier =
-                VIOStub.failThenSucceed(
-                        counter -> counter == 1 || counter == 2 ? new RuntimeException("counter:+" + counter) : null,
-                        false
-                                       );
-        CondExp.seq(valSupplier.get(),
+        StubBuilder<Boolean> valSupplier =
+                StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2
+                                                   ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                                   FALSE
+                                                  )
+                                          );
+        CondExp.seq(valSupplier.build(),
                     () -> VIO.succeed("hi"),
                     FALSE,
                     () -> VIO.succeed("bye"),
@@ -191,24 +206,28 @@ public class TestCond {
 
     @Test
     public void test_cond_exp_returns_the_second_branch_with_retries(VertxTestContext context) {
-        VIOStub<Boolean> falseSupplier =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? new RuntimeException("counter:+" + counter) : null,
-                                        false
-                                       );
-        VIOStub<Boolean> trueSupplier =
-                VIOStub.failThenSucceed(counter -> counter == 1 || counter == 2 ? new RuntimeException("counter:+" + counter) : null,
-                                        false
-                                       );
+        StubBuilder<Boolean> trueSupplier =
+                StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2
+                                          ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                          TRUE
+                                         )
+                                 );
+        StubBuilder<Boolean> falseSupplier =
+                StubBuilder.ofGen(Gen.seq(counter -> counter == 1 || counter == 2
+                                          ? VIO.fail(new RuntimeException("counter:+" + counter)) :
+                                          FALSE
+                                         )
+                                 );
 
-        CondExp.seq(falseSupplier.get(),
+        CondExp.seq(falseSupplier.build(),
                     () -> VIO.succeed("hi"),
-                    trueSupplier.get(),
+                    trueSupplier.build(),
                     () -> VIO.succeed("bye"),
                     () -> VIO.succeed("otherwise")
                    )
                .retryEach(limitRetries(2))
                .onSuccess(it -> context.verify(() -> {
-                   Assertions.assertEquals("otherwise",
+                   Assertions.assertEquals("bye",
                                            it
                                           );
                    context.completeNow();
@@ -316,9 +335,9 @@ public class TestCond {
     public void test_retries_never_happens_because_error_is_texted_false_on_the_predicate(VertxTestContext context) {
 
         CondExp.seq(TRUE,
-                    a,
+                    () -> a.build(),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .retryEach(Failures.REPLY_EXCEPTION_PRISM.exists.apply(v -> v.failureCode() == Failures.BAD_MESSAGE_CODE),
                           limitRetries(ATTEMPTS)
@@ -336,9 +355,9 @@ public class TestCond {
     public void test_retries_happens_because_error_is_texted_true_on_the_predicate(VertxTestContext context) {
 
         CondExp.seq(TRUE,
-                    a,
+                    () -> a.build(),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .retryEach(e -> e instanceof RuntimeException,
                           limitRetries(ATTEMPTS)
@@ -358,9 +377,9 @@ public class TestCond {
 
         long start = System.nanoTime();
         CondExp.seq(TRUE,
-                    a,
+                    () -> a.build(),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .retryEach(limitRetries(ATTEMPTS)
                                   .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))
@@ -382,7 +401,7 @@ public class TestCond {
         CondExp.seq(TRUE,
                     () -> VIO.fail(new RuntimeException()),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .recover(e -> e instanceof RuntimeException ? "hi!" : "bye!")
                .onSuccess(str -> context.verify(() -> {
@@ -401,7 +420,7 @@ public class TestCond {
         CondExp.seq(TRUE,
                     () -> VIO.fail(new RuntimeException()),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .recoverWith(e -> e instanceof RuntimeException ?
                        VIO.fail(new IllegalArgumentException()) :
@@ -420,7 +439,7 @@ public class TestCond {
         CondExp.seq(TRUE,
                     () -> VIO.fail(new RuntimeException()),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .recoverWith(e -> e instanceof RuntimeException ? VIO.succeed("hi!") : VIO.succeed("bye!"))
                .onSuccess(str -> context.verify(() -> {
@@ -439,7 +458,7 @@ public class TestCond {
         CondExp.seq(TRUE,
                     () -> VIO.fail(new RuntimeException()),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .fallbackTo(e -> e instanceof RuntimeException ? VIO.succeed("hi!") : VIO.succeed("bye!"))
                .onSuccess(str -> context.verify(() -> {
@@ -456,7 +475,7 @@ public class TestCond {
         CondExp.seq(TRUE,
                     () -> VIO.fail(new RuntimeException()),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .fallbackTo(e -> e instanceof RuntimeException ? VIO.fail(new IllegalArgumentException()) : VIO.succeed("bye!"))
                .onComplete(r -> context.verify(() -> {
@@ -472,15 +491,18 @@ public class TestCond {
         int ATTEMPTS = 3;
 
         long start = System.nanoTime();
-        VIOStub<Boolean> True = VIOStub.failThenSucceed(
-                counter -> counter <= ATTEMPTS ? new RuntimeException("counter: " + counter) : null,
-                true
-                                                       );
 
-        CondExp.seq(True.get(),
+        StubBuilder<Boolean> True =
+                StubBuilder.ofGen(Gen.seq(counter -> counter <= ATTEMPTS
+                                          ? VIO.fail(new RuntimeException("counter: " + counter)) :
+                                          TRUE
+                                         )
+                                 );
+
+        CondExp.seq(True.build(),
                     () -> VIO.succeed("a"),
                     FALSE,
-                    b
+                    () -> b.build()
                    )
                .retryEach(limitRetries(ATTEMPTS)
                                   .append(RetryPolicies.constantDelay(vertxRef.delay(Duration.ofMillis(100))))

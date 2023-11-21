@@ -16,7 +16,6 @@ import vertx.effect.http.client.HttpReqEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
-
 import java.util.stream.Collectors;
 
 import static io.vertx.core.eventbus.ReplyFailure.RECIPIENT_FAILURE;
@@ -29,6 +28,21 @@ import static vertx.effect.Functions.getErrorMessage;
 import static vertx.effect.http.client.HttpResp.*;
 
 public abstract class AbstractHttpClientModule extends VertxModule {
+
+    protected final HttpClientOptions httpOptions;
+    protected final String httpClientAddress;
+    protected Lambdac<JsObj, JsObj> httpClient;
+
+    public AbstractHttpClientModule(final HttpClientOptions options,
+                                    final String address
+                                   ) {
+        if (requireNonNull(address).isBlank())
+            throw new IllegalArgumentException("address is empty");
+
+        this.httpClientAddress = address;
+        this.httpOptions = requireNonNull(options);
+
+    }
 
     private static JsObj toJsObj(Buffer buffer, HttpClientResponse httpResp) {
         return STATUS_CODE_LENS.set.apply(httpResp.statusCode())
@@ -79,22 +93,6 @@ public abstract class AbstractHttpClientModule extends VertxModule {
         }
     }
 
-
-    protected final HttpClientOptions httpOptions;
-    protected final String httpClientAddress;
-    protected Lambdac<JsObj, JsObj> httpClient;
-
-    public AbstractHttpClientModule(final HttpClientOptions options,
-                                    final String address
-                                   ) {
-        if (requireNonNull(address).isBlank())
-            throw new IllegalArgumentException("address is empty");
-
-        this.httpClientAddress = address;
-        this.httpOptions = requireNonNull(options);
-
-    }
-
     private static JsArray cookies2JsArray(final List<String> cookies) {
         if (cookies == null || cookies.isEmpty()) return JsArray.empty();
         return JsArray.ofIterable(cookies.stream()
@@ -119,37 +117,20 @@ public abstract class AbstractHttpClientModule extends VertxModule {
             reqEvent.host = options.getHost();
 
             switch (type) {
-                case 0:
-                    execReq(client, message, reqEvent, options, GET);
-                    break;
-                case 1:
-                    execBodyReq(client, message, reqEvent, HttpReq.BYTES_BODY_LENS.get.apply(req), options, POST);
-                    break;
-                case 2:
-                    execBodyReq(client, message, reqEvent, HttpReq.BYTES_BODY_LENS.get.apply(req), options, PUT);
-                    break;
-                case 3:
-                    execReq(client, message, reqEvent, options, DELETE);
-                    break;
-                case 4:
-                    execReq(client, message, reqEvent, options, OPTIONS);
-                    break;
-                case 5:
-                    execReq(client, message, reqEvent, options, HEAD);
-                    break;
-                case 6:
-                    execReq(client, message, reqEvent, options, TRACE);
-                    break;
-                case 7:
-                    execBodyReq(client, message, reqEvent, HttpReq.BYTES_BODY_LENS.get.apply(req), options, PATCH);
-                    break;
-
-                default:
-                    message.reply(new ReplyException(RECIPIENT_FAILURE,
-                                                     HTTP_METHOD_NOT_IMPLEMENTED_CODE,
-                                                     "The method type " + type + " is not supported. Supported types are in enum HttpReqBuilder.TYPE."
-                                  )
-                                 );
+                case 0 -> execReq(client, message, reqEvent, options, GET);
+                case 1 -> execBodyReq(client, message, reqEvent, HttpReq.BYTES_BODY_LENS.get.apply(req), options, POST);
+                case 2 -> execBodyReq(client, message, reqEvent, HttpReq.BYTES_BODY_LENS.get.apply(req), options, PUT);
+                case 3 -> execReq(client, message, reqEvent, options, DELETE);
+                case 4 -> execReq(client, message, reqEvent, options, OPTIONS);
+                case 5 -> execReq(client, message, reqEvent, options, HEAD);
+                case 6 -> execReq(client, message, reqEvent, options, TRACE);
+                case 7 ->
+                        execBodyReq(client, message, reqEvent, HttpReq.BYTES_BODY_LENS.get.apply(req), options, PATCH);
+                default -> message.reply(new ReplyException(RECIPIENT_FAILURE,
+                                                            HTTP_METHOD_NOT_IMPLEMENTED_CODE,
+                                                            "The method type " + type + " is not supported. Supported types are in enum HttpReqBuilder.TYPE."
+                                         )
+                                        );
             }
         };
     }
@@ -271,9 +252,7 @@ public abstract class AbstractHttpClientModule extends VertxModule {
 
     @Override
     protected final void deploy() {
-        this.deployConsumer(
-                httpClientAddress,
-                consumer(vertx.createHttpClient(httpOptions))
-                           );
+        this.deployConsumer(httpClientAddress,
+                            consumer(vertx.createHttpClient(httpOptions)));
     }
 }
