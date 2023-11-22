@@ -1,25 +1,23 @@
-package vertx.effect.http.client.oauth;
+package vertx.effect;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
-import vertx.effect.VIO;
-import vertx.effect.http.client.HttpClientModule;
 
 import java.util.function.BiFunction;
 
 import static java.util.Objects.requireNonNull;
 
-public class ClientCredentialsFlowBuilder extends OauthBuilder<ClientCredentialsFlowBuilder> {
+public class ClientCredentialsModuleBuilder extends OauthModuleBuilder<ClientCredentialsModuleBuilder> {
 
 
     private final BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> accessTokenReq;
 
 
-    public ClientCredentialsFlowBuilder(final HttpClientOptions options,
-                                        final String address,
-                                        final BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> accessTokenReq
-                                       ) {
+    public ClientCredentialsModuleBuilder(final HttpClientOptions options,
+                                          final String address,
+                                          final BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> accessTokenReq
+                                         ) {
         super(options, address);
         this.accessTokenReq = requireNonNull(accessTokenReq);
     }

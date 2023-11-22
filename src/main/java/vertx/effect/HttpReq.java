@@ -1,4 +1,4 @@
-package vertx.effect.http.client;
+package vertx.effect;
 
 import fun.optic.Lens;
 import fun.optic.Option;
@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract sealed class HttpReq<T extends HttpReq<T>> permits BodyHttpReq, DeleteReq, GetReq, HeadReq, OptionsReq, TraceReq {
+ abstract sealed class HttpReq<T extends HttpReq<T>> permits BodyHttpReq, DeleteReq, GetReq, HeadReq, OptionsReq, TraceReq {
 
     private static final String SSL_FIELD = "ssl";
     private static final String URI_FIELD = "uri";

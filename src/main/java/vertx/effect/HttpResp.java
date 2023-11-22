@@ -1,4 +1,4 @@
-package vertx.effect.http.client;
+package vertx.effect;
 
 import fun.optic.Lens;
 import fun.optic.Option;

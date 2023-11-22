@@ -12,13 +12,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.api.Port;
 import vertx.effect.api.Verifiers;
-import vertx.effect.http.client.GetReq;
-import vertx.effect.http.client.HttpClientModule;
-import vertx.effect.http.client.HttpResp;
-import vertx.effect.http.server.HttpServerBuilder;
-import vertx.effect.http.stub.HttpHeadersRespStub;
-import vertx.effect.http.stub.HttpReqHandlerStub;
-import vertx.effect.http.stub.HttpRespStub;
+import vertx.effect.GetReq;
+import vertx.effect.HttpClientModule;
+import vertx.effect.HttpResp;
+import vertx.effect.HttpServerBuilder;
+import vertx.effect.stub.http.HttpHeadersRespStub;
+import vertx.effect.stub.http.HttpReqHandlerStub;
+import vertx.effect.stub.http.HttpRespStub;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import java.time.Duration;
@@ -46,7 +46,7 @@ public class HttpClientTestRetryOnFailure {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        httpClient = new HttpExampleModule(new HttpClientOptions().setDefaultHost("0.0.0.0"));
+        httpClient = new HttpClientModule(new HttpClientOptions().setDefaultHost("0.0.0.0"), "myhttp-client");
 
         HttpRespStub mockReqErrorResp =
                 HttpRespStub.when((n, req) -> n <= 3)

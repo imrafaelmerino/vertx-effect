@@ -1,4 +1,4 @@
-package vertx.effect.http.client.oauth;
+package vertx.effect;
 
 import io.vertx.core.eventbus.ReplyException;
 import jsonvalues.JsObj;
@@ -10,7 +10,7 @@ import static vertx.effect.Failures.HTTP_ACCESS_TOKEN_NOT_FOUND_CODE;
 
 public class OauthFailures {
 
-    public static final Function<JsObj, ReplyException> GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION =
+    public static final Function<JsObj, ReplyException> ACCESS_TOKEN_NOT_FOUND_EXCEPTION =
             resp -> new ReplyException(RECIPIENT_FAILURE,
                                        HTTP_ACCESS_TOKEN_NOT_FOUND_CODE,
                                        "Access token not found. Http response:" + resp.toString()

@@ -30,7 +30,7 @@ import static vertx.effect.Failures.UNKNOWN_ERROR_CODE;
  * <li>get delays</li>
  * </ul>
  */
-public class VertxRef {
+public final class VertxRef {
     /**
      * Address where vertx-effect publish different logging events.
      */
@@ -557,7 +557,8 @@ public class VertxRef {
                     .consumer(address,
                               message -> {
                                   try {
-                                      EventPublisher.PUBLISHER.publishMessageReceived(address, message.headers()).accept(vertx);
+                                      EventPublisher.PUBLISHER.publishMessageReceived(address, message.headers())
+                                                              .accept(vertx);
                                       O body = message.body();
                                       consumer.accept(body);
                                       message.reply(null);

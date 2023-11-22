@@ -1,10 +1,7 @@
-package vertx.effect.http.client.oauth;
+package vertx.effect;
 
 import io.vertx.core.MultiMap;
 import jsonvalues.JsObj;
-import vertx.effect.VIO;
-import vertx.effect.http.client.HttpClientModule;
-import vertx.effect.http.client.PostReq;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -23,7 +20,7 @@ import static java.util.Objects.requireNonNull;
  * the default uri is /token the default host and port are the ones specified in the HttpClientModule where the requests
  * that need the token are defined
  */
-public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> {
+public final class AccessTokenRequest implements BiFunction<MultiMap, HttpClientModule, VIO<JsObj>> {
 
     private static final String DEFAULT_URI = "/token";
     private final String uri;
@@ -32,13 +29,13 @@ public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientMod
     private Integer port;
     private Boolean ssl;
 
-    public GetAccessTokenRequest(final String clientId,
-                                 final String clientSecret,
-                                 final String host,
-                                 final String uri,
-                                 final int port,
-                                 final boolean ssl
-                                ) {
+    public AccessTokenRequest(final String clientId,
+                              final String clientSecret,
+                              final String host,
+                              final String uri,
+                              final int port,
+                              final boolean ssl
+                             ) {
         String credentials = clientId + ":" + clientSecret;
         this.clientIdSecretBase64 = Base64.getEncoder()
                                           .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
@@ -48,20 +45,20 @@ public class GetAccessTokenRequest implements BiFunction<MultiMap, HttpClientMod
         this.ssl = ssl;
     }
 
-    public GetAccessTokenRequest(final String clientId,
-                                 final String clientSecret
-                                ) {
+    public AccessTokenRequest(final String clientId,
+                              final String clientSecret
+                             ) {
         this.uri = DEFAULT_URI;
         String credentials = clientId + ":" + clientSecret;
         this.clientIdSecretBase64 = Base64.getEncoder()
                                           .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
     }
 
-    public GetAccessTokenRequest(final String clientId,
-                                 final String clientSecret,
-                                 final String host,
-                                 final int port
-                                ) {
+    public AccessTokenRequest(final String clientId,
+                              final String clientSecret,
+                              final String host,
+                              final int port
+                             ) {
         this(clientId,
              clientSecret
             );

@@ -26,7 +26,7 @@ import static vertx.effect.EventPublisher.PUBLISHER;
  * @param <I> the type of the input message sent to this verticle
  * @param <O> the type of the output message returned by this verticle
  */
-public class VerticleRef<I, O> {
+public final class VerticleRef<I, O> {
 
     /**
      * the default delivery options that will be used if not specified

@@ -2,9 +2,8 @@ package vertx.effect.api.httpclient;
 
 import vertx.effect.*;
 import vertx.effect.api.Verifiers;
-import vertx.effect.http.client.DeleteReq;
-import vertx.effect.http.client.*;
-import vertx.effect.http.server.HttpServerBuilder;
+import vertx.effect.DeleteReq;
+import vertx.effect.HttpServerBuilder;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import io.vertx.core.Vertx;
@@ -18,13 +17,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.api.Port;
-import vertx.effect.http.stub.HttpHeadersRespStub;
-import vertx.effect.http.stub.HttpReqHandlerStub;
-import vertx.effect.http.stub.HttpRespStub;
+import vertx.effect.stub.http.HttpHeadersRespStub;
+import vertx.effect.stub.http.HttpReqHandlerStub;
+import vertx.effect.stub.http.HttpRespStub;
 
 import java.util.List;
 
-import static vertx.effect.http.stub.HttpRespStub.ALWAYS;
+import static vertx.effect.stub.http.HttpRespStub.ALWAYS;
 
 
 @ExtendWith(VertxExtension.class)
@@ -41,7 +40,7 @@ public class HttpClientMethodsTests {
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
                                   System.out::println
                                  );
-        httpClient = new HttpExampleModule(new HttpClientOptions().setDefaultHost("0.0.0.0"));
+        httpClient = new HttpClientModule(new HttpClientOptions().setDefaultHost("0.0.0.0"), "myhttp-client");
 
         HttpRespStub mockReqResp =
                 HttpRespStub.when(ALWAYS)

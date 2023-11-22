@@ -1,22 +1,17 @@
-package vertx.effect.http.client.oauth;
+package vertx.effect;
 
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
 import jsonvalues.JsPath;
-import vertx.effect.Lambda;
-import vertx.effect.RetryPolicies;
-import vertx.effect.RetryPolicy;
-import vertx.effect.VIO;
-import vertx.effect.http.client.HttpResp;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
-import static vertx.effect.http.client.oauth.OauthFailures.GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION;
+import static vertx.effect.OauthFailures.ACCESS_TOKEN_NOT_FOUND_EXCEPTION;
 
 @SuppressWarnings("unchecked")
-public abstract class OauthBuilder<T extends OauthBuilder<T>> {
+ abstract class OauthModuleBuilder<T extends OauthModuleBuilder<T>> {
 
     protected final HttpClientOptions options;
     protected final String address;
@@ -36,10 +31,10 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
                                           .key("body")
                                           .key("access_token"));
                     if (token == null || token.isEmpty())
-                        return VIO.fail(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                        return VIO.fail(ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                     return VIO.succeed(token);
                 } catch (Exception e) {
-                    return VIO.fail(GET_ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
+                    return VIO.fail(ACCESS_TOKEN_NOT_FOUND_EXCEPTION.apply(resp));
                 }
             };
 
@@ -53,9 +48,9 @@ public abstract class OauthBuilder<T extends OauthBuilder<T>> {
     protected Predicate<Throwable> accessTokenRetryPredicate = e -> true;
 
 
-    public OauthBuilder(final HttpClientOptions options,
-                        final String address
-                       ) {
+    public OauthModuleBuilder(final HttpClientOptions options,
+                              final String address
+                             ) {
         this.options = requireNonNull(options);
         this.address = address;
     }

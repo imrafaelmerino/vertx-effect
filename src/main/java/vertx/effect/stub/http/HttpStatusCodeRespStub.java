@@ -1,12 +1,14 @@
-package vertx.effect.http.stub;
+package vertx.effect.stub.http;
 
 
+import fun.gen.Gen;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 
-import java.util.Random;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 public interface HttpStatusCodeRespStub extends IntFunction<Function<Buffer, Function<HttpServerRequest, Integer>>> {
 
@@ -21,9 +23,8 @@ public interface HttpStatusCodeRespStub extends IntFunction<Function<Buffer, Fun
         return n -> body -> req -> code;
     }
 
-    static HttpStatusCodeRespStub random(final int min,
-                                         final int max
-                                        ) {
-        return n -> body -> req -> new Random().nextInt(max + min) - min;
+    static HttpStatusCodeRespStub gen(Gen<Integer> gen) {
+        Supplier<Integer> supplier = Objects.requireNonNull(gen).sample();
+        return n -> body -> req -> supplier.get();
     }
 }

@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 /**
  * Different constructors to create Lambdas that validates their input messages according to specs and predicates
  */
-public class Validators {
+public final class Validators {
     private Validators() {
     }
 

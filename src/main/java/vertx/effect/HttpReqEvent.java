@@ -1,4 +1,4 @@
-package vertx.effect.http.client;
+package vertx.effect;
 
 import jdk.jfr.*;
 import jdk.jfr.Event;

@@ -181,7 +181,7 @@ class EventPublisher {
 
 
 
-    public Consumer<Vertx> publishMessageReceived(final String from,
+    public Consumer<Vertx> publishMessageReceived(final String address,
                                                   final MultiMap headers
                                                  ) {
         return vertx -> {
@@ -190,7 +190,7 @@ class EventPublisher {
                         .eventBus()
                         .publish(VertxRef.EVENTS_ADDRESS,
                                  eventLens.set.apply(RECEIVED_MESSAGE_EVENT)
-                                              .andThen(addressOpt.set.apply(from))
+                                              .andThen(addressOpt.set.apply(address))
                                               .andThen(contextLens.set.apply(headers.isEmpty() ? NOTHING : headers2JsObj.apply(headers)))
                                               .andThen(Event.instantLens.set.apply(Instant.now()))
                                               .andThen(Event.threadNameLens.set.apply(Thread.currentThread().getName()))

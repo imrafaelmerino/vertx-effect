@@ -12,14 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import vertx.effect.*;
 import vertx.effect.api.Verifiers;
-import vertx.effect.http.client.GetReq;
+import vertx.effect.GetReq;
 import vertx.values.codecs.RegisterJsValuesCodecs;
+
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class HttpExampleModuleTest {
 
     static VertxRef vertxRef;
-    static HttpExampleModule httpModule;
+    static HttpClientModule httpModule;
     static Lambda<String, JsObj> search;
 
     @BeforeAll
@@ -33,9 +34,10 @@ public class HttpExampleModuleTest {
                                  );
 
         httpModule =
-                new HttpExampleModule(new HttpClientOptions().setSsl(true)
-                                                             .setDefaultPort(443)
-                                                             .setTrustAll(true));
+                new HttpClientModule(new HttpClientOptions().setSsl(true)
+                                                            .setDefaultPort(443)
+                                                            .setTrustAll(true),
+                                     "myhttp-client");
 
         search =
                 term -> httpModule.get.apply(new GetReq().host("www.google.com")

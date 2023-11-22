@@ -14,13 +14,13 @@ import vertx.effect.RetryPolicies;
 import vertx.effect.VertxRef;
 import vertx.effect.api.Port;
 import vertx.effect.api.Verifiers;
-import vertx.effect.http.client.GetReq;
-import vertx.effect.http.client.HttpResp;
-import vertx.effect.http.client.oauth.ClientCredentialsFlowBuilder;
-import vertx.effect.http.client.oauth.ClientCredentialsModule;
-import vertx.effect.http.client.oauth.GetAccessTokenRequest;
-import vertx.effect.http.server.HttpServerBuilder;
-import vertx.effect.http.stub.*;
+import vertx.effect.GetReq;
+import vertx.effect.HttpResp;
+import vertx.effect.ClientCredentialsModuleBuilder;
+import vertx.effect.ClientCredentialsModule;
+import vertx.effect.AccessTokenRequest;
+import vertx.effect.HttpServerBuilder;
+import vertx.effect.stub.http.*;
 import vertx.values.codecs.RegisterJsValuesCodecs;
 
 
@@ -28,14 +28,14 @@ import java.util.List;
 
 import static jsonvalues.JsBool.FALSE;
 import static jsonvalues.JsBool.TRUE;
-import static vertx.effect.http.stub.HttpRespStub.*;
+import static vertx.effect.stub.http.HttpRespStub.*;
 
 @SuppressWarnings("ReturnValueIgnored")
 @ExtendWith(VertxExtension.class)
 public class ClientCredentialsModuleTest {
 
     static ClientCredentialsModule httpClient;
-    static ClientCredentialsFlowBuilder builder;
+    static ClientCredentialsModuleBuilder builder;
     static VertxRef vertxRef;
     static int port = Port.number.incrementAndGet();
 
@@ -44,11 +44,11 @@ public class ClientCredentialsModuleTest {
     public static void prepare(final Vertx vertx,
                                final VertxTestContext context
                               ) {
-        builder = new ClientCredentialsFlowBuilder(new HttpClientOptions().setDefaultPort(port)
-                                                                          .setDefaultHost("0.0.0.0"),
-                                                   "my-httpclient",
-                                                   new GetAccessTokenRequest("",
-                                                                             ""
+        builder = new ClientCredentialsModuleBuilder(new HttpClientOptions().setDefaultPort(port)
+                                                                            .setDefaultHost("0.0.0.0"),
+                                                     "my-httpclient",
+                                                     new AccessTokenRequest("",
+                                                                          ""
                                                    ));
 
         httpClient = builder.createModule();

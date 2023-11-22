@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Datatype with stats about retries made thus far.
  */
-public class RetryStatus {
+public final class RetryStatus {
 
     /**
      * Delay incurred so far from retries in milliseconds

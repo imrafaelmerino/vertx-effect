@@ -1,4 +1,4 @@
-package vertx.effect.http.stub;
+package vertx.effect.stub.http;
 
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;

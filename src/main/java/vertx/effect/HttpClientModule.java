@@ -1,9 +1,7 @@
-package vertx.effect.http.client;
+package vertx.effect;
 
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
-import vertx.effect.AbstractHttpClientModule;
-import vertx.effect.Lambdac;
 
 
 /**
@@ -16,8 +14,8 @@ import vertx.effect.Lambdac;
  * HttpClientOptions server1Options = new HttpClientOptions();
  * HttpClientOptions server2Options = new HttpClientOptions();
  *
- * HttpClientModule  httpServer1Module = new HttpClientModule(server1Options);
- * HttpClientModule  httpServer2Module = new HttpClientModule(server2Options);
+ * HttpClientModule  httpServer1Module = new HttpClientModule(server1Options,address1);
+ * HttpClientModule  httpServer2Module = new HttpClientModule(server2Options,address2);
  *
  * vertx.deployVerticle(httpServer1Module);
  * vertx.deployVerticle(httpServer2Module);
@@ -26,7 +24,7 @@ import vertx.effect.Lambdac;
  * Once deployed, you can use the defined functions {@link HttpClientModule#get get}, {@link HttpClientModule#post post},
  * {@link HttpClientModule#put put}, {@link HttpClientModule#delete delete} and so on.
  */
-public abstract class HttpClientModule extends AbstractHttpClientModule {
+public class HttpClientModule extends AbstractHttpClientModule {
 
     public HttpClientModule(final HttpClientOptions options,
                             final String address

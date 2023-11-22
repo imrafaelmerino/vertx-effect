@@ -1,4 +1,4 @@
-package vertx.effect.http.client;
+package vertx.effect;
 
 
 public final class GetReq extends HttpReq<GetReq> {

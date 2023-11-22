@@ -1,6 +1,5 @@
-package vertx.effect.http.server;
+package vertx.effect;
 
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -77,14 +76,9 @@ public class HttpServerBuilder {
     public VIO<HttpServer> start(final String host,
                                  final int port
                                 ) {
-        return VIO.effect(() -> {
-                              Future<HttpServer> fut = vertx.createHttpServer(options.setHost(host))
-                                                            .requestHandler(reqHandler)
-                                                            .listen(port, host);
-
-                              System.out.println(fut.result());
-                              return fut;
-                          }
+        return VIO.effect(() -> vertx.createHttpServer(options.setHost(host))
+                                     .requestHandler(reqHandler)
+                                     .listen(port, host)
                          );
     }
 

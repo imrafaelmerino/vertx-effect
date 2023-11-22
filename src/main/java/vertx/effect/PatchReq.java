@@ -1,4 +1,4 @@
-package vertx.effect.http.client;
+package vertx.effect;
 
 
 import java.util.Objects;

@@ -1,12 +1,8 @@
-package vertx.effect.http.client.oauth;
+package vertx.effect;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
-import vertx.effect.Lambda;
-import vertx.effect.RetryPolicy;
-import vertx.effect.VIO;
-import vertx.effect.http.client.HttpClientModule;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

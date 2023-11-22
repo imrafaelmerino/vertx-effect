@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 /**
  *
  */
-public class RetryPolicies {
+public final class RetryPolicies {
 
     private RetryPolicies() {
     }

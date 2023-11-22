@@ -1,18 +1,15 @@
-package vertx.effect.http.client.oauth;
+package vertx.effect;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClientOptions;
 import jsonvalues.JsObj;
-import vertx.effect.*;
-import vertx.effect.http.client.DeleteReq;
-import vertx.effect.http.client.*;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class OauthModule extends HttpClientModule {
+abstract class OauthModule extends HttpClientModule {
 
     public final Lambdac<GetReq, JsObj> getOauth;
     public final Lambdac<PostReq, JsObj> postOauth;

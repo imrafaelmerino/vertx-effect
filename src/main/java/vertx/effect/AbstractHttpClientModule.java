@@ -10,8 +10,6 @@ import io.vertx.core.http.*;
 import jsonvalues.JsArray;
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
-import vertx.effect.http.client.HttpReq;
-import vertx.effect.http.client.HttpReqEvent;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -25,9 +23,9 @@ import static java.util.Objects.requireNonNull;
 import static vertx.effect.EventPublisher.PUBLISHER;
 import static vertx.effect.Failures.*;
 import static vertx.effect.Functions.getErrorMessage;
-import static vertx.effect.http.client.HttpResp.*;
+import static vertx.effect.HttpResp.*;
 
-public abstract class AbstractHttpClientModule extends VertxModule {
+abstract class AbstractHttpClientModule extends VertxModule {
 
     protected final HttpClientOptions httpOptions;
     protected final String httpClientAddress;
