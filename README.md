@@ -15,6 +15,9 @@
 - [Requirements](#requirements)
 - [Installation](#installation)
 
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/4.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/4.0.0/jar)
+
+
 ## <a name="manifesto"><a/> vertx-effect manifesto
 
     . The more verticles, the better.

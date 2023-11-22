@@ -8,7 +8,9 @@ import jsonvalues.JsValue;
 
 import java.util.function.Function;
 
-public class HttpResp {
+public final class HttpResp {
+
+    private HttpResp(){}
 
     private static final String STATUS_CODE_FIELD = "status_code";
     private static final String STATUS_MESSAGE_FIELD = "status_message";
