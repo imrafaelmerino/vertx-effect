@@ -120,45 +120,50 @@ public class ClientCredentialsModuleTest {
                                                     ) {
 
 
-        new HttpServerBuilder(vertx,
-                              new HttpReqHandlerStub(HttpRespStub.when(REQ_LET.apply(3))
-                                                                 .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
-                                                                                                             FALSE
-                                                                                                            )
-                                                                                                   )
-                                                                             )
-                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._401),
-                                                     HttpRespStub.when(FORTH_REQ)
-                                                                 .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
-                                                                                                             TRUE,
-                                                                                                             "access_token",
-                                                                                                             JsStr.of("foooo")
-                                                                                                            )
-                                                                                                   )
-                                                                             )
-                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._200),
-                                                     HttpRespStub.when(REQ_LET.apply(7))
-                                                                 .setBodyResp(c -> body -> req -> {
-                                                                                  req.response().close();
-                                                                                  return "{}";
-                                                                              }
-                                                                             )
-                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._500),
-                                                     HttpRespStub.when(REQ_GT.apply(7))
-                                                                 .setBodyResp(HttpBodyRespStub.cons(JsObj.of("name",
-                                                                                                             JsStr.of("Rafael")
-                                                                                                            ))
-                                                                             )
-                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._200)
+        List<HttpRespStub> httpRespStubs =
+                List.of(when(REQ_LET.apply(3))
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                            FALSE
+                                                                           )
+                                                                  )
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._401),
+                        when(FORTH_REQ)
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                            TRUE,
+                                                                            "access_token",
+                                                                            JsStr.of("foooo")
+                                                                           )
+                                                                  )
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._200),
+                        when(REQ_LET.apply(7))
+                                .setBodyResp(c -> body -> req -> {
+                                                 req.response().close();
+                                                 return "{}";
+                                             }
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._500),
+                        when(REQ_GT.apply(7))
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("name",
+                                                                            JsStr.of("Rafael")
+                                                                           ))
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._200));
 
-                              )
+        VIO<JsObj> getReq = httpClient.getOauth.apply(new GetReq().uri("/name"))
+                                               .retry(RetryPolicies.limitRetries(3));
+
+        new HttpServerBuilder(vertx,
+                              new HttpReqHandlerStub(httpRespStubs)
         ).create(port)
          .get()
-         .onSuccess(server -> Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                                       .accept(httpClient.getOauth.apply(new GetReq().uri("/name"))
-                                                                  .retry(RetryPolicies.limitRetries(3)),
-                                               context
-                                              ));
+         .onSuccess(server -> {
+             Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                      .accept(getReq,
+                              context
+                             );
+         });
 
 
     }
