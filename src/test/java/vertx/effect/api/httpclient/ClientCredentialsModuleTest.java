@@ -9,20 +9,11 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import vertx.effect.PairExp;
-import vertx.effect.RetryPolicies;
-import vertx.effect.VertxRef;
+import vertx.effect.*;
 import vertx.effect.api.Port;
 import vertx.effect.api.Verifiers;
-import vertx.effect.GetReq;
-import vertx.effect.HttpResp;
-import vertx.effect.ClientCredentialsModuleBuilder;
-import vertx.effect.ClientCredentialsModule;
-import vertx.effect.AccessTokenRequest;
-import vertx.effect.HttpServerBuilder;
 import vertx.effect.stub.http.*;
 import vertx.values.codecs.RegisterJsValuesCodecs;
-
 
 import java.util.List;
 
@@ -44,11 +35,12 @@ public class ClientCredentialsModuleTest {
     public static void prepare(final Vertx vertx,
                                final VertxTestContext context
                               ) {
-        builder = new ClientCredentialsModuleBuilder(new HttpClientOptions().setDefaultPort(port)
-                                                                            .setDefaultHost("0.0.0.0"),
-                                                     "my-httpclient",
-                                                     new AccessTokenRequest("",
-                                                                          ""
+        builder =
+                new ClientCredentialsModuleBuilder(new HttpClientOptions().setDefaultPort(port)
+                                                                          .setDefaultHost("0.0.0.0"),
+                                                   "my-httpclient",
+                                                   new AccessTokenRequest("client_id",
+                                                                          "client_secret"
                                                    ));
 
         httpClient = builder.createModule();
@@ -56,10 +48,7 @@ public class ClientCredentialsModuleTest {
         vertxRef = new VertxRef(vertx);
 
         vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
-                                  (JsObj message) ->
-                                          System.out.println(message.filterKeys(key -> !key.equals("thread")
-                                                                     && !key.equals("instant"))
-                                                            )
+                                  System.out::println
                                  );
 
         PairExp.seq(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
@@ -81,40 +70,47 @@ public class ClientCredentialsModuleTest {
                                              RetryPolicies.limitRetries(3)
                                             );
 
+        List<HttpRespStub> httpRespStubs =
+                List.of(when(REQ_LET.apply(3))
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                            FALSE
+                                                                           )
+                                                                  )
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._401)
+                                .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE),
+                        when(FORTH_REQ)
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                            TRUE,
+                                                                            "access_token",
+                                                                            JsStr.of("foooo")
+                                                                           )
+                                                                  )
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._200)
+                                .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE),
+                        when(REQ_GT.apply(4))
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("name",
+                                                                            JsStr.of("Rafael")
+                                                                           ))
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._200)
+                                .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE));
+
+        VIO<JsObj> getReq = httpClient.getOauth.apply(new GetReq().uri("/name"));
+
         new HttpServerBuilder(vertx,
-                              new HttpReqHandlerStub(List.of(HttpRespStub.when(REQ_LET.apply(3))
-                                                                         .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
-                                                                                                                     FALSE
-                                                                                                                    )
-                                                                                                           )
-                                                                                     )
-                                                                         .setStatusCodeResp(HttpStatusCodeRespStub._401)
-                                                                         .setHeadersResp(HttpHeadersRespStub.JSON),
-                                                             HttpRespStub.when(FORTH_REQ)
-                                                                         .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
-                                                                                                                     TRUE,
-                                                                                                                     "access_token",
-                                                                                                                     JsStr.of("foooo")
-                                                                                                                    )
-                                                                                                           )
-                                                                                     )
-                                                                         .setStatusCodeResp(HttpStatusCodeRespStub._200)
-                                                                         .setHeadersResp(HttpHeadersRespStub.JSON),
-                                                             HttpRespStub.when(REQ_GT.apply(4))
-                                                                         .setBodyResp(HttpBodyRespStub.cons(JsObj.of("name",
-                                                                                                                     JsStr.of("Rafael")
-                                                                                                                    ))
-                                                                                     )
-                                                                         .setStatusCodeResp(HttpStatusCodeRespStub._200)
-                                                                         .setHeadersResp(HttpHeadersRespStub.JSON)
-                                                            )
+                              new HttpReqHandlerStub(httpRespStubs
+
                               )
-        ).start(port)
+        ).create(port)
          .get()
-         .onSuccess(server -> Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
-                                       .accept(httpClient.getOauth.apply(new GetReq().uri("/name")),
-                                               context
-                                              ));
+         .onSuccess(server -> {
+             Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                      .accept(getReq,
+                              context
+                             );
+         });
 
     }
 
@@ -156,7 +152,7 @@ public class ClientCredentialsModuleTest {
                                                                  .setStatusCodeResp(HttpStatusCodeRespStub._200)
 
                               )
-        ).start(port)
+        ).create(port)
          .get()
          .onSuccess(server -> Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
                                        .accept(httpClient.getOauth.apply(new GetReq().uri("/name"))

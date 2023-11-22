@@ -11,12 +11,17 @@
     - [Publishing events](#events)
     - [Publishing correlated events](#correlated-events)
 - [Spawning verticles](#spawning-verticles)
-- [Java Flight Recorder support](#jfr)
+- [Http client](#http-client)
+- [Oauth Http client](#oauth-client)
+- [Http server](#http-server)
+- [Testing](#testing)
+    - [VIO stubs](#vio-stubs)
+    - [Http server stubs](#http-stubs)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Related projects](#rp)
 
 [![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/4.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/4.0.0/jar)
-
 
 ## <a name="manifesto"><a/> vertx-effect manifesto
 
@@ -929,141 +934,141 @@ Let's take a look at the events that are published during the execution of the p
 
 ```json  
 [
-{
-  "event": "MESSAGE_SENT",
-  "to": "isValid",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
+  {
+    "event": "MESSAGE_SENT",
+    "to": "isValid",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "message": {
+      "email": "example@gmail.com",
+      "age": 10,
+      "id": "03486761"
+    },
+    "instant": "2020-10-11T15:09:26.704145Z",
+    "thread": "main"
   },
-  "message": {
-    "email": "example@gmail.com",
-    "age": 10,
-    "id": "03486761"
+  {
+    "event": "MESSAGE_RECEIVED",
+    "address": "isValid",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "instant": "2020-10-11T15:09:26.708157Z",
+    "thread": "vert.x-eventloop-thread-8"
   },
-  "instant": "2020-10-11T15:09:26.704145Z",
-  "thread": "main"
-},
-{
-  "event": "MESSAGE_RECEIVED",
-  "address": "isValid",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
+  {
+    "event": "MESSAGE_SENT",
+    "to": "isValid",
+    "context": {
+      "email": [
+        "imrafaelmerino@gmail.com"
+      ]
+    },
+    "message": {
+      "email": "imrafaelmerino@gmail.com",
+      "age": 17,
+      "id": "03786761>"
+    },
+    "instant": "2020-10-11T15:09:26.708597Z",
+    "thread": "main"
   },
-  "instant": "2020-10-11T15:09:26.708157Z",
-  "thread": "vert.x-eventloop-thread-8"
-},
-{
-  "event": "MESSAGE_SENT",
-  "to": "isValid",
-  "context": {
-    "email": [
-      "imrafaelmerino@gmail.com"
-    ]
+  {
+    "event": "MESSAGE_SENT",
+    "to": "isLegalAge",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "message": 10,
+    "instant": "2020-10-11T15:09:26.709568Z",
+    "thread": "vert.x-eventloop-thread-8"
   },
-  "message": {
-    "email": "imrafaelmerino@gmail.com",
-    "age": 17,
-    "id": "03786761>"
+  {
+    "event": "MESSAGE_RECEIVED",
+    "address": "isLegalAge",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "instant": "2020-10-11T15:09:26.710185Z",
+    "thread": "vert.x-eventloop-thread-4"
   },
-  "instant": "2020-10-11T15:09:26.708597Z",
-  "thread": "main"
-},
-{
-  "event": "MESSAGE_SENT",
-  "to": "isLegalAge",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
+  {
+    "event": "MESSAGE_SENT",
+    "to": "isValidId",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "message": "03486761",
+    "instant": "2020-10-11T15:09:26.710136Z",
+    "thread": "vert.x-eventloop-thread-8"
   },
-  "message": 10,
-  "instant": "2020-10-11T15:09:26.709568Z",
-  "thread": "vert.x-eventloop-thread-8"
-},
-{
-  "event": "MESSAGE_RECEIVED",
-  "address": "isLegalAge",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
+  {
+    "event": "MESSAGE_SENT",
+    "to": "isValidEmail",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "message": "example@gmail.com",
+    "instant": "2020-10-11T15:09:26.710672Z",
+    "thread": "vert.x-eventloop-thread-8"
   },
-  "instant": "2020-10-11T15:09:26.710185Z",
-  "thread": "vert.x-eventloop-thread-4"
-},
-{
-  "event": "MESSAGE_SENT",
-  "to": "isValidId",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
+  {
+    "event": "MESSAGE_RECEIVED",
+    "address": "isValidId",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "instant": "2020-10-11T15:09:26.710713Z",
+    "thread": "vert.x-eventloop-thread-5"
   },
-  "message": "03486761",
-  "instant": "2020-10-11T15:09:26.710136Z",
-  "thread": "vert.x-eventloop-thread-8"
-},
-{
-  "event": "MESSAGE_SENT",
-  "to": "isValidEmail",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
+  {
+    "event": "MESSAGE_RECEIVED",
+    "address": "isValidEmail",
+    "context": {
+      "email": [
+        "example@gmail.com"
+      ]
+    },
+    "instant": "2020-10-11T15:09:26.711165Z",
+    "thread": "vert.x-eventloop-thread-6"
   },
-  "message": "example@gmail.com",
-  "instant": "2020-10-11T15:09:26.710672Z",
-  "thread": "vert.x-eventloop-thread-8"
-},
-{
-  "event": "MESSAGE_RECEIVED",
-  "address": "isValidId",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
-  },
-  "instant": "2020-10-11T15:09:26.710713Z",
-  "thread": "vert.x-eventloop-thread-5"
-},
-{
-  "event": "MESSAGE_RECEIVED",
-  "address": "isValidEmail",
-  "context": {
-    "email": [
-      "example@gmail.com"
-    ]
-  },
-  "instant": "2020-10-11T15:09:26.711165Z",
-  "thread": "vert.x-eventloop-thread-6"
-},
-{
-  "event": "MESSAGE_RECEIVED",
-  "address": "isValid",
-  "context": {
-    "email": [
-      "imrafaelmerino@gmail.com"
-    ]
-  },
-  "instant": "2020-10-11T15:09:26.711854Z",
-  "thread": "vert.x-eventloop-thread-8"
-}
-{
-  "event": "MESSAGE_SENT",
-  "to": "isLegalAge",
-  "context": {
-    "email": [
-      "imrafaelmerino@gmail.com"
-    ]
-  },
-  "message": 17,
-  "instant": "2020-10-11T15:09:26.712138Z",
-  "thread": "vert.x-eventloop-thread-8"
-}
+  {
+    "event": "MESSAGE_RECEIVED",
+    "address": "isValid",
+    "context": {
+      "email": [
+        "imrafaelmerino@gmail.com"
+      ]
+    },
+    "instant": "2020-10-11T15:09:26.711854Z",
+    "thread": "vert.x-eventloop-thread-8"
+  }
+  {
+    "event": "MESSAGE_SENT",
+    "to": "isLegalAge",
+    "context": {
+      "email": [
+        "imrafaelmerino@gmail.com"
+      ]
+    },
+    "message": 17,
+    "instant": "2020-10-11T15:09:26.712138Z",
+    "thread": "vert.x-eventloop-thread-8"
+  }
 ]
 ```
 
@@ -1114,6 +1119,414 @@ Benchmark                  Mode  Cnt  Score   Error  Units
 Processes.deploy_undeploy  avgt   10  2.907 ± 0.658   s/op
 ```
 
+## <a name="http-client"><a/> Http Client
+
+Here's a comprehensive example demonstrating the effortless creation of an HTTP server, deployment of a handler using
+stubs, creation of an HTTP client module, and the sending of both GET and POST requests. Requesting data is simplified
+to the extent that it merely involves invoking lambdas that return HTTP responses encapsulated in JsObj.
+
+```java
+
+@ExtendWith(VertxExtension.class)
+public class HttpClientMethodsTests {
+
+    private static final int PORT = Port.number.incrementAndGet();
+    static HttpClientModule httpClient;
+
+    @BeforeAll
+    public static void prepare(final Vertx vertx,
+                               final VertxTestContext context
+                              ) {
+        VertxRef vertxRef = new VertxRef(vertx);
+        vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
+                                  System.out::println
+                                 );
+        httpClient = new HttpClientModule(new HttpClientOptions().setDefaultHost("0.0.0.0"),
+                                          "myhttp-client");
+
+        HttpRespStub mockReqResp =
+                HttpRespStub.when(ALWAYS)
+                            .setBodyResp(n -> body -> req -> JsObj.of("req_method",
+                                                                      JsStr.of(req.method()
+                                                                                  .name()
+                                                                              ),
+                                                                      "req_body",
+                                                                      JsStr.of(body.toString()),
+                                                                      "req_uri",
+                                                                      JsStr.of(req.uri())
+                                                                     )
+                                                                  .toPrettyString()
+                                        )
+                            .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE);
+
+        MapExp.seq("json-values-codecs",
+                   vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                   "http-server",
+                   new HttpServerBuilder(vertx,
+                                         new HttpReqHandlerStub(mockReqResp)
+                   ).create(PORT),
+                   "http-client",
+                   vertxRef.deployVerticle(httpClient)
+                  )
+              .get()
+              .onComplete(Verifiers.pipeTo(context));
+
+
+    }
+
+
+    @Test
+    public void testGet(VertxTestContext context) {
+        VIO<JsObj> getReq = httpClient.get.apply(HttpHeaders.headers()
+                                                            .set("method",
+                                                                 "get"
+                                                                ),
+                                                 new GetReq().port(PORT)
+                                                             .uri("example")
+                                                );
+        Verifiers.<JsObj>verifySuccess(resp -> {
+                     int status = HttpResp.STATUS_CODE_LENS.get.apply(resp);
+                     String bodyResp = HttpResp.STR_BODY_LENS.get.apply(resp);
+                     JsObj bodyJsObj = JsObj.parse(bodyResp);
+                     return bodyJsObj.getStr("req_method")
+                                     .equals("GET")
+                            && bodyJsObj.getStr("req_uri")
+                                        .equals("example")
+                            && bodyJsObj.getStr("req_body").isEmpty()
+                            && status == 200;
+                 })
+                 .accept(getReq,
+                         context
+                        );
+
+    }
+
+    @Test
+    public void testPost(VertxTestContext context) {
+        VIO<JsObj> postReq = httpClient.post.apply(HttpHeaders.headers()
+                                                              .set("method",
+                                                                   "post"
+                                                                  ),
+                                                   new PostReq("hi".getBytes())
+                                                           .port(PORT)
+                                                           .uri("example")
+                                                  );
+        Verifiers.<JsObj>verifySuccess(resp -> {
+                     Integer status = HttpResp.STATUS_CODE_LENS.get.apply(resp);
+                     String bodyResp = HttpResp.STR_BODY_LENS.get.apply(resp);
+                     JsObj bodyJsObj = JsObj.parse(bodyResp);
+                     return bodyJsObj.getStr("req_method")
+                                     .equals("POST")
+                            && bodyJsObj.getStr("req_uri")
+                                        .equals("example")
+                            && bodyJsObj.getStr("req_body")
+                                        .equals("hi")
+                            && status == 200;
+                 })
+                 .accept(postReq,
+                         context
+                        );
+    }
+
+
+}
+
+
+```
+
+You can harness the power of the `VIO` API to make requests with retry policies, as illustrated in the following
+example:
+
+```java
+
+@ExtendWith(VertxExtension.class)
+public class HttpClientTestRetryOnFailure {
+
+    private static final int PORT = Port.number.incrementAndGet();
+
+    static HttpClientModule httpClient;
+    static VertxRef vertxRef;
+    static HttpReqHandlerStub httpReqHandlerStub;
+
+    @BeforeAll
+    public static void prepare(final Vertx vertx,
+                               final VertxTestContext context
+                              ) {
+        vertxRef = new VertxRef(vertx);
+
+        vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
+                                  System.out::println
+                                 );
+        httpClient = new HttpClientModule(new HttpClientOptions().setDefaultHost("0.0.0.0"),
+                                          "myhttp-client");
+
+        HttpRespStub mockReqErrorResp =
+                HttpRespStub.when((n, req) -> n <= 3)
+                            .setStatusCodeResp(n -> body -> req -> 500)
+                            .setBodyResp(n -> body -> req -> "{}")
+                            .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE);
+
+        HttpRespStub mockReqErrorSuccess =
+                HttpRespStub.when((n, req) -> n > 3)
+                            .setStatusCodeResp(n -> body -> req -> 200)
+                            .setBodyResp(n -> body -> req -> "{}")
+                            .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE);
+
+        httpReqHandlerStub = new HttpReqHandlerStub(mockReqErrorResp,
+                                                    mockReqErrorSuccess
+        );
+        TripleExp.seq(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                      new HttpServerBuilder(vertx,
+                                            httpReqHandlerStub
+                      ).create(PORT),
+                      vertxRef.deployVerticle(httpClient)
+                     )
+                 .get()
+                 .onComplete(Verifiers.pipeTo(context));
+    }
+
+
+    @Test
+    public void test_retries(VertxTestContext context) {
+        Verifiers.<JsObj>verifySuccess(resp -> {
+                     Integer status = HttpResp.STATUS_CODE_LENS.get.apply(resp);
+                     return status == 200;
+                 })
+                 .accept(httpClient.get.apply(new GetReq().port(PORT)
+                                                          .uri("example")
+                                             )
+                                       .repeat(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
+                                               limitRetries(3)
+                                              ),
+                         context
+                        );
+
+    }
+
+
+    @Test
+    public void test_retries_constant_delay(VertxTestContext context) {
+        httpReqHandlerStub.resetCounter();
+
+        long tic = Instant.now()
+                          .toEpochMilli();
+
+        VIO<JsObj> getReq =
+                httpClient.get.apply(new GetReq().port(PORT)
+                                                 .uri("example")
+                                    )
+                              .repeat(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 500,
+                                      limitRetries(3).append(constantDelay(vertxRef.delay(Duration.ofMillis(100))))
+                                     );
+
+        Verifiers.<JsObj>verifySuccess(resp -> {
+            long elapsed = Instant.now()
+                                  .toEpochMilli() - tic;
+            int status = HttpResp.STATUS_CODE_LENS.get.apply(resp);
+            System.out.println(elapsed);
+            return status == 200 && elapsed >= 300;
+        }).accept(getReq,
+                  context
+                 );
+    }
+
+}
+
+
+```
+
+## <a name="oauth-client"><a/> Oauth Http client
+
+Creating an HTTP client with OAuth client credentials support is made exceptionally straightforward, liberating you from
+the intricacies of obtaining and refreshing tokens. The provided code showcases how to easily set up a resilient HTTP
+client using the VIO API, complete with token retrieval and automatic refresh. This not only streamlines the process but
+also enables you to seamlessly integrate retry policies and other reliability features.
+
+```java
+
+package vertx.effect.api.httpclient;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import jsonvalues.JsObj;
+import jsonvalues.JsStr;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import vertx.effect.*;
+import vertx.effect.api.Port;
+import vertx.effect.api.Verifiers;
+import vertx.effect.stub.http.*;
+import vertx.values.codecs.RegisterJsValuesCodecs;
+
+import java.util.List;
+
+import static jsonvalues.JsBool.FALSE;
+import static jsonvalues.JsBool.TRUE;
+import static vertx.effect.stub.http.HttpRespStub.*;
+
+@SuppressWarnings("ReturnValueIgnored")
+@ExtendWith(VertxExtension.class)
+public class ClientCredentialsModuleTest {
+
+    static ClientCredentialsModule httpClient;
+    static ClientCredentialsModuleBuilder builder;
+    static VertxRef vertxRef;
+    static int port = Port.number.incrementAndGet();
+
+
+    @BeforeAll
+    public static void prepare(final Vertx vertx,
+                               final VertxTestContext context
+                              ) {
+        builder =
+                new ClientCredentialsModuleBuilder(new HttpClientOptions().setDefaultPort(port)
+                                                                          .setDefaultHost("0.0.0.0"),
+                                                   "my-httpclient",
+                                                   new AccessTokenRequest("client_id",
+                                                                          "client_secret"
+                                                   ));
+
+        httpClient = builder.createModule();
+
+        vertxRef = new VertxRef(vertx);
+
+        vertxRef.registerConsumer(VertxRef.EVENTS_ADDRESS,
+                                  System.out::println
+                                 );
+
+        PairExp.seq(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                    vertxRef.deployVerticle(httpClient)
+                   )
+               .onComplete(Verifiers.pipeTo(context))
+               .get();
+
+    }
+
+
+    @Test
+    public void test_get_success_after_three_retries_getting_token(Vertx vertx,
+                                                                   VertxTestContext context
+                                                                  ) {
+
+
+        builder.setAccessTokenReqRetryPolicy(e -> true,
+                                             RetryPolicies.limitRetries(3)
+                                            );
+
+        List<HttpRespStub> httpRespStubs =
+                List.of(when(REQ_LET.apply(3))
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                            FALSE
+                                                                           )
+                                                                  )
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._401)
+                                .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE),
+                        when(FORTH_REQ)
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                            TRUE,
+                                                                            "access_token",
+                                                                            JsStr.of("foooo")
+                                                                           )
+                                                                  )
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._200)
+                                .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE),
+                        when(REQ_GT.apply(4))
+                                .setBodyResp(HttpBodyRespStub.cons(JsObj.of("name",
+                                                                            JsStr.of("Rafael")
+                                                                           ))
+                                            )
+                                .setStatusCodeResp(HttpStatusCodeRespStub._200)
+                                .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE));
+
+        VIO<JsObj> getReq = httpClient.getOauth.apply(new GetReq().uri("/name"));
+
+        new HttpServerBuilder(vertx,
+                              new HttpReqHandlerStub(httpRespStubs
+
+                              )
+        ).create(port)
+         .get()
+         .onSuccess(server -> {
+             Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                      .accept(getReq,
+                              context
+                             );
+         });
+
+    }
+
+    @Test
+    public void test_get_success_after_three_retries(Vertx vertx,
+                                                     VertxTestContext context
+                                                    ) {
+
+
+        new HttpServerBuilder(vertx,
+                              new HttpReqHandlerStub(HttpRespStub.when(REQ_LET.apply(3))
+                                                                 .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                                                             FALSE
+                                                                                                            )
+                                                                                                   )
+                                                                             )
+                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._401),
+                                                     HttpRespStub.when(FORTH_REQ)
+                                                                 .setBodyResp(HttpBodyRespStub.cons(JsObj.of("token_found",
+                                                                                                             TRUE,
+                                                                                                             "access_token",
+                                                                                                             JsStr.of("foooo")
+                                                                                                            )
+                                                                                                   )
+                                                                             )
+                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._200),
+                                                     HttpRespStub.when(REQ_LET.apply(7))
+                                                                 .setBodyResp(c -> body -> req -> {
+                                                                                  req.response().close();
+                                                                                  return "{}";
+                                                                              }
+                                                                             )
+                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._500),
+                                                     HttpRespStub.when(REQ_GT.apply(7))
+                                                                 .setBodyResp(HttpBodyRespStub.cons(JsObj.of("name",
+                                                                                                             JsStr.of("Rafael")
+                                                                                                            ))
+                                                                             )
+                                                                 .setStatusCodeResp(HttpStatusCodeRespStub._200)
+
+                              )
+        ).create(port)
+         .get()
+         .onSuccess(server -> Verifiers.<JsObj>verifySuccess(resp -> HttpResp.STATUS_CODE_LENS.get.apply(resp) == 200)
+                                       .accept(httpClient.getOauth.apply(new GetReq().uri("/name"))
+                                                                  .retry(RetryPolicies.limitRetries(3)),
+                                               context
+                                              ));
+
+
+    }
+
+}
+
+```
+
+## <a name="http-server"><a/> Http server
+
+TO be documented but implemented!
+
+## <a name="testing"><a/> Testing
+
+### <a name="vio-stubs"><a/> VIO stubs
+
+TO be documented but implemented!
+
+### <a name="http-stubs"><a/> Http server stubs
+
+TO be documented but implemented!
+
 ## <a name="requirements"><a/> Requirements
 
 Java 17 or greater
@@ -1127,7 +1540,8 @@ Java 17 or greater
     <artifactId>vertx-effect</artifactId>
     <version>4.0.0</version>
 </dependency>
+
 ```
 
-
+## <a name="rp"><a/> Related projects
 

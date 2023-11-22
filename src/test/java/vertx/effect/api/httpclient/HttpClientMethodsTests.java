@@ -1,11 +1,5 @@
 package vertx.effect.api.httpclient;
 
-import vertx.effect.*;
-import vertx.effect.api.Verifiers;
-import vertx.effect.DeleteReq;
-import vertx.effect.HttpServerBuilder;
-import vertx.values.codecs.RegisterJsValuesCodecs;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpHeaders;
@@ -16,12 +10,13 @@ import jsonvalues.JsStr;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import vertx.effect.*;
 import vertx.effect.api.Port;
+import vertx.effect.api.Verifiers;
 import vertx.effect.stub.http.HttpHeadersRespStub;
 import vertx.effect.stub.http.HttpReqHandlerStub;
 import vertx.effect.stub.http.HttpRespStub;
-
-import java.util.List;
+import vertx.values.codecs.RegisterJsValuesCodecs;
 
 import static vertx.effect.stub.http.HttpRespStub.ALWAYS;
 
@@ -55,17 +50,16 @@ public class HttpClientMethodsTests {
                                                                      )
                                                                   .toPrettyString()
                                         )
-                            .setHeadersResp(HttpHeadersRespStub.JSON);
+                            .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE);
 
-        TripleExp.seq(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                      new HttpServerBuilder(vertx,
-                                            new HttpReqHandlerStub(List.of(mockReqResp)
-                                            )
-                      ).start(PORT),
-                      vertxRef.deployVerticle(httpClient)
-                     )
-                 .get()
-                 .onComplete(Verifiers.pipeTo(context));
+        MapExp.seq("json-values-codecs", vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
+                   "http-server", new HttpServerBuilder(vertx,
+                                                        new HttpReqHandlerStub(mockReqResp
+                                                        )).create(PORT),
+                   "http-client", vertxRef.deployVerticle(httpClient)
+                  )
+              .get()
+              .onComplete(Verifiers.pipeTo(context));
 
 
     }
@@ -79,10 +73,10 @@ public class HttpClientMethodsTests {
                      JsObj bodyJsObj = JsObj.parse(bodyResp);
                      return bodyJsObj.get("req_method")
                                      .equals(JsStr.of("GET"))
-                             && bodyJsObj.get("req_uri")
-                                         .equals(JsStr.of("example"))
-                             && bodyJsObj.get("req_body")
-                                         .equals(JsStr.of("")) && status == 200;
+                            && bodyJsObj.get("req_uri")
+                                        .equals(JsStr.of("example"))
+                            && bodyJsObj.get("req_body")
+                                        .equals(JsStr.of("")) && status == 200;
                  })
                  .accept(httpClient.get.apply(HttpHeaders.headers()
                                                          .set("method",
@@ -104,10 +98,10 @@ public class HttpClientMethodsTests {
                      JsObj bodyJsObj = JsObj.parse(bodyResp);
                      return bodyJsObj.get("req_method")
                                      .equals(JsStr.of("POST"))
-                             && bodyJsObj.get("req_uri")
-                                         .equals(JsStr.of("example"))
-                             && bodyJsObj.get("req_body")
-                                         .equals(JsStr.of("hi")) && status == 200;
+                            && bodyJsObj.get("req_uri")
+                                        .equals(JsStr.of("example"))
+                            && bodyJsObj.get("req_body")
+                                        .equals(JsStr.of("hi")) && status == 200;
                  })
                  .accept(httpClient.post.apply(HttpHeaders.headers()
                                                           .set("method",
@@ -129,10 +123,10 @@ public class HttpClientMethodsTests {
                      JsObj bodyJsObj = JsObj.parse(bodyResp);
                      return bodyJsObj.get("req_method")
                                      .equals(JsStr.of("PUT"))
-                             && bodyJsObj.get("req_uri")
-                                         .equals(JsStr.of("example"))
-                             && bodyJsObj.get("req_body")
-                                         .equals(JsStr.of("hi")) && status == 200;
+                            && bodyJsObj.get("req_uri")
+                                        .equals(JsStr.of("example"))
+                            && bodyJsObj.get("req_body")
+                                        .equals(JsStr.of("hi")) && status == 200;
                  })
                  .accept(httpClient.put.apply(HttpHeaders.headers()
                                                          .set("method",
@@ -154,10 +148,10 @@ public class HttpClientMethodsTests {
                      JsObj bodyJsObj = JsObj.parse(bodyResp);
                      return bodyJsObj.get("req_method")
                                      .equals(JsStr.of("PATCH"))
-                             && bodyJsObj.get("req_uri")
-                                         .equals(JsStr.of("example"))
-                             && bodyJsObj.get("req_body")
-                                         .equals(JsStr.of("hi")) && status == 200;
+                            && bodyJsObj.get("req_uri")
+                                        .equals(JsStr.of("example"))
+                            && bodyJsObj.get("req_body")
+                                        .equals(JsStr.of("hi")) && status == 200;
                  })
                  .accept(httpClient.patch.apply(HttpHeaders.headers()
                                                            .set("method",
@@ -179,8 +173,8 @@ public class HttpClientMethodsTests {
                      JsObj bodyJsObj = JsObj.parse(bodyResp);
                      return bodyJsObj.get("req_method")
                                      .equals(JsStr.of("DELETE"))
-                             && bodyJsObj.get("req_uri")
-                                         .equals(JsStr.of("example")) && status == 200;
+                            && bodyJsObj.get("req_uri")
+                                        .equals(JsStr.of("example")) && status == 200;
 
                  })
                  .accept(httpClient.delete.apply(HttpHeaders.headers()
@@ -241,8 +235,8 @@ public class HttpClientMethodsTests {
             JsObj bodyJsObj = JsObj.parse(bodyResp);
             return bodyJsObj.get("req_method")
                             .equals(JsStr.of("OPTIONS"))
-                    && bodyJsObj.get("req_uri")
-                                .equals(JsStr.of("example")) && status == 200;
+                   && bodyJsObj.get("req_uri")
+                               .equals(JsStr.of("example")) && status == 200;
 
         }).accept(httpClient.options.apply(HttpHeaders.headers()
                                                       .set("method",
@@ -264,8 +258,8 @@ public class HttpClientMethodsTests {
                      JsObj bodyJsObj = JsObj.parse(bodyResp);
                      return bodyJsObj.get("req_method")
                                      .equals(JsStr.of("TRACE"))
-                             && bodyJsObj.get("req_uri")
-                                         .equals(JsStr.of("example")) && status == 200;
+                            && bodyJsObj.get("req_uri")
+                                        .equals(JsStr.of("example")) && status == 200;
 
                  })
                  .accept(httpClient.trace.apply(new TraceReq()

@@ -5,13 +5,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
-import vertx.effect.VIO;
 
 import java.util.Objects;
 
 /**
  * Provides a constructor to create http servers, and different methods to wrapped their deployment into a {@link VIO}.
- * It allows to define some interesting methods like {@link #startAtRandom(int, int)}, that deploys the server on the
+ * It allows to define some interesting methods like {@link #createAtRandom(int, int)}, that deploys the server on the
  * first free port it finds.
  */
 public class HttpServerBuilder {
@@ -39,19 +38,19 @@ public class HttpServerBuilder {
             );
     }
 
-    public VIO<HttpServer> startAtRandom(final int start,
-                                         final int end
-                                        ) {
-        return startAtRandom(DEFAULT_HOST,
-                             start,
-                             end
-                            );
+    public VIO<HttpServer> createAtRandom(final int start,
+                                          final int end
+                                         ) {
+        return createAtRandom(DEFAULT_HOST,
+                              start,
+                              end
+                             );
     }
 
-    public VIO<HttpServer> startAtRandom(final String localhost,
-                                         final int start,
-                                         final int end
-                                        ) {
+    public VIO<HttpServer> createAtRandom(final String localhost,
+                                          final int start,
+                                          final int end
+                                         ) {
         if (start > end) return VIO.fail(new IllegalArgumentException("start greater than end"));
         return startAtRandomRec(localhost,
                                 start,
@@ -64,28 +63,28 @@ public class HttpServerBuilder {
                                              final int end
                                             ) {
         if (start == end) return VIO.fail(new IllegalArgumentException("range of ports exhausted"));
-        return start(localhost,
-                     start
-                    ).recoverWith(error -> startAtRandomRec(localhost,
+        return create(localhost,
+                      start
+                     ).recoverWith(error -> startAtRandomRec(localhost,
                                                             start + 1,
                                                             end
                                                            )
                                  );
     }
 
-    public VIO<HttpServer> start(final String host,
-                                 final int port
-                                ) {
+    public VIO<HttpServer> create(final String host,
+                                  final int port
+                                 ) {
         return VIO.effect(() -> vertx.createHttpServer(options.setHost(host))
                                      .requestHandler(reqHandler)
                                      .listen(port, host)
                          );
     }
 
-    public VIO<HttpServer> start(final int port) {
-        return start(DEFAULT_HOST,
-                     port
-                    );
+    public VIO<HttpServer> create(final int port) {
+        return create(DEFAULT_HOST,
+                      port
+                     );
     }
 
 

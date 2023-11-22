@@ -52,12 +52,12 @@ public class HttpClientTestRetryOnFailure {
                 HttpRespStub.when((n, req) -> n <= 3)
                             .setStatusCodeResp(n -> body -> req -> 500)
                             .setBodyResp(n -> body -> req -> "{}")
-                            .setHeadersResp(HttpHeadersRespStub.JSON);
+                            .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE);
         HttpRespStub mockReqErrorSuccess =
                 HttpRespStub.when((n, req) -> n > 3)
                             .setStatusCodeResp(n -> body -> req -> 200)
                             .setBodyResp(n -> body -> req -> "{}")
-                            .setHeadersResp(HttpHeadersRespStub.JSON);
+                            .setHeadersResp(HttpHeadersRespStub.JSON_CONTENT_TYPE);
 
         httpReqHandlerStub = new HttpReqHandlerStub(List.of(mockReqErrorResp,
                                                             mockReqErrorSuccess
@@ -65,7 +65,7 @@ public class HttpClientTestRetryOnFailure {
         TripleExp.seq(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
                       new HttpServerBuilder(vertx,
                                             httpReqHandlerStub
-                      ).start(PORT),
+                      ).create(PORT),
                       vertxRef.deployVerticle(httpClient)
                      )
                  .get()

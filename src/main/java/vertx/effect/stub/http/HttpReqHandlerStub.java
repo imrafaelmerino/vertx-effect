@@ -21,6 +21,8 @@ public final class HttpReqHandlerStub implements Handler<HttpServerRequest> {
         this.mockReqResp = Objects.requireNonNull(mockReqResp);
     }
 
+
+
     public HttpReqHandlerStub(final HttpRespStub... mockReqResp) {
         this.mockReqResp = Arrays.stream(Objects.requireNonNull(mockReqResp)).collect(Collectors.toList());
     }
