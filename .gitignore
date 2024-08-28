@@ -1,0 +1,9 @@
+.idea/
+target
+vertx-effect-recording.jfr
+vertx-effect.iml
+../.idea/
+.DS_Store
+.idea/**
+deploy.sh
+settings.xml
