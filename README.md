@@ -121,8 +121,8 @@ persistent
 Json across the event bus.
 
 ```java   
-import VIO.vertx.core.Vertx;
-import VIO.vertx.junit5.*;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import jsonvalues.JsArray;
@@ -265,7 +265,7 @@ an effect is in vertx-effect:
 ```code   
 
 import java.util.function.Supplier
-import VIO.vertx.core.Future
+import io.vertx.core.Future
 
 public abstract class VIO<O> extends Supplier<Future<O>> {
     //from a constant
@@ -839,7 +839,7 @@ In vertx-effect is really easy! As always, functions and composition come to the
 let's see what a `Lambdac` is:
 
 ```code   
-import VIO.vertx.core.MultiMap;
+import io.vertx.core.MultiMap;
 
 public interface Lambdac<I, O> extends BiFunction<MultiMap, I, VIO<O>> {}
 
