@@ -1539,3 +1539,5 @@ Java 21 or greater
 
 ## <a name="rp"><a/> Related projects
 
+- [vertx-mongodb-effect](https://github.com/imrafaelmerino/vertx-mongodb-effect)
+- [vertx-values](https://github.com/imrafaelmerino/vertx-values)
