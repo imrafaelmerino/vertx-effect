@@ -21,7 +21,7 @@
 - [Installation](#installation)
 - [Related projects](#rp)
 
-[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/4.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/4.0.0/jar)
+[![Maven](https://img.shields.io/maven-central/v/com.github.imrafaelmerino/vertx-effect/5.0.0)](https://search.maven.org/artifact/com.github.imrafaelmerino/vertx-effect/5.0.0/jar)
 
 ## <a name="manifesto"><a/> vertx-effect manifesto
 
@@ -1519,6 +1519,20 @@ Java 17 or greater
     <groupId>com.github.imrafaelmerino</groupId>
     <artifactId>vertx-effect</artifactId>
     <version>4.0.0</version>
+</dependency>
+
+```
+
+Java 21 or greater
+
+## <a name="installation"><a/> Installation
+
+```xml
+
+<dependency>
+    <groupId>com.github.imrafaelmerino</groupId>
+    <artifactId>vertx-effect</artifactId>
+    <version>5.0.0</version>
 </dependency>
 
 ```
