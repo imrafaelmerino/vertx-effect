@@ -1,5 +1,8 @@
 <img src="./logo/package_twitter_swe2n4mg/black/full/coverphoto/black_logo_white_background.png" alt="logo"/>
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-%E2%98%95%20Support-yellow)](https://www.buymeacoffee.com/imrafaelmerino)
+
+
 - [vertx-effect manifesto](#manifesto)
 - [How persistent data structures makes a difference working with actors](#persistendata)
 - [vertx-effect in a few lines of code](#fewlinesofcode)
@@ -8,15 +11,15 @@
 - [Being reactive](#reactive)
 - [Modules](#modules)
 - [Logging](#logging)
-    - [Publishing events](#events)
-    - [Publishing correlated events](#correlated-events)
+  - [Publishing events](#events)
+  - [Publishing correlated events](#correlated-events)
 - [Spawning verticles](#spawning-verticles)
 - [Http client](#http-client)
 - [Oauth Http client](#oauth-client)
 - [Http server](#http-server)
 - [Testing](#testing)
-    - [VIO stubs](#vio-stubs)
-    - [Http server stubs](#http-stubs)
+  - [VIO stubs](#vio-stubs)
+  - [Http server stubs](#http-stubs)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Related projects](#rp)
@@ -34,13 +37,13 @@
 
 ## <a name="persistendata"><a/>How persistent data structures makes a difference working with actors
 
-Vertx-effect embraces immutability and persistent data structures.
-That's why it uses [vertx-values](https://github.com/imrafaelmerino/vertx-values) instead of the
-default Vert.x Json which is very inefficient.
+Vertx-effect embraces immutability and persistent data structures. That's why it uses
+[vertx-values](https://github.com/imrafaelmerino/vertx-values) instead of the default Vert.x Json
+which is very inefficient.
 
 ## <a name="fewlinesofcode"><a/>vertx-effect in a few lines of code
 
-```code  
+```code
 public class MyModule extends VertxModule {
 
     public static Lambda<String, String> toLowerCase, toUpperCase;
@@ -60,7 +63,7 @@ public class MyModule extends VertxModule {
                     (Integer n) -> VIO.succeed(n + 1)
                    );
 
-        // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]} 
+        // json-values uses specs to define the structure of a Json: {a:int,b:[str,str]}
         JsObjSpec spec = JsObjSpec.of("a", integer(),
                                       "b", tuple(str(), str())
                                      );
@@ -97,30 +100,27 @@ public class MyModule extends VertxModule {
 }
 ```
 
-**A module is a regular verticle that deploys other verticles and exposes lambdas to communicate with them**.
-A lambda is just a function that takes an input and produces an output. In the above example, `MyModule` deploys
-five verticles. It's worth mentioning how the verticle `ValidateAndMap` is defined using composition and the expressions
-`JsObjExp` and `JsArrayExp`. It shows the essence and the goal of vertx-effect. Later on, we'll see more expressions
-like
-`CondExp`, `SwitchExp`, `IfElseExp`, `AllExp`, `AnyExp`, `PairExp`, `TripleExp`, `ListExp`,
-`MapExp` etc.
+**A module is a regular verticle that deploys other verticles and exposes lambdas to communicate
+with them**. A lambda is just a function that takes an input and produces an output. In the above
+example, `MyModule` deploys five verticles. It's worth mentioning how the verticle `ValidateAndMap`
+is defined using composition and the expressions `JsObjExp` and `JsArrayExp`. It shows the essence
+and the goal of vertx-effect. Later on, we'll see more expressions like `CondExp`, `SwitchExp`,
+`IfElseExp`, `AllExp`, `AnyExp`, `PairExp`, `TripleExp`, `ListExp`, `MapExp` etc.
 
-`ValidateAndMap` sends a message to `validate`. If the message matches the given spec, `ValidateAndMap` computes the
-output
-sending messages to the verticles `inc`, `toLowerCase`, and `toUpperCase` and composing a Json from their responses in
-parallel.
-You can operate sequentially instead of in parallel using the constructors `JsObjExp.seq` and `JsArrayExp.sequential`.
-Thanks to the `retry` function, if `any` verticle failed to compute their value, it would retry the computation up to
-two times.
+`ValidateAndMap` sends a message to `validate`. If the message matches the given spec,
+`ValidateAndMap` computes the output sending messages to the verticles `inc`, `toLowerCase`, and
+`toUpperCase` and composing a Json from their responses in parallel. You can operate sequentially
+instead of in parallel using the constructors `JsObjExp.seq` and `JsArrayExp.sequential`. Thanks to
+the `retry` function, if `any` verticle failed to compute their value, it would retry the
+computation up to two times.
 
-It's important to notice that you can still send messages to the module verticles using the Vertx API, but one of the
-points of vertx-effect is to use functions for that.
+It's important to notice that you can still send messages to the module verticles using the Vertx
+API, but one of the points of vertx-effect is to use functions for that.
 
-Let's write some tests. Vertx doesn't support json-values, so we need to register a `MessageCodec` to send its
-persistent
-Json across the event bus.
+Let's write some tests. Vertx doesn't support json-values, so we need to register a `MessageCodec`
+to send its persistent Json across the event bus.
 
-```java   
+```java
 import io.vertx.core.Vertx;
 import io.vertx.junit5.*;
 import org.junit.jupiter.api.*;
@@ -183,7 +183,7 @@ public class TestMyModule {
 
 **Lambdas are just functions, so you can test them without deploying any verticle!**
 
-```code  
+```code
 
  Lambda<String, String> toLowerCase = str -> VIO.succeed(str.toLowerCase());
 
@@ -201,12 +201,12 @@ public class TestMyModule {
                                              toUpperCase.apply(obj.getStr(path("/b/1"))).map(JsStr::of)
                                             )
                         );
- 
+
  @Test
  public void valid_json_is_validated_and_mapped(VertxTestContext context) {
 
     JsObj input = JsObj.of("a", JsInt.of(1), "b", JsArray.of("FOO","foo"));
-        
+
     JsObj expected = JsObj.of("a", JsInt.of(2), "b", JsArray.of("foo","FOO"));
 
     validate.then(map)
@@ -222,18 +222,19 @@ public class TestMyModule {
 ```
 
 **This is extremely convenient and productive to do your testing. You don't need to mock anything.
-Passing around functions that produce outputs given some inputs is enough to check that your verticles
-will do their job.**
+Passing around functions that produce outputs given some inputs is enough to check that your
+verticles will do their job.**
 
 **The takeaway from this section is how using function composition and different expressions, you'll
 be able to handle complexity and implement and test any imaginable flow very quickly.**
 
 ## <a name="effects"><a/> Effects
 
-Functional Programming is all about working with pure functions and values. That's all. **One of the points where FP
-especially shines is dealing with effects**. An effect is something you can't call twice unless you intended to:
+Functional Programming is all about working with pure functions and values. That's all. **One of the
+points where FP especially shines is dealing with effects**. An effect is something you can't call
+twice unless you intended to:
 
-```code 
+```code
 
 Future<Customer> a = insertDb(customer);
 
@@ -241,10 +242,11 @@ Future<Customer> b = insertDb(customer);
 
 ```
 
-Both calls can fail, or they can create two different customers, or one of them can fail, who knows. That code is not
-referentially transparent. For obvious reasons, you can't do the following refactoring:
+Both calls can fail, or they can create two different customers, or one of them can fail, who knows.
+That code is not referentially transparent. For obvious reasons, you can't do the following
+refactoring:
 
-```code  
+```code
 
 Future<Customer> c = insertDb(customer)
 
@@ -254,15 +256,15 @@ Future<Customer> b = c;
 
 ```
 
-A Vertx future represents an asynchronous effect. We don't want to block the event loop because
-of the latency of a computation.
-**Haskell** has proven to us how laziness is an essential property to stay pure. We need to define
-an immutable and lazy data structure that allows us to control the effect of latency.
+A Vertx future represents an asynchronous effect. We don't want to block the event loop because of
+the latency of a computation. **Haskell** has proven to us how laziness is an essential property to
+stay pure. We need to define an immutable and lazy data structure that allows us to control the
+effect of latency.
 
 Since Java 8, we have suppliers. They are indispensable to do FP in Java. Let's start defining what
 an effect is in vertx-effect:
 
-```code   
+```code
 
 import java.util.function.Supplier
 import io.vertx.core.Future
@@ -270,23 +272,23 @@ import io.vertx.core.Future
 public abstract class VIO<O> extends Supplier<Future<O>> {
     //from a constant
     public static VIO<O> succeed(O constant);
-    
+
     //from a exception
     public static VIO<O> fail(Throwable error);
-    
+
     // from an effect
     public static VIO<O> effect(Supplier<Future<O>> effect);
-    
+
 }
 
 ```
 
-A **VIO** of type **O** is a supplier that will return a Vertx future of type **O**.
-**It describes (and not execute) an asynchronous effect that will compute a value of type O**.
+A **VIO** of type **O** is a supplier that will return a Vertx future of type **O**. **It describes
+(and not execute) an asynchronous effect that will compute a value of type O**.
 
 If we turn Future into VIO in the previous example:
 
-```code 
+```code
 
 VIO<Customer> a = VIO.effect( () -> insertDb(customer) );
 
@@ -296,9 +298,9 @@ VIO<Customer> b = VIO.effect( () -> insertDb(customer) );
 
 The above example is entirely equivalent to:
 
-```code  
+```code
 
-VIO<Customer> c = VIO.effect( ()->insertDb(customer) ); 
+VIO<Customer> c = VIO.effect( ()->insertDb(customer) );
 
 VIO<Customer> a = c;
 
@@ -306,15 +308,14 @@ VIO<Customer> b = c;
 
 ```
 
-This property is fundamental. Whenever you see the expression `insertDb(customer)`
-in your program, you can think of it as it was c. Pure FP programming helps us reason
-about the programs we write. VIO is lazy. It's a description
-of an effect. **In FP, we describe programs, and it's at the very last moment when
-they're executed.**
+This property is fundamental. Whenever you see the expression `insertDb(customer)` in your program,
+you can think of it as it was c. Pure FP programming helps us reason about the programs we write.
+VIO is lazy. It's a description of an effect. **In FP, we describe programs, and it's at the very
+last moment when they're executed.**
 
 I always wanted to name **Lambda** to something, and I finally got the chance!
 
-```code  
+```code
 
 import java.util.function.Function
 
@@ -322,34 +323,34 @@ public interface Lambda<I,O> extends Function<I, VIO<O>> { }
 
 ```
 
-A lambda is a function that returns a **VIO** of type **O** given a type **I**.
-**It models the communication with a verticle**: a message is sent, the verticle
-receives and processes the message, and replies with a response.
-The message and the answer have to be of a type that can be sent across the event bus;
-otherwise, you must implement a [MessageCodec](https://vertx.io/docs/apidocs/io/vertx/core/eventbus/MessageCodec.html).
+A lambda is a function that returns a **VIO** of type **O** given a type **I**. **It models the
+communication with a verticle**: a message is sent, the verticle receives and processes the message,
+and replies with a response. The message and the answer have to be of a type that can be sent across
+the event bus; otherwise, you must implement a
+[MessageCodec](https://vertx.io/docs/apidocs/io/vertx/core/eventbus/MessageCodec.html).
 
 ## <a name="exp"><a/> Expressions
 
-**Using expressions and function composition is how we deal with complexity in functional programming**.
-Let's go over the essential expressions in vertx-effect:
+**Using expressions and function composition is how we deal with complexity in functional
+programming**. Let's go over the essential expressions in vertx-effect:
 
 - **VIO constructors**
 
-```code   
-VIO<String> str = VIO.succeed("hi"); 
+```code
+VIO<String> str = VIO.succeed("hi");
 
 VIO<Throwable> error = VIO.fail(new RuntimeException("something went wrong :("));
 
 Future<JsObj> getProfile(final String id){...}
-VIO<JsObj> profile = VIO.effect( () -> getProfile(id)); 
+VIO<JsObj> profile = VIO.effect( () -> getProfile(id));
 
 VIO<Long> realTime = VIO.effect(() -> System.currentTimeMillis() );
-``` 
+```
 
 - **IfElseExp**. If the condition is evaluated to true, it computes and returns the consequence;
   otherwise, the alternative.
 
-```code   
+```code
 
 import jio.IfElseExp;
 
@@ -365,36 +366,35 @@ import jio.IfElseExp;
 
 The alternative and the consequence are lazy computations of IO effects.
 
-- **SwitchExp**. The switch construct implements multiple pattern-value branches.
-  It evaluates an effect or value of type I and allows multiple clauses based on
-  evaluating that value.
+- **SwitchExp**. The switch construct implements multiple pattern-value branches. It evaluates an
+  effect or value of type I and allows multiple clauses based on evaluating that value.
 
-```code   
+```code
 
 // matches a value of type I
 
- VIO<O> exp = 
+ VIO<O> exp =
   SwitchExp<I,O>.match(I value)
                 .patterns(I pattern1, Lambda<I,O> lambda1,
-                          I pattern2, Lambda<I,O> lambda2,           
+                          I pattern2, Lambda<I,O> lambda2,
                           I pattern3, Lambda<I,O> lambda3,
                           Lambda<I,O> otherwise
-                          );      
+                          );
 
 // matches an effect of type I
-                          
- VIO<O> exp = 
+
+ VIO<O> exp =
   SwitchExp<I,O>.match(VIO<I> value)
                 .patterns(I pattern1, Lambda<I,O> lambda1,
-                          I pattern2, Lambda<I,O> lambda2,           
+                          I pattern2, Lambda<I,O> lambda2,
                           I pattern3, Lambda<I,O> lambda3,
                           Lambda<I,O> otherwise
-                          );                               
-                          
+                          );
+
 
 // For example, the following expression reduces to "Wednesday"
 
- VIO<O> exp = 
+ VIO<O> exp =
   SwitchExp<Integer,String>.match(3)
                            .patterns(1, _ -> VIO.succeed("Monday"),
                                      2, _ -> VIO.succeed("Tuesday"),
@@ -407,17 +407,17 @@ The alternative and the consequence are lazy computations of IO effects.
 
 The same as before but using lists instead of constants as patterns.
 
-```code   
+```code
 
  VIO<O> exp = SwitchExp<I,O>.match(I value)
                           .patterns(List<I> pattern1, Lambda<I,O> lambda1,
-                                    List<I> pattern2, Lambda<I,O> lambda2,        
+                                    List<I> pattern2, Lambda<I,O> lambda2,
                                     List<I> pattern3, Lambda<I,O> lambda3,
                                     Lambda<I,O> otherwise
-                                   );      
-        
+                                   );
+
 // For example, the following expression reduces to "third week"
- VIO<O> exp = 
+ VIO<O> exp =
   SwitchExp<Integer,String>.match(20)
                            .patterns(List.of(1, 2, 3, 4, 5, 6, 7), _ -> VIO.succeed("first week"),
                                      List.of(8, 9, 10, 11, 12, 13, 14), _ -> VIO.succeed("second week"),
@@ -429,19 +429,19 @@ The same as before but using lists instead of constants as patterns.
 
 Last but not least, you can use predicates as patterns instead of values or list of values:
 
-```code   
+```code
 
- VIO<O> exp = 
+ VIO<O> exp =
   SwitchExp<I,O>.match(VIO<I> value)
                 .patterns(Predicate<I> pattern1, Lambda<I,O> lambda1,
-                          Predicate<I> pattern2, Lambda<I,O> lambda2,        
+                          Predicate<I> pattern2, Lambda<I,O> lambda2,
                           Predicate<I> pattern3, Lambda<I,O> lambda3,
                           Lambda<I,O> otherwise
-                          );      
-        
+                          );
+
 // For example, the following expression reduces to the default value, "greater or equal to twenty"
 
- VIO<O> exp = 
+ VIO<O> exp =
   SwitchExp<Integer,String>.match(IO.succeed(20))
                            .patterns(i -> i < 5 , _ -> VIO.succeed("lower than five"),
                                      i -> i < 10 , _ -> VIO.succeed("lower than ten"),
@@ -450,34 +450,34 @@ Last but not least, you can use predicates as patterns instead of values or list
                                     );
 ```
 
-- **CondExp**. It's a set of branches, and a default value. Each branch consists of an
-  effect that computes a boolean (the condition) and its associated effect. The effect is
-  computed and the expression reduced to its value if its condition is the first one in the
-  list to be true. This means the order you place branches matters.
-  If no condition is true, it computes the default effect, which is the last clause.
-  You can compute all the conditions values either in parallel or sequentially.
+- **CondExp**. It's a set of branches, and a default value. Each branch consists of an effect that
+  computes a boolean (the condition) and its associated effect. The effect is computed and the
+  expression reduced to its value if its condition is the first one in the list to be true. This
+  means the order you place branches matters. If no condition is true, it computes the default
+  effect, which is the last clause. You can compute all the conditions values either in parallel or
+  sequentially.
 
-```code   
+```code
 
  VIO<O> exp = CondExp.<O>seq(VIO<Boolean> cond1, Supplier<VIO<O>> effect1,
                              VIO<Boolean> cond2, Supplier<VIO<O>> effect2,
                              VIO<Boolean> cond3, Supplier<VIO<O>> effect3,
                              Supplier<VIO<O>> otherwise
                           );
-                          
-                          
+
+
  VIO<O> exp = CondExp.<O>par(VIO<Boolean> cond1, Supplier<VIO<O>> effect1,
                              VIO<Boolean> cond2, Supplier<VIO<O>> effect2,
                              VIO<Boolean> cond3, Supplier<VIO<O>> effect3,
                              Supplier<VIO<O>> otherwise
-                          );                          
-                        
-``` 
+                          );
 
-- `AllExp` and `AnyExp`. They are just idiomatic names for the boolean expressions
-  And and Or. You can compute all the boolean effects either in parallel or sequentially.
+```
 
-```code  
+- `AllExp` and `AnyExp`. They are just idiomatic names for the boolean expressions And and Or. You
+  can compute all the boolean effects either in parallel or sequentially.
+
+```code
 
  VIO<Boolean> all = AllExp.par(VIO<Boolean> cond1, VIO<Boolean> cond2, ....);
  VIO<Boolean> all = AllExp.seq(VIO<Boolean> cond1, VIO<Boolean> cond2, ....);
@@ -485,12 +485,12 @@ Last but not least, you can use predicates as patterns instead of values or list
  VIO<Boolean> any = AnyExp.par(VIO<Boolean> cond1, VIO<Boolean> cond2, ...);
  VIO<Boolean> any = AnyExp.seq(VIO<Boolean> cond1, VIO<Boolean> cond2, ...);
 
-```  
+```
 
-- **PairExp**. A pair is a tuple of two elements. Each element can be computed
-  either in parallel or sequentially.
+- **PairExp**. A pair is a tuple of two elements. Each element can be computed either in parallel or
+  sequentially.
 
-```code   
+```code
 
  VIO<Pair<A,B> pair = PairExp.par(VIO<A> val1, VIO<B> val2);
 
@@ -498,10 +498,9 @@ Last but not least, you can use predicates as patterns instead of values or list
 
 ```
 
-You can race pairs when A and B have the same type, returning the first value
-that is computed:
+You can race pairs when A and B have the same type, returning the first value that is computed:
 
-```code   
+```code
 
  VIO<Pair<A,A> pair = PairExp.par(VIO<A> val1, VIO<A> val2);
 
@@ -509,10 +508,10 @@ that is computed:
 
 ```
 
-- **TripleExp**. A triple is a tuple of three elements. Each element can be
-  computed either in parallel or sequentially.
+- **TripleExp**. A triple is a tuple of three elements. Each element can be computed either in
+  parallel or sequentially.
 
-```code   
+```code
 
  VIO<Triple<A,B,C> triple = TripleExp.par(VIO<A> val1, VIO<B> val2, VIO<C> val3);
 
@@ -524,18 +523,17 @@ You can also race triples.
 
 - **JsObjExp** and **JsArrayExp**.
 
-`JsObjExp` and `JsArrayExp` are data structures that look like raw Json.
-You can compute all the values either in parallel or sequentially. You can mix
-all the expressions we've seen so far and nest them, going as deep as
-necessary, like in the following example:
+`JsObjExp` and `JsArrayExp` are data structures that look like raw Json. You can compute all the
+values either in parallel or sequentially. You can mix all the expressions we've seen so far and
+nest them, going as deep as necessary, like in the following example:
 
-```code   
+```code
 
 IfElseExp<JsStr> a = IfElseExp.<JsStr>predicate(VIO<Boolean> condition)
                                      .consequence(VIO<JsStr> consequence)
-                                     .alternative(VIO<JsStr> alternative); 
+                                     .alternative(VIO<JsStr> alternative);
 
-JsArrayExp b = 
+JsArrayExp b =
         JsArrayExp.seq(SwitchExp<Integer,JsValue>.match(n)
                                                  .patthers(1, Lambda<Insteger,JsValue> lambda1,
                                                            2, Lambda<Insteger,JsValue> lambda2,
@@ -547,33 +545,32 @@ JsArrayExp b =
                                 )
                       );
 
-JsObjExp c = 
+JsObjExp c =
        JsObjExp.par("d", AnyExp.seq(VIO<Boolean> cond3, VIO<Boolean> cond4)
                                .map(JsBool::of),
                     "e", AllExp.par(VIO<Boolean> cond5, VIO<Boolean> cond6)
                                .map(JsBool::of),
-                    "f", JsArrayExp.par(VIO<JsValue> value1, VIO<JsValue> value2) 
+                    "f", JsArrayExp.par(VIO<JsValue> value1, VIO<JsValue> value2)
                    )
 
 JsObjExp exp = JsObjExp.par("a", a,
                             "b", b,
-                            "c", c 
+                            "c", c
                            );
-                           
-JsObj json = exp.result();                          
+
+JsObj json = exp.result();
 ```
 
-It's important to notice that any value of the above expressions can be computed
-by different verticles deployed on different machine's of a cluster.
-Imagine ten machines collaborating to compute a JsObj. Isn't this amazing?
+It's important to notice that any value of the above expressions can be computed by different
+verticles deployed on different machine's of a cluster. Imagine ten machines collaborating to
+compute a JsObj. Isn't this amazing?
 
 - **ListExp and MapExp**
 
-They represent sequences and maps. **Modules use them internally**. For example,
-the `deploy` method uses a MapExp to put the deployed verticles using their addresses
-as keys. They also use a ListExp when more than a verticle instance is deployed.
-As with the other expressions, you can compute their values either in parallel or
-sequentially.
+They represent sequences and maps. **Modules use them internally**. For example, the `deploy` method
+uses a MapExp to put the deployed verticles using their addresses as keys. They also use a ListExp
+when more than a verticle instance is deployed. As with the other expressions, you can compute their
+values either in parallel or sequentially.
 
 ```
 
@@ -594,7 +591,7 @@ The `race` function returns the value that finishes first. You can race a `JsArr
 Find below some of the most critical operations defined in the `Val` interface that will help us
 make our code more resilient:
 
-```code   
+```code
 import vertx.effect.RetryPolicy;
 
 public interface VIO<O> extends Supplier<Future<O>> {
@@ -612,47 +609,48 @@ public interface VIO<O> extends Supplier<Future<O>> {
 
     VIO<O> recoverWith(Lambda<Throwable, O> fn);
 }
- ``` 
+```
 
-**recoverWith**:  it switches to an alternative lambda when a failure happens.
+**recoverWith**: it switches to an alternative lambda when a failure happens.
 
-**fallbackTo**: It's like recoverWith, but if the second lambda fails too, it returns the first one error.
+**fallbackTo**: It's like recoverWith, but if the second lambda fails too, it returns the first one
+error.
 
 **recover**: returns a constant if the computation fails.
 
 **retry**: retries the computation if an error happens. You can define a predicate to retry only the
 specified errors. Retry policies are created in a very declarative and composable way, for example:
 
-```code   
+```code
 import static vertx.effect.RetryPolicies.*
 
 Delay oneHundredMillis = vertxRef.sleep(Duration.ofMillis(100));
 Delay oneSec = vertxRef.sleep(Duration.ofSeconds(1));
 
-// up to five retries waiting 100 ms 
+// up to five retries waiting 100 ms
 constantDelay(oneHundredMillis).append(limitRetries(5))
 
-//during 3 seconds up to 10 times     
-limitRetries(10).limitRetriesByCumulativeDelay(Duration.ofSeconds(3))    
+//during 3 seconds up to 10 times
+limitRetries(10).limitRetriesByCumulativeDelay(Duration.ofSeconds(3))
 
 //5 times without timer and then, if it keeps failing, an incremental timer from 100 ms up to 1 second
 limiteRetries(5).followedBy(incrementalDelay(oneHundredMillis).capDelay(oneSec))
 
 ```
 
-There are very interesting policies implemented based
-on [this article](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/):
-exponential backoff, full jitter, equal jitter, decorrelated jitter etc
+There are very interesting policies implemented based on [this
+article](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/): exponential
+backoff, full jitter, equal jitter, decorrelated jitter etc
 
-**repeat**: When you get a not expected value (a failure) and want to repeat the computation.
-A predicate is specified to catch the failures. You can define any imaginable policy as well.
-Imagine you make a http request and you get a 500. That's not an error, it's a server failure.
-You can repeat the request according to a policy.
+**repeat**: When you get a not expected value (a failure) and want to repeat the computation. A
+predicate is specified to catch the failures. You can define any imaginable policy as well. Imagine
+you make a http request and you get a 500. That's not an error, it's a server failure. You can
+repeat the request according to a policy.
 
-For expressions like **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, you can retry
-each value of the expression instead of the overall expresion with the methods:
+For expressions like **Cond**, **Case**, **IfElse**, **All**, **Any**, **Pair**, **Triple**, you can
+retry each value of the expression instead of the overall expresion with the methods:
 
-```code   
+```code
  VIO<O> retryEach(RetryPolicy policy);
 
  VIO<O> retryEach(Predicate<Throwable>,
@@ -662,10 +660,10 @@ each value of the expression instead of the overall expresion with the methods:
 
 ## <a name="modules"><a/> Modules
 
-In vertx-effect, **a module is a special verticle whose purpose is to deploy other verticles and expose lambdas
-to communicate with them**. Let's put an example.
+In vertx-effect, **a module is a special verticle whose purpose is to deploy other verticles and
+expose lambdas to communicate with them**. Let's put an example.
 
-```code   
+```code
 import jsonvalues.JsObj;
 import jsonvalues.JsStr;
 import vertx.effect.VIO;
@@ -708,23 +706,23 @@ We usually divide modules into four main blocks:
     . The `deploy` method, where the module deploys the verticles.
     . The `initialize` method, where the module initializes the lambdas.
 
-In our example, we are using the persistent and immutable Json from json-values.
-The **ask** method returns a lambda to establish bidirectional communication with a verticle.
-In contrast, the **tell** method would return a consumer because a response is either not expected
-or ignored. Let's deploy our module and do some testing. We usually divide modules into four main blocks:
+In our example, we are using the persistent and immutable Json from json-values. The **ask** method
+returns a lambda to establish bidirectional communication with a verticle. In contrast, the **tell**
+method would return a consumer because a response is either not expected or ignored. Let's deploy
+our module and do some testing. We usually divide modules into four main blocks:
 
-```code   
+```code
  @BeforeAll
  public static void prepare(final Vertx vertx,
-                            final VertxTestContext context) 
+                            final VertxTestContext context)
  {
     VertxRef vertxRef = new VertxRef(vertx);
 
     // prints out events published by vertx-effect
-    vertxRef.registerConsumer(EVENTS_ADDRESS, System.out::println); 
+    vertxRef.registerConsumer(EVENTS_ADDRESS, System.out::println);
 
     Pair.seq(vertxRef.deployVerticle(new RegisterJsValuesCodecs()),
-                    vertxRef.deployVerticle(new MyModule()) 
+                    vertxRef.deployVerticle(new MyModule())
                    )
         .onSuccess(pair -> {
                             System.out.println(String.format("Ids deployed: %s and %s",
@@ -769,30 +767,28 @@ or ignored. Let's deploy our module and do some testing. We usually divide modul
 ```
 
 To send the persistent objects from [json-values](https://imrafaelmerino.github.io/json-values/)
-across the event bus, we need to register some codecs. The verticle RegisterJsValuesCodecs does
-this task. The VertxRef class is a wrapper around the Vertx instance to deploy and spawn verticles
-from lambdas. Modules use this class internally.
+across the event bus, we need to register some codecs. The verticle RegisterJsValuesCodecs does this
+task. The VertxRef class is a wrapper around the Vertx instance to deploy and spawn verticles from
+lambdas. Modules use this class internally.
 
-The `VertxRef` class is a wrapper around the Vertx instance to deploy and spawn verticles from lambdas.
-Modules use this class internally.
+The `VertxRef` class is a wrapper around the Vertx instance to deploy and spawn verticles from
+lambdas. Modules use this class internally.
 
 ## <a name="logging"><a/> Logging
 
-Logging is essential in software. There are many logging libraries. Sometimes it is not clear
-what dependencies you have to use because there isn't a standard solution. Each library uses
-its own. I didn't want to be opinionated. At the same time, I wanted to provide a simple and
-decouple solution to know what is going on in any system using vertx-effect.
-That's why I decided to publish remarkable events in a specific address. If you want to use your
-favorite slf4j implementation, just implement it in a consumer. On the other hand, consuming all
-those events during testing will give you instant feedback
-on your system and agility spotting bugs. You can disable this future with the Java system
-property **-D"vertx.effect.enable.log.events"=false**.
+Logging is essential in software. There are many logging libraries. Sometimes it is not clear what
+dependencies you have to use because there isn't a standard solution. Each library uses its own. I
+didn't want to be opinionated. At the same time, I wanted to provide a simple and decouple solution
+to know what is going on in any system using vertx-effect. That's why I decided to publish
+remarkable events in a specific address. If you want to use your favorite slf4j implementation, just
+implement it in a consumer. On the other hand, consuming all those events during testing will give
+you instant feedback on your system and agility spotting bugs. You can disable this future with the
+Java system property **-D"vertx.effect.enable.log.events"=false**.
 
 ### <a name="events"><a/> Publishing events
 
-**vertx-effect** publishes events to the address **vertx-effect-events**. Find below some of the most important
-predefined
-events:
+**vertx-effect** publishes events to the address **vertx-effect-events**. Find below some of the
+most important predefined events:
 
     - VERTICLE_DEPLOYED
     - VERTICLE_UNDEPLOYED
@@ -812,7 +808,7 @@ events:
 
 An example from the previous example would be:
 
-```text   
+```text
 
 {"event":"VERTICLE_DEPLOYED","address":"removeNull","instant":"2020-10-10T22:44:42.687633Z","id":"3de92ef8-777f-4110-aa45-442fc41900c6","thread":"vert.x-eventloop-thread-1"}
 {"event":"VERTICLE_DEPLOYED","class":"vertx.effect.RegisterJsValuesCodecs","instant":"2020-10-10T22:44:42.682624Z","id":"73181043-ae38-4819-b7de-02f303fcc155","thread":"vert.x-eventloop-thread-3"}
@@ -829,29 +825,28 @@ An example from the previous example would be:
 {"event":"RESPONSE_REPLIED","address":"trim","message":{"a":"hi","c":{"d":"bye"}},"instant":"2020-10-10T22:44:42.728636Z","thread":"vert.x-eventloop-thread-5"}
 {"event":"RESPONSE_RECEIVED","from":"trim","instant":"2020-10-10T22:44:42.728902Z","thread":"vert.x-eventloop-thread-8"}
 
-``` 
+```
 
 ### <a name="correlated-events"><a/> Publishing correlated events
 
-In async event-driven systems is extremely difficult to correlate events. Having this solved is a killer future that
-saves you from working hours trying to gather all the different events associated with a specific transaction.
-In vertx-effect is really easy! As always, functions and composition come to the rescue. Before checking out an example,
-let's see what a `Lambdac` is:
+In async event-driven systems is extremely difficult to correlate events. Having this solved is a
+killer future that saves you from working hours trying to gather all the different events associated
+with a specific transaction. In vertx-effect is really easy! As always, functions and composition
+come to the rescue. Before checking out an example, let's see what a `Lambdac` is:
 
-```code   
+```code
 import io.vertx.core.MultiMap;
 
 public interface Lambdac<I, O> extends BiFunction<MultiMap, I, VIO<O>> {}
 
 ```
 
-A `Lambdac` is a function that takes two arguments, a map representing the context in which an operation will be
-executed,
-and the message of type I sent to the verticle across the event bus. You can put the user's email into the context
-to filter all the events associated with that email and a random value to distinguish between transactions from the
-same email. That's only an example.
+A `Lambdac` is a function that takes two arguments, a map representing the context in which an
+operation will be executed, and the message of type I sent to the verticle across the event bus. You
+can put the user's email into the context to filter all the events associated with that email and a
+random value to distinguish between transactions from the same email. That's only an example.
 
-```code   
+```code
 public class UserAccountModule extends VertxModule {
 
     public static Lambdac<Integer, Boolean> isLegalAge;
@@ -896,13 +891,12 @@ public class UserAccountModule extends VertxModule {
 }
 ```
 
-As you can see, we've implemented a module that deploys five verticles and exposes five Lambdac
-to interact with them.
-The method `trace` returns a `Lambdac` (in the previous example, we used the `ask` method that returns a `Lambda`).
-The `isValid` lambda is implemented using the `AllExp` expression. The context is passed through all the lambdas of
-the `AllExp` expression.
+As you can see, we've implemented a module that deploys five verticles and exposes five Lambdac to
+interact with them. The method `trace` returns a `Lambdac` (in the previous example, we used the
+`ask` method that returns a `Lambda`). The `isValid` lambda is implemented using the `AllExp`
+expression. The context is passed through all the lambdas of the `AllExp` expression.
 
-```code   
+```code
 
 Function<JsObj, MultiMap> context=
         user -> MultiMap.caseInsensitiveMultiMap()
@@ -922,7 +916,7 @@ Function<JsObj, MultiMap> context=
                          .apply(context.apply(user),
                                 user)
                          .get();
-        
+
         UserAccountModule.isValid
                          .apply(context.apply(user1),
                                 user1)
@@ -932,7 +926,7 @@ Function<JsObj, MultiMap> context=
 
 Let's take a look at the events that are published during the execution of the previous code:
 
-```json  
+```json
 [
   {
     "event": "MESSAGE_SENT",
@@ -1074,23 +1068,24 @@ Let's take a look at the events that are published during the execution of the p
 
 ## <a name="spawning-verticles"><a/> Spawning verticles
 
-With vertx-effect, you can spawn verticles, which means that verticles are deployed and
-undeployed on the fly. Every time something needs to be computed, a new verticle is deployed.
-When the computation is done and the verticle replies, it is undeployed right away. The
-goal is to get the most out of the cores! Erlang taught us how to develop concurrent software
-that doubles in speed if you double the number of cores without changing a code line: spawning
-as many verticles as possible. In Erlang jargon, a verticle is kind of a process.
+With vertx-effect, you can spawn verticles, which means that verticles are deployed and undeployed
+on the fly. Every time something needs to be computed, a new verticle is deployed. When the
+computation is done and the verticle replies, it is undeployed right away. The goal is to get the
+most out of the cores! Erlang taught us how to develop concurrent software that doubles in speed if
+you double the number of cores without changing a code line: spawning as many verticles as possible.
+In Erlang jargon, a verticle is kind of a process.
 
-Will deploy and undeploy verticles continuously slow down the system? It depends, like everything related
-to performance. There are times when the cost of reaching a greater level of parallelization is worth it.
-Other times it's not. Let's see how long it takes to deploy and undeploy one million verticles:
+Will deploy and undeploy verticles continuously slow down the system? It depends, like everything
+related to performance. There are times when the cost of reaching a greater level of parallelization
+is worth it. Other times it's not. Let's see how long it takes to deploy and undeploy one million
+verticles:
 
-```code   
+```code
 
 @Benchmark
 @BenchmarkMode(Mode.AverageTime)
 public void deploy_undeploy()throws InterruptedException{
-        
+
         int processes = 1000000;
         CountDownLatch latch = new CountDownLatch(processes);
 
@@ -1121,9 +1116,10 @@ Processes.deploy_undeploy  avgt   10  2.907 ± 0.658   s/op
 
 ## <a name="http-client"><a/> Http Client
 
-Here's a comprehensive example demonstrating the effortless creation of an HTTP server, deployment of a handler using
-stubs, creation of an HTTP client module, and the sending of both GET and POST requests. Requesting data is simplified
-to the extent that it merely involves invoking lambdas that return HTTP responses encapsulated in JsObj.
+Here's a comprehensive example demonstrating the effortless creation of an HTTP server, deployment
+of a handler using stubs, creation of an HTTP client module, and the sending of both GET and POST
+requests. Requesting data is simplified to the extent that it merely involves invoking lambdas that
+return HTTP responses encapsulated in JsObj.
 
 ```java
 
@@ -1234,8 +1230,8 @@ public class HttpClientMethodsTests {
 
 ```
 
-You can harness the power of the `VIO` API to make requests with retry policies, as illustrated in the following
-example:
+You can harness the power of the `VIO` API to make requests with retry policies, as illustrated in
+the following example:
 
 ```java
 
@@ -1337,10 +1333,11 @@ public class HttpClientTestRetryOnFailure {
 
 ## <a name="oauth-client"><a/> Oauth Http client
 
-Creating an HTTP client with OAuth client credentials support is made exceptionally straightforward, liberating you from
-the intricacies of obtaining and refreshing tokens. The provided code showcases how to easily set up a resilient HTTP
-client using the VIO API, complete with token retrieval and automatic refresh. This not only streamlines the process but
-also enables you to seamlessly integrate retry policies and other reliability features.
+Creating an HTTP client with OAuth client credentials support is made exceptionally straightforward,
+liberating you from the intricacies of obtaining and refreshing tokens. The provided code showcases
+how to easily set up a resilient HTTP client using the VIO API, complete with token retrieval and
+automatic refresh. This not only streamlines the process but also enables you to seamlessly
+integrate retry policies and other reliability features.
 
 ```java
 
